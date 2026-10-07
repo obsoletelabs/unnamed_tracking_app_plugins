@@ -1,6 +1,6 @@
 # Metadata provider plugins
 
-The official metadata plugins consume the host's additive **Plugin API v1.1.1**
+The nine optional official metadata plugins consume the host's additive **Plugin API v1.1.1**
 contract. The host owns discovery, ranking, deduplication, sessions, health UI,
 enrichment scheduling and persistence. Plugins own external API communication,
 authentication, parsing, provider mapping, pacing and retries.
@@ -15,32 +15,27 @@ for fields whose declaration permits both scopes. Values are encrypted and
 write-only in UI/API reads; clearing a user value restores the system fallback.
 
 The host reuses its original compact source tiles, colored badges, key buttons
-and expandable forms. Tiles are discovered from enabled plugins and show live
-health classifications. Administrators choose **System default**; **My account**
+and expandable forms. Core tiles are hardcoded in the host; optional plugin registrations add extra
+tiles with live health classifications. Administrators choose **System default**; **My account**
 edits only their user scope. Existing account-import connections remain below
 the metadata tiles. See the [host screenshots and workflow](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/feat/metadata-provider-orchestration/wiki/docs/integrations/metadata.md).
 
-Old host metadata integration keys are not automatically transferred. Enter them
-in the matching provider plugin's configuration. Account library/achievement
+Core Steam, IGDB, SteamGridDB, TVmaze, AniList, AniZip and OMDb implementations
+are maintained inside the host and need no plugin installation. Existing core
+keys are carried forward by the host. Optional plugins do not automatically
+receive old host keys; configure them in their provider tiles. Account library/achievement
 sync credentials remain in their existing account integration settings.
 
 | Package | Media / capabilities | Credentials |
 | --- | --- | --- |
-| `metadata-steam` | Game search, metadata, selected CDN artwork | None for metadata; account sync uses separate Steam settings |
-| `metadata-steamgriddb` | Selected game artwork | SteamGridDB API key, system/user |
 | `metadata-gog` | Game catalogue search and metadata | None |
-| `metadata-igdb` | Game search, metadata and artwork | Twitch client ID/secret, system |
 | `metadata-giantbomb` | Game search, metadata and artwork | GiantBomb API key, system/user |
 | `metadata-retroachievements` | Game search and metadata | RetroAchievements username/key, user |
 | `metadata-screenscraper` | Selected game artwork | Developer ID/password and account ID/password |
 | `metadata-hltb` | Game completion time | None; unofficial API can reject requests |
-| `metadata-tvmaze` | TV search, metadata, seasons, episodes, airing and artwork | None |
-| `metadata-anilist` | Anime search, metadata, episodes, airing, franchise/recommendations and artwork | None |
-| `metadata-anizip` | Anime cross-IDs and primary episode details | None |
 | `metadata-jikan` | MAL anime search, metadata, episodes, airing and artwork | None; Jikan availability/rate limits apply |
 | `metadata-kitsu` | Anime search, metadata, episodes, airing and artwork | None |
 | `metadata-tmdb` | Movie/TV/anime search, metadata, episodes, collections, recommendations and artwork | Optional TMDB API key, system/user |
-| `metadata-omdb` | Movie/TV/anime IMDb search, metadata and poster | OMDb API key, system/user |
 | `metadata-tvdb` | TV search, metadata, franchise relationships and poster | TVDB API key, system/user; optional subscriber PIN, user |
 
 ## Public wire contract
@@ -59,6 +54,9 @@ in the UI document. Call `register(DECLARATION)` after startup.
 
 Actions receive authenticated request context and, for enrichment, a canonical
 candidate. Search returns lightweight candidates without metadata or artwork.
+At five query characters the host preloads metadata from the top down with up to
+four concurrent fetches, refilling each slot as it finishes. Query changes cancel
+obsolete work. Artwork still requires selection; providers do not schedule preload work.
 Metadata returns partial canonical fields, with scores on 0–100. Media returns
 asset references only when the host selects an entity. Cross-ID lookup uses a
 unique exact title and known year when an ID is missing; ambiguous titles remain
@@ -78,13 +76,15 @@ remote error bodies, URLs or secrets.
 ## Validation and limitations
 
 Contract/unit fixtures verify mapping and failure behavior; they do not establish
-live service success. `tools/check_metadata_live.py` uses actual installed `.utp`
-packages on a disposable host. Its optional SteamGridDB flow checks absent,
+live service success. `tools/check_metadata_live.py` exercises the native Steam/SteamGridDB core suite
+on a disposable host with no required plugin packages. Optional sources continue
+to be tested as actual `.utp` packages through the host integration harness. Its optional SteamGridDB flow checks absent,
 invalid, user-scoped and system-scoped credentials. Credentials come from local
 environment/configuration and are never printed. Keep preview output under ignored
 `.validation/`; publication still uses the official signer and immutable histories.
 
-Live development validation on 2026-10-07 observed:
+Live optional/preview development validation before the core transfer on
+2026-10-07 observed:
 
 - Steam, SteamGridDB and TVmaze: search/enrichment and selected artwork succeeded.
   SteamGridDB rejected invalid credentials and validated both credential scopes.
@@ -104,3 +104,20 @@ Live development validation on 2026-10-07 observed:
 The host's eight-second interactive and 25-second background deadlines can return
 partial long episode/franchise inventories under rate limiting. Prior fields remain
 available, and later background refresh can fill missing fields.
+
+## Core ownership
+
+The seven former core preview sources were transferred to the host at the user
+request. Their episode regressions moved to the host core suite. This repository
+retains nine optional providers: GOG, GiantBomb, RetroAchievements, ScreenScraper,
+HowLongToBeat, Kitsu, Jikan, TMDB and TVDB. No private host imports or embedded
+host runtime were added here. Plugin API 1.1.1 remains unchanged.
+
+After the transfer, the isolated host was verified with **zero installed plugins**
+and its plugin runtime stopped. Native Steam search, TVmaze search/details/artwork,
+AniList search/details/artwork and AniZip health succeeded. Native SteamGridDB
+validated missing, invalid, personal and shared keys and provided selected artwork.
+The first native Steam result arrived in 0.56 seconds with no artwork; selected
+metadata/artwork appeared in 1.74 seconds in the credential-scope harness.
+Remote timing and rate limiting vary. IGDB and OMDb authenticated live success
+still require credentials; contract fixtures cover their native mappings.

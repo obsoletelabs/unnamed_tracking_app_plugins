@@ -42,7 +42,7 @@ build must produce identical bytes for the same source/commit/signer.
 
 ## Exercise the real host contract
 
-Clone `Rosefall-a/unnamed_tracking_app` at `main` into `.validation/host`
+Clone `obsoletelabs/unnamed_tracking_app_2` at `main` into `.validation/host`
 and run `python tools/check_host_contract.py --host-root .validation/host` after
 building the preview. It uses actual validators/verifier/registry; it never
 enables code during inspection.

@@ -1,4 +1,4 @@
-"""Exercise installed metadata packages against a real development host and provider APIs.
+"""Exercise native core metadata providers against a real development host and provider APIs.
 
 No provider responses are mocked. Credentials come from the environment; output contains
 only bounded counts, classifications and elapsed times. Run only against a disposable host.
@@ -107,20 +107,14 @@ class Host:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="http://localhost:18083")
-    parser.add_argument("--install", action="store_true",
-                        help="Install unsigned preview packages on the disposable development host")
     args = parser.parse_args()
     host = Host(args.host)
     password = os.environ["PRIMARY_USER_PASSWORD"]
     host.call("POST", "/api/auth/login", {
         "username_or_email": os.environ["PRIMARY_USER_USERNAME"], "password": password,
     })
-    if args.install:
-        for slug in ("steam", "steamgriddb"):
-            package = next((Path(".validation/dist")).glob(f"official.metadata-{slug}-*.utp"))
-            host.install(package, password)
-    steam = "official.metadata-steam.steam"
-    artwork = "official.metadata-steamgriddb.steamgriddb"
+    steam = "core.steam"
+    artwork = "core.steamgriddb"
     host.wait(lambda: steam in host.providers() and artwork in host.providers())
     host.configure(artwork, None)
     host.configure(artwork, None, "system")

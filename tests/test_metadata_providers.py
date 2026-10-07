@@ -86,37 +86,8 @@ def test_interactive_does_not_retry_but_background_can_retry(monkeypatch):
     assert len(calls) == 4 and sleeps == [1, 2]
 
 
-def test_anizip_uses_documented_id_parameter_and_retains_episode_details(monkeypatch):
-    module = plugin("anizip", monkeypatch)
-    urls = []
-    def http(*args, **kwargs):
-        def get(url):
-            urls.append(url)
-            return {"episodeCount": 1, "mappings": {"anilist_id": 20, "mal_id": 20}, "episodes": {
-                "1": {"title": {"en": "A real title"}, "overview": "Summary\nSource: credit",
-                      "airDate": "2002-10-03", "runtime": 24, "image": "https://example.test/still.jpg"},
-                "S1": {"title": {"en": "Special"}}, "2": {"title": {"en": "Another entry"}}}}
-        return get
-    monkeypatch.setattr(module, "ProviderHttp", http)
-    response = module.metadata({"request": {"resource": "episodes"},
-                                "candidate": {"provider_ids": {"anilist": "20"}}})
-    assert urls == ["https://api.ani.zip/mappings?anilist_id=20"]
-    assert response["metadata"]["episodes"] == [{"episode_number": 1, "title": "A real title",
-        "description": "Summary", "air_date": "2002-10-03", "air_at": None,
-        "runtime_minutes": 24, "still_url": "https://example.test/still.jpg"}]
 
 
-def test_anilist_streaming_titles_and_stills_do_not_block_fallbacks(monkeypatch):
-    module = plugin("anilist", monkeypatch)
-    monkeypatch.setattr(module, "entity", lambda *args: {
-        "id": 20, "episodes": 3, "status": "FINISHED", "streamingEpisodes": [
-            {"title": "Episode 1 - Arrival", "thumbnail": "https://example.test/one.jpg"},
-            {"title": "Untitled", "thumbnail": "https://example.test/two.jpg"}]})
-    response = module.metadata({"request": {"resource": "episodes"}, "candidate": {}})
-    entries = response["metadata"]["episodes"]
-    assert entries[0]["title"] == "Arrival"
-    assert entries[1]["title"] is None and entries[1]["still_url"]
-    assert entries[2] == {"episode_number": 3}
 
 
 def test_tmdb_collection_and_recommendations_use_separate_resources(monkeypatch):
