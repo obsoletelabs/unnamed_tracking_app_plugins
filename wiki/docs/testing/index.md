@@ -47,6 +47,12 @@ and run `python tools/check_host_contract.py --host-root .validation/host` after
 building the preview. It uses actual validators/verifier/registry; it never
 enables code during inspection.
 
+Both integration workflows select matching feature branches in that owned host
+repository. Contract CI falls back to `main`; runtime CI retains its separately
+verified fallback revision below. Explicit workflow-dispatch refs still take
+precedence. The host's companion checkout targets
+`obsoletelabs/unnamed_tracking_app_plugins` with the same matching-branch convention.
+
 On Linux, `python tools/check_reference_lifecycle.py --host-root .validation/host`
 builds signed disposable release sequences for UI/API, report, notifier and
 curator, then uses the actual registry and supervisor. It checks pending grant

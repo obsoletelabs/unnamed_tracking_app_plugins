@@ -116,27 +116,18 @@
       "dialogs": []
     }
   ],
-  "settings_sections": [
+  "page_replacements": [
     {
       "id": "sessions",
-      "label": "Sessions",
+      "page": "sessions",
       "page_id": "sessions",
-      "order": 50,
-      "area": "account",
-      "group": "Account",
-      "folders": []
+      "order": 50
     },
     {
       "id": "admin-sessions",
-      "label": "Session Manager",
+      "page": "admin-sessions",
       "page_id": "admin-sessions",
-      "order": 51,
-      "visibility": {
-        "admin_only": true
-      },
-      "area": "administration",
-      "group": "Server management",
-      "folders": []
+      "order": 51
     }
   ]
 }

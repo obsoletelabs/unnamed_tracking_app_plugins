@@ -100,6 +100,21 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+.ssm details.ssm-user-agent {
+  padding: 0;
+  border: 0;
+  margin-block: 6px;
+  background: transparent;
+  font-size: 12px;
+}
+.ssm .ssm-user-agent summary {
+  color: var(--ui-dim);
+  min-height: 0;
+}
+.ssm .ssm-user-agent p {
+  margin: 6px 0;
+  overflow-wrap: anywhere;
+}
 .ssm .ssm-file {
   margin-block: 10px;
   flex-wrap: wrap;

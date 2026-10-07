@@ -95,10 +95,6 @@
       "version": 1
     },
     {
-      "name": "frontend.settings",
-      "version": 1
-    },
-    {
       "name": "frontend.native",
       "version": 1
     },
@@ -111,16 +107,16 @@
       "version": 1
     },
     {
-      "name": "frontend.placement.settings.account",
+      "name": "frontend.page.replace.sessions",
       "version": 1
     },
     {
-      "name": "frontend.placement.settings.admin",
+      "name": "frontend.page.replace.admin-sessions",
       "version": 1
     }
   ],
   "dependencies": [],
-  "description": "Manage account and administrator browser sessions inside Settings, with GeoIP, anomaly context, filters, and confirmed revocation.",
+  "description": "Enhance the built-in browser session pages with GeoIP, network and anomaly context, a map, filters and confirmed revocation.",
   "entrypoint": "plugin:main",
   "frontend": {
     "entry": "frontend/index.html"
@@ -176,13 +172,6 @@
     },
     {
       "capability": {
-        "name": "frontend.settings",
-        "version": 1
-      },
-      "rationale": "Contribute Sessions and administrator Session Manager sections to native host Settings."
-    },
-    {
-      "capability": {
         "name": "frontend.native",
         "version": 1
       },
@@ -204,17 +193,17 @@
     },
     {
       "capability": {
-        "name": "frontend.placement.settings.account",
+        "name": "frontend.page.replace.sessions",
         "version": 1
       },
-      "rationale": "Place these settings beneath the built-in account headings. Approval covers this settings area and its folders, not other settings areas or backend actions."
+      "rationale": "HIGH RISK: replace only the built-in account Sessions page with GeoIP, network, anomaly and map details. Declining this grant keeps the basic host page."
     },
     {
       "capability": {
-        "name": "frontend.placement.settings.admin",
+        "name": "frontend.page.replace.admin-sessions",
         "version": 1
       },
-      "rationale": "Place these settings beneath the built-in administration headings. Approval covers this settings area and its folders, not other settings areas or backend actions."
+      "rationale": "HIGH RISK: replace only the built-in administrator Session Manager page with extended GeoIP, network, anomaly, map and database controls. The host still requires administrator access; declining this grant keeps the basic host page."
     }
   ],
   "plugin_id": "example.self-service-session-manager",

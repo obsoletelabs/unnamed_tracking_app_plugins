@@ -87,7 +87,7 @@ Use the [tutorial map](wiki/docs/development/index.md) for one-feature exercises
 | [Help Button](examples/help-button/README.md) | Native contributions, dialogs, overlays, navigation and cleanup |
 | [Jellyfin Media Sync](examples/jellyfin-media-sync/README.md) | Master server, approved user identities, library mapping, episode completion and Watch Now |
 | [Scoped Document Viewer](examples/scoped-document-viewer/README.md) | Scoped document APIs and sandbox PDF/text/Office reader |
-| [Self-Service Session Manager](examples/self-service-session-manager/README.md) | Scoped own/admin sessions and privileged native Settings/maps |
+| [Self-Service Session Manager](examples/self-service-session-manager/README.md) | Extends built-in session pages with GeoIP, network, anomalies and native maps |
 
 The [example map](wiki/docs/examples/index.md) identifies tests and relevant captures.
 Small references stay small; real demos document supported behavior and host limitations.

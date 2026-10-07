@@ -59,6 +59,8 @@
         "frontend.shortcuts",
         "frontend.page.replace.home",
         "frontend.page.replace.settings",
+        "frontend.page.replace.sessions",
+        "frontend.page.replace.admin-sessions",
         "frontend.routes",
         "frontend.native",
         "frontend.pwa",
@@ -108,7 +110,9 @@
       "description": "Host pages with explicit page-scoped replacement permissions.",
       "enum": [
         "home",
-        "settings"
+        "settings",
+        "sessions",
+        "admin-sessions"
       ],
       "title": "HostPage",
       "type": "string"

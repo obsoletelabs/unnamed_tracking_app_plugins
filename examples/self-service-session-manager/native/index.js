@@ -8,6 +8,32 @@ export const locationText = (session) =>
 export const when = (value) =>
   value == null ? "Unavailable" : new Date(value * 1000).toLocaleString();
 
+// Keep this presentation local to the plugin's public UI boundary.
+export function sessionDevice(agent) {
+  if (!agent) return "Browser unavailable";
+  const browser = /Edg(?:e|A|iOS)?\//.test(agent)
+    ? "Edge"
+    : /(?:Firefox|FxiOS)\//.test(agent)
+      ? "Firefox"
+      : /(?:Chrome|CriOS)\//.test(agent)
+        ? "Chrome"
+        : /Safari\//.test(agent)
+          ? "Safari"
+          : "Other browser";
+  const system = /Android/.test(agent)
+    ? "Android"
+    : /iPhone|iPad|iPod/.test(agent)
+      ? "iOS"
+      : /Windows/.test(agent)
+        ? "Windows"
+        : /Macintosh|Mac OS X/.test(agent)
+          ? "macOS"
+          : /Linux/.test(agent)
+            ? "Linux"
+            : "";
+  return system ? `${browser} on ${system}` : browser;
+}
+
 export function createController(
   host,
   admin = false,
@@ -127,6 +153,15 @@ export function clusterPoints(sessions, zoom) {
 
 export function activate(context) {
   const { h, defineComponent, reactive, ref } = context.vue;
+  const fullUserAgent = (session) =>
+    session.user_agent
+      ? h("details", { class: "ssm-user-agent" }, [
+          h("summary", "Full user agent"),
+          h("p", session.user_agent),
+        ])
+      : null;
+  const deviceDetails = (session) =>
+    h("div", [sessionDevice(session.user_agent), fullUserAgent(session)]);
   const active = new Set();
   context.onCleanup(() => {
     for (const dispose of active) dispose();
@@ -335,7 +370,7 @@ export function activate(context) {
                   ...map.selected.map((s) =>
                     h(
                       "p",
-                      `${s.username || (s.is_current ? "Current session" : "Session")} · ${locationText(s)} · ${s.ip_address || "IP unavailable"} · ${s.location?.network_number ?? ""} ${s.location?.network_organization || ""} · ${s.user_agent || "Device unavailable"}`,
+                      `${s.username || (s.is_current ? "Current session" : "Session")} · ${locationText(s)} · ${s.ip_address || "IP unavailable"} · ${s.location?.network_number ?? ""} ${s.location?.network_organization || ""} · ${sessionDevice(s.user_agent)}`,
                     ),
                   ),
                 ])
@@ -423,7 +458,7 @@ export function activate(context) {
         ["State", s.is_current ? "Current session" : s.state],
         ["Location", locationText(s)],
         ["IP address", s.ip_address || "Unavailable"],
-        ["User agent", s.user_agent || "Unavailable"],
+        ["Browser", sessionDevice(s.user_agent)],
         ["Network type", s.location?.network_type || "Unavailable"],
         ["Network", s.location?.network_label || "Unavailable"],
         ["ASN / network number", s.location?.network_number ?? "Unavailable"],
@@ -661,7 +696,7 @@ export function activate(context) {
                             s.is_current ? "Current session" : s.state,
                             locationText(s),
                             s.ip_address || "Unavailable",
-                            s.user_agent || "Unavailable",
+                            deviceDetails(s),
                             [
                               s.location?.network_type,
                               s.location?.network_label,
@@ -677,7 +712,18 @@ export function activate(context) {
                               .filter(Boolean)
                               .join(" · ") || "—",
                           ]
-                            .map((value) => h("td", { title: value }, value))
+                            .map((value) =>
+                              h(
+                                "td",
+                                {
+                                  title:
+                                    typeof value === "string"
+                                      ? value
+                                      : undefined,
+                                },
+                                value,
+                              ),
+                            )
                             .concat([
                               h(
                                 "td",
@@ -719,6 +765,7 @@ export function activate(context) {
                           h("dd", String(value)),
                         ]),
                       ),
+                      fullUserAgent(s),
                       s.anomaly?.reason
                         ? h(
                             "p",
