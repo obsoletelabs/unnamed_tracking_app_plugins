@@ -80,7 +80,7 @@ jobs:
             # Current native plugins require the public Plugin API 1.1 host.
             ref=main
             # Repository main branches have different ownership targets.
-            if [ "$COMPANION_BRANCH" != main ] && git ls-remote --exit-code --heads https://github.com/Rosefall-a/unnamed_tracking_app.git "refs/heads/$COMPANION_BRANCH" >/dev/null; then
+            if [ "$COMPANION_BRANCH" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$COMPANION_BRANCH" >/dev/null; then
               ref="$COMPANION_BRANCH"
             fi
           fi
@@ -88,7 +88,7 @@ jobs:
           echo "Testing companion repository ref: $ref"
       - uses: actions/checkout@v7
         with:
-          repository: Rosefall-a/unnamed_tracking_app
+          repository: obsoletelabs/unnamed_tracking_app_2
           ref: ${{ steps.companion.outputs.ref }}
           path: .validation/host
       - run: python tools/check_host_contract.py --host-root .validation/host
@@ -103,13 +103,13 @@ jobs:
           if [ "$COMPANION_BRANCH" = feat/ui-ux-redevelopment ]; then
             mobile_branch=feat/pwa-personal-appearance
           fi
-          if [ "$mobile_branch" != main ] && git ls-remote --exit-code --heads https://github.com/Rosefall-a/unnamed-tracking-mobile-app.git "refs/heads/$mobile_branch" >/dev/null; then
+          if [ "$mobile_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed-tracking-mobile-app.git "refs/heads/$mobile_branch" >/dev/null; then
             ref="$mobile_branch"
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
-          repository: Rosefall-a/unnamed-tracking-mobile-app
+          repository: obsoletelabs/unnamed-tracking-mobile-app
           ref: ${{ steps.mobile.outputs.ref }}
           path: .validation/mobile
       - name: Verify source provenance, version and reviewed host templates

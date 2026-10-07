@@ -1,6 +1,6 @@
 {
   "name": "Unnamed Tracking plugins",
-  "base_url": "https://raw.githubusercontent.com/Rosefall-a/unnamed_tracking_app_plugins/main",
+  "base_url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main",
   "unreleased_plugins": [
     "example.home-widgets",
     "example.theme-palettes",

@@ -21,7 +21,7 @@ ROOT = Path(__file__).parents[1]
 SEMVER = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
 TAG = re.compile(r"^[a-z0-9][a-z0-9-]{0,47}$")
 DEFAULT_BASE = (
-    "https://raw.githubusercontent.com/Rosefall-a/unnamed_tracking_app_plugins/main"
+    "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main"
 )
 RETIREMENT_FILE = "retired_plugins.json"
 
@@ -181,6 +181,9 @@ def collect_payload(
     )
     validate_metadata(metadata)
     files = {"sdk/plugin_protocol.py": source_bytes(root / "sdk/plugin_protocol.py")}
+    if any(capability["name"].startswith("metadata_providers.")
+           for capability in manifest.get("capabilities", [])):
+        files["sdk/metadata_provider.py"] = source_bytes(root / "sdk/metadata_provider.py")
     if manifest.get("frontend"):
         files["frontend/appearance.js"] = source_bytes(
             root / "sdk/frontend_appearance.js"
@@ -509,7 +512,8 @@ def generate_catalogue(
     histories: dict[str, list[dict]],
 ) -> None:
     """Write the catalogue derived from retained packages and maintained sources."""
-    write_json(output / "list.json", catalogue_document(root, plugins, histories))
+    # Keep the growing mutable catalogue within the host's existing bounded download limit.
+    (output / "list.json").write_bytes(canonical_json(catalogue_document(root, plugins, histories)))
 
 
 def validate_url(url: str) -> None:
@@ -610,11 +614,11 @@ def validate_distribution(
     if filenames != {p.name for p in (output / "dist").glob("*.utp")}:
         raise ValueError("dist contains untracked packages")
     catalogue_path = output / "list.json"
-    # The targeted host bounds decoded catalogue downloads to 1 MiB. Fail before
+    # The v1.1.1 host bounds decoded catalogue downloads to 4 MiB. Fail before
     # publication instead of producing an endpoint it cannot consume.
-    if catalogue_path.stat().st_size > 1024 * 1024:
+    if catalogue_path.stat().st_size > 4 * 1024 * 1024:
         raise ValueError(
-            "catalogue exceeds the current Plugin Manager's 1 MiB download limit"
+            "catalogue exceeds the current Plugin Manager's 4 MiB download limit"
         )
     catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
     if catalogue != catalogue_document(
