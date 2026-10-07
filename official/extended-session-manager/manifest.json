@@ -127,7 +127,7 @@
     "signature": null
   },
   "manifest_version": 1,
-  "name": "Self-Service Session Manager",
+  "name": "Extended Session Manager",
   "native_frontend": {
     "entry": "native/index.js",
     "styles": [

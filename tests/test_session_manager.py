@@ -9,7 +9,7 @@ SESSION_ID = "00000000-0000-0000-0000-000000000001"
 
 
 def test_session_listing_forwards_filters_and_host_context(monkeypatch):
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     calls = []
     monkeypatch.setattr(
         plugin,
@@ -53,7 +53,7 @@ def test_session_listing_forwards_filters_and_host_context(monkeypatch):
     ],
 )
 def test_every_destructive_action_rejects_missing_confirmation(monkeypatch, handler):
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     monkeypatch.setattr(
         plugin, "request", lambda *_args: pytest.fail("must not call gateway")
     )
@@ -65,7 +65,7 @@ def test_every_destructive_action_rejects_missing_confirmation(monkeypatch, hand
 
 @pytest.mark.parametrize("value", [None, "", "invalid", "../../sessions", 1, [], {}])
 def test_invalid_session_identifiers_never_reach_gateway(monkeypatch, value):
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     monkeypatch.setattr(
         plugin, "request", lambda *_args: pytest.fail("must not call gateway")
     )
@@ -76,7 +76,7 @@ def test_invalid_session_identifiers_never_reach_gateway(monkeypatch, value):
 
 
 def test_bulk_routes_use_distinct_self_service_and_admin_grants(monkeypatch):
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     calls = []
     monkeypatch.setattr(
         plugin, "request", lambda *args: calls.append(args) or {"revoked": 1}
@@ -96,7 +96,7 @@ def test_bulk_routes_use_distinct_self_service_and_admin_grants(monkeypatch):
 
 
 def test_native_settings_and_all_destructive_actions_are_declared():
-    root = ROOT / "examples" / "self-service-session-manager"
+    root = ROOT / "official" / "extended-session-manager"
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     ui = json.loads((root / "ui.json").read_text(encoding="utf-8"))
     from tools.distribution import version_key

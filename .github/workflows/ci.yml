@@ -56,7 +56,7 @@ jobs:
       - run: node --test tests/frontend_appearance.test.mjs
       - run: node --test tests/shortcut_playground.test.mjs
       - run: node --test tests/jellyfin_official_ui.test.mjs
-      - run: node --check examples/self-service-session-manager/frontend/app.js
+      - run: node --check official/extended-session-manager/frontend/app.js
       - run: pytest
       - run: python tools/build_packages.py
       - run: python tools/verify_packages.py dist/*.utp

@@ -7,7 +7,7 @@ import sys
 import zipfile
 
 import pytest
-from test_domain_plugins import ROOT
+from test_domain_plugins import ROOT, plugin_root
 
 from tools.package_format import canonical_payload_digest
 from tools.validate_packages import validate_package
@@ -23,10 +23,10 @@ def packages(tmp_path):
             tmp_path / directory,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
-    for name in ("help-button", "jellyfin-media-sync", "self-service-session-manager"):
+    for name in ("help-button", "jellyfin-media-sync", "extended-session-manager"):
         shutil.copytree(
-            ROOT / "examples" / name,
-            tmp_path / "examples" / name,
+            plugin_root(name),
+            tmp_path / plugin_root(name).relative_to(ROOT),
             ignore=shutil.ignore_patterns("__pycache__"),
         )
     build = [sys.executable, str(tmp_path / "tools/build_packages.py"), "--output-root", str(tmp_path / "build")]
@@ -49,10 +49,11 @@ def test_native_assets_manifest_and_integrity_in_real_packages(packages):
                 for name in archive.namelist()
                 if name.startswith("payload/")
             }
-        source_name = next(name for name in
-                           ("help-button", "jellyfin-media-sync", "self-service-session-manager")
-                           if name in path.name)
-        expected_version = json.loads((ROOT / "examples" / source_name / "manifest.json").read_text(encoding="utf-8"))["version"]
+        source_manifest = next(
+            data for name in ("help-button", "jellyfin-media-sync", "extended-session-manager")
+            if (data := json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8")))["plugin_id"] == manifest["plugin_id"]
+        )
+        expected_version = source_manifest["version"]
         assert manifest["version"] == expected_version
         assert manifest["integrity"]["signature"] is None
         assert manifest["integrity"]["sha256"] == canonical_payload_digest(

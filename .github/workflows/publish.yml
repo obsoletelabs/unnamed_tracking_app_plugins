@@ -42,7 +42,7 @@ jobs:
       - name: Validate developer wiki before publication
         run: python -m mkdocs build --strict
       - run: node --test tests/session_manager_ui.test.mjs tests/native_frontends.test.mjs tests/jellyfin_official_ui.test.mjs
-      - run: node --check examples/self-service-session-manager/frontend/app.js
+      - run: node --check official/extended-session-manager/frontend/app.js
       - run: pytest
       - run: npm ci
       - run: npx playwright install --with-deps chromium --only-shell

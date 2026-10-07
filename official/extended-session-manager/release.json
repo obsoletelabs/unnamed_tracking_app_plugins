@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "account",
+    "administration"
+  ],
+  "icon": "icon.svg",
+  "automatic_update": null,
+  "release_notes": "Promote Extended Session Manager to maintained official functionality while preserving the existing plugin ID for updates. Use the scoped official signing identity. Enhance the built-in account and administrator session pages through separately approved page replacements, preserving GeoIP location, network and anomaly data, the map, database uploads and confirmed revocation. Summarize browser and operating system, with the full user agent available on demand."
+}

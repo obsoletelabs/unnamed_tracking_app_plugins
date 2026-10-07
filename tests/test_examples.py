@@ -3,6 +3,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+from test_domain_plugins import plugin_root
+
 ROOT = Path(__file__).parents[1]
 PLUGINS = (
     "ui-api",
@@ -10,7 +12,7 @@ PLUGINS = (
     "theme-palettes",
     "shortcut-playground",
     "scoped-document-viewer",
-    "self-service-session-manager",
+    "extended-session-manager",
     "discord-delivery-provider",
     "playtime-report",
     "recently-played-notifier",
@@ -24,7 +26,7 @@ PLUGINS = (
 def test_manifests_are_v1_and_unique():
     ids = []
     for name in PLUGINS:
-        data = json.loads((ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8"))
+        data = json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8"))
         assert data["manifest_version"] == 1
         assert data["version"].count(".") == 2
         assert data["entrypoint"] == "plugin:main"
@@ -36,7 +38,7 @@ def test_manifests_are_v1_and_unique():
 
 def test_plugins_do_not_import_application_source():
     for name in PLUGINS:
-        source = (ROOT / "examples" / name / "plugin.py").read_text(encoding="utf-8")
+        source = (plugin_root(name) / "plugin.py").read_text(encoding="utf-8")
         assert "src.plugin_api" not in source and "ValidationGateway" not in source
 
 
@@ -47,7 +49,7 @@ def test_real_plugins_contain_application_logic():
         "metadata-curator",
         "ui-playground",
     ):
-        source = (ROOT / "examples" / name / "plugin.py").read_text(encoding="utf-8")
+        source = (plugin_root(name) / "plugin.py").read_text(encoding="utf-8")
         assert len(source.splitlines()) >= 30
 
 
@@ -72,7 +74,7 @@ def test_real_plugin_manifests_declare_required_capabilities():
         },
     }
     for name, capabilities in expected.items():
-        data = json.loads((ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8"))
+        data = json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8"))
         declared = {item["name"] for item in data["capabilities"]}
         granted = {item["capability"]["name"] for item in data["permissions"]}
         assert capabilities <= declared
@@ -86,7 +88,7 @@ def test_demo_manifests_do_not_claim_fake_signatures():
         "metadata-curator",
         "ui-playground",
     ):
-        data = json.loads((ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8"))
+        data = json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8"))
         assert data["integrity"]["signature"] is None
         assert data["integrity"]["key_id"] is None
 
@@ -102,18 +104,18 @@ def test_ui_playground_manifest_points_to_real_frontend_entry():
 def test_every_example_has_an_executable_entrypoint_source():
     for name in PLUGINS:
         manifest = json.loads(
-            (ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8")
+            (plugin_root(name) / "manifest.json").read_text(encoding="utf-8")
         )
         module, function = manifest["entrypoint"].split(":")
         assert module == "plugin"
         assert function == "main"
-        assert (ROOT / "examples" / name / "plugin.py").is_file()
+        assert (plugin_root(name) / "plugin.py").is_file()
 
 
 def test_permissions_are_declared_capabilities():
     for name in PLUGINS:
         manifest = json.loads(
-            (ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8")
+            (plugin_root(name) / "manifest.json").read_text(encoding="utf-8")
         )
         capabilities = {
             (item["name"], item["version"]) for item in manifest.get("capabilities", [])

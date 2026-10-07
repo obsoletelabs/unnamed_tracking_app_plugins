@@ -18,6 +18,8 @@ package/source, review identity, publisher/signature, compatibility and permissi
 then complete approval/configuration and enable it as required by the host flow.
 
 Maintained user-facing functionality lives in [official/](official/README.md).
+The [Extended Session Manager](official/extended-session-manager/README.md) is
+now official functionality and preserves its existing plugin ID for updates.
 The [PWA](official/pwa/README.md) appearance migration remains unreleased 0.0.2; its production
 release waits for a separate protected official signing identity. Examples remain
 demonstrations, even when their historical publisher text contains Official.
@@ -87,7 +89,6 @@ Use the [tutorial map](wiki/docs/development/index.md) for one-feature exercises
 | [Help Button](examples/help-button/README.md) | Native contributions, dialogs, overlays, navigation and cleanup |
 | [Jellyfin Media Sync](examples/jellyfin-media-sync/README.md) | Master server, approved user identities, library mapping, episode completion and Watch Now |
 | [Scoped Document Viewer](examples/scoped-document-viewer/README.md) | Scoped document APIs and sandbox PDF/text/Office reader |
-| [Self-Service Session Manager](examples/self-service-session-manager/README.md) | Extends built-in session pages with GeoIP, network, anomalies and native maps |
 
 The [example map](wiki/docs/examples/index.md) identifies tests and relevant captures.
 Small references stay small; real demos document supported behavior and host limitations.

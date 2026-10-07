@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 // The native module is a browser ES module; load its actual packaged source.
 const source = await readFile(
   new URL(
-    "../examples/self-service-session-manager/native/index.js",
+    "../official/extended-session-manager/native/index.js",
     import.meta.url,
   ),
   "utf8",

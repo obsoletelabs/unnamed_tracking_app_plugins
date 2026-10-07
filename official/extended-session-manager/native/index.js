@@ -490,7 +490,7 @@ export function activate(context) {
           [
             h("header", [
               h("div", [
-                h("h2", admin ? "Session Manager" : "Sessions"),
+                h("h2", admin ? "Extended Session Manager" : "Sessions"),
                 h(
                   "p",
                   "Browser sessions only. API keys are separate. Location is approximate; VPNs and shared networks can affect it.",

@@ -2,7 +2,7 @@
   "api_contract_version": "1.1.0",
   "schema_version": "v1",
   "plugin_id": "example.self-service-session-manager",
-  "title": "Session Manager",
+  "title": "Extended Session Manager",
   "settings": [],
   "actions": [
     {

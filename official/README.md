@@ -1,5 +1,13 @@
 # Official plugins
 
+[Extended Session Manager](extended-session-manager/README.md) enhances the
+built-in personal and administrator session pages with GeoIP, network, anomaly
+details and maps. It retains the ID `example.self-service-session-manager` so
+existing installations can update. New releases use the scoped official signer;
+historical demo-signed archives keep their original identity. The successor-key
+trust and expiry requirements are tracked in
+[host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
+
 [Unnamed Tracking PWA](pwa/README.md) is maintained official functionality,
 currently **0.0.1**, published through the scoped official signing identity.
 
