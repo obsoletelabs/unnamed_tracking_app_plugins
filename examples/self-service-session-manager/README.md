@@ -8,6 +8,8 @@ The primary experience is **Account → Sessions** (`/settings?area=account&sect
 
 Disabling the plugin or declining either replacement permission leaves that built-in page available. **Show built-in sessions** temporarily opens the basic page with `basic=1`; remove that query option to return to the enhanced view. Native and sandbox plugin-owned page URLs remain available. The companion host change adding `sessions` and `admin-sessions` replacement targets must be merged before this plugin update: earlier hosts do not understand the new capabilities. Existing installations must review and grant the new replacement permissions during update.
 
+Native cards, administration rows and selected map markers summarize browser and operating system. The full user agent is available in an expandable detail so diagnostic information remains accessible without filling every row. This formatting stays inside the plugin; it does not import host frontend code.
+
 The 2.3.1 preview bounds native controls to the host panel. User selectors use
 the shared field style, long values wrap or stay within their control, and
 expanded GeoIP uploads fit narrow screens. The wide administration table keeps

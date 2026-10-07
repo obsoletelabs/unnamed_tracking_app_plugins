@@ -10,9 +10,34 @@ const source = await readFile(
   ),
   "utf8",
 );
-const { createController, clusterPoints, locationText, project } = await import(
+const {
+  createController,
+  clusterPoints,
+  locationText,
+  project,
+  sessionDevice,
+} = await import(
   `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
 );
+
+test("browser summaries preserve browser precedence and mobile operating systems", () => {
+  for (const [agent, expected] of [
+    [
+      "Mozilla/5.0 (Windows NT 10.0) Chrome/140.0 Safari/537.36 Edg/140.0",
+      "Edge on Windows",
+    ],
+    [
+      "Mozilla/5.0 (Linux; Android 16) Chrome/140.0 Safari/537.36",
+      "Chrome on Android",
+    ],
+    ["Mozilla/5.0 (iPhone) Version/18.0 Safari/604.1", "Safari on iOS"],
+    ["Mozilla/5.0 (iPad) FxiOS/140.0 Safari/604.1", "Firefox on iOS"],
+    ["Mozilla/5.0 (Macintosh) Firefox/140.0", "Firefox on macOS"],
+    [null, "Browser unavailable"],
+    ["custom-client", "Other browser"],
+  ])
+    assert.equal(sessionDevice(agent), expected);
+});
 
 test("filters and cursor reach the declared scoped action; append preserves all rows", async () => {
   const calls = [];

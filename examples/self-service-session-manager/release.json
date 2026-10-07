@@ -7,5 +7,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": null,
-  "release_notes": "Enhance the built-in account and administrator session pages through separately approved page replacements, preserving GeoIP location, network and anomaly data, the map, database uploads and confirmed revocation."
+  "release_notes": "Enhance the built-in account and administrator session pages through separately approved page replacements, preserving GeoIP location, network and anomaly data, the map, database uploads and confirmed revocation. Summarize browser and operating system, with the full user agent available on demand."
 }
