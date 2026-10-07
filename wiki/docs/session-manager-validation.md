@@ -1,6 +1,40 @@
 # Session Manager validation
 
-## Current unsigned CI package: 2.3.1
+## Integrated session pages: 2.4.0 preview
+
+Validation on 7 October 2026 uses the actual locally built unsigned `.utp`,
+installed and updated through the disposable host's normal plugin manager.
+The companion host adds basic account cards and a compact administrator table;
+the plugin replaces those same destinations through separately approved page grants.
+The built-in pages remain available when the plugin is disabled, lacks grants,
+or the user turns off the Advanced sessions switch at the top of either page.
+
+The independent Linux suite passes 283 tests. All seven native session UI tests
+pass, including browser/OS summaries, cancellation, revocation, pagination,
+cleanup and map projection/clustering. The strict documentation build and package
+digest verification pass. `tools/check_host_contract.py` passes against the
+companion host source, including real package installation and disabled lifecycle.
+
+Authenticated browser checks cover both native replacement pages, expandable
+user agents, built-in state/user filtering, cancellation and confirmed revocation,
+and narrow-screen overflow. Optional City database upload uses the public
+MaxMind test database, and screenshots use synthetic users, network metadata,
+anomalies and coordinates. The map renders, zooms and displays the simplified
+browser summary for a selected marker.
+
+The plugin CI host-contract job selects matching feature branches in the owned
+host repository, falling back to `main`. Publication requires the
+[companion host PR](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/5)
+to merge before the plugin release uses the new page capabilities. The host suite passes
+1,504 tests with two skips before the final image-fallback regression, and frontend checks pass 298 tests. The inherited host Pylint duplicate-code warning was traced to identical image redirects and removed by sharing their HTTP response, with regression coverage for status and cache headers.
+No checks or security boundaries were weakened. Preview packages are unsigned;
+official publication continues through the existing signing workflow.
+
+![Integrated administrator sessions and map](assets/screenshots/session-integrated-admin.jpg)
+
+![Integrated personal sessions with browser summaries](assets/screenshots/session-integrated-owner.jpg)
+
+## Historical unsigned CI package: 2.3.1
 
 Validation on 6 October 2026 uses the actual `unsigned-dist` artifact
 `11386044038` from companion source
