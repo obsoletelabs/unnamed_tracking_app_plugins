@@ -102,11 +102,12 @@ def test_native_settings_and_all_destructive_actions_are_declared():
     from tools.distribution import version_key
     assert version_key(manifest["version"]) >= (2, 0, 0)
     assert manifest["native_frontend"]["entry"] == "native/index.js"
-    assert {section["id"] for section in ui["settings_sections"]} == {
+    assert {section["page"] for section in ui["page_replacements"]} == {
         "sessions",
         "admin-sessions",
     }
-    assert ui["settings_sections"][1]["visibility"]["admin_only"] is True
+    assert not ui.get("settings_sections")
+    assert all(item["page"] == item["page_id"] for item in ui["page_replacements"])
     assert all(
         action.get("confirmation")
         for action in ui["actions"]

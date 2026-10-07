@@ -4,7 +4,9 @@ The 2.x series ports application [PR #248](https://github.com/Rosefall-a/unnamed
 
 ## Experience and source parity
 
-The primary experience is **Account → Sessions** (`/settings?area=account&section=sessions`) and administrator-only **Administration → Session Manager** (`/settings?area=administration&section=admin-sessions`). Each is a direct entry under its existing host heading, without an extra Sessions folder. Generic Settings contributions register native Vue components using the host runtime. Controls use native palette and shape tokens; no host code selects this plugin by ID.
+The primary experience is **Account → Sessions** (`/settings?area=account&section=sessions`) and administrator-only **Administration → Session Manager** (`/settings?area=administration&section=admin-sessions`). The host now supplies basic pages showing state, IP, browser details and timestamps. This plugin replaces only those two sections with its extended GeoIP, network, anomaly and map interface, using independently approved page-scoped permissions. It registers no duplicate settings entries and retains its stable plugin ID. Controls use native palette and shape tokens; no host code selects this plugin by ID.
+
+Disabling the plugin or declining either replacement permission leaves that built-in page available. **Show built-in sessions** temporarily opens the basic page with `basic=1`; remove that query option to return to the enhanced view. Native and sandbox plugin-owned page URLs remain available. The companion host change adding `sessions` and `admin-sessions` replacement targets must be merged before this plugin update: earlier hosts do not understand the new capabilities. Existing installations must review and grant the new replacement permissions during update.
 
 The 2.3.1 preview bounds native controls to the host panel. User selectors use
 the shared field style, long values wrap or stay within their control, and
@@ -38,9 +40,8 @@ The map requests visible OpenStreetMap tiles with browser caching, visible attri
 | `sessions.admin.revoke` | Admin single/user/server revocation | **Destructive, High:** can sign out every browser; admin required |
 | `sessions.geoip.read` | Database availability | Admin-only status without filesystem paths |
 | `sessions.geoip.configure` | Replace optional MMDB databases | **Destructive, High:** changes shared enrichment data; admin and confirmation required |
-| `frontend.settings` | Account/admin Settings sections | Generic contribution registration and visibility |
-| `frontend.placement.settings.account` | Join the built-in Account heading | Approval covers account settings, independent of admin settings and backend actions |
-| `frontend.placement.settings.admin` | Join Server management | Approval covers admin settings; the host still requires administrator access |
+| `frontend.page.replace.sessions` | Enhance the built-in account Sessions section | **High:** replaces only this page; independent of session read/revoke grants |
+| `frontend.page.replace.admin-sessions` | Enhance the built-in administrator Session Manager section | **High:** replaces only this page; the host still requires administrator access |
 | `frontend.native` | Native cards, table, map, file controls | **Critical:** reviewed code executes in the host browser realm, with DOM/browser authority; scoped backend grants remain enforced |
 | `backend.routes.plugin` | Optional namespaced JSON handlers | Host authentication, admin policies, lifecycle, limits, and installation grants |
 
