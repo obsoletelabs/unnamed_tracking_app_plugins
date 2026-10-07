@@ -1,5 +1,24 @@
 # Session Manager validation
 
+## Official Extended Session Manager and key rotation
+
+On 7 October 2026, the maintained source moved to
+`official/extended-session-manager` and was renamed **Extended Session Manager**.
+Its existing plugin ID is preserved for updates. All 312 Python tests and the
+native/browser checks pass in CI. An isolated signed publication verifies 21
+current published plugins, including Extended Session Manager 2.4.0 under the
+new official key. The 51 reviewed signed historical archives remain unchanged;
+expired keys cannot authorize new or backdated archives after Perth midnight.
+
+The actual unsigned preview package was updated through the disposable host's
+public installer, preserving its existing data and permissions. The screenshot
+shows the new title, the Advanced sessions switch, browser summaries, map and
+administrator table with synthetic users and metadata. Successor trust and
+expiry enforcement on deployed hosts are requested in
+[host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
+
+![Extended Session Manager administrator preview](assets/extended-session-manager.jpg)
+
 ## Integrated session pages: 2.4.0 preview
 
 Validation on 7 October 2026 uses the actual locally built unsigned `.utp`,
