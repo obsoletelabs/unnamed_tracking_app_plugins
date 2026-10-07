@@ -55,7 +55,7 @@ in the UI document. Call `register(DECLARATION)` after startup.
 Actions receive authenticated request context and, for enrichment, a canonical
 candidate. Search returns lightweight candidates without metadata or artwork.
 At five query characters the host preloads metadata from the top down with up to
-four concurrent fetches, refilling each slot as it finishes. Query changes cancel
+five concurrent fetches, refilling each slot as it finishes. Query changes cancel
 obsolete work. Artwork still requires selection; providers do not schedule preload work.
 Metadata returns partial canonical fields, with scores on 0–100. Media returns
 asset references only when the host selects an entity. Cross-ID lookup uses a
