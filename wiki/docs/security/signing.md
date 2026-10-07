@@ -32,11 +32,20 @@ An unknown signature is not trusted just because a catalogue advertises it.
 Unsigned development packages remain explicitly untrusted and use the host's
 consent path.
 
-For rotation, review/publish the successor public key before switching signing,
-keep the approved predecessor overlap, then revoke according to policy. Publish
-a new version; never alter a historical archive to simulate rotation. Existing
-test-key policy differences with the host are recorded in the dated API audit;
-this cleanup does not change identities or claim production trust for test keys.
+The October 7 rotation uses three independent successor identities. Existing
+keys expire at `2026-10-07T16:00:00Z`, the end of October 7 in Australia/Perth.
+New publication requires the signer to be inside its timezone-aware validity
+window. After expiry, only exact already-published archive SHA-256 pins can
+verify; signature, scope and v1 manifest-binding checks still apply. Backdating
+package metadata does not create a historical exception. Revoked keys are always
+rejected, even for pinned archives. Historical packages are never re-signed.
+
+The official successor additionally grants the exact stable ID
+`example.self-service-session-manager` for **Extended Session Manager**.
+Lookalike IDs and the remaining example namespace are excluded. Host enforcement
+and new public-key deployment are requested in
+[host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
+An unchanged host does not enforce these new policy fields.
 
 Follow the [independent catalogue tutorial](../publishing/community-catalogue.md)
 to register your own identity and build a signed package using the same tools.

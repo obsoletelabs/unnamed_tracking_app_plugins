@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import binascii
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
@@ -30,12 +31,68 @@ class PublisherRecord:
     plugin_id_prefixes: tuple[str, ...]
     channel: str = "community"
     legacy_manifest_hashes: dict[str, list[str]] = field(default_factory=dict)
+    plugin_ids: tuple[str, ...] = ()
+    not_before: datetime | None = None
+    not_after: datetime | None = None
+    historical_package_sha256: frozenset[str] = field(default_factory=frozenset)
 
-    def allows_plugin(self, plugin_id: str, *, release: bool = False) -> bool:
+    def allows_plugin(self, plugin_id: str, *, release: bool = False, now: datetime | None = None) -> bool:
         allowed_statuses = {"active"} if release else {"active", "retiring"}
-        return self.status in allowed_statuses and any(
-            plugin_id.startswith(prefix) for prefix in self.plugin_id_prefixes
+        allowed = self.status in allowed_statuses and (
+            plugin_id in self.plugin_ids
+            or any(plugin_id.startswith(prefix) for prefix in self.plugin_id_prefixes)
         )
+        return allowed and (not release or self.valid_at(now))
+
+    def valid_at(self, now: datetime | None = None) -> bool:
+        instant = now if now is not None else datetime.now(timezone.utc)
+        return (self.not_before is None or instant >= self.not_before) and (
+            self.not_after is None or instant < self.not_after
+        )
+
+    def allows_package(self, plugin_id: str, archive_sha256: str, *, now: datetime | None = None) -> bool:
+        if not self.allows_plugin(plugin_id):
+            return False
+        instant = now if now is not None else datetime.now(timezone.utc)
+        if self.not_before is not None and instant < self.not_before:
+            return False
+        return self.valid_at(instant) or (
+            self.not_after is not None and instant >= self.not_after
+            and archive_sha256 in self.historical_package_sha256
+        )
+
+
+def _timestamp(entry: dict, field_name: str) -> datetime | None:
+    value = entry.get(field_name)
+    if value is None:
+        return None
+    try:
+        if not isinstance(value, str):
+            raise ValueError("timestamp must be a string")
+        instant = datetime.fromisoformat(value)
+        if instant.tzinfo is None or instant.utcoffset() is None:
+            raise ValueError("timestamp must include a timezone")
+        return instant.astimezone(timezone.utc)
+    except ValueError as exc:
+        raise PublisherRegistryError(f"invalid publisher {field_name} timestamp") from exc
+
+
+def _rotation_policy(entry: dict) -> dict:
+    plugin_ids = entry.get("plugin_ids", [])
+    pins = entry.get("historical_package_sha256", [])
+    if not isinstance(plugin_ids, list) or len(plugin_ids) > 128 or any(
+        not isinstance(value, str) or not _KEY_ID.fullmatch(value) for value in plugin_ids
+    ) or len(plugin_ids) != len(set(plugin_ids)):
+        raise PublisherRegistryError("invalid exact publisher plugin IDs")
+    if not isinstance(pins, list) or len(pins) > 2048 or any(
+        not isinstance(value, str) or not re.fullmatch(r"[a-f0-9]{64}", value) for value in pins
+    ) or len(pins) != len(set(pins)):
+        raise PublisherRegistryError("invalid historical package SHA-256 pins")
+    not_before, not_after = _timestamp(entry, "not_before"), _timestamp(entry, "not_after")
+    if not_before is not None and not_after is not None and not_before >= not_after:
+        raise PublisherRegistryError("invalid publisher validity interval")
+    return {"plugin_ids": tuple(plugin_ids), "not_before": not_before, "not_after": not_after,
+            "historical_package_sha256": frozenset(pins)}
 
 
 def load_registry(path: Path = REGISTRY_PATH) -> dict[str, PublisherRecord]:
@@ -104,6 +161,7 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, PublisherRecord]:
             plugin_id_prefixes=tuple(scopes),
             channel=entry.get("channel", "community"),
             legacy_manifest_hashes=legacy,
+            **_rotation_policy(entry),
         )
     if not records:
         raise PublisherRegistryError("publisher registry must contain at least one key")

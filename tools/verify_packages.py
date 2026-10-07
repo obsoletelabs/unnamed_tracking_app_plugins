@@ -44,7 +44,8 @@ def verify_package(path: Path, *, require_signature: bool = False) -> None:
         if json.loads(files.get(SIGNATURE_ENVELOPE, b"null")) != signature_envelope(manifest, integrity.get("key_id")):
             raise PublisherRegistryError("signed manifest envelope does not match")
     record = load_registry().get(integrity.get("key_id"))
-    if record is None or not record.allows_plugin(manifest["plugin_id"]):
+    archive_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    if record is None or not record.allows_package(manifest["plugin_id"], archive_sha256):
         raise PublisherRegistryError("package publisher is not trusted for this plugin")
     if version == 1:
         claim = {key: value for key, value in manifest.items() if key != "integrity"}
