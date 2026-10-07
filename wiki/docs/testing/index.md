@@ -61,7 +61,7 @@ The required `host-integration.yml` job provisions PostgreSQL and runs the host'
 It builds the actual Plugin Manager frontend and verifies consent, effective
 grants, new-scope staging, release policy, rollback and failed worker restoration.
 Then it runs the additional reference lifecycle check. Use the host's
-[validation instructions](https://github.com/Rosefall-a/unnamed_tracking_app/blob/main/wiki/docs/development/plugin-validation.md)
+[validation instructions](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/main/wiki/docs/development/plugin-validation.md)
 for database, Linux, environment and frontend prerequisites. Never replace this
 with a pretend gateway or fake host to get a green lifecycle claim.
 
