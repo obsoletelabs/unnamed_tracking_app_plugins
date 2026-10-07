@@ -25,8 +25,14 @@ browser summary for a selected marker.
 The plugin CI host-contract job selects matching feature branches in the owned
 host repository, falling back to `main`. Publication requires the
 [companion host PR](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/5)
-to merge before the plugin release uses the new page capabilities. The host suite passes
-1,504 tests with two skips before the final image-fallback regression, and frontend checks pass 298 tests. The inherited host Pylint duplicate-code warning was traced to identical image redirects and removed by sharing their HTTP response, with regression coverage for status and cache headers.
+to merge before the plugin release uses the new page capabilities. The host's full
+backend suite passes 1,505 tests with two skips, and its additional acceptance
+acquisition regression passes separately. Frontend checks pass 298 tests.
+The inherited host Pylint duplicate-code warning was traced to identical image
+redirects and removed by sharing their HTTP response, with regression coverage
+for status and cache headers. The acceptance harness now substitutes fixture
+downloads at the current host acquisition boundary; remote downloads still use
+the normal host implementation.
 No checks or security boundaries were weakened. Preview packages are unsigned;
 official publication continues through the existing signing workflow.
 
