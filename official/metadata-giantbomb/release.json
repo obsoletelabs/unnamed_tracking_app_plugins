@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "metadata",
+    "giantbomb",
+    "official"
+  ],
+  "icon": "icon.svg",
+  "automatic_update": true,
+  "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities."
+}
