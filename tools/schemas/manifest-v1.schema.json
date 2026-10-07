@@ -83,6 +83,8 @@
         "frontend.shortcuts",
         "frontend.page.replace.home",
         "frontend.page.replace.settings",
+        "frontend.page.replace.sessions",
+        "frontend.page.replace.admin-sessions",
         "frontend.routes",
         "frontend.native",
         "frontend.pwa",

@@ -29,9 +29,13 @@ def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, j
     """Explicit refs and matching branches precede each workflow's verified fallback."""
     requested, branch, remote_branch, expected = scenario
     workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
+    checkout = next(step for step in workflow["jobs"][job]["steps"]
+                    if step.get("with", {}).get("path") == ".validation/host")
+    assert checkout["with"]["repository"] == "obsoletelabs/unnamed_tracking_app_2"
     step = next(
         step for step in workflow["jobs"][job]["steps"] if step.get("id") == "companion"
     )
+    assert "https://github.com/obsoletelabs/unnamed_tracking_app_2.git" in step["run"]
     if job == "lifecycle":
         assert step["env"]["DEFAULT_HOST_REF"] == VERIFIED_RUNTIME_REF
         if not requested and expected == "main":

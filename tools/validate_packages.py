@@ -324,6 +324,11 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
     granted = {p["capability"]["name"] for p in manifest["permissions"]}
     validate_scheduled_tasks(manifest, document, contract_version, granted)
     required = set()
+    page_ids = {page["id"] for page in document.get("pages", [])}
+    for replacement in document.get("page_replacements", []):
+        required.add(f"frontend.page.replace.{replacement['page']}")
+        if replacement["page_id"] not in page_ids:
+            raise ValueError("page replacement refers to a missing page")
     if document.get("shortcuts"):
         required.add("frontend.shortcuts")
         validate_shortcut_targets(document, contract_version)

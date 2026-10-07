@@ -23,7 +23,7 @@ def packages(tmp_path):
             tmp_path / directory,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
-    for name in ("help-button", "jellyfin-media-sync"):
+    for name in ("help-button", "jellyfin-media-sync", "self-service-session-manager"):
         shutil.copytree(
             ROOT / "examples" / name,
             tmp_path / "examples" / name,
@@ -38,7 +38,7 @@ def packages(tmp_path):
 
 
 def test_native_assets_manifest_and_integrity_in_real_packages(packages):
-    assert len(packages) == 2
+    assert len(packages) == 3
     for path in packages:
         validate_package(path)
         verify_package(path)
@@ -49,7 +49,9 @@ def test_native_assets_manifest_and_integrity_in_real_packages(packages):
                 for name in archive.namelist()
                 if name.startswith("payload/")
             }
-        source_name = "jellyfin-media-sync" if "jellyfin-media-sync" in path.name else "help-button"
+        source_name = next(name for name in
+                           ("help-button", "jellyfin-media-sync", "self-service-session-manager")
+                           if name in path.name)
         expected_version = json.loads((ROOT / "examples" / source_name / "manifest.json").read_text(encoding="utf-8"))["version"]
         assert manifest["version"] == expected_version
         assert manifest["integrity"]["signature"] is None
@@ -59,6 +61,30 @@ def test_native_assets_manifest_and_integrity_in_real_packages(packages):
         assert manifest["native_frontend"]["entry"] in files
         assert all(x in files for x in manifest["native_frontend"]["styles"])
         assert b"SECRET-token" not in b"".join(files.values())
+
+
+@pytest.mark.parametrize("defect", ["undeclared", "ungranted", "missing-page"])
+def test_session_replacement_contract_is_checked_in_the_actual_package(packages, defect):
+    from tools.validate_packages import validate_current_contract
+
+    path = next(path for path in packages if "self-service-session-manager" in path.name)
+    with zipfile.ZipFile(path) as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        files = {name.removeprefix("payload/"): archive.read(name)
+                 for name in archive.namelist() if name.startswith("payload/")}
+    validate_current_contract(manifest, files)
+    if defect == "missing-page":
+        document = json.loads(files["ui.json"])
+        document["page_replacements"][0]["page_id"] = "missing"
+        files["ui.json"] = json.dumps(document).encode()
+    elif defect == "undeclared":
+        manifest["capabilities"] = [item for item in manifest["capabilities"]
+                                    if item["name"] != "frontend.page.replace.sessions"]
+    else:
+        manifest["permissions"] = [item for item in manifest["permissions"]
+                                   if item["capability"]["name"] != "frontend.page.replace.sessions"]
+    with pytest.raises(ValueError, match="missing page|permissions"):
+        validate_current_contract(manifest, files)
 
 
 def test_native_asset_absence_and_permission_denial_are_rejected(packages, tmp_path):
