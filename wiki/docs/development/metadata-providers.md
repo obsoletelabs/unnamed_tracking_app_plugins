@@ -121,3 +121,6 @@ The first native Steam result arrived in 0.56 seconds with no artwork; selected
 metadata/artwork appeared in 1.74 seconds in the credential-scope harness.
 Remote timing and rate limiting vary. IGDB and OMDb authenticated live success
 still require credentials; contract fixtures cover their native mappings.
+Later runs observed intermittent TVmaze and SteamGridDB timeouts; successful
+results and Steam CDN artwork remained available. These live timings are
+observations, not performance guarantees.
