@@ -1,6 +1,6 @@
 site_name: Unnamed Tracking Plugins
 site_description: Plugin API v1 developer manual, examples and publishing guide
-repo_url: https://github.com/Rosefall-a/unnamed_tracking_app_plugins
+repo_url: https://github.com/obsoletelabs/unnamed_tracking_app_plugins
 docs_dir: docs
 site_dir: ../.validation/wiki
 strict: true
@@ -42,6 +42,7 @@ nav:
       - Secrets: development/secrets.md
       - Game access: development/games.md
       - Media access: development/media.md
+      - Metadata provider plugins: development/metadata-providers.md
       - Events: development/events.md
       - Background tasks: development/background-tasks.md
       - Notifications: development/notifications.md

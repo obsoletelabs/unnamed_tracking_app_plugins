@@ -202,7 +202,10 @@ def validate_package(path: Path, *, full: bool = False) -> None:
                 "README.md",
             }
             if (
-                provenance.get("repository") != "Rosefall-a/unnamed-tracking-mobile-app"
+                provenance.get("repository") not in {
+                    "Rosefall-a/unnamed-tracking-mobile-app",
+                    "obsoletelabs/unnamed-tracking-mobile-app",
+                }
                 or provenance.get("source_path") != "pwa"
                 or provenance.get("version") != asset_version
                 or set(provenance.get("sha256", {})) != expected_assets
@@ -245,6 +248,9 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
     version_key(manifest["version"])
     contract = manifest.get("api_contract_version", "1.0.0")
     contract_version = version_key(contract)
+    if (any(c["name"].startswith("metadata_providers.") for c in manifest["capabilities"])
+            and contract_version < (1, 1, 1)):
+        raise ValueError("metadata provider capabilities require Plugin API v1.1.1")
     ranges = [manifest[field] for field in ("sdk_version_range", "application_version_range")]
     ranges.extend(d["version_range"] for d in manifest.get("dependencies", []))
     for value in ranges:

@@ -509,7 +509,7 @@ Verify:
 For changes affecting the host/plugin contract, coordinate testing with:
 
 ```text
-Rosefall-a/unnamed_tracking_app
+obsoletelabs/unnamed_tracking_app_2
 ```
 
 The plugin repository's tests should validate the plugin side.

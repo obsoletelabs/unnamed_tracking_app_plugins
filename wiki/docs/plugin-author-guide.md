@@ -193,7 +193,7 @@ Both repository CI workflows now run the host's real-worker/browser lifecycle
 acceptance against the current `plugin-manager` branch. It uses a disposable
 database and publisher, verifies live official downloads, and tests a signed
 Jellyfin release sequence. See the host's
-[integration validation instructions](https://github.com/Rosefall-a/unnamed_tracking_app/blob/plugin-manager/wiki/docs/development/plugin-validation.md)
+[integration validation instructions](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/main/wiki/docs/development/plugin-validation.md)
 for local prerequisites, commands and environment limits.
 
 ## Runtime and SDK

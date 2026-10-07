@@ -103,13 +103,13 @@ jobs:
           if [ "$COMPANION_BRANCH" = feat/ui-ux-redevelopment ]; then
             mobile_branch=feat/pwa-personal-appearance
           fi
-          if [ "$mobile_branch" != main ] && git ls-remote --exit-code --heads https://github.com/Rosefall-a/unnamed-tracking-mobile-app.git "refs/heads/$mobile_branch" >/dev/null; then
+          if [ "$mobile_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed-tracking-mobile-app.git "refs/heads/$mobile_branch" >/dev/null; then
             ref="$mobile_branch"
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
-          repository: Rosefall-a/unnamed-tracking-mobile-app
+          repository: obsoletelabs/unnamed-tracking-mobile-app
           ref: ${{ steps.mobile.outputs.ref }}
           path: .validation/mobile
       - name: Verify source provenance, version and reviewed host templates

@@ -45,9 +45,8 @@ jobs:
         env:
           REQUESTED_REF: ${{ inputs.host_ref }}
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
-          # Current main plus CI fixes awaiting https://github.com/Rosefall-a/unnamed_tracking_app/pull/432.
-          # Return to main after its retained-legacy checker fix is merged.
-          DEFAULT_HOST_REF: a2d1c898f4fdfb0270234dad58d73f3eee051568
+          # The fork's main includes the retained-legacy conformance fixes.
+          DEFAULT_HOST_REF: main
         run: |
           ref="$REQUESTED_REF"
           if [ -z "$ref" ]; then

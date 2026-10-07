@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-VERIFIED_RUNTIME_REF = "a2d1c898f4fdfb0270234dad58d73f3eee051568"
+VERIFIED_RUNTIME_REF = "main"
 
 
 @pytest.mark.parametrize(
