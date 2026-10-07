@@ -15,7 +15,7 @@ ROOT = Path(__file__).parents[1]
 )
 def test_native_asset_contract_is_validated(tmp_path, defect):
     manifest = json.loads(
-        (ROOT / "examples/self-service-session-manager/manifest.json").read_text(encoding="utf-8")
+        (ROOT / "official/extended-session-manager/manifest.json").read_text(encoding="utf-8")
     )
     files = {"native/index.js", "native/style.css", "frontend/index.html"}
     if defect == "missing_entry":

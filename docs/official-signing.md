@@ -8,13 +8,30 @@ Unknown keys, invalid signatures and unsigned packages never receive that badge.
 Invalid signatures are blocked; unsigned/unknown keys require explicit consent.
 Official status does not bypass permissions.
 
-The production identities registered in both repositories are:
+The successor identities registered in this repository are:
 
 | Key ID | Channel | Plugin ID scope |
 | --- | --- | --- |
-| `unnamed-tracking-examples-2026-10-v1` | demo | `example.` |
-| `unnamed-tracking-official-2026-10-v1` | official | `official.` |
-| `unnamed-tracking-generic-2026-10-v1` | community | `example.`, `plugin.` |
+| `unnamed-tracking-examples-2026-10-07-v2` | demo | `example.` |
+| `unnamed-tracking-official-2026-10-07-v2` | official | `official.` plus exact `example.self-service-session-manager` |
+| `unnamed-tracking-generic-2026-10-07-v2` | community | `example.`, `plugin.` |
+
+Existing keys have an exclusive `not_after` of `2026-10-07T16:00:00Z`: midnight
+at the start of October 8 in Australia/Perth. The builder refuses an expired
+signer. The verifier accepts expired-key packages only when their complete
+archive SHA-256 appears in the key's reviewed `historical_package_sha256` list.
+All 51 existing signed archives are pinned; the two unsigned historical archives
+remain unchanged and untrusted. Signatures, scope and v1 manifest binding remain
+mandatory. A claimed build timestamp cannot bypass expiry, and revocation
+overrides historical exceptions.
+
+`not_before` and `not_after` must be timezone-aware ISO timestamps with a valid
+interval. `plugin_ids` grants exact IDs alongside existing prefix scopes; the
+official session manager exception does not grant the entire example namespace.
+The host currently ignores these policy fields and does not yet trust the new
+public keys. [Host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7)
+requests that implementation and deployment. This repository's checks do not
+claim expiry is enforced by an unchanged host.
 
 Adding Actions secrets alone does not register a publisher. The builder registry,
 matching public key file and deployed host registry must contain the same public

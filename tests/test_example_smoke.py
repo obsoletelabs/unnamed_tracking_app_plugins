@@ -7,6 +7,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from test_domain_plugins import plugin_root
+
 ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT))
 PLUGINS = (
@@ -16,13 +18,13 @@ PLUGINS = (
     "metadata-curator",
     "ui-playground",
     "scoped-document-viewer",
-    "self-service-session-manager",
+    "extended-session-manager",
     "discord-delivery-provider",
 )
 
 
 def _load_plugin(name: str):
-    path = ROOT / "examples" / name / "plugin.py"
+    path = plugin_root(name) / "plugin.py"
     spec = importlib.util.spec_from_file_location(
         f"smoke_{name.replace('-', '_')}", path
     )
@@ -129,9 +131,9 @@ def test_ui_playground_frontend_entry_is_complete() -> None:
 
 def test_every_example_package_source_has_safe_paths_and_valid_frontend() -> None:
     for name in ("ui-api", *PLUGINS):
-        manifest = json.loads((ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8"))
+        manifest = json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8"))
         frontend = manifest.get("frontend")
         if frontend:
             entry = frontend["entry"]
             assert ".." not in Path(entry).parts
-            assert (ROOT / "examples" / name / entry).is_file()
+            assert (plugin_root(name) / entry).is_file()

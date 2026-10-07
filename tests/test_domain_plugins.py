@@ -11,8 +11,13 @@ ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+def plugin_root(name: str):
+    folder = "official" if name == "extended-session-manager" else "examples"
+    return ROOT / folder / name
+
+
 def load_plugin(name: str):
-    source = ROOT / "examples" / name / "plugin.py"
+    source = plugin_root(name) / "plugin.py"
     spec = importlib.util.spec_from_file_location(f"domain_{name.replace('-', '_')}", source)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -30,7 +35,7 @@ def load_plugin(name: str):
              "frontend.placement.settings.admin"},
         ),
         (
-            "self-service-session-manager",
+            "extended-session-manager",
             {
                 "sessions.read",
                 "sessions.revoke",
@@ -56,7 +61,7 @@ def load_plugin(name: str):
     ],
 )
 def test_domain_manifests_are_minimally_scoped(name: str, expected: set[str]) -> None:
-    manifest = json.loads((ROOT / "examples" / name / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((plugin_root(name) / "manifest.json").read_text(encoding="utf-8"))
     declared = {item["name"] for item in manifest["capabilities"]}
     requested = {item["capability"]["name"] for item in manifest["permissions"]}
 
@@ -134,7 +139,7 @@ def test_document_viewer_namespaced_routes_keep_gateway_ownership_checks(
 
 
 def test_session_manager_separates_read_and_revoke_capabilities(monkeypatch) -> None:
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     calls = []
     monkeypatch.setattr(
         plugin,
@@ -158,7 +163,7 @@ def test_session_manager_separates_read_and_revoke_capabilities(monkeypatch) -> 
         "sessions.revoke",
         {"session_id": "00000000-0000-0000-0000-000000000001", "confirmed": True},
     )
-    ui = json.loads((ROOT / "examples" / "self-service-session-manager" / "ui.json").read_text(encoding="utf-8"))
+    ui = json.loads((ROOT / "official" / "extended-session-manager" / "ui.json").read_text(encoding="utf-8"))
     revoke = next(action for action in ui["actions"] if action["id"] == "revoke-session")
     assert revoke["confirmation"]
 
@@ -166,7 +171,7 @@ def test_session_manager_separates_read_and_revoke_capabilities(monkeypatch) -> 
 def test_session_manager_routes_preserve_self_service_and_admin_capabilities(
     monkeypatch,
 ) -> None:
-    plugin = load_plugin("self-service-session-manager")
+    plugin = load_plugin("extended-session-manager")
     calls = []
     monkeypatch.setattr(
         plugin,
@@ -203,7 +208,7 @@ def test_session_manager_routes_preserve_self_service_and_admin_capabilities(
         ),
     ]
     manifest = json.loads(
-        (ROOT / "examples" / "self-service-session-manager" / "manifest.json").read_text(encoding="utf-8")
+        (ROOT / "official" / "extended-session-manager" / "manifest.json").read_text(encoding="utf-8")
     )
     admin_routes = [
         route for route in manifest["backend_routes"] if route["path"].startswith("admin/")
@@ -267,10 +272,10 @@ def test_delivery_provider_rejects_malformed_work() -> None:
 def test_reference_frontends_use_only_the_host_bridge() -> None:
     for name in (
         "scoped-document-viewer",
-        "self-service-session-manager",
+        "extended-session-manager",
         "discord-delivery-provider",
     ):
-        script = (ROOT / "examples" / name / "frontend" / "app.js").read_text(encoding="utf-8")
+        script = (plugin_root(name) / "frontend" / "app.js").read_text(encoding="utf-8")
         assert "plugin-api-request" in script
         assert "window.parent.postMessage" in script
         assert "fetch(" not in script

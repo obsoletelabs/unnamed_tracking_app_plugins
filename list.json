@@ -8928,7 +8928,7 @@
       "source": {
         "lifecycle": "source",
         "manifest_version": 1,
-        "path": "examples/self-service-session-manager"
+        "path": "official/extended-session-manager"
       },
       "tags": [
         "account",

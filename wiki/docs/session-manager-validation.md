@@ -1,5 +1,24 @@
 # Session Manager validation
 
+## Official Extended Session Manager and key rotation
+
+On 7 October 2026, the maintained source moved to
+`official/extended-session-manager` and was renamed **Extended Session Manager**.
+Its existing plugin ID is preserved for updates. All 312 Python tests and the
+native/browser checks pass in CI. An isolated signed publication verifies 21
+current published plugins, including Extended Session Manager 2.4.0 under the
+new official key. The 51 reviewed signed historical archives remain unchanged;
+expired keys cannot authorize new or backdated archives after Perth midnight.
+
+The actual unsigned preview package was updated through the disposable host's
+public installer, preserving its existing data and permissions. The screenshot
+shows the new title, the Advanced sessions switch, browser summaries, map and
+administrator table with synthetic users and metadata. Successor trust and
+expiry enforcement on deployed hosts are requested in
+[host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
+
+![Extended Session Manager administrator preview](assets/extended-session-manager.jpg)
+
 ## Integrated session pages: 2.4.0 preview
 
 Validation on 7 October 2026 uses the actual locally built unsigned `.utp`,
@@ -82,7 +101,7 @@ OS-specific installation prompts remain manual surfaces.
 
 ## Historical 2.0.0 validation
 
-Validation on 1 October 2026, against app `plugin-manager` base `daedc1d8125662065bf27d64ac6311380249a5e6` and plugin base `ed7d1d0299a9fc891fb90dfef7e35f84fcd86320`, using the coordinated local changes. PR #248's actual head `5bf43f22bd4991999cd278c5b201817aae439e85` and stages 1–4 contracts/runtime/UI/grant enforcement were inspected before implementation. The earlier [platform audit](plugin-api-v1-audit.md) describes the prior minimized example; [the current README](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/self-service-session-manager/README.md) supersedes its Session Manager observations.
+Validation on 1 October 2026, against app `plugin-manager` base `daedc1d8125662065bf27d64ac6311380249a5e6` and plugin base `ed7d1d0299a9fc891fb90dfef7e35f84fcd86320`, using the coordinated local changes. PR #248's actual head `5bf43f22bd4991999cd278c5b201817aae439e85` and stages 1–4 contracts/runtime/UI/grant enforcement were inspected before implementation. The earlier [platform audit](plugin-api-v1-audit.md) describes the prior minimized example; [the current README](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/extended-session-manager/README.md) supersedes its Session Manager observations.
 
 | Check                                                | Result                                                                                                                                                                                                                                         |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

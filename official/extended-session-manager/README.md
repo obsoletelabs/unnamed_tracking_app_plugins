@@ -1,4 +1,11 @@
-# Self-Service Session Manager
+# Extended Session Manager
+
+This is maintained official functionality in `official/extended-session-manager`.
+The stable ID `example.self-service-session-manager` is preserved for updates;
+new releases use the official signer through an exact-ID trust grant. Historical
+demo packages retain their original signatures. Installing a newly signed release
+requires the successor public key and exact-ID policy described in
+[host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
 
 The 2.x series ports application [PR #248](https://github.com/Rosefall-a/unnamed_tracking_app/pull/248), inspected at head `5bf43f22bd4991999cd278c5b201817aae439e85`. Current branch previews use Plugin API 1.1. The stable ID remains `example.self-service-session-manager`. This replaces the minimized metadata/Refresh example.
 
@@ -6,7 +13,7 @@ The 2.x series ports application [PR #248](https://github.com/Rosefall-a/unnamed
 
 The primary experience is **Account → Sessions** (`/settings?area=account&section=sessions`) and administrator-only **Administration → Session Manager** (`/settings?area=administration&section=admin-sessions`). The host now supplies basic pages showing state, IP, browser details and timestamps. This plugin replaces only those two sections with its extended GeoIP, network, anomaly and map interface, using independently approved page-scoped permissions. It registers no duplicate settings entries and retains its stable plugin ID. Controls use native palette and shape tokens; no host code selects this plugin by ID.
 
-Disabling the plugin or declining either replacement permission leaves that built-in page available. **Show built-in sessions** temporarily opens the basic page with `basic=1`; remove that query option to return to the enhanced view. Native and sandbox plugin-owned page URLs remain available. The companion host change adding `sessions` and `admin-sessions` replacement targets must be merged before this plugin update: earlier hosts do not understand the new capabilities. Existing installations must review and grant the new replacement permissions during update.
+Disabling the plugin or declining either replacement permission leaves that built-in page available. The **Advanced sessions** switch at the top of either page selects the extended or built-in view; turning it off opens the basic page with `basic=1`. Native and sandbox plugin-owned page URLs remain available. The companion host change adding `sessions` and `admin-sessions` replacement targets is merged: earlier hosts do not understand the new capabilities. Existing installations must review and grant the new replacement permissions during update.
 
 Native cards, administration rows and selected map markers summarize browser and operating system. The full user agent is available in an expandable detail so diagnostic information remains accessible without filling every row. This formatting stays inside the plugin; it does not import host frontend code.
 
