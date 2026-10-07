@@ -226,8 +226,11 @@ def test_official_signing_failure_never_publishes_or_downgrades(scoped_checkout,
 
 
 def test_unsigned_preview_is_explicit_and_keeps_zero_zero_version(scoped_checkout, pwa_version):
-    """The explicit patch keeps unsigned UI previews on the v1.1 contract."""
+    """An SDK patch preserves the separately reviewed mobile asset version."""
     root, env = scoped_checkout
+    asset_version = json.loads((root / "official/pwa/pwa/version.json").read_text())["version"]
+    assert asset_version.startswith("0.0.")
+    assert int(pwa_version.split(".")[2]) >= int(asset_version.split(".")[2])
     env = {k: v for k, v in env.items() if "SIGNING_KEY" not in k}
     env["PLUGIN_SIGNING_FALLBACK"] = "unsigned"
     result = build(root, env)
@@ -236,8 +239,12 @@ def test_unsigned_preview_is_explicit_and_keeps_zero_zero_version(scoped_checkou
         manifest = json.loads(archive.read("manifest.json"))
         assert manifest["version"] == pwa_version
         assert manifest["api_contract_version"] == "1.1.0"
-        assert json.loads(archive.read("payload/pwa/version.json"))["version"] == pwa_version
-        assert json.loads(archive.read("payload/pwa/provenance.json"))["version"] == pwa_version
+        assert json.loads(archive.read("payload/pwa/version.json"))["version"] == asset_version
+        provenance = json.loads(archive.read("payload/pwa/provenance.json"))
+        assert provenance["version"] == asset_version
+        assert provenance["sha256"]["version.json"] == hashlib.sha256(
+            archive.read("payload/pwa/version.json").replace(b"\r\n", b"\n")
+        ).hexdigest()
         assert manifest["integrity"]["signature"] is None
         assert manifest["integrity"]["key_id"] is None
     assert not (root / "list.json").exists()

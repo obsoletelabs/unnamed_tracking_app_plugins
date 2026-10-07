@@ -54,6 +54,9 @@ def main() -> None:
     from publisher_registry import load_registry
     from runtime import PluginRegistry, PluginSupervisor, RuntimePolicyError
     from src.plugin_api.capabilities import capability_definition
+    from src.plugin_api.metadata_contracts import (
+        MetadataProviderRegistration, MetadataProviderRequest, ProviderResponse,
+    )
     from src.plugin_api.contracts import (
         Capability,
         PluginDependency,
@@ -67,6 +70,13 @@ def main() -> None:
     )
 
     root = Path(__file__).parents[1]
+    for name, model in (("metadata-registration-v1", MetadataProviderRegistration),
+                        ("metadata-request-v1", MetadataProviderRequest),
+                        ("metadata-response-v1", ProviderResponse)):
+        schema = model.model_json_schema()
+        schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+        schema["x-api-contract-version"] = "1.1.1"
+        assert schema == json.loads((root / "tools/schemas" / f"{name}.schema.json").read_bytes()), name
     catalogue = json.loads((args.distribution_root / "list.json").read_text(encoding="utf-8"))
     # Evaluate the actual public catalogue entry model without loading database
     # configuration or the API server. Additional distribution fields remain

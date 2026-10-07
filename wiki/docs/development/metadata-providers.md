@@ -14,6 +14,12 @@ user may configure their own fields. User overrides win over system fallback
 for fields whose declaration permits both scopes. Values are encrypted and
 write-only in UI/API reads; clearing a user value restores the system fallback.
 
+The host reuses its original compact source tiles, colored badges, key buttons
+and expandable forms. Tiles are discovered from enabled plugins and show live
+health classifications. Administrators choose **System default**; **My account**
+edits only their user scope. Existing account-import connections remain below
+the metadata tiles. See the [host screenshots and workflow](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/feat/metadata-provider-orchestration/wiki/docs/integrations/metadata.md).
+
 Old host metadata integration keys are not automatically transferred. Enter them
 in the matching provider plugin's configuration. Account library/achievement
 sync credentials remain in their existing account integration settings.
@@ -85,8 +91,10 @@ Live development validation on 2026-10-07 observed:
 - AniList and Kitsu: progressive search, selected metadata and artwork succeeded.
   AniList rate limiting and Jikan timeouts did not discard other providers' data.
 - AniZip: the corrected `anilist_id` mapping endpoint passed real health checks.
-- GOG: public catalogue/metadata responses are reachable; query filtering and
-  selected product mapping are checked by the live harness.
+- GOG: public catalogue/metadata responses were reachable in direct live probes.
+  The catalogue returns fuzzy matches; the host's title filter keeps unrelated
+  products out of the displayed Portal 2 matches. The installed-package harness
+  does not establish authenticated GOG account-import success.
 - HowLongToBeat: its unofficial endpoint rejected requests; reported unavailable.
 - IGDB, GiantBomb, RetroAchievements, ScreenScraper, OMDb and TVDB: missing
   credentials were verified; live authenticated success remains unverified.
