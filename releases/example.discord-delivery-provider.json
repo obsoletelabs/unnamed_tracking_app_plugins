@@ -369,6 +369,137 @@
         "integration"
       ],
       "version": "1.2.1"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "8f57d10491fab7ee0230df5ce6fe1bcf57be2f8a",
+        "source_committed_at": "2026-10-08T10:09:32+08:00",
+        "source_digest": "09c48628a028dd7c7731c088fd76113ea4a0a340ec5b55665a64abdc15ad3356",
+        "source_path": "examples/discord-delivery-provider",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "35878a54a656772077bd25fe042f7b715432b9b6ba67ee4080d6d3f5f69f758d"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": ">=1.0.0",
+        "capabilities": [
+          {
+            "name": "notification_providers.register",
+            "version": 1
+          },
+          {
+            "name": "notification_providers.deliver",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Registers a Discord notification destination while core retains preferences, retry state, and delivery ownership.",
+        "entrypoint": "plugin:main",
+        "frontend": {
+          "entry": "frontend/index.html"
+        },
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "83cd09806c8e8bde2d206967884c5f5cbfde2d1fa00637f613220c70a16b9db5",
+          "signature": "v2:0luJEwxyMYrlLp0qwdne9dYL6erRGNNd/rFb3/uRB1BZA8HP9k0xWb01sBicSytomzeNeiQyY/YOesxiuUWjDg=="
+        },
+        "manifest_version": 1,
+        "name": "External Discord Delivery Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "notification_providers.register",
+              "version": 1
+            },
+            "rationale": "Register this plugin's namespaced Discord provider with the core notification coordinator."
+          },
+          {
+            "capability": {
+              "name": "notification_providers.deliver",
+              "version": 1
+            },
+            "rationale": "Receive only minimized delivery work that core has approved using the user's provider preference and this installation's grant."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Store the Discord webhook as a write-only secret in this plugin's private runtime namespace."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Expose the declared plugin page in the main navigation."
+          }
+        ],
+        "plugin_id": "example.discord-delivery-provider",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "deliver",
+            "check-configuration"
+          ],
+          "menus": [],
+          "pages": [
+            "provider"
+          ],
+          "settings": [
+            "destination"
+          ]
+        },
+        "version": "1.3.0"
+      },
+      "package": {
+        "filename": "example.discord-delivery-provider-1.3.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 11402
+      },
+      "package_sha256": "dd8efd36fa38e15317268a8bac5b156839ca2a9beb72b12b6584c4b87052035b",
+      "plugin_id": "example.discord-delivery-provider",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# External Discord Delivery Provider\n\nThis reference plugin registers `example.discord-delivery-provider.discord` with the core notification coordinator. Core decides which notifications are eligible, checks the user's provider setting and active grant, owns deduplication and retry state, and sends a minimized delivery DTO to the plugin's `deliver` action.\n\nPermissions requested:\n\n- `notification_providers.register`: register and remove the namespaced provider.\n- `notification_providers.deliver`: receive eligible minimized delivery work.\n- `plugin.storage`: store a Discord webhook in private, write-only runtime storage.\n\nThe runtime accepts only HTTPS `discord.com` or `discordapp.com` `/api/webhooks/` destinations and limits message content to Discord's 2,000-character bound. The plugin never logs or returns the webhook. Set `PLUGIN_RUNTIME_DISCORD_EGRESS=true` to enable the narrowly scoped runtime sender; outbound access remains disabled otherwise.\n\nAt startup, provider registration waits for the host gateway using bounded\nbackoff when the public gateway reports a temporary `unavailable` error. This\nsupports runtime-first startup and an app-only callback configuration without\nrequiring a manual retry. Permission, invalid-request and other permanent errors\nare not retried. Registration is idempotent; this wait does not deliver messages.\n\nBuild all packages with `python tools/build_packages.py`. Local builds are intentionally unsigned and require the host's untrusted-package confirmation; release CI supplies the reviewed signing identity. Requires the host Plugin API v1 notification-provider capabilities introduced by the Phase 2 plugin-manager work.\n",
+      "release_notes": "Recover provider registration when the host gateway becomes available after runtime startup. Permission and permanent errors still fail explicitly.",
+      "sha256": "83cd09806c8e8bde2d206967884c5f5cbfde2d1fa00637f613220c70a16b9db5",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "83cd09806c8e8bde2d206967884c5f5cbfde2d1fa00637f613220c70a16b9db5",
+        "signature": "v2:0luJEwxyMYrlLp0qwdne9dYL6erRGNNd/rFb3/uRB1BZA8HP9k0xWb01sBicSytomzeNeiQyY/YOesxiuUWjDg=="
+      },
+      "tags": [
+        "notifications",
+        "integration"
+      ],
+      "version": "1.3.0"
     }
   ],
   "version": 1

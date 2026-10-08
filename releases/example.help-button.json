@@ -787,6 +787,257 @@
         "frontend"
       ],
       "version": "2.2.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "8f57d10491fab7ee0230df5ce6fe1bcf57be2f8a",
+        "source_committed_at": "2026-10-08T10:09:32+08:00",
+        "source_digest": "173419ec8b4c7d4cbc4dfda1c71ebe784ad9e0d6e40b2597e8d4d62774d4e1a0",
+        "source_path": "examples/help-button",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "6640b039c45e05ab110af71b6bc56ddcf0d891d4fd54c2c5a81333e4be37ccd6"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "^1.0.0",
+        "capabilities": [
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.overlay",
+            "version": 1
+          },
+          {
+            "name": "frontend.dialog",
+            "version": 1
+          },
+          {
+            "name": "frontend.context.game",
+            "version": 1
+          },
+          {
+            "name": "frontend.page.extend",
+            "version": 1
+          },
+          {
+            "name": "frontend.routes",
+            "version": 1
+          },
+          {
+            "name": "frontend.native",
+            "version": 1
+          },
+          {
+            "name": "plugin.settings",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "events.subscribe",
+            "version": 1
+          },
+          {
+            "name": "notifications.send",
+            "version": 1
+          },
+          {
+            "name": "frontend.placement.settings.preferences",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "An intentionally playful showcase of overlays, dialogs, notifications, Settings, Home extensions, routes, events and privileged native Vue UI.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "01aee8344d8148b1e59ef2ad61a6f4ab55a3a69e1f5d2b27e59602b28ddefb63",
+          "signature": "v2:jATXeb2UY6zoHkMoLKGzXashqnElik1OuqYz0wjXKta1sOiTpnm/Iwl3pQXanIQdBt4g7N76MXg0lSs3JlnZAw=="
+        },
+        "manifest_version": 1,
+        "name": "Help Button · Capability Showcase",
+        "native_frontend": {
+          "entry": "native/app.js",
+          "styles": [
+            "native/style.css"
+          ]
+        },
+        "permissions": [
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Add the showcase to the main sidebar."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.settings",
+              "version": 1
+            },
+            "rationale": "Link to the showcase Settings section."
+          },
+          {
+            "capability": {
+              "name": "frontend.settings",
+              "version": 1
+            },
+            "rationale": "Provide a native showcase Settings section."
+          },
+          {
+            "capability": {
+              "name": "frontend.overlay",
+              "version": 1
+            },
+            "rationale": "Mount the floating Help Button on host pages."
+          },
+          {
+            "capability": {
+              "name": "frontend.dialog",
+              "version": 1
+            },
+            "rationale": "Open a host-owned demonstration dialog."
+          },
+          {
+            "capability": {
+              "name": "frontend.context.game",
+              "version": 1
+            },
+            "rationale": "Offer the demo remember action on a game."
+          },
+          {
+            "capability": {
+              "name": "frontend.page.extend",
+              "version": 1
+            },
+            "rationale": "Add a showcase card below Home widgets."
+          },
+          {
+            "capability": {
+              "name": "frontend.routes",
+              "version": 1
+            },
+            "rationale": "Expose the plugin-owned showcase route."
+          },
+          {
+            "capability": {
+              "name": "frontend.native",
+              "version": 1
+            },
+            "rationale": "Run explicitly privileged Vue components and scoped CSS in the host; required for the floating button and local toast."
+          },
+          {
+            "capability": {
+              "name": "plugin.settings",
+              "version": 1
+            },
+            "rationale": "Read the configurable showcase greeting."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Remember a demo visit under the authenticated user ID."
+          },
+          {
+            "capability": {
+              "name": "events.subscribe",
+              "version": 1
+            },
+            "rationale": "Display the types of up to five current-user host activity events."
+          },
+          {
+            "capability": {
+              "name": "notifications.send",
+              "version": 1
+            },
+            "rationale": "Send a real current-user host notification on demand."
+          },
+          {
+            "capability": {
+              "name": "frontend.placement.settings.preferences",
+              "version": 1
+            },
+            "rationale": "Place these settings beneath the built-in preferences headings. Approval covers this settings area and its folders, not other settings areas or backend actions."
+          }
+        ],
+        "plugin_id": "example.help-button",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "rickroll",
+            "remember",
+            "inspect-state",
+            "notify",
+            "activity"
+          ],
+          "menus": [
+            "help"
+          ],
+          "pages": [
+            "help",
+            "floating",
+            "home-card"
+          ],
+          "settings": [
+            "showcase"
+          ]
+        },
+        "version": "2.3.0"
+      },
+      "package": {
+        "filename": "example.help-button-2.3.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 11464
+      },
+      "package_sha256": "d83bd686b937aaf008bd98216b77cf35a9d7cbc63a92c28a384ce13299faab90",
+      "plugin_id": "example.help-button",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Help Button: capability showcase\n\nVersion 2.0.0 targets Plugin API v1 on the completed `plugin-manager` platform.\nThis is intentionally a playful developer showcase, not a support application.\nIt has no plugin dependencies and bundles plain JavaScript using the host-supplied\nVue API; no CDN or frontend build tool is required.\n\n## Surfaces and permissions\n\n| Permission | Visible demonstration and reason |\n| --- | --- |\n| `frontend.overlay` | Floating Help Button on host pages |\n| `frontend.dialog` | Host-owned demonstration modal opened by the floating button |\n| `frontend.navigation.main` | Help showcase sidebar entry |\n| `frontend.navigation.settings` | Settings sidebar link |\n| `frontend.settings` | Native Settings contribution, separate from Plugins configuration |\n| `frontend.context.game` | Remember demo visit in a game context; no game-data read grant |\n| `frontend.page.extend` | Labelled card below Home widgets |\n| `frontend.routes` | `/plugins/example.help-button/showcase` |\n| `frontend.native` | **Privileged** Vue cards, scoped CSS and local toast in the host realm |\n| `notifications.send` | A real current-user host notification, distinct from the local toast |\n| `events.subscribe` | Poll five current-user event types on demand |\n| `plugin.storage` | Remember/read a timestamp in the authenticated user's demo namespace |\n| `plugin.settings` | Read the configurable greeting with the saved visit |\n\nThe external help-video action declares `external_navigation` and confirmation.\nIts destination is a fixed HTTPS YouTube URL. It needs no outbound HTTP grant:\nthe browser navigates after user confirmation. The native view uses the public\nhost action SDK and an exact destination check before navigating a new tab.\n\nHome is extended rather than replaced. No page-replacement, broad API, user-data\nread, host-route or outbound-network privileges are requested. Every gateway\noperation still depends on a live host grant. Denied UI grants remove the relevant\ncontribution; denying native mode leaves declarative pages/actions available.\nThe native modal launcher and local toast require native mode.\n\n## Configuration and use\n\nInstall the package through Settings → Plugins and review the native frontend\nprivilege. Enable it, then open Help showcase from the sidebar or Settings.\nIn Plugins → Help Button → Settings, change the demo greeting. Read remembered\nvisit to observe that configuration together with persisted state.\n\nTry the floating dialog, toast, real notification, event inspection, Home card,\ngame contextual action, remembered visit after reload, and suspicious help video.\nThe native UI visibly labels the capability behind each card. It never mutates\nhost DOM or imports host application internals. Timers and CSS registrations are\ncleaned up when the host removes the plugin.\n\n## Test, build and install\n\nFrom the repository root:\n\n```sh\npytest\npython tools/build_packages.py\npython tools/verify_packages.py dist/*.utp\npython tools/validate_packages.py dist/*.utp\n```\n\n`tests/test_help_button.py` covers behavior, per-user state and protocol requests.\n`tests/test_canonical_packages.py` covers packaged native assets and integrity.\n`tests/test_native_frontends.py` runs the behavioral native tests with Node when\ninstalled; CI installs Node explicitly. No host checkout is needed for these tests.\n\nDevelopment produces `dist/example.help-button-2.0.0.utp`, deliberately unsigned.\nThe existing release workflow rebuilds/signs with its configured reviewed\npublisher key; the source does not contain private signing material. An unsigned\nnative package must go through the host's elevated permission consent and password\nreauthentication. No signature or installation check is bypassed.\n\nManual host verification: install the actual package, allow the listed leaves,\ncheck all surfaces, revoke one UI leaf and reload, revoke storage and try a saved\nvisit, then disable the plugin. Its contributions must disappear. No host-side\nspecial case is required for this example.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "01aee8344d8148b1e59ef2ad61a6f4ab55a3a69e1f5d2b27e59602b28ddefb63",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "01aee8344d8148b1e59ef2ad61a6f4ab55a3a69e1f5d2b27e59602b28ddefb63",
+        "signature": "v2:jATXeb2UY6zoHkMoLKGzXashqnElik1OuqYz0wjXKta1sOiTpnm/Iwl3pQXanIQdBt4g7N76MXg0lSs3JlnZAw=="
+      },
+      "tags": [
+        "reference",
+        "frontend"
+      ],
+      "version": "2.3.0"
     }
   ],
   "version": 1

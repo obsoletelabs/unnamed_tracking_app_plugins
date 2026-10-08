@@ -344,6 +344,144 @@
         "frontend"
       ],
       "version": "1.2.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "8f57d10491fab7ee0230df5ce6fe1bcf57be2f8a",
+        "source_committed_at": "2026-10-08T10:09:32+08:00",
+        "source_digest": "1e36c74c6f8878573e57cd7982a25c4cfe3de753b4142afbb7788114b6ace413",
+        "source_path": "examples/ui-api",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "f9544b68ddd7e369f95f9d73f2da5a7f63c1b319f08093b75385b6473188fe98"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "*",
+        "capabilities": [
+          {
+            "name": "games.read",
+            "version": 1
+          },
+          {
+            "name": "plugin.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          },
+          {
+            "name": "tasks.background",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Reference native declarative UI and gateway API plugin.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "645346f4c2819d99ad7487e572827aaf0816e7e9b345af780430052cfa68caf1",
+          "signature": "v2:PHHyqIIYfrhBtCF1OLH6m7FrhRthqA3i0LkxFqZ9Z0AqOYUefwQVikDidsEbVeDQycT4QfptLhAu8JBhjLDDBw=="
+        },
+        "manifest_version": 1,
+        "name": "UI and API Example",
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.read",
+              "version": 1
+            },
+            "rationale": "Read games requested by the user."
+          },
+          {
+            "capability": {
+              "name": "plugin.settings",
+              "version": 1
+            },
+            "rationale": "Persist native UI settings."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Expose the declared plugin page in the main navigation."
+          },
+          {
+            "capability": {
+              "name": "tasks.background",
+              "version": 1
+            },
+            "rationale": "Offer an optional host-managed library summary schedule using the existing background identity."
+          }
+        ],
+        "plugin_id": "example.ui-api",
+        "scheduled_tasks": [
+          {
+            "action_id": "scheduled-summary",
+            "default_interval_minutes": 1440,
+            "description": "Reports the number of games read from the plugin background administrator library.",
+            "id": "library-summary",
+            "max_interval_minutes": 10080,
+            "min_interval_minutes": 5,
+            "name": "Library summary"
+          }
+        ],
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "refresh",
+            "scheduled-summary"
+          ],
+          "pages": [
+            "games"
+          ],
+          "settings": [
+            "settings"
+          ]
+        },
+        "version": "1.3.0"
+      },
+      "package": {
+        "filename": "example.ui-api-1.3.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 5653
+      },
+      "package_sha256": "10e4fbfaa6d52b75f9b8a121d8d6906b2f5a30a6ea135cdd73e14209b1ea78ce",
+      "plugin_id": "example.ui-api",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# UI and API Example\n\nA small Plugin API v1 reference with a real declarative page, a `display_mode`\nsettings section and a **Read library** action returning up to 50 current-user\ngames. It requests `games.read`, `plugin.settings` and `frontend.navigation.main`.\nIt also requests `tasks.background` for a **Library summary** job in Administration\n→ Tasks. The schedule starts off, supports an interval and Run now, and uses the\nplugin's existing background administrator identity. Its handler returns only a\nbounded public summary; it does not read every user's library or opt anyone into\npersonal background subscriptions. Withdraw either background or library access\nto pause the job. Updates and ordinary reinstall retain its schedule.\nThe host owns permission classification and supplies authenticated gateway context.\nThe entrypoint reports ready and remains supervised instead of exiting after\nstartup requests. No plugin JavaScript is loaded by the native host.\n\nUse it as the minimal structure in the [author guide](../../docs/plugin-author-guide.md).\nBuild/test with `pytest` and `python tools/build_packages.py`; inspect the isolated\n`.validation/` distribution. New packages include this README, an icon, tags and\nrelease-specific update metadata. Release signing requires a registered publisher.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "645346f4c2819d99ad7487e572827aaf0816e7e9b345af780430052cfa68caf1",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "645346f4c2819d99ad7487e572827aaf0816e7e9b345af780430052cfa68caf1",
+        "signature": "v2:PHHyqIIYfrhBtCF1OLH6m7FrhRthqA3i0LkxFqZ9Z0AqOYUefwQVikDidsEbVeDQycT4QfptLhAu8JBhjLDDBw=="
+      },
+      "tags": [
+        "reference",
+        "frontend"
+      ],
+      "version": "1.3.0"
     }
   ],
   "version": 1

@@ -1,12 +1,5 @@
 {
-  "manifest_version": 1,
   "api_contract_version": "1.1.1",
-  "plugin_id": "official.metadata-jikan",
-  "name": "MyAnimeList Metadata Provider",
-  "version": "0.0.1",
-  "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
-  "entrypoint": "plugin:main",
-  "sdk_version_range": "^1.1.1",
   "application_version_range": ">=0.0.1",
   "capabilities": [
     {
@@ -38,6 +31,16 @@
       "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "MyAnimeList Metadata Provider",
   "permissions": [
     {
       "capability": {
@@ -89,7 +92,11 @@
       "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
     }
   ],
-  "dependencies": [],
+  "plugin_id": "official.metadata-jikan",
+  "sdk_version_range": "^1.1.1",
+  "storage": {
+    "quota_mb": 1
+  },
   "ui": {
     "actions": [
       "search",
@@ -97,16 +104,9 @@
       "media",
       "health"
     ],
-    "settings": [],
+    "menus": [],
     "pages": [],
-    "menus": []
+    "settings": []
   },
-  "integrity": {
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "signature": null,
-    "key_id": null
-  },
-  "storage": {
-    "quota_mb": 1
-  }
+  "version": "0.0.1"
 }

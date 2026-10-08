@@ -1,0 +1,142 @@
+{
+  "plugin_id": "official.metadata-hltb",
+  "releases": [
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "8f57d10491fab7ee0230df5ce6fe1bcf57be2f8a",
+        "source_committed_at": "2026-10-08T10:09:32+08:00",
+        "source_digest": "2cb1d911cce1d46721f1ce0a4727d9cdf506b946a799830b38492f139db1abf2",
+        "source_path": "official/metadata-hltb",
+        "version_bump": "initial"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "23363a16bf14c0afff0cdf9a9a2185a3c4f3772adda4967d31c4f67b2fd02562",
+          "signature": "v2:WbfsZgwYAzljd3vYgiNyv14AwaCN8suTA0t8ir56XdbMR9i4kxcCPEeeriyLPFfXDJ+8TPKEL57Q4etRsaG4Dg=="
+        },
+        "manifest_version": 1,
+        "name": "HowLongToBeat Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-hltb",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "metadata",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.0.1"
+      },
+      "package": {
+        "filename": "official.metadata-hltb-0.0.1.utp",
+        "format": "utp-v1",
+        "size_bytes": 8035
+      },
+      "package_sha256": "4a94757febc856eaad0bd7ecdfe2576fdbbb7f2a339f89340c9cfcb863060968",
+      "plugin_id": "official.metadata-hltb",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# HowLongToBeat Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "23363a16bf14c0afff0cdf9a9a2185a3c4f3772adda4967d31c4f67b2fd02562",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "23363a16bf14c0afff0cdf9a9a2185a3c4f3772adda4967d31c4f67b2fd02562",
+        "signature": "v2:WbfsZgwYAzljd3vYgiNyv14AwaCN8suTA0t8ir56XdbMR9i4kxcCPEeeriyLPFfXDJ+8TPKEL57Q4etRsaG4Dg=="
+      },
+      "tags": [
+        "metadata",
+        "hltb",
+        "official"
+      ],
+      "version": "0.0.1"
+    }
+  ],
+  "version": 1
+}
