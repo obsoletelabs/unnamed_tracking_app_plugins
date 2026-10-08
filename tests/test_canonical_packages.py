@@ -119,8 +119,13 @@ def test_native_asset_absence_and_permission_denial_are_rejected(packages, tmp_p
 
 def test_modified_payload_is_rejected(packages, tmp_path):
     path = tmp_path / "modified.utp"
+    source = next(
+        package
+        for package in packages
+        if "payload/native/app.js" in zipfile.ZipFile(package).namelist()
+    )
     with (
-        zipfile.ZipFile(packages[0]) as original,
+        zipfile.ZipFile(source) as original,
         zipfile.ZipFile(path, "w") as changed,
     ):
         for name in original.namelist():
