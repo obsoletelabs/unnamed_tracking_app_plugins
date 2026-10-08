@@ -11,3 +11,7 @@ It is intentionally application-level behavior. The host owns the notification s
 
 Build/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).
 README, tags, icon and resolved release policy are included in each new package.
+
+## Notification contract 1.1.2
+
+`notifications.send` submits a PRIVATE notice to the host controller for the authenticated user. Its result reports acceptance, not successful external transport. User type/destination preferences can suppress it. Public webhooks cannot receive this personal game summary. Rich game sale/release/price-threshold source registration is a later API extension; this example does not invent live prices from purchase costs.

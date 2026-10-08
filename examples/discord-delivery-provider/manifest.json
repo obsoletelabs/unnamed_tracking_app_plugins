@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.0",
+  "api_contract_version": "1.1.2",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -52,7 +52,7 @@
         "name": "plugin.storage",
         "version": 1
       },
-      "rationale": "Store the Discord webhook as a write-only secret in this plugin's private runtime namespace."
+      "rationale": "Store the Discord webhook in this plugin's private runtime namespace; the UI cannot read it, but the plugin can."
     },
     {
       "capability": {
@@ -63,7 +63,7 @@
     }
   ],
   "plugin_id": "example.discord-delivery-provider",
-  "sdk_version_range": "^1.1.0",
+  "sdk_version_range": "^1.1.2",
   "storage": {
     "quota_mb": 1
   },
