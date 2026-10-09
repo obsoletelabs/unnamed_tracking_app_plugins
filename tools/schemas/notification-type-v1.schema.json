@@ -1,0 +1,89 @@
+{
+  "additionalProperties": false,
+  "description": "Host-interpreted plain-text templates; producers do not choose delivery endpoints.",
+  "properties": {
+    "event_type": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Event Type",
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 500,
+      "title": "Description",
+      "type": "string"
+    },
+    "required_trust": {
+      "default": "PRIVATE",
+      "enum": [
+        "PRIVATE",
+        "SECURE"
+      ],
+      "title": "Required Trust",
+      "type": "string"
+    },
+    "purpose": {
+      "default": "standard",
+      "enum": [
+        "standard",
+        "security",
+        "recovery"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "severity": {
+      "default": "info",
+      "enum": [
+        "info",
+        "warning",
+        "error"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "title_template": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Title Template",
+      "type": "string"
+    },
+    "body_template": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "title": "Body Template",
+      "type": "string"
+    },
+    "parameters": {
+      "additionalProperties": {
+        "enum": [
+          "string",
+          "integer",
+          "boolean"
+        ],
+        "type": "string"
+      },
+      "maxProperties": 32,
+      "title": "Parameters",
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_type",
+    "label",
+    "title_template",
+    "body_template"
+  ],
+  "title": "NotificationTypeRegistration",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.2"
+}

@@ -184,6 +184,9 @@ def collect_payload(
     if any(capability["name"].startswith("metadata_providers.")
            for capability in manifest.get("capabilities", [])):
         files["sdk/metadata_provider.py"] = source_bytes(root / "sdk/metadata_provider.py")
+    if any(capability["name"] in {"notification_sources.register", "notifications.emit"}
+           for capability in manifest.get("capabilities", [])):
+        files["sdk/notifications.py"] = source_bytes(root / "sdk/notifications.py")
     if manifest.get("frontend"):
         files["frontend/appearance.js"] = source_bytes(
             root / "sdk/frontend_appearance.js"

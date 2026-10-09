@@ -457,3 +457,13 @@ data changes. The host stages new scopes for explicit approval while the old
 release remains active, applies release-specific automatic-update policy and
 restores the previous package after failed startup. Catalogue history does not
 replace locally retained rollback packages. See the compatibility note above.
+
+## Registered notification sources (1.1.2)
+
+The SDK's `sdk.notifications.register_type`, `unregister_type` and `emit` wrap public methods `notification_sources.register`, `notification_sources.unregister` and `notifications.emit`. Registration/unregistration require notification_sources.register; event emission requires notifications.emit. The host binds recipients to the authenticated action or subscribed background user. A source declares its own namespaced event type, PRIVATE/SECURE policy, purpose, severity and bounded plain-text templates with scalar parameters. Events contain only type, dedupe identity, occurrence, facts and optional group. Neither operation selects an arbitrary user, address, provider or delivery state.
+
+SECURE types additionally need the explicit critical notifications.sensitive grant, which broad notifications/api.full grants do not imply. Security/recovery require SECURE; recovery also requires external context, current possession proof, recovery opt-in and suitable transport. Generic plugin facts cannot self-label PUBLIC. Host-reviewed public media projections stay separate. Real auth namespaces remain reserved to the host.
+
+The host persists source interpretation and installation identity, creates deliveries, applies preferences/trust, isolates transport failures and rechecks source grants before I/O. It retains types, history and inactive preferences after uninstall. Reinstall requires fresh activation/grants and cannot reclaim destinations or replay old deliveries. Source registration is bounded to 32 retained types; acceptance to 100 new events per plugin/user/hour using server time. Replay with conflicting facts fails. The demo sources do not import host code or handle SMTP credentials.
+
+See the reset and invite demonstrations in the [example map](examples/index.md). They use synthetic owner-scoped tokens and never mutate real authentication. The existing storage get/put demonstration is not an atomic production token-consumption service.

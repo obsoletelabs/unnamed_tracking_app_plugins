@@ -1,0 +1,28 @@
+{
+  "api_contract_version": "1.1.2",
+  "schema_version": "v1",
+  "plugin_id": "example.user-invite-notification-demo",
+  "title": "User Invite Routing Demo",
+  "pages": [],
+  "settings": [],
+  "actions": [
+    {
+      "id": "issue",
+      "label": "Send demo notification",
+      "handler": "plugin:issue",
+      "capability": {
+        "name": "notifications.emit",
+        "version": 1
+      }
+    },
+    {
+      "id": "confirm",
+      "label": "Confirm demo token",
+      "handler": "plugin:confirm",
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      }
+    }
+  ]
+}
