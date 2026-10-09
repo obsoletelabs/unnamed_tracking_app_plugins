@@ -7,5 +7,6 @@
     "official"
   ],
   "release_notes": "Initial protected provider: core-approved field layouts and encrypted per-user webhooks. New identity; no legacy secret migration.",
-  "automatic_update": true
+  "automatic_update": true,
+  "icon": "icon.svg"
 }
