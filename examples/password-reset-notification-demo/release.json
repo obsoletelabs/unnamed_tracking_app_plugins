@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "publisher": "Notification Demonstrations",
+  "tags": [
+    "notifications",
+    "demo"
+  ],
+  "icon": "icon.svg",
+  "automatic_update": false,
+  "release_notes": "Synthetic owner-scoped notification source demonstration, Plugin API 1.1.2."
+}

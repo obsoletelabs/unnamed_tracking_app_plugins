@@ -68,7 +68,10 @@
         "backend.routes.plugin",
         "backend.routes.host",
         "network.outbound",
-        "api.full"
+        "api.full",
+        "notifications.emit",
+        "notification_sources.register",
+        "notifications.sensitive"
       ],
       "title": "Capability",
       "type": "string"

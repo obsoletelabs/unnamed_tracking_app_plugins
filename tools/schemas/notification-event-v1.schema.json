@@ -1,0 +1,65 @@
+{
+  "additionalProperties": false,
+  "description": "Facts for one installed source; the gateway supplies the recipient and installation.",
+  "properties": {
+    "event_type": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Event Type",
+      "type": "string"
+    },
+    "dedupe_key": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Dedupe Key",
+      "type": "string"
+    },
+    "occurred_at": {
+      "minimum": 0,
+      "title": "Occurred At",
+      "type": "integer"
+    },
+    "data": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "maxProperties": 32,
+      "title": "Data",
+      "type": "object"
+    },
+    "group_key": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Group Key"
+    }
+  },
+  "required": [
+    "event_type",
+    "dedupe_key",
+    "occurred_at"
+  ],
+  "title": "NotificationEventEmission",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.2"
+}
