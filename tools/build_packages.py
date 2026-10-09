@@ -37,12 +37,21 @@ def write_package(path: Path, manifest: dict, files: dict[str, bytes]) -> None:
             archive.writestr(info, data)
 
 
-def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bool = False, reuse_published: bool = False) -> None:
+def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bool = False, reuse_published: bool = False, promote_plugins: tuple[str, ...] = ()) -> None:
     plugins = discover_plugins(root)
+    config_path = root / "catalogue.json"
+    config = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
+    pending = set(config.get("unreleased_plugins", []))
+    promoted = set(promote_plugins)
+    if promoted:
+        if not publish or catalogue_only or reuse_published or output != root:
+            raise ValueError("promotion requires signed main publication, not a preview or release tag")
+        source_ids = {manifest["plugin_id"] for _, manifest in plugins}
+        if len(promoted) != len(promote_plugins) or not promoted.issubset(pending & source_ids):
+            raise ValueError("promotion IDs must be unique maintained sources explicitly marked unreleased")
     if publish:
-        config_path = root / "catalogue.json"
-        pending = set(json.loads(config_path.read_text()).get("unreleased_plugins", [])) if config_path.exists() else set()
-        plugins = [(source, manifest) for source, manifest in plugins if manifest["plugin_id"] not in pending]
+        plugins = [(source, manifest) for source, manifest in plugins
+                   if manifest["plugin_id"] not in pending - promoted]
     if output == root and not (publish or catalogue_only):
         raise ValueError("use --publish for signed distribution; development builds must use a separate output root")
     if publish and git(root, "status", "--porcelain", "--", "examples", "official", "plugins", "sdk", "tools", "publishers", "catalogue.json"):
@@ -100,6 +109,12 @@ def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bo
         generate_catalogue(root, stage, plugins, histories)
         validate_distribution(stage, source_root=root, check_source=not catalogue_only,
                               include_unreleased=not publish and not catalogue_only)
+        if promoted:
+            # Stage policy only after every package/signature/catalogue has passed.
+            # A missing signer or invalid release must leave preview policy intact.
+            write_json(stage / "catalogue.json", {**config, "unreleased_plugins": [
+                plugin_id for plugin_id in config["unreleased_plugins"] if plugin_id not in promoted
+            ]})
         output.mkdir(parents=True, exist_ok=True)
         for directory in ("dist", "releases"):
             (output / directory).mkdir(exist_ok=True)
@@ -121,6 +136,8 @@ def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bo
                 # Only generated package manifests carry the final integrity.
                 manifest["integrity"] = {"sha256": "0" * 64, "signature": None, "key_id": None}
                 write_json(path, manifest)
+        if promoted:
+            os.replace(stage / "catalogue.json", root / "catalogue.json")
     print(f"Validated distribution: {output}")
 
 
@@ -131,10 +148,12 @@ def main() -> None:
     parser.add_argument("--require-signing", action="store_true", help="compatibility alias for --publish")
     parser.add_argument("--catalogue-only", action="store_true", help="index existing immutable packages without rebuilding")
     parser.add_argument("--reuse-published", action="store_true", help="release assets must already be published from this source snapshot")
+    parser.add_argument("--promote-plugin", action="append", default=[], metavar="PLUGIN_ID",
+                        help="publish an explicitly approved unreleased source; repeat for multiple IDs")
     args = parser.parse_args()
     publish = args.publish or args.require_signing
     output = ROOT if publish or args.catalogue_only else args.output_root.resolve()
-    build(ROOT, output, publish=publish, catalogue_only=args.catalogue_only, reuse_published=args.reuse_published)
+    build(ROOT, output, publish=publish, catalogue_only=args.catalogue_only, reuse_published=args.reuse_published, promote_plugins=tuple(args.promote_plugin))
 
 
 if __name__ == "__main__":
