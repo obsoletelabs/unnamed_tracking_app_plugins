@@ -5,6 +5,8 @@
     "example.home-widgets",
     "example.theme-palettes",
     "example.shortcut-playground",
-    "official.collectors-archive"
+    "official.collectors-archive",
+    "example.password-reset-notification-demo",
+    "example.user-invite-notification-demo"
   ]
 }
