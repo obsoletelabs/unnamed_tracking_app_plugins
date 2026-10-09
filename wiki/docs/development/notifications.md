@@ -23,7 +23,7 @@ def run(values: dict) -> dict:
 
 The host owns records and delivery preferences. A local native toast is transient
 browser feedback. External provider delivery is another contract, demonstrated
-by Discord Delivery Provider; do not copy host retry/deduplication infrastructure.
+by Discord Notifications; do not copy host retry/deduplication infrastructure.
 
 ## Test command
 

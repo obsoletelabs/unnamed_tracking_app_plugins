@@ -15,6 +15,11 @@
       "plugin_id": "example.lifecycle",
       "status": "retired",
       "reason": "Legacy reference package; source implementation is no longer maintained."
+    },
+    {
+      "plugin_id": "example.discord-delivery-provider",
+      "status": "retired",
+      "reason": "Replaced by the new official.discord-notifications identity with protected host-owned destinations. Historical packages remain intact; credentials and consent are never transferred."
     }
   ]
 }

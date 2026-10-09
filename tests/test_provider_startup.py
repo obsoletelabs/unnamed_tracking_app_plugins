@@ -5,12 +5,13 @@ from pathlib import Path
 
 import pytest
 
+from sdk import notifications
 from sdk.plugin_protocol import GatewayRequestError
 
 
 def load_provider():
     """Import maintained plugin source without any host internals."""
-    source = Path(__file__).parents[1] / "examples/discord-delivery-provider/plugin.py"
+    source = Path(__file__).parents[1] / "official/discord-notifications/plugin.py"
     spec = importlib.util.spec_from_file_location("startup_provider", source)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -30,12 +31,12 @@ def test_registration_recovers_after_host_appears(monkeypatch, capsys):
             raise GatewayRequestError("Host is starting.", {"code": "unavailable"})
         return {"registered": True}
 
-    monkeypatch.setattr(provider, "request", register)
+    monkeypatch.setattr(notifications, "request", register)
     monkeypatch.setattr(provider.time, "sleep", delays.append)
     provider._register_provider()
     assert delays == [1, 2, 4, 8, 16, 30, 30]
     assert all(call == calls[0] for call in calls)
-    assert calls[0][2]["provider_id"] == "example.discord-delivery-provider.discord"
+    assert calls[0][2]["provider_id"] == "official.discord-notifications.webhook"
     assert "Waiting for the host gateway" in capsys.readouterr().err
 
 
@@ -48,7 +49,7 @@ def test_registration_does_not_retry_permanent_errors(monkeypatch, code):
     def rejected(*_arguments):
         raise GatewayRequestError("Registration was rejected.", {"code": code})
 
-    monkeypatch.setattr(provider, "request", rejected)
+    monkeypatch.setattr(notifications, "request", rejected)
     monkeypatch.setattr(provider.time, "sleep", delays.append)
     with pytest.raises(GatewayRequestError, match="Registration was rejected"):
         provider._register_provider()

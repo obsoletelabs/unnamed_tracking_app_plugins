@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 
 def plugin_root(name: str):
-    folder = "official" if name == "extended-session-manager" else "examples"
+    folder = "official" if name in {"extended-session-manager", "discord-notifications"} else "examples"
     return ROOT / folder / name
 
 
@@ -50,12 +50,10 @@ def load_plugin(name: str):
             },
         ),
         (
-            "discord-delivery-provider",
+            "discord-notifications",
             {
                 "notification_providers.register",
                 "notification_providers.deliver",
-                "plugin.storage",
-                "frontend.navigation.main",
             },
         ),
     ],
@@ -68,7 +66,10 @@ def test_domain_manifests_are_minimally_scoped(name: str, expected: set[str]) ->
     assert declared == expected
     assert requested == expected
     assert all(item["rationale"].strip() for item in manifest["permissions"])
-    assert manifest["frontend"]["entry"] == "frontend/index.html"
+    if name == "discord-notifications":
+        assert not manifest.get("frontend") and not manifest.get("storage")
+    else:
+        assert manifest["frontend"]["entry"] == "frontend/index.html"
 
 
 def test_document_viewer_uses_opaque_public_document_methods(monkeypatch) -> None:
@@ -217,15 +218,17 @@ def test_session_manager_routes_preserve_self_service_and_admin_capabilities(
     assert all(route["authorization"] == "admin" for route in admin_routes)
 
 
-def test_delivery_provider_registers_namespaced_provider(monkeypatch) -> None:
-    plugin = load_plugin("discord-delivery-provider")
+def test_delivery_provider_registers_namespaced_protected_provider(monkeypatch) -> None:
+    from sdk import notifications
+
+    plugin = load_plugin("discord-notifications")
     calls = []
 
     def fake_request(method, capability, payload):
         calls.append((method, capability, payload))
         raise StopIteration
 
-    monkeypatch.setattr(plugin, "request", fake_request)
+    monkeypatch.setattr(notifications, "request", fake_request)
     with pytest.raises(StopIteration):
         plugin.main()
 
@@ -234,38 +237,31 @@ def test_delivery_provider_registers_namespaced_provider(monkeypatch) -> None:
             "notification_providers.register",
             "notification_providers.register",
             {
-                "provider_id": "example.discord-delivery-provider.discord",
-                "name": "Discord (plugin)",
-                "action_id": "deliver",
+                "provider_id": "official.discord-notifications.webhook",
+                "name": "Discord",
+                "action_id": "render",
+                "transport": "discord_webhook",
             },
         )
     ]
 
 
-def test_delivery_provider_returns_bounded_work_without_a_secret() -> None:
-    plugin = load_plugin("discord-delivery-provider")
-    result = plugin.deliver(
-        {
-            "delivery": {
-                "notification_id": "notification-id",
-                "title": "T" * 400,
-                "body": "B" * 5000,
-                "event_at": 1,
-            }
-        }
+def test_delivery_provider_returns_field_references_without_content_or_secrets() -> None:
+    plugin = load_plugin("discord-notifications")
+    result = plugin.render(
+        {"delivery": {"title": "T" * 400, "body": "B" * 5000, "event_at": 1},
+         "unrelated_secret": "never expose"}
     )
+    assert result == {"style": "embed", "fields": ["title", "body", "event_at", "link"]}
+    assert "never expose" not in json.dumps(result)
+    assert "webhook" not in result and "content" not in result
 
-    assert result["discord"] is True
-    assert len(result["content"]) <= 2000
-    assert "webhook" not in result
 
-
-def test_delivery_provider_rejects_malformed_work() -> None:
-    plugin = load_plugin("discord-delivery-provider")
-    assert plugin.deliver({"delivery": {}}) == {
-        "success": False,
-        "retryable": False,
-        "error": "Invalid delivery work.",
+def test_delivery_provider_cannot_invent_content_from_malformed_work() -> None:
+    plugin = load_plugin("discord-notifications")
+    # Field layouts are independent of data; core validates and bounds actual work.
+    assert plugin.render({"delivery": {}}) == {
+        "style": "embed", "fields": ["title", "body", "event_at", "link"]
     }
 
 
@@ -273,7 +269,6 @@ def test_reference_frontends_use_only_the_host_bridge() -> None:
     for name in (
         "scoped-document-viewer",
         "extended-session-manager",
-        "discord-delivery-provider",
     ):
         script = (plugin_root(name) / "frontend" / "app.js").read_text(encoding="utf-8")
         assert "plugin-api-request" in script

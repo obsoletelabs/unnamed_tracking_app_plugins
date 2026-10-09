@@ -46,9 +46,10 @@ def publish_real_release(request):
 
 
 def test_retirement_policy_keeps_all_maintained_sources():
-    """Only the three absent legacy references are retired; every maintained demo stays."""
+    """Reviewed absent sources are retired; all maintained providers remain active."""
     retired = load_retired_plugins(ROOT)
-    assert retired == {"example.advanced", "example.events", "example.lifecycle"}
+    assert retired == {"example.advanced", "example.events", "example.lifecycle",
+                       "example.discord-delivery-provider"}
     assert not retired.intersection(
         manifest["plugin_id"] for _, manifest in discover_plugins(ROOT)
     )

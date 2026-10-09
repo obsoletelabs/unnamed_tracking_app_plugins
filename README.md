@@ -84,7 +84,7 @@ Use the [tutorial map](wiki/docs/development/index.md) for one-feature exercises
 | [Playtime Report](examples/playtime-report/README.md) | Read → calculate → persist a user-scoped report |
 | [Recently Played Notifier](examples/recently-played-notifier/README.md) | Library data and host notifications |
 | [Metadata Curator](examples/metadata-curator/README.md) | Settings, metadata search and normalized state |
-| [Discord Delivery Provider](examples/discord-delivery-provider/README.md) | Core-coordinated external delivery and write-only secrets |
+| [Discord Notifications](official/discord-notifications/README.md) | Official protected layouts; owner webhooks and routing remain in the host |
 | [UI Playground](examples/ui-playground/README.md) | Sandboxed Vue pages and bridge; CDN teaching limitation |
 | [Help Button](examples/help-button/README.md) | Native contributions, dialogs, overlays, navigation and cleanup |
 | [Jellyfin Media Sync](examples/jellyfin-media-sync/README.md) | Master server, approved user identities, library mapping, episode completion and Watch Now |
