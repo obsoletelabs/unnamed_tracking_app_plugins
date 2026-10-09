@@ -148,6 +148,154 @@
         "official"
       ],
       "version": "0.0.1"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "37cb5935ffbbe6148c902cf0f76ef3bcf2e7b13b",
+        "source_committed_at": "2026-10-09T21:23:39+08:00",
+        "source_digest": "a1668680114e38f2e739b0b8e6c8ab60fc70debd9c39b01988c68a1e9d3277b1",
+        "source_path": "official/metadata-gog",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "5473245f1d9e65d87c1df95ff291bf6b69630dc3979b70ec0d25c3039831e907",
+          "signature": "v2:xImCHAdAqbijsE8TaV0vdERDB+qZgPCFc9NXPfcqD4JKmCxHDCO0JPlZlpz/JUVaKxRu37XFvQTGjsUSV5/sCA=="
+        },
+        "manifest_version": 1,
+        "name": "GOG Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-gog",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.1.0"
+      },
+      "package": {
+        "filename": "official.metadata-gog-0.1.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 8053
+      },
+      "package_sha256": "0587dcf764e91870268c0ff4f3810c1aa3dad7cf367738430f10f6bcecc5bb1d",
+      "plugin_id": "official.metadata-gog",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# GOG Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "5473245f1d9e65d87c1df95ff291bf6b69630dc3979b70ec0d25c3039831e907",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "5473245f1d9e65d87c1df95ff291bf6b69630dc3979b70ec0d25c3039831e907",
+        "signature": "v2:xImCHAdAqbijsE8TaV0vdERDB+qZgPCFc9NXPfcqD4JKmCxHDCO0JPlZlpz/JUVaKxRu37XFvQTGjsUSV5/sCA=="
+      },
+      "tags": [
+        "metadata",
+        "gog",
+        "official"
+      ],
+      "version": "0.1.0"
     }
   ],
   "version": 1
