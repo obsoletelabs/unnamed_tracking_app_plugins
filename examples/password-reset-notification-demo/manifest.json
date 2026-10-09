@@ -1,14 +1,6 @@
 {
-  "manifest_version": 1,
-  "plugin_id": "example.password-reset-notification-demo",
-  "name": "Password Reset Routing Demo",
-  "version": "1.0.0",
-  "description": "Executable notification routing demo. Does not change real authentication.",
-  "entrypoint": "plugin:main",
   "api_contract_version": "1.1.2",
-  "sdk_version_range": "^1.1.2",
   "application_version_range": "*",
-  "dependencies": [],
   "capabilities": [
     {
       "name": "notification_sources.register",
@@ -27,6 +19,16 @@
       "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Executable notification routing demo. Does not change real authentication.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "Password Reset Routing Demo",
   "permissions": [
     {
       "capability": {
@@ -57,20 +59,18 @@
       "rationale": "Explicit high-risk permission for the synthetic recovery token; SECURE external destinations only."
     }
   ],
+  "plugin_id": "example.password-reset-notification-demo",
+  "sdk_version_range": "^1.1.2",
   "storage": {
     "quota_mb": 1
   },
   "ui": {
-    "pages": [],
-    "settings": [],
     "actions": [
       "issue",
       "confirm"
-    ]
+    ],
+    "pages": [],
+    "settings": []
   },
-  "integrity": {
-    "key_id": null,
-    "signature": null,
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
-  }
+  "version": "1.0.0"
 }

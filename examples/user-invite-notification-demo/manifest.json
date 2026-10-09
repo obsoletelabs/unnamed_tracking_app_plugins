@@ -1,14 +1,6 @@
 {
-  "manifest_version": 1,
-  "plugin_id": "example.user-invite-notification-demo",
-  "name": "User Invite Routing Demo",
-  "version": "1.0.0",
-  "description": "Executable notification routing demo. Does not change real authentication.",
-  "entrypoint": "plugin:main",
   "api_contract_version": "1.1.2",
-  "sdk_version_range": "^1.1.2",
   "application_version_range": "*",
-  "dependencies": [],
   "capabilities": [
     {
       "name": "notification_sources.register",
@@ -23,6 +15,16 @@
       "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Executable notification routing demo. Does not change real authentication.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "User Invite Routing Demo",
   "permissions": [
     {
       "capability": {
@@ -46,20 +48,18 @@
       "rationale": "Persist user-scoped expiring demo token digests and consumption state."
     }
   ],
+  "plugin_id": "example.user-invite-notification-demo",
+  "sdk_version_range": "^1.1.2",
   "storage": {
     "quota_mb": 1
   },
   "ui": {
-    "pages": [],
-    "settings": [],
     "actions": [
       "issue",
       "confirm"
-    ]
+    ],
+    "pages": [],
+    "settings": []
   },
-  "integrity": {
-    "key_id": null,
-    "signature": null,
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
-  }
+  "version": "1.0.0"
 }
