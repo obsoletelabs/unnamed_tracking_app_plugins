@@ -30,6 +30,13 @@ The final command consumes the actual generated `.utp` files and catalogue using
 the host's manifest/UI models, verifier and disabled installer. It never enables
 an unsigned preview to make a check pass.
 
+Publisher conformance requires the host's rotation policy from
+[host PR #28](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/28).
+The adapter carries exact plugin IDs, validity windows and reviewed archive pins
+alongside prefix scope and channel. Omitting those fields changes the trust policy,
+including the official session manager's stable-ID exception. Historical package
+bytes and release records remain immutable; the adapter never rebuilds them.
+
 On Linux with the [host prerequisites](index.md) available:
 
 ```sh
