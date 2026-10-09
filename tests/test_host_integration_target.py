@@ -1,4 +1,4 @@
-"""Execute the Linux workflow's actual selector with an offline Git transport."""
+"""Execute the Linux workflow selector with offline GitHub API and Git transports."""
 
 import os
 import subprocess
@@ -14,11 +14,13 @@ VERIFIED_RUNTIME_REF = "main"
 @pytest.mark.parametrize(
     "scenario",
     [
-        ("", "main", "main", "main"),
-        ("", "feature/example", "feature/example", "feature/example"),
-        ("", "feature/example", "main", "main"),
-        ("pinned-host-sha", "main", "main", "pinned-host-sha"),
-        ("main", "main", "main", "main"),
+        ("", "main", "main", False, "main"),
+        ("", "feature/example", "feature/example", True, "feature/example"),
+        ("", "feature/example", "main", False, "main"),
+        # A stale branch without an open host PR must not shadow the merged main.
+        ("", "feature/example", "feature/example", False, "main"),
+        ("pinned-host-sha", "main", "main", False, "pinned-host-sha"),
+        ("main", "main", "main", False, "main"),
     ],
 )
 @pytest.mark.parametrize(
@@ -26,8 +28,8 @@ VERIFIED_RUNTIME_REF = "main"
     [("host-integration.yml", "lifecycle"), ("ci.yml", "test-and-build")],
 )
 def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, job):
-    """Explicit refs and matching branches precede each workflow's verified fallback."""
-    requested, branch, remote_branch, expected = scenario
+    """Explicit refs and open paired branches precede each workflow's verified fallback."""
+    requested, branch, remote_branch, open_pr, expected = scenario
     workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
     checkout = next(step for step in workflow["jobs"][job]["steps"]
                     if step.get("with", {}).get("path") == ".validation/host")
@@ -47,12 +49,17 @@ def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, j
         '[ "$last" = "refs/heads/$AVAILABLE_HOST_BRANCH" ]\n'
     )
     git.chmod(0o755)
+    curl = tmp_path / "curl"
+    curl.write_text("#!/bin/sh\\nprintf '%s' \"$OPEN_PR_RESPONSE\"\\n")
+    curl.chmod(0o755)
     output = tmp_path / "output"
     result = subprocess.run(
         ["bash", "-e", "-c", step["run"]],
         env={
             **os.environ,
             "PATH": str(tmp_path) + os.pathsep + os.environ["PATH"],
+            "OPEN_PR_RESPONSE": '[{}]' if open_pr else '[]',
+            "GITHUB_TOKEN": "test-token",
             "REQUESTED_REF": requested,
             "DEFAULT_HOST_REF": step["env"].get("DEFAULT_HOST_REF", "main"),
             "COMPANION_BRANCH": branch,
