@@ -16,3 +16,5 @@ public contract changes, review and re-export both schemas, and run that check.
 The metadata registration/request/response snapshots describe Plugin API 1.1.1.
 They are exported by the companion host's `tools/export_metadata_contract.py`.
 Provider plugins use these public schemas without importing host internals.
+
+Notification source/event/provider/layout schemas describe the public API 1.1.2 extension and are exported by the host tools/export_notification_contract.py. Both schemas and packaged consumers are checked by check_host_contract.py against the paired host.
