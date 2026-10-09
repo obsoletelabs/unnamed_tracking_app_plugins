@@ -10,6 +10,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      promote_plugins:
+        description: 'Approved unreleased plugin IDs to publish (space separated; main only)'
+        required: false
+        default: ''
+        type: string
 
 # Serialize publication; an older job must never overwrite a newer catalogue.
 concurrency:
@@ -65,11 +71,23 @@ jobs:
           PLUGIN_OFFICIAL_SIGNING_KEY_B64: ${{ secrets.PLUGIN_OFFICIAL_SIGNING_KEY_B64 }}
           PLUGIN_SIGNING_FALLBACK: ${{ vars.PLUGIN_SIGNING_FALLBACK || 'generic' }}
           EVENT_NAME: ${{ github.event_name }}
+          PROMOTE_PLUGINS: ${{ inputs.promote_plugins || '' }}
         run: |
           if [ "$EVENT_NAME" = release ]; then
             python tools/build_packages.py --require-signing --reuse-published
           else
-            python tools/build_packages.py --require-signing
+            args=(--require-signing)
+            if [ -n "$PROMOTE_PLUGINS" ]; then
+              if [ "$EVENT_NAME" != workflow_dispatch ]; then
+                echo "::error::Preview promotion requires explicit workflow dispatch."
+                exit 1
+              fi
+              read -r -a plugin_ids <<< "$PROMOTE_PLUGINS"
+              for plugin_id in "${plugin_ids[@]}"; do
+                args+=(--promote-plugin "$plugin_id")
+              done
+            fi
+            python tools/build_packages.py "${args[@]}"
           fi
       - name: Verify complete distribution and current source
         run: |
@@ -83,7 +101,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A -- dist releases list.json
+          git add -A -- dist releases list.json catalogue.json
           git ls-files -z -- 'examples/*/manifest.json' 'official/*/manifest.json' 'plugins/*/manifest.json' | xargs -0 -r git add --
           git diff --exit-code
           if [ -n "$(git ls-files --others --exclude-standard)" ]; then

@@ -44,3 +44,31 @@ is the only official release path. Missing keys fail; no unsigned fallback exist
 Tag a generated main snapshot only after publication succeeds. GitHub release
 events require already-published source and upload the same package/list/history
 assets. They do not replace append-only repository release records.
+
+## Promote a tested source preview
+
+Sources in `catalogue.json.unreleased_plugins` are validated and packaged by
+development checks but intentionally excluded from routine signed publication.
+After review, use **Publish plugin packages** → **Run workflow** on `main` and
+enter the exact approved IDs in `promote_plugins`, separated by spaces. For the
+notification routing demonstrations these IDs are
+`example.password-reset-notification-demo` and
+`example.user-invite-notification-demo`.
+
+The existing serialized publisher reruns all checks, signs with the registered
+folder-specific key, validates the complete distribution, then commits archives,
+release histories, catalogue entries and removal of those preview markers in the
+same publication commit. A failed signature, invalid package or unknown ID leaves
+preview policy and published artifacts unchanged. Other preview IDs stay excluded;
+the demo signing channel does not make these production authentication features.
+
+Independent catalogue owners can use the same builder:
+
+```bash
+python tools/build_packages.py --publish --promote-plugin example.my-tested-plugin
+```
+
+Repeat `--promote-plugin` for multiple IDs. Promotion requires committed source,
+an existing explicit preview entry and the appropriate registered signer. It is
+unavailable for unsigned development builds, catalogue-only indexing or tagged
+release reuse. Never remove the preview entry before its first signed publication.

@@ -474,3 +474,97 @@ def test_new_example_requires_explicit_unreleased_identity(tmp_path):
     (tmp_path / "catalogue.json").write_text(json.dumps(config))
     with pytest.raises(ValueError, match="missing release history"):
         catalogue_document(tmp_path, [(source, manifest)], {})
+
+
+
+def notification_preview_checkout(checkout):
+    """Use the real demo sources with the isolated fixture's example-only key."""
+    root, env = checkout
+    ids = ["example.password-reset-notification-demo", "example.user-invite-notification-demo"]
+    for name in ("password-reset-notification-demo", "user-invite-notification-demo"):
+        shutil.copytree(ROOT / "examples" / name, root / "examples" / name)
+    config = {"name": "Notification test catalogue", "base_url": "https://example.invalid/plugins",
+              "unreleased_plugins": ids}
+    (root / "catalogue.json").write_text(json.dumps(config), encoding="utf-8")
+    commit(root, "feat: add notification source previews")
+    return root, env, ids, config
+
+
+def test_explicit_notification_promotion_signs_before_removing_preview_policy(checkout):
+    root, env, ids, config = notification_preview_checkout(checkout)
+    run_build(root, env, "--publish")
+    original = records(root)[0]
+    original_bytes = (root / "dist" / original["package"]["filename"]).read_bytes()
+    assert not (root / "releases" / f"{ids[0]}.json").exists()
+    assert json.loads((root / "catalogue.json").read_text()) == config
+    commit(root, "chore: publish existing distribution")
+
+    run_build(root, env, "--publish", "--promote-plugin", ids[0])
+    promoted = json.loads((root / "releases" / f"{ids[0]}.json").read_text())["releases"][0]
+    assert promoted["lifecycle"] == "published" and promoted["signing"]["signature"]
+    assert json.loads((root / "catalogue.json").read_text()) == {
+        **config, "unreleased_plugins": [ids[1]]}
+    assert {p["plugin_id"] for p in json.loads((root / "list.json").read_text())["plugins"]} == {
+        "example.help-button", ids[0]}
+    assert not (root / "releases" / f"{ids[1]}.json").exists()
+    assert (root / "dist" / original["package"]["filename"]).read_bytes() == original_bytes
+    subprocess.run([sys.executable, str(root / "tools/distribution.py"), "--check-source"],
+                   env=env, check=True, capture_output=True)
+    commit(root, "chore: publish first notification demo")
+
+    run_build(root, env, "--publish", "--promote-plugin", ids[1])
+    assert json.loads((root / "catalogue.json").read_text())["unreleased_plugins"] == []
+    assert json.loads((root / "releases" / f"{ids[0]}.json").read_text())["releases"] == [promoted]
+    subprocess.run([sys.executable, str(root / "tools/distribution.py"), "--check-source"],
+                   env=env, check=True, capture_output=True)
+
+
+@pytest.mark.parametrize("flags", [[], ["--catalogue-only"], ["--publish", "--reuse-published"],
+                                  ["--publish", "--promote-plugin", "example.unknown"],
+                                  ["--publish", "--promote-plugin", "example.help-button"],
+                                  ["--publish", "--promote-plugin", "example.password-reset-notification-demo"]])
+def test_invalid_promotion_leaves_policy_and_distribution_untouched(checkout, flags):
+    root, env, ids, _ = notification_preview_checkout(checkout)
+    before = (root / "catalogue.json").read_bytes()
+    rejected = run_build(root, env, *flags, "--promote-plugin", ids[0], check=False)
+    assert rejected.returncode != 0
+    assert "promotion" in rejected.stderr.lower()
+    assert (root / "catalogue.json").read_bytes() == before
+    assert not (root / "dist").exists() and not (root / "releases").exists()
+
+
+def test_missing_signer_cannot_promote_notification_demo(checkout):
+    root, env, ids, _ = notification_preview_checkout(checkout)
+    # No private key is retained outside this disposable test checkout.
+    no_signer = {k: v for k, v in env.items() if not k.startswith("PLUGIN_SIGNING_")}
+    before = (root / "catalogue.json").read_bytes()
+    rejected = run_build(root, no_signer, "--publish", "--promote-plugin", ids[0], check=False)
+    assert rejected.returncode != 0 and "required" in rejected.stderr
+    assert (root / "catalogue.json").read_bytes() == before
+    assert not (root / "dist").exists() and not (root / "releases").exists()
+
+
+
+def test_multiple_notification_previews_can_be_promoted_together(checkout):
+    root, env, ids, _ = notification_preview_checkout(checkout)
+    run_build(root, env, "--publish", "--promote-plugin", ids[0], "--promote-plugin", ids[1])
+    assert json.loads((root / "catalogue.json").read_text())["unreleased_plugins"] == []
+    assert {p["plugin_id"] for p in json.loads((root / "list.json").read_text())["plugins"]} == {
+        "example.help-button", *ids}
+    for plugin_id in ids:
+        history = json.loads((root / "releases" / f"{plugin_id}.json").read_text())["releases"]
+        assert len(history) == 1 and history[0]["signing"]["signature"]
+
+
+def test_promotion_does_not_expand_signer_scope(checkout):
+    root, env, ids, _ = notification_preview_checkout(checkout)
+    registry_path = root / "publishers/registry.json"
+    registry = json.loads(registry_path.read_text())
+    registry["publishers"][0]["plugin_id_prefixes"] = ["example.help-button"]
+    registry_path.write_text(json.dumps(registry))
+    commit(root, "chore: restrict disposable signing key")
+    before = (root / "catalogue.json").read_bytes()
+    rejected = run_build(root, env, "--publish", "--promote-plugin", ids[0], check=False)
+    assert rejected.returncode != 0 and "scope" in rejected.stderr.lower()
+    assert (root / "catalogue.json").read_bytes() == before
+    assert not (root / "dist").exists() and not (root / "releases").exists()
