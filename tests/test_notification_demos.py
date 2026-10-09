@@ -152,3 +152,17 @@ def test_actual_package_contains_standalone_executable_demo(current_packages, tm
     result = subprocess.run([sys.executable, "-c", "import plugin; assert callable(plugin.issue); assert callable(plugin.confirm)"],
                             cwd=tmp_path, text=True, capture_output=True, check=False)
     assert result.returncode == 0, result.stderr
+
+
+def test_demo_release_metadata_uses_registered_demo_publisher():
+    from tools.publisher_registry import load_registry
+
+    publishers = load_registry().values()
+    for name in NAMES:
+        source = ROOT / "examples" / name
+        metadata = json.loads((source / "release.json").read_text(encoding="utf-8"))
+        plugin_id = "example." + name
+        assert any(record.channel == "demo" and record.status == "active"
+                   and record.publisher == metadata["publisher"]
+                   and any(plugin_id.startswith(prefix) for prefix in record.plugin_id_prefixes)
+                   for record in publishers), "Demo release must match a registered demo signing identity"
