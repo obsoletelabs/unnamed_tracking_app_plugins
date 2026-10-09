@@ -159,3 +159,9 @@ The [catalogue v1 specification](wiki/docs/catalogue-specification.md) is unchan
 HTTPS immutable package URLs, exact hashes/manifests/signatures and retained
 history. Register catalogue endpoints and reviewed publisher keys separately
 in Plugin Manager; permissions always remain host-controlled.
+
+### Notification compatibility: Plugin API 1.1.2
+
+The SDK advertises contract 1.1.2. The Discord delivery and recently played examples require host SDK ^1.1.2: notification acceptance and physical delivery now pass through the host controller. Generic plugin actions cannot authorize Discord transport. The legacy Discord endpoint remains PUBLIC; only host-approved public release facts may reach it. Legacy custom plugin notifications remain PRIVATE and may be suppressed by preferences. See each example's README for the limits of this compatibility bridge.
+
+The shared SDK is included in plugin packages, so this contract update changes the PWA package fingerprint too. Its development source advances from 0.0.5 to 0.0.6 under the existing explicit patch policy. Its UI and service worker behavior are unchanged. Published packages and release history remain immutable; development previews use the existing validation output directories.

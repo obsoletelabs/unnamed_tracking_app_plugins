@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   unsigned-dist:
     runs-on: ubuntu-24.04
@@ -82,15 +86,23 @@ jobs:
         id: companion
         env:
           REQUESTED_REF: ""
+          GITHUB_TOKEN: ${{ github.token }}
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           ref="$REQUESTED_REF"
           if [ -z "$ref" ]; then
             # Current native plugins require the public Plugin API 1.1 host.
             ref=main
-            # Repository main branches have different ownership targets.
+            # Use matching branches only while their host PR is still open.
             if [ "$COMPANION_BRANCH" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$COMPANION_BRANCH" >/dev/null; then
-              ref="$COMPANION_BRANCH"
+              encoded_branch="$(printf '%s' "$COMPANION_BRANCH" | jq -sRr @uri)"
+              open_prs="$(curl -fsSL \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/obsoletelabs/unnamed_tracking_app_2/pulls?state=open&head=obsoletelabs%3A${encoded_branch}")"
+              if printf '%s' "$open_prs" | jq -e 'length > 0' >/dev/null; then
+                ref="$COMPANION_BRANCH"
+              fi
             fi
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"

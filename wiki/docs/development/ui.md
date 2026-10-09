@@ -80,3 +80,5 @@ including an empty list when shortcuts are disabled. The host rechecks every
 forwarded binding before dispatch. Host dialogs open without leaving the plugin
 page and preserve focus and dismissal behavior. See [Keyboard shortcuts](shortcuts.md)
 for native registration, declarative bindings, personal overrides and conflicts.
+
+The bundled appearance helper accepts the compatible 1.1.0, 1.1.1 and 1.1.2 snapshots for both the initial response and later theme updates. It still accepts messages only from its host parent and applies only bounded cosmetic tokens. Unknown contract versions are ignored.

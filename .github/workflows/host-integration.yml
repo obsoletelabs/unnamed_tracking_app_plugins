@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   lifecycle:
@@ -47,6 +48,7 @@ jobs:
         id: companion
         env:
           REQUESTED_REF: ${{ inputs.host_ref }}
+          GITHUB_TOKEN: ${{ github.token }}
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
           # The fork's main includes the retained-legacy conformance fixes.
           DEFAULT_HOST_REF: main
@@ -55,9 +57,16 @@ jobs:
           if [ -z "$ref" ]; then
             ref="${DEFAULT_HOST_REF:-main}"
             # The v1.1 host is merged; use the verified conformance-tool revision.
-            # explicit overrides and matching feature branches remain supported.
+            # Explicit overrides remain supported; only open paired PRs shadow main.
             if [ "$COMPANION_BRANCH" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$COMPANION_BRANCH" >/dev/null; then
-              ref="$COMPANION_BRANCH"
+              encoded_branch="$(printf '%s' "$COMPANION_BRANCH" | jq -sRr @uri)"
+              open_prs="$(curl -fsSL \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/obsoletelabs/unnamed_tracking_app_2/pulls?state=open&head=obsoletelabs%3A${encoded_branch}")"
+              if printf '%s' "$open_prs" | jq -e 'length > 0' >/dev/null; then
+                ref="$COMPANION_BRANCH"
+              fi
             fi
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"

@@ -37,3 +37,8 @@ def test_success_payload_still_passes_through(monkeypatch, capsys):
         "registered": True
     }
     assert json.loads(capsys.readouterr().out)["payload"] == {}
+
+
+def test_notification_contract_release_is_1_1_2():
+    from sdk.plugin_protocol import API_CONTRACT_VERSION
+    assert API_CONTRACT_VERSION == "1.1.2"

@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.0",
+  "api_contract_version": "1.1.2",
   "application_version_range": "*",
   "capabilities": [
     {
@@ -60,7 +60,7 @@
     }
   ],
   "plugin_id": "example.recently-played-notifier",
-  "sdk_version_range": "^1.1.0",
+  "sdk_version_range": "^1.1.2",
   "storage": {
     "quota_mb": 1
   },

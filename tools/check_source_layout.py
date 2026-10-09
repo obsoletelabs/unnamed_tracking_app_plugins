@@ -12,8 +12,8 @@ except ImportError:
 def check(root=ROOT) -> None:
     plugins = discover_plugins(root)
     for source, manifest in plugins:
-        if manifest.get("api_contract_version") not in {"1.1.0", "1.1.1"}:
-            raise ValueError(f"{source.name}: maintained source must explicitly target Plugin API v1.1.0 or v1.1.1")
+        if manifest.get("api_contract_version") not in {"1.1.0", "1.1.1", "1.1.2"}:
+            raise ValueError(f"{source.name}: maintained source must explicitly target Plugin API v1.1.0, v1.1.1 or v1.1.2")
         files, metadata = collect_payload(root, source, manifest)
         # The existing validator expects generated version/policy fields.
         # Resolve them only for this static validation; write no artifacts.

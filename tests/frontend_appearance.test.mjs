@@ -135,3 +135,26 @@ test("opaque frame forwards only host-advertised Alt navigation and protects edi
     assert.equal(key({ key: "k", code: "KeyK", altKey: false, ctrlKey: true, ...changes }), false);
   }
 });
+
+for (const version of ["1.1.0", "1.1.1", "1.1.2"]) {
+  test(`appearance applies supported contract ${version} in replies and updates`, () => {
+    const values = new Map();
+    const parent = { postMessage() {} };
+    const root = { style: { setProperty: (key, value) => values.set(key, value) },
+      dataset: {}, classList: { toggle() {} } };
+    let listener;
+    vm.runInNewContext(readFileSync(new URL("../sdk/frontend_appearance.js", import.meta.url), "utf8"), {
+      crypto: { randomUUID: () => "request" }, document: { documentElement: root },
+      window: { parent, addEventListener: (type, callback) => { if (type === "message") listener = callback; } },
+    });
+    const appearance = { api_contract_version: version, mode: "dark", tokens: { "--ui-bg": "#123456" } };
+    listener({ source: parent, data: { type: "plugin-api-response", requestId: "request", result: appearance } });
+    assert.equal(root.dataset.theme, "dark");
+    assert.equal(values.get("--ui-bg"), "#123456");
+    listener({ source: parent, data: { type: "plugin-appearance-changed", appearance: {
+      ...appearance, mode: "light", tokens: { "--ui-bg": "#ffffff" },
+    } } });
+    assert.equal(root.dataset.theme, "light");
+    assert.equal(values.get("--ui-bg"), "#ffffff");
+  });
+}
