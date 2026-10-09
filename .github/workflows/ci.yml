@@ -86,6 +86,7 @@ jobs:
         id: companion
         env:
           REQUESTED_REF: ""
+          GITHUB_TOKEN: ${{ github.token }}
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           ref="$REQUESTED_REF"

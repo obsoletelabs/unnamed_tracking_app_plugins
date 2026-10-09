@@ -48,6 +48,7 @@ jobs:
         id: companion
         env:
           REQUESTED_REF: ${{ inputs.host_ref }}
+          GITHUB_TOKEN: ${{ github.token }}
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
           # The fork's main includes the retained-legacy conformance fixes.
           DEFAULT_HOST_REF: main
