@@ -50,7 +50,7 @@ def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, j
     )
     git.chmod(0o755)
     curl = tmp_path / "curl"
-    curl.write_text("#!/bin/sh\nprintf '%s' "$OPEN_PR_RESPONSE"\n")
+    curl.write_text("#!/bin/sh\nprintf '%s' \"$OPEN_PR_RESPONSE\"\n")
     curl.chmod(0o755)
     output = tmp_path / "output"
     result = subprocess.run(
