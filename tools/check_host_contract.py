@@ -94,6 +94,10 @@ def main() -> None:
             channel=record.channel,
             legacy_manifest_hashes=record.legacy_manifest_hashes,
             require_manifest_binding=True,
+            plugin_ids=record.plugin_ids,
+            not_before=record.not_before,
+            not_after=record.not_after,
+            historical_package_sha256=record.historical_package_sha256,
         )
         for key, record in load_registry().items()
     }
