@@ -23,7 +23,8 @@ from uuid import uuid4
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = ("ui-api", "playtime-report", "recently-played-notifier", "metadata-curator")
+NAMES = ("ui-api", "playtime-report", "recently-played-notifier", "metadata-curator",
+         "password-reset-notification-demo", "user-invite-notification-demo")
 
 
 def commit(root: Path, message: str) -> None:
