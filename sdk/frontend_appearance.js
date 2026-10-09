@@ -4,7 +4,7 @@
   let globalKeys = new Set();
   let bindings = null;
   function apply(appearance) {
-    if (!appearance || appearance.api_contract_version !== "1.1.0" ||
+    if (!appearance || !["1.1.0", "1.1.1", "1.1.2"].includes(appearance.api_contract_version) ||
         !["light", "dark"].includes(appearance.mode) || !appearance.tokens) return;
     const root = document.documentElement;
     navigationKeys = new Set(Array.isArray(appearance.navigation_shortcuts)
