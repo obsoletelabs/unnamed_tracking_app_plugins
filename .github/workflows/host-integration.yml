@@ -1,4 +1,7 @@
 name: Plugin Manager integration
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 on:
   push:
@@ -67,10 +70,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: .validation/host/src/backend/requirements.txt
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            .validation/host/src/frontend/package-lock.json
       - name: Install host and builder dependencies
         run: |
           python -m pip install -r .validation/host/src/backend/requirements.txt jsonschema
@@ -91,6 +99,13 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       - name: Install browser tooling
         run: |
           npm ci
