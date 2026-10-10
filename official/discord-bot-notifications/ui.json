@@ -1,0 +1,35 @@
+{
+  "schema_version": "v1",
+  "api_contract_version": "1.1.5",
+  "plugin_id": "official.discord-bot-notifications",
+  "title": "Discord Bot Notifications",
+  "settings": [],
+  "actions": [
+    {"id": "get-config", "label": "Read Discord configuration", "handler": "plugin:get_config", "capability": {"name": "plugin.storage", "version": 1}},
+    {"id": "save-bot-config", "label": "Validate and save Discord bot", "handler": "plugin:save_bot_config", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "clear-bot-token", "label": "Clear Discord bot token", "handler": "plugin:clear_bot_token", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Remove the bot token and server configuration? User account links will be retained."},
+    {"id": "start-link", "label": "Start Discord account linking", "handler": "plugin:start_link", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "confirm-link", "label": "Verify Discord account link", "handler": "plugin:confirm_link", "capability": {"name": "plugin.storage", "version": 1}},
+    {"id": "unlink", "label": "Unlink Discord account", "handler": "plugin:unlink", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Unlink this Discord account from your host account?"},
+    {"id": "test-dm", "label": "Send a test Discord DM", "handler": "plugin:test_dm", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "configure-destination", "label": "Enable Discord notifications", "handler": "plugin:configure_destination", "capability": {"name": "plugin.storage", "version": 1}},
+    {"id": "retire-destination", "label": "Retire Discord notification destination", "handler": "plugin:retire_destination", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Retire this destination and unlink the Discord account?"},
+    {"id": "deliver", "label": "Deliver notification to Discord", "handler": "plugin:deliver", "capability": {"name": "notification_providers.deliver", "version": 1}}
+  ],
+  "menus": [],
+  "pages": [
+    {"id": "admin", "title": "Discord bot administration", "description": "Configure the bot token and the Discord server used for verified account linking.", "settings": [], "actions": ["get-config", "save-bot-config", "clear-bot-token"], "tables": [], "dialogs": []},
+    {"id": "account", "title": "Discord account linking", "description": "Verify the Discord account that will receive private notifications.", "settings": [], "actions": ["get-config", "start-link", "confirm-link", "unlink", "test-dm"], "tables": [], "dialogs": []}
+  ],
+  "tables": [],
+  "dialogs": [],
+  "extensions": [],
+  "navigation": [
+    {"id": "discord-bot-account-nav", "location": "settings.sidebar", "label": "Discord Bot Notifications", "settings_section_id": "discord-bot-account-section", "order": 75},
+    {"id": "discord-bot-admin-nav", "location": "settings.sidebar", "label": "Discord Bot Notifications", "settings_section_id": "discord-bot-admin-section", "order": 75, "visibility": {"admin_only": true}}
+  ],
+  "settings_sections": [
+    {"id": "discord-bot-account-section", "label": "Discord Bot Notifications", "page_id": "account", "order": 75, "area": "account", "group": "Account"},
+    {"id": "discord-bot-admin-section", "label": "Discord Bot Notifications", "page_id": "admin", "order": 75, "visibility": {"admin_only": true}, "area": "administration", "group": "Server management"}
+  ]
+}

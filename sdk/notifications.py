@@ -1,6 +1,6 @@
 """Public typed notification source helpers; recipient/routing stay host-owned."""
 
-from typing import Any
+from typing import Any, Literal
 
 from .plugin_protocol import request
 
@@ -20,11 +20,35 @@ def emit(event_type: str, dedupe_key: str, occurred_at: int, data: dict[str, str
     return request("notifications.emit", "notifications.emit", payload)
 
 
-def register_provider(provider_id: str, name: str, action_id: str, *, transport: str = "legacy") -> dict[str, Any]:
-    """Register a namespaced provider; host owns endpoints, trust and delivery state."""
-    return request("notification_providers.register", "notification_providers.register", {
-        "provider_id": provider_id, "name": name, "action_id": action_id, "transport": transport,
-    })
+def register_provider(
+    provider_id: str,
+    name: str,
+    action_id: str,
+    *,
+    transport: Literal["legacy", "discord_webhook", "plugin"] = "legacy",
+    definition: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Register a provider using the versioned host-owned transport contract.
+
+    Existing host-owned transports remain supported. Plugin-owned destinations
+    use the generic plugin transport plus a bounded declarative definition;
+    credentials and endpoint values remain inside plugin storage.
+    """
+    if (transport == "plugin") != (definition is not None):
+        raise ValueError("Generic plugin providers require a definition; legacy transports forbid it")
+    payload: dict[str, Any] = {
+        "provider_id": provider_id,
+        "name": name,
+        "action_id": action_id,
+        "transport": transport,
+    }
+    if definition is not None:
+        payload["definition"] = definition
+    return request(
+        "notification_providers.register",
+        "notification_providers.register",
+        payload,
+    )
 
 
 def poll_lifecycle(cursor: str | None = None, *, limit: int = 100) -> dict[str, Any]:

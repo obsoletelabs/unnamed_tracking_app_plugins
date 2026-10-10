@@ -1,6 +1,339 @@
 {
+  "$defs": {
+    "NotificationDestinationDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "privacy": {
+          "default": "PUBLIC",
+          "enum": [
+            "PUBLIC",
+            "PRIVATE"
+          ],
+          "title": "Privacy",
+          "type": "string"
+        },
+        "fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiField"
+          },
+          "maxItems": 32,
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "title": "NotificationDestinationDeclaration",
+      "type": "object",
+      "description": "Enrollment choices; independent core proof determines concrete endpoint trust."
+    },
+    "NotificationProviderDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "destinations": {
+          "items": {
+            "$ref": "#/$defs/NotificationDestinationDeclaration"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Destinations",
+          "type": "array"
+        },
+        "server_fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiField"
+          },
+          "maxItems": 32,
+          "title": "Server Fields",
+          "type": "array"
+        },
+        "configure_action": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Configure Action",
+          "type": "string"
+        },
+        "retire_action": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Retire Action",
+          "type": "string"
+        },
+        "test_action": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Test Action"
+        },
+        "features": {
+          "$ref": "#/$defs/NotificationProviderFeatures"
+        }
+      },
+      "required": [
+        "destinations",
+        "configure_action",
+        "retire_action"
+      ],
+      "title": "NotificationProviderDefinition",
+      "type": "object",
+      "description": "Generic plugin-owned configuration and operations, without credential values."
+    },
+    "NotificationProviderFeatures": {
+      "additionalProperties": false,
+      "properties": {
+        "critical_supported": {
+          "default": false,
+          "title": "Critical Supported",
+          "type": "boolean"
+        },
+        "critical_description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Critical Description",
+          "type": "string"
+        },
+        "multiple_destinations": {
+          "default": true,
+          "title": "Multiple Destinations",
+          "type": "boolean"
+        }
+      },
+      "title": "NotificationProviderFeatures",
+      "type": "object",
+      "description": "Supported delivery behavior; declarations never confer grants or verification."
+    },
+    "UiField": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/UiFieldType"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "secret": {
+          "default": false,
+          "title": "Secret",
+          "type": "boolean"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
+        "options": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "validation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UiValidation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "type"
+      ],
+      "title": "UiField",
+      "type": "object",
+      "description": "One declarative settings value; secrets are write-only at the host boundary."
+    },
+    "UiFieldType": {
+      "enum": [
+        "text",
+        "textarea",
+        "password",
+        "number",
+        "boolean",
+        "select",
+        "multiselect"
+      ],
+      "title": "UiFieldType",
+      "type": "string",
+      "description": "Native field controls supported by the v1 renderer."
+    },
+    "UiOption": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "UiOption",
+      "type": "object",
+      "description": "A non-executable option rendered by a select control."
+    },
+    "UiValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "min_length": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Length"
+        },
+        "max_length": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Length"
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum"
+        }
+      },
+      "title": "UiValidation",
+      "type": "object",
+      "description": "Safe client/server validation constraints for a declarative field."
+    }
+  },
   "additionalProperties": false,
-  "description": "A plugin-owned provider registered with the core delivery coordinator.",
   "properties": {
     "provider_id": {
       "maxLength": 128,
@@ -26,10 +359,22 @@
       "default": "legacy",
       "enum": [
         "legacy",
-        "discord_webhook"
+        "discord_webhook",
+        "plugin"
       ],
       "title": "Transport",
       "type": "string"
+    },
+    "definition": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NotificationProviderDefinition"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [
@@ -40,5 +385,6 @@
   "title": "NotificationProviderRegistration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.2"
+  "x-api-contract-version": "1.1.5",
+  "description": "Versioned registration preserving existing transports and adding generic plugin delivery."
 }
