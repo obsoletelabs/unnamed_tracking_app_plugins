@@ -9,6 +9,7 @@ import jsonschema
 import pytest
 
 from sdk import notifications
+from sdk.plugin_protocol import GatewayRequestError
 
 ROOT = Path(__file__).parents[1]
 PLUGIN_PATH = ROOT / "official/discord-bot-notifications/plugin.py"
@@ -205,3 +206,23 @@ def test_status_never_returns_the_bot_token(monkeypatch):
     assert result["bot_name"] == "Test Bot"
     assert "token" not in result
     assert "sensitive-bot-token" not in repr(result)
+
+
+
+def test_delivery_reports_revoked_storage_permission_without_retrying(monkeypatch):
+    provider = load()
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "host-user")
+
+    def denied_storage(key, default=None):
+        raise GatewayRequestError("permission denied", {"code": "forbidden"})
+
+    monkeypatch.setattr(provider, "_load", denied_storage)
+    result = provider.deliver(
+        {
+            "_plugin_context": {"user_id": "host-user"},
+            "delivery": {"title": "Private", "body": "No delivery."},
+        }
+    )
+    assert result["success"] is False
+    assert result["retryable"] is False
+    assert result["error"] == "discord_permission_denied"
