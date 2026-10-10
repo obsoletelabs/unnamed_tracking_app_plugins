@@ -46,7 +46,7 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
   try {
-    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups"></iframe>');
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>');
     await mount(page);
     const frame = page.frameLocator("iframe");
     await frame.getByText("Connect your Epic account to start.", { exact: true }).waitFor();
@@ -69,7 +69,7 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
 test("Epic sign-in opens a separate tab and leaves the code-entry page available", async () => {
   const page = await browser.newPage();
   try {
-    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups"></iframe>');
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>');
     await mount(page);
     const frame = page.frameLocator("iframe");
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).waitFor();
