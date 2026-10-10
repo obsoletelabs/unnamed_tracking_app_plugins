@@ -18,6 +18,8 @@ package/source, review identity, publisher/signature, compatibility and permissi
 then complete approval/configuration and enable it as required by the host flow.
 
 Maintained user-facing functionality lives in [official/](official/README.md).
+The [Epic Games Library](official/epic-games/README.md) imports a personal game
+library in resumable steps and requires host Plugin API 1.1.3.
 The [Extended Session Manager](official/extended-session-manager/README.md) is
 now official functionality and preserves its existing plugin ID for updates.
 The [PWA](official/pwa/README.md) appearance migration remains unreleased 0.0.2; its production

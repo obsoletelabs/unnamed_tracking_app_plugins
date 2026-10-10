@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": ["games", "epic", "imports", "official"],
+  "icon": "icon.svg",
+  "automatic_update": false,
+  "release_notes": "Personal Epic game imports with private rotating tokens, bounded resumable inventory/catalogue steps and preserved host library state. Requires host Plugin API 1.1.3."
+}
