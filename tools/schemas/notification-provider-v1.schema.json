@@ -40,7 +40,8 @@
         "label"
       ],
       "title": "NotificationDestinationDeclaration",
-      "type": "object"
+      "type": "object",
+      "description": "Enrollment choices; independent core proof determines concrete endpoint trust."
     },
     "NotificationProviderDefinition": {
       "additionalProperties": false,
@@ -102,7 +103,8 @@
         "retire_action"
       ],
       "title": "NotificationProviderDefinition",
-      "type": "object"
+      "type": "object",
+      "description": "Generic plugin-owned configuration and operations, without credential values."
     },
     "NotificationProviderFeatures": {
       "additionalProperties": false,
@@ -125,7 +127,8 @@
         }
       },
       "title": "NotificationProviderFeatures",
-      "type": "object"
+      "type": "object",
+      "description": "Supported delivery behavior; declarations never confer grants or verification."
     },
     "UiField": {
       "additionalProperties": false,
@@ -215,7 +218,8 @@
         "type"
       ],
       "title": "UiField",
-      "type": "object"
+      "type": "object",
+      "description": "One declarative settings value; secrets are write-only at the host boundary."
     },
     "UiFieldType": {
       "enum": [
@@ -228,7 +232,8 @@
         "multiselect"
       ],
       "title": "UiFieldType",
-      "type": "string"
+      "type": "string",
+      "description": "Native field controls supported by the v1 renderer."
     },
     "UiOption": {
       "additionalProperties": false,
@@ -251,7 +256,8 @@
         "label"
       ],
       "title": "UiOption",
-      "type": "object"
+      "type": "object",
+      "description": "A non-executable option rendered by a select control."
     },
     "UiValidation": {
       "additionalProperties": false,
@@ -323,7 +329,8 @@
         }
       },
       "title": "UiValidation",
-      "type": "object"
+      "type": "object",
+      "description": "Safe client/server validation constraints for a declarative field."
     }
   },
   "additionalProperties": false,
@@ -378,5 +385,6 @@
   "title": "NotificationProviderRegistration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.5"
+  "x-api-contract-version": "1.1.5",
+  "description": "Versioned registration preserving existing transports and adding generic plugin delivery."
 }
