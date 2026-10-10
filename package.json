@@ -2,7 +2,7 @@
   "name": "unnamed-tracking-plugin-browser-tests",
   "private": true,
   "scripts": {
-    "test": "node --test tests/document_viewer.browser.test.cjs",
+    "test": "node --test tests/*.browser.test.cjs",
     "check": "node --check examples/scoped-document-viewer/frontend/app.js && node --check examples/scoped-document-viewer/frontend/office.js",
     "build:native": "node tools/build_native_frontends.mjs",
     "check:native": "node tools/build_native_frontends.mjs --check"
