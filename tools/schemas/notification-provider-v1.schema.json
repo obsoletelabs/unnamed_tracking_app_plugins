@@ -26,7 +26,8 @@
       "default": "legacy",
       "enum": [
         "legacy",
-        "discord_webhook"
+        "discord_webhook",
+        "discord_bot_dm"
       ],
       "title": "Transport",
       "type": "string"
