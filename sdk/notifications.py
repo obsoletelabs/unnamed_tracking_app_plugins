@@ -1,6 +1,6 @@
-"""Public typed notification source helpers; recipient/routing stay host-owned."""
+"""Public typed notification source/provider helpers."""
 
-from typing import Any
+from typing import Any, Literal
 
 from .plugin_protocol import request
 
@@ -20,8 +20,23 @@ def emit(event_type: str, dedupe_key: str, occurred_at: int, data: dict[str, str
     return request("notifications.emit", "notifications.emit", payload)
 
 
-def register_provider(provider_id: str, name: str, action_id: str, *, transport: str = "legacy") -> dict[str, Any]:
-    """Register a namespaced provider; host owns endpoints, trust and delivery state."""
+def register_provider(
+    provider_id: str,
+    name: str,
+    action_id: str,
+    *,
+    destination_kind: str,
+    privacy: Literal["PUBLIC", "PRIVATE"] = "PUBLIC",
+    channel_context: Literal["external", "internal"] = "external",
+) -> dict[str, Any]:
+    """Register a plugin-owned destination contract; the plugin performs delivery."""
+    transport = "plugin_private" if privacy == "PRIVATE" else "plugin_public"
     return request("notification_providers.register", "notification_providers.register", {
-        "provider_id": provider_id, "name": name, "action_id": action_id, "transport": transport,
+        "provider_id": provider_id,
+        "name": name,
+        "action_id": action_id,
+        "destination_kind": destination_kind,
+        "privacy": privacy,
+        "channel_context": channel_context,
+        "transport": transport,
     })
