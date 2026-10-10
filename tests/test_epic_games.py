@@ -187,20 +187,17 @@ def test_authorization_code_formats_are_validated(service, value):
     ],
 )
 def test_invalid_codes_make_no_network_request(service, value):
-    with pytest.raises(service.epic.EpicError):
-        service.plugin.connect(context(authorization_code=value))
+    assert service.plugin.connect(context(authorization_code=value))["ok"] is False
     assert service.calls == []
 
 
 def test_personal_credentials_context_and_disconnect(service):
-    with pytest.raises(service.epic.EpicError, match="authenticated"):
-        service.plugin.status({"user_id": USER})
+    assert "authenticated" in service.plugin.status({"user_id": USER})["error"]
     result = service.plugin.connect(context(authorization_code=CODE, user_id=OTHER))
     assert result["connected"] and "token" not in json.dumps(result)
     assert CODE not in json.dumps(service.storage)
     assert not service.plugin.status(context(OTHER))["connected"]
-    with pytest.raises(service.epic.EpicError, match="Confirm"):
-        service.plugin.disconnect({"_plugin_context": {"user_id": USER}})
+    assert "Confirm" in service.plugin.disconnect({"_plugin_context": {"user_id": USER}})["error"]
     service.plugin.disconnect(context())
     assert not service.plugin.status(context())["connected"]
     assert not any(key.startswith("secrets/") for key in service.storage)
@@ -213,8 +210,9 @@ def test_rotated_refresh_is_saved_before_inventory_failure(service):
     session["expires_at"] = 0
     service.storage[key] = json.dumps(session)
     service.failures["/library/api/public/items"] = {"status": 503, "error": "SECRET"}
-    with pytest.raises(service.epic.EpicError, match="saved import"):
-        service.plugin.step(context())
+    failure = service.plugin.step(context())
+    assert failure["ok"] is False and "saved import" in failure["error"]
+    assert "SECRET" not in json.dumps(failure)
     assert json.loads(service.storage[key])["refresh_token"] == "rotated-refresh"
     assert service.plugin.status(context())["phase"] == "inventory"
     assert service.imports == []
@@ -271,8 +269,7 @@ def test_incomplete_inventory_never_changes_availability(service, defect):
         service.pages[None].pop("responseMetadata")
     else:
         service.pages[None].pop("records")
-    with pytest.raises(service.epic.EpicError):
-        service.plugin.step(context())
+    assert service.plugin.step(context())["ok"] is False
     assert service.imports == []
     assert service.plugin.status(context())["phase"] == "inventory"
 
@@ -283,8 +280,7 @@ def test_catalogue_failure_preserves_batch_and_optional_playtime_is_not_zero(ser
     service.plugin.step(context())
     service.plugin.step(context())
     service.catalogue.clear()
-    with pytest.raises(service.epic.EpicError, match="catalogue"):
-        service.plugin.step(context())
+    assert "catalogue" in service.plugin.step(context())["error"]
     assert service.imports == [] and service.plugin.status(context())["phase"] == "catalogue"
     service.catalogue[("store", "item")] = {"title": "Recovered game"}
     result = finish(service)
@@ -326,8 +322,7 @@ def test_crash_after_host_commit_replays_same_identity_and_checkpoint(service, m
         return original(method, capability, payload)
 
     monkeypatch.setattr(service.plugin, "request", gateway)
-    with pytest.raises(service.epic.EpicError, match="host denied"):
-        service.plugin.step(context())
+    assert "host denied" in service.plugin.step(context())["error"]
     assert service.plugin.status(context())["phase"] == "import"
     finish(service)
     assert service.imports[0] == service.imports[1]
@@ -339,9 +334,9 @@ def test_live_permission_denial_is_sanitized_and_checkpoint_retained(service):
     while service.plugin.status(context())["phase"] != "import":
         service.plugin.step(context())
     service.denied.add("games.write")
-    with pytest.raises(service.epic.EpicError, match="Check plugin permissions") as failure:
-        service.plugin.step(context())
-    assert "SECRET" not in str(failure.value)
+    failure = service.plugin.step(context())
+    assert failure["ok"] is False and "Check plugin permissions" in failure["error"]
+    assert "SECRET" not in json.dumps(failure)
     assert service.plugin.status(context())["phase"] == "import"
     service.denied.clear()
     assert finish(service)["imported"] == 1
@@ -349,6 +344,7 @@ def test_live_permission_denial_is_sanitized_and_checkpoint_retained(service):
 
 def test_active_lease_prevents_rotating_token_or_checkpoint_races(service):
     service.storage["leases/" + USER] = json.dumps({"id": "other", "expires_at": time.time() + 50})
-    with pytest.raises(service.epic.EpicError, match="Another Epic action"):
-        service.plugin.connect(context(authorization_code=CODE))
+    assert (
+        "Another Epic action" in service.plugin.connect(context(authorization_code=CODE))["error"]
+    )
     assert not any(call[0] == "network.request" for call in service.calls)

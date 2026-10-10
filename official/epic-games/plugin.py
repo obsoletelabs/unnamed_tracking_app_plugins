@@ -17,10 +17,13 @@ def safe_action(handler):
     def invoke(values):
         try:
             return handler(values)
-        except GatewayRequestError as exc:
-            raise epic.EpicError(
-                "The host denied or could not complete this action. Check plugin permissions, then retry."
-            ) from exc
+        except GatewayRequestError:
+            return {
+                "ok": False,
+                "error": "The host denied or could not complete this action. Check plugin permissions, then retry.",
+            }
+        except epic.EpicError as exc:
+            return {"ok": False, "error": str(exc)}
 
     return invoke
 
