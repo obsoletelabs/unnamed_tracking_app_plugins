@@ -53,6 +53,14 @@ def _load_url(user_id: str) -> str:
     return _validate_url(str(data.get("url", "")))
 
 
+def _store_url(user_id: str, url: str) -> None:
+    request("storage.put", "plugin.storage", {"key": _secret_key(user_id), "value": json.dumps({"url": url})})
+
+
+def _remove_url(user_id: str) -> None:
+    request("storage.delete", "plugin.storage", {"key": _secret_key(user_id)})
+
+
 def _send(url: str, payload: dict[str, Any]) -> None:
     request(
         "network.request",
@@ -65,6 +73,19 @@ def _send(url: str, payload: dict[str, Any]) -> None:
             "timeout_ms": 10000,
         },
     )
+
+
+def save_webhook(values: dict[str, Any]) -> dict[str, Any]:
+    user_id = _user_id(values)
+    url = _validate_url(str(values.get("url", "")))
+    _store_url(user_id, url)
+    return {"ok": True, "message": "Discord webhook saved."}
+
+
+def remove_webhook(values: dict[str, Any]) -> dict[str, Any]:
+    user_id = _user_id(values)
+    _remove_url(user_id)
+    return {"ok": True, "message": "Discord webhook removed."}
 
 
 def test(values: dict[str, Any]) -> dict[str, Any]:
