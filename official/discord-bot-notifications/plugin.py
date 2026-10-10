@@ -80,6 +80,7 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
 def _member_by_username(token: str, guild_id: str, username: str) -> dict[str, Any] | None:
     username = username.casefold()
     after = "0"
+    matches: list[dict[str, Any]] = []
     while True:
         response = _discord(token, "GET", f"/guilds/{quote(guild_id)}/members?limit=1000&after={after}")
         if not isinstance(response, list):
@@ -87,9 +88,11 @@ def _member_by_username(token: str, guild_id: str, username: str) -> dict[str, A
         for member in response:
             user = member.get("user", {}) if isinstance(member, dict) else {}
             if str(user.get("username", "")).casefold() == username:
-                return user
+                matches.append(user)
+                if len(matches) > 1:
+                    raise PluginError("That Discord username matched more than one server member; use the unique Discord username.")
         if len(response) < 1000:
-            return None
+            return matches[0] if matches else None
         last = response[-1].get("user", {}).get("id")
         if not isinstance(last, str) or not _SNOWFLAKE.fullmatch(last):
             return None
@@ -112,46 +115,16 @@ def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:
 
 def _permission_names(permission_value: int) -> list[str]:
     permissions = {
-        0x0000000000000001: "CREATE_INSTANT_INVITE",
-        0x0000000000000002: "KICK_MEMBERS",
-        0x0000000000000004: "BAN_MEMBERS",
-        0x0000000000000008: "ADMINISTRATOR",
-        0x0000000000000010: "MANAGE_CHANNELS",
-        0x0000000000000020: "MANAGE_GUILD",
-        0x0000000000000400: "VIEW_CHANNEL",
-        0x0000000000000800: "SEND_MESSAGES",
-        0x0000000000001000: "SEND_TTS_MESSAGES",
-        0x0000000000002000: "MANAGE_MESSAGES",
-        0x0000000000004000: "EMBED_LINKS",
-        0x0000000000008000: "ATTACH_FILES",
-        0x0000000000010000: "READ_MESSAGE_HISTORY",
-        0x0000000000020000: "MENTION_EVERYONE",
-        0x0000000000040000: "USE_EXTERNAL_EMOJIS",
-        0x0000000000080000: "VIEW_GUILD_INSIGHTS",
-        0x0000000000100000: "CONNECT",
-        0x0000000000200000: "SPEAK",
-        0x0000000000400000: "MUTE_MEMBERS",
-        0x0000000000800000: "DEAFEN_MEMBERS",
-        0x0000000001000000: "MOVE_MEMBERS",
-        0x0000000002000000: "USE_VAD",
-        0x0000000004000000: "PRIORITY_SPEAKER",
-        0x0000000008000000: "STREAM",
-        0x0000000010000000: "USE_APPLICATION_COMMANDS",
-        0x0000000020000000: "MANAGE_THREADS",
-        0x0000000040000000: "USE_PUBLIC_THREADS",
-        0x0000000080000000: "USE_PRIVATE_THREADS",
-        0x0000000100000000: "USE_EXTERNAL_STICKERS",
-        0x0000000200000000: "SEND_MESSAGES_IN_THREADS",
-        0x0000000400000000: "USE_EMBEDDED_ACTIVITIES",
-        0x0000000800000000: "MODERATE_MEMBERS",
-        0x0000002000000000: "VIEW_AUDIT_LOG",
-        0x0000004000000000: "VIEW_GUILD_ANALYTICS",
-        0x0000010000000000: "MANAGE_EVENTS",
-        0x0000040000000000: "VIEW_CREATOR_MONETIZATION_ANALYTICS",
-        0x0000080000000000: "USE_SOUNDBOARD",
-        0x0000100000000000: "CREATE_GUILD_EXPRESSIONS",
-        0x0000200000000000: "CREATE_EVENTS",
-        0x0000400000000000: "USE_EXTERNAL_SOUNDS",
+        0x0000000000000001: "CREATE_INSTANT_INVITE", 0x0000000000000002: "KICK_MEMBERS", 0x0000000000000004: "BAN_MEMBERS", 0x0000000000000008: "ADMINISTRATOR",
+        0x0000000000000010: "MANAGE_CHANNELS", 0x0000000000000020: "MANAGE_GUILD", 0x0000000000000400: "VIEW_CHANNEL", 0x0000000000000800: "SEND_MESSAGES",
+        0x0000000000001000: "SEND_TTS_MESSAGES", 0x0000000000002000: "MANAGE_MESSAGES", 0x0000000000004000: "EMBED_LINKS", 0x0000000000008000: "ATTACH_FILES",
+        0x0000000000010000: "READ_MESSAGE_HISTORY", 0x0000000000020000: "MENTION_EVERYONE", 0x0000000000040000: "USE_EXTERNAL_EMOJIS", 0x0000000000080000: "VIEW_GUILD_INSIGHTS",
+        0x0000000000100000: "CONNECT", 0x0000000000200000: "SPEAK", 0x0000000000400000: "MUTE_MEMBERS", 0x0000000000800000: "DEAFEN_MEMBERS",
+        0x0000000001000000: "MOVE_MEMBERS", 0x0000000002000000: "USE_VAD", 0x0000000004000000: "PRIORITY_SPEAKER", 0x0000000008000000: "STREAM",
+        0x0000000010000000: "USE_APPLICATION_COMMANDS", 0x0000000020000000: "MANAGE_THREADS", 0x0000000040000000: "USE_PUBLIC_THREADS", 0x0000000080000000: "USE_PRIVATE_THREADS",
+        0x0000000100000000: "USE_EXTERNAL_STICKERS", 0x0000000200000000: "SEND_MESSAGES_IN_THREADS", 0x0000000400000000: "USE_EMBEDDED_ACTIVITIES", 0x0000000800000000: "MODERATE_MEMBERS",
+        0x0000002000000000: "VIEW_AUDIT_LOG", 0x0000004000000000: "VIEW_GUILD_ANALYTICS", 0x0000010000000000: "MANAGE_EVENTS", 0x0000040000000000: "VIEW_CREATOR_MONETIZATION_ANALYTICS",
+        0x0000080000000000: "USE_SOUNDBOARD", 0x0000100000000000: "CREATE_GUILD_EXPRESSIONS", 0x0000200000000000: "CREATE_EVENTS", 0x0000400000000000: "USE_EXTERNAL_SOUNDS",
         0x0000800000000000: "SEND_VOICE_MESSAGES",
     }
     return [name for bit, name in permissions.items() if permission_value & bit]
@@ -161,11 +134,12 @@ def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
     started = time.monotonic()
     bot = _discord(token, "GET", "/users/@me")
     guild = _discord(token, "GET", f"/guilds/{quote(guild_id)}?with_counts=true")
-    member = _discord(token, "GET", f"/guilds/{quote(guild_id)}/members/@me")
-    roles = _discord(token, "GET", f"/guilds/{quote(guild_id)}/roles")
-    elapsed_ms = round((time.monotonic() - started) * 1000)
     if not isinstance(bot, dict) or not bot.get("id"):
         raise PluginError("Discord did not return the configured bot identity.")
+    bot_id = str(bot["id"])
+    member = _discord(token, "GET", f"/guilds/{quote(guild_id)}/members/{quote(bot_id)}")
+    roles = _discord(token, "GET", f"/guilds/{quote(guild_id)}/roles")
+    elapsed_ms = round((time.monotonic() - started) * 1000)
     if not isinstance(guild, dict) or not guild.get("id"):
         raise PluginError("Discord could not read the configured server.")
     if not isinstance(member, dict):
@@ -174,13 +148,17 @@ def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
         roles = []
     role_by_id = {str(role.get("id")): role for role in roles if isinstance(role, dict)}
     role_names = [str(role_by_id[rid].get("name")) for rid in member.get("roles", []) if str(rid) in role_by_id]
-    try:
-        permission_value = int(member.get("permissions", "0"))
-    except (TypeError, ValueError):
-        permission_value = 0
+    permission_value = 0
+    for role in roles:
+        if not isinstance(role, dict) or str(role.get("id")) not in {str(rid) for rid in member.get("roles", [])}:
+            continue
+        try:
+            permission_value |= int(role.get("permissions", "0"))
+        except (TypeError, ValueError):
+            continue
     return {
         "bot": {
-            "id": str(bot.get("id")),
+            "id": bot_id,
             "username": str(bot.get("username", "")),
             "global_name": bot.get("global_name"),
             "discriminator": str(bot.get("discriminator", "0")),
@@ -188,29 +166,25 @@ def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
             "verified": bot.get("verified"),
             "bot": bot.get("bot") is True,
             "public_flags": bot.get("public_flags"),
+            "invite_url": f"https://discord.com/oauth2/authorize?client_id={quote(bot_id)}&scope=bot%20applications.commands",
+            "recommended_intents": ["GUILDS", "GUILD_MEMBERS"],
         },
         "guild": {
-            "id": str(guild.get("id")),
-            "name": str(guild.get("name", "")),
+            "id": str(guild.get("id")), "name": str(guild.get("name", "")),
             "icon_url": f"https://cdn.discordapp.com/icons/{guild['id']}/{guild['icon']}.png?size=256" if guild.get("icon") else None,
-            "description": guild.get("description"),
-            "owner_id": guild.get("owner_id"),
-            "member_count": guild.get("approximate_member_count"),
-            "online_count": guild.get("approximate_presence_count"),
-            "verification_level": guild.get("verification_level"),
-            "premium_tier": guild.get("premium_tier"),
-            "preferred_locale": guild.get("preferred_locale"),
-            "features": guild.get("features", []),
-            "nsfw_level": guild.get("nsfw_level"),
-            "vanity_url_code": guild.get("vanity_url_code"),
+            "description": guild.get("description"), "owner_id": guild.get("owner_id"),
+            "member_count": guild.get("approximate_member_count"), "online_count": guild.get("approximate_presence_count"),
+            "verification_level": guild.get("verification_level"), "premium_tier": guild.get("premium_tier"),
+            "premium_subscription_count": guild.get("premium_subscription_count"), "premium_progress_bar_enabled": guild.get("premium_progress_bar_enabled"),
+            "preferred_locale": guild.get("preferred_locale"), "features": guild.get("features", []), "nsfw_level": guild.get("nsfw_level"),
+            "vanity_url_code": guild.get("vanity_url_code"), "afk_channel_id": guild.get("afk_channel_id"), "afk_timeout": guild.get("afk_timeout"),
+            "system_channel_id": guild.get("system_channel_id"), "rules_channel_id": guild.get("rules_channel_id"), "public_updates_channel_id": guild.get("public_updates_channel_id"),
+            "explicit_content_filter": guild.get("explicit_content_filter"), "default_message_notifications": guild.get("default_message_notifications"),
+            "mfa_level": guild.get("mfa_level"), "widget_enabled": guild.get("widget_enabled"),
         },
         "bot_member": {
-            "nickname": member.get("nick"),
-            "joined_at": member.get("joined_at"),
-            "pending": member.get("pending"),
-            "role_names": role_names,
-            "role_count": len(role_names),
-            "permissions": permission_value,
+            "nickname": member.get("nick"), "joined_at": member.get("joined_at"), "pending": member.get("pending"),
+            "role_names": role_names, "role_count": len(role_names), "permissions": permission_value,
             "permission_names": _permission_names(permission_value),
         },
         "health": {"api_ok": True, "request_ms": elapsed_ms},
@@ -236,11 +210,11 @@ def get_config(values: dict[str, Any]) -> dict[str, Any]:
         except PluginError as exc:
             result["health"] = {"api_ok": False}
             result["bot_error"] = str(exc)
-    if result["linked"]:
+    if result["linked"] and result["configured"]:
         linked_id = str(link["discord_id"])
         try:
-            linked_user = _discord(str(config["token"]), "GET", f"/users/{quote(linked_id)}") if result["configured"] else None
-            linked_member = _discord(str(config["token"]), "GET", f"/guilds/{quote(str(config.get('guild_id', '')))}/members/{quote(linked_id)}") if result["configured"] else None
+            linked_user = _discord(str(config["token"]), "GET", f"/users/{quote(linked_id)}")
+            linked_member = _discord(str(config["token"]), "GET", f"/guilds/{quote(str(config['guild_id']))}/members/{quote(linked_id)}")
             if isinstance(linked_user, dict):
                 result["username"] = linked_user.get("username", "")
                 result["global_name"] = linked_user.get("global_name")
