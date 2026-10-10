@@ -46,9 +46,17 @@
       snapshot = await request("step"); render();
     }
   }
-  $("connect-form").addEventListener("submit", (event) => {
-    event.preventDefault(); const authorization_code = $("code").value; $("code").value = "";
+  function connect() {
+    if (busy) return;
+    const authorization_code = $("code").value; $("code").value = "";
     void perform(async () => { snapshot = await request("connect", { authorization_code }); });
+  }
+  // The host's opaque sandbox blocks native forms; use the action bridge.
+  $("connect").onclick = connect;
+  $("code").addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.isComposing) {
+      event.preventDefault(); connect();
+    }
   });
   $("disconnect").onclick = () => perform(async () => { const result = await request("disconnect"); if (!result.cancelled) snapshot = result; });
   $("signin").onclick = () => perform(() => request("signin"));
