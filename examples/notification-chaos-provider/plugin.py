@@ -63,8 +63,15 @@ def _register_provider() -> None:
                 PROVIDER_ID,
                 "Notification Chaos Demo",
                 "render",
-                destination_kind="notification_chaos",
-                privacy="PUBLIC",
+                transport="plugin",
+                definition={
+                    "destinations": [
+                        {"kind": "notification_chaos", "label": "Notification Chaos Demo", "privacy": "PUBLIC"}
+                    ],
+                    "configure_action": "configure",
+                    "retire_action": "retire",
+                    "test_action": "test",
+                },
             )
             return
         except GatewayRequestError as exc:
