@@ -24,7 +24,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("ui-api", "playtime-report", "recently-played-notifier", "metadata-curator",
-         "password-reset-notification-demo", "user-invite-notification-demo")
+         "password-reset-notification-demo", "user-invite-notification-demo",
+         "notification-chaos-provider")
 SOURCE_PATHS = tuple(Path("examples") / name for name in NAMES) + (Path("official/discord-notifications"),)
 
 
@@ -152,6 +153,46 @@ def main() -> None:
                     registry.finish_activation(plugin_id, operation, commit=True)
 
                 install(package)
+                if plugin_id == "example.notification-chaos-provider":
+                    actor = str(uuid4())
+                    work = {"delivery": {"notification_id": str(uuid4())}}
+
+                    def render():
+                        return registry.notification_layout(plugin_id, "render", work,
+                            user_id=actor, installation_id=identity, attempt_id=str(uuid4()))
+
+                    registry.settings(plugin_id, {"mode": "plain"})
+                    assert render() == {"style": "plain", "fields": ["link", "event_at", "body", "title"]}
+                    registry.settings(plugin_id, {"mode": "fail_first"})
+                    try:
+                        render()
+                    except RuntimePolicyError:
+                        pass
+                    else:
+                        raise AssertionError("demo did not simulate first renderer failure")
+                    assert render()["style"] == "embed"
+                    registry.stop(plugin_id)
+                    registry.start(plugin_id, user_id=actor)
+                    assert render()["style"] == "embed", "simulation ledger did not survive restart"
+                    registry.settings(plugin_id, {"mode": "invalid_layout"})
+                    import jsonschema
+                    schema = json.loads((ROOT / "tools/schemas/notification-layout-v1.schema.json").read_text())
+                    try:
+                        jsonschema.validate(render(), schema)
+                    except jsonschema.ValidationError:
+                        pass
+                    else:
+                        raise AssertionError("invalid demo layout unexpectedly conformed")
+                    registry.settings(plugin_id, {"mode": "always_fail"})
+                    for _ in range(3):
+                        try:
+                            render()
+                        except RuntimePolicyError:
+                            pass
+                        else:
+                            raise AssertionError("always-fail demo rendered successfully")
+                    registry.settings(plugin_id, {"mode": "embed"})
+                    print(f"{plugin_id}: actual packaged renderer modes and restart persistence passed", flush=True)
                 configured = {"display_mode": "compact", "query": "Acceptance"}
                 settings = {field["id"]: configured.get(field["id"], field.get("default"))
                             for section in registry.ui(plugin_id).get("settings", [])

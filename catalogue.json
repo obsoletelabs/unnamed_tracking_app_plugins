@@ -5,6 +5,7 @@
     "example.home-widgets",
     "example.theme-palettes",
     "example.shortcut-playground",
-    "official.collectors-archive"
+    "official.collectors-archive",
+    "example.notification-chaos-provider"
   ]
 }

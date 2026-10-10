@@ -61,6 +61,10 @@ Each webhook stays PUBLIC, even after explicit richer-media consent. Security
 and recovery content is ineligible. The new plugin requests only provider
 registration/delivery, without storage, data-reading or frontend permissions.
 
-This is an explicit source preview until paired host lifecycle acceptance and
-reviewed signed promotion. Legacy example credentials are not transferred.
+The official provider is signed and published after paired host lifecycle acceptance
+and reviewed promotion. Legacy example credentials are not transferred.
 Standalone consumer tests: `python -m pytest tests/test_discord_notifications.py -q`.
+
+## Failure simulation
+
+The unreleased Notification Chaos Demo exercises the same protected renderer without a second transport API. Its settings select reversed approved fields, a bounded persistent first-render failure, repeated failure or an intentionally invalid layout. Exceptions enter core retry handling; invalid layouts are rejected before network I/O. Its ledger stores only opaque notification IDs, never delivery rows or credentials. See [examples](../examples/index.md#notification-chaos-demo) and `tests/test_notification_chaos_provider.py`.
