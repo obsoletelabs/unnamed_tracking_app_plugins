@@ -1,0 +1,40 @@
+{
+  "additionalProperties": false,
+  "description": "A provider can arrange approved fields, never append arbitrary destination content.",
+  "properties": {
+    "style": {
+      "default": "embed",
+      "enum": [
+        "plain",
+        "embed"
+      ],
+      "title": "Style",
+      "type": "string"
+    },
+    "fields": {
+      "default": [
+        "title",
+        "body",
+        "event_at",
+        "link"
+      ],
+      "items": {
+        "enum": [
+          "title",
+          "body",
+          "event_at",
+          "link"
+        ],
+        "type": "string"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "title": "Fields",
+      "type": "array"
+    }
+  },
+  "title": "NotificationFieldLayout",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.2"
+}

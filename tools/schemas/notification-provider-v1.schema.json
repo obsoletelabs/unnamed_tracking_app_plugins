@@ -1,0 +1,44 @@
+{
+  "additionalProperties": false,
+  "description": "A plugin-owned provider registered with the core delivery coordinator.",
+  "properties": {
+    "provider_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Provider Id",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "action_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Action Id",
+      "type": "string"
+    },
+    "transport": {
+      "default": "legacy",
+      "enum": [
+        "legacy",
+        "discord_webhook"
+      ],
+      "title": "Transport",
+      "type": "string"
+    }
+  },
+  "required": [
+    "provider_id",
+    "name",
+    "action_id"
+  ],
+  "title": "NotificationProviderRegistration",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.2"
+}

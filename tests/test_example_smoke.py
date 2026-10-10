@@ -19,7 +19,7 @@ PLUGINS = (
     "ui-playground",
     "scoped-document-viewer",
     "extended-session-manager",
-    "discord-delivery-provider",
+    "discord-notifications",
 )
 
 

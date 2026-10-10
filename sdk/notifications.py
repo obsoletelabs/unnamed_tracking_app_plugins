@@ -18,3 +18,10 @@ def emit(event_type: str, dedupe_key: str, occurred_at: int, data: dict[str, str
     if group_key is not None:
         payload["group_key"] = group_key
     return request("notifications.emit", "notifications.emit", payload)
+
+
+def register_provider(provider_id: str, name: str, action_id: str, *, transport: str = "legacy") -> dict[str, Any]:
+    """Register a namespaced provider; host owns endpoints, trust and delivery state."""
+    return request("notification_providers.register", "notification_providers.register", {
+        "provider_id": provider_id, "name": name, "action_id": action_id, "transport": transport,
+    })

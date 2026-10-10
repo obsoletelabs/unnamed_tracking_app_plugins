@@ -1,0 +1,20 @@
+{
+  "api_contract_version": "1.1.2",
+  "schema_version": "v1",
+  "plugin_id": "official.discord-notifications",
+  "title": "Discord Notifications",
+  "settings": [],
+  "actions": [
+    {
+      "id": "render",
+      "label": "Render approved notification",
+      "handler": "plugin:render",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
+    }
+  ],
+  "menus": [],
+  "pages": []
+}

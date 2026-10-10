@@ -48,7 +48,7 @@ wiki/mkdocs.yml         # strict wiki navigation
 
 `examples.old/` and README-only plugin directories are invalid. Discovery and CI
 reject incomplete source rather than silently omitting it from publication.
-UI/API and Discord Delivery Provider are focused references. Playtime Report,
+UI/API is a focused reference; Discord Notifications is a maintained official provider. Playtime Report,
 Recently Played Notifier, Metadata Curator and UI Playground are small useful
 demos. Help Button, Jellyfin, Document Viewer and Session Manager demonstrate
 more substantial host integrations. Keep this mixture; no duplicate source trees.

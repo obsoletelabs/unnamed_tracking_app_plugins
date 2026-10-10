@@ -13,7 +13,7 @@ PLUGINS = (
     "shortcut-playground",
     "scoped-document-viewer",
     "extended-session-manager",
-    "discord-delivery-provider",
+    "discord-notifications",
     "playtime-report",
     "recently-played-notifier",
     "metadata-curator",

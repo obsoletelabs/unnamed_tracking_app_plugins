@@ -25,6 +25,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ("ui-api", "playtime-report", "recently-played-notifier", "metadata-curator",
          "password-reset-notification-demo", "user-invite-notification-demo")
+SOURCE_PATHS = tuple(Path("examples") / name for name in NAMES) + (Path("official/discord-notifications"),)
 
 
 def commit(root: Path, message: str) -> None:
@@ -58,8 +59,8 @@ def main() -> None:
         for directory in ("tools", "sdk", "publishers"):
             shutil.copytree(ROOT / directory, source / directory,
                             ignore=shutil.ignore_patterns("__pycache__"))
-        for name in NAMES:
-            shutil.copytree(ROOT / "examples" / name, source / "examples" / name)
+        for relative in SOURCE_PATHS:
+            shutil.copytree(ROOT / relative, source / relative)
         shutil.copyfile(ROOT / ".gitignore", source / ".gitignore")
         key = Ed25519PrivateKey.generate()
         public = key.public_key().public_bytes_raw()
@@ -69,26 +70,36 @@ def main() -> None:
                   "public_key_file": "disposable.public-key.b64", "public_key_b64": encoded,
                   "public_key_sha256": hashlib.sha256(public).hexdigest(), "status": "active",
                   "plugin_id_prefixes": ["example."]}
+        official_key = Ed25519PrivateKey.generate()
+        official_public = official_key.public_key().public_bytes_raw()
+        official_encoded = base64.b64encode(official_public).decode()
+        (source / "publishers/disposable-official.public-key.b64").write_text(official_encoded, encoding="utf-8")
+        official_record = {"key_id": "disposable-official", "publisher": "Unnamed Tracking Official",
+                           "public_key_file": "disposable-official.public-key.b64", "public_key_b64": official_encoded,
+                           "public_key_sha256": hashlib.sha256(official_public).hexdigest(), "status": "active",
+                           "plugin_id_prefixes": ["official."], "channel": "official"}
         (source / "publishers/registry.json").write_text(
-            json.dumps({"schema_version": 1, "publishers": [record]}), encoding="utf-8")
+            json.dumps({"schema_version": 1, "publishers": [record, official_record]}), encoding="utf-8")
         subprocess.run(["git", "init", str(source)], check=True, capture_output=True)
         for name, value in (("user.name", "Acceptance"), ("user.email", "acceptance@example.invalid")):
             subprocess.run(["git", "-C", str(source), "config", name, value], check=True)
         commit(source, "feat: initialize real reference acceptance")
         env = {**os.environ, "PLUGIN_SIGNING_KEY_ID": "disposable",
-               "PLUGIN_SIGNING_KEY_B64": base64.b64encode(key.private_bytes_raw()).decode()}
+               "PLUGIN_SIGNING_KEY_B64": base64.b64encode(key.private_bytes_raw()).decode(),
+               "PLUGIN_OFFICIAL_SIGNING_KEY_ID": "disposable-official",
+               "PLUGIN_OFFICIAL_SIGNING_KEY_B64": base64.b64encode(official_key.private_bytes_raw()).decode()}
         first = releases(source, env)
         # A real source input changes, so the existing version policy builds a patch.
-        for name in NAMES:
-            path = source / "examples" / name / "README.md"
+        for relative in SOURCE_PATHS:
+            path = source / relative / "README.md"
             with path.open("a", encoding="utf-8") as stream:
                 stream.write("\nDisposable lifecycle acceptance patch.\n")
         commit(source, "fix: document acceptance transition")
         second = releases(source, env)
         # Package-side permission delta; the HTTP acceptance independently tests
         # actual grants and rejection/staging while the old package stays active.
-        for name in NAMES:
-            path = source / "examples" / name / "manifest.json"
+        for relative in SOURCE_PATHS:
+            path = source / relative / "manifest.json"
             manifest = json.loads(path.read_text(encoding="utf-8"))
             ref = {"name": "media.read", "version": 1}
             manifest["capabilities"].append(ref)
@@ -98,14 +109,17 @@ def main() -> None:
         third = releases(source, env)
         # A valid signed package whose real entrypoint cannot activate. This is
         # a runtime failure, not malformed ZIP bytes or a mocked health result.
-        for name in NAMES:
-            with (source / "examples" / name / "plugin.py").open("a", encoding="utf-8") as stream:
+        for relative in SOURCE_PATHS:
+            with (source / relative / "plugin.py").open("a", encoding="utf-8") as stream:
                 stream.write('\n\ndef main() -> None:\n    raise RuntimeError("Disposable activation failure")\n')
         commit(source, "fix: exercise failed activation restoration")
         broken = releases(source, env)
         verifier = PluginPackageVerifier({"disposable": TrustedPublisher(
             key_id="disposable", public_key=public, publisher=record["publisher"],
-            status="active", plugin_id_prefixes=("example.",))})
+            status="active", plugin_id_prefixes=("example.",)),
+            "disposable-official": TrustedPublisher(
+                key_id="disposable-official", public_key=official_public, publisher=record["publisher"],
+                status="active", plugin_id_prefixes=("official.",), channel="official")})
         supervisor = PluginSupervisor(work / "workers", work / "runtime/.storage")
         supervisor.probe_isolation()
         registry = PluginRegistry(work / "runtime", supervisor)
