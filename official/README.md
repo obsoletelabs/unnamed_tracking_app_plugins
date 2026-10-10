@@ -35,3 +35,8 @@ preview, available in branch CI's `unsigned-dist` artifact. Its native pages use
 the public host UI runtime, and its personal import preserves legacy identifiers,
 artwork, prestige links, evidence, journals and point history without deleting
 server originals. A signed production release requires the official publisher.
+
+[Discord Bot Notifications](discord-bot-notifications/README.md) is an unreleased paired
+preview for private direct messages. It requires the host's matching
+`discord_bot_dm` transport; it is not catalogue-published until that host support
+and its integration checks are accepted.
