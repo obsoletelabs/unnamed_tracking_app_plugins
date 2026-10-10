@@ -18,3 +18,5 @@ They are exported by the companion host's `tools/export_metadata_contract.py`.
 Provider plugins use these public schemas without importing host internals.
 
 Notification source/event/provider/layout schemas describe the public API 1.1.2 extension and are exported by the host tools/export_notification_contract.py. Both schemas and packaged consumers are checked by check_host_contract.py against the paired host.
+
+Lifecycle query/page snapshots describe the additive public API 1.1.4 extension. Older notification schemas retain their 1.1.2 identities. The explicit read grant is standalone and not implied by sending/provider permissions.

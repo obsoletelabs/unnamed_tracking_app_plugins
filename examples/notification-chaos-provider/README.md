@@ -3,7 +3,7 @@
 **Demonstration only; unsuitable for production delivery.** This intentionally
 unreliable provider exercises the public Plugin API 1.1.2 protected renderer.
 It is independent of the maintained official Discord Notifications provider.
-This source is unreleased until reviewed signed promotion; preview packages are
+Version 1.0.0 is published through reviewed demo-channel signing; preview packages are
 available through the existing builder.
 
 Install, review its four exact grants, and enable it. Choose a simulation mode

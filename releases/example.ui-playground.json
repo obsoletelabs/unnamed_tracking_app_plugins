@@ -610,6 +610,134 @@
         "frontend"
       ],
       "version": "1.4.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
+        "source_committed_at": "2026-10-10T19:28:39+08:00",
+        "source_digest": "bc730dcf39d2ed7412967c2b9dca891f9a9f2353c534ddf4823a83d14803e2f5",
+        "source_path": "examples/ui-playground",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "451c91eef99081ff9bf9716ae04fe98dfad7bed3f089de896b2d526214f1c47d"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "*",
+        "capabilities": [
+          {
+            "name": "notifications.send",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "plugin.settings",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Vue UI smoke test with four visible pages, filter controls, private Discord storage, and page announcements.",
+        "entrypoint": "plugin:main",
+        "frontend": {
+          "entry": "frontend/index.html"
+        },
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "0689c52504c7ddb18a91ac7a325cdd9c1a6b6dd707e094bdcba8c702391f4e3d",
+          "signature": "v2:86sKFYysPXNw64wLASdftsXdW3EpkO9WZiPl9e+oym5mVR6QGmHAuzNOxvyskXsGnYMvkaqAAqQ6FMe1n5s0AA=="
+        },
+        "manifest_version": 1,
+        "name": "Plugin UI Playground",
+        "permissions": [
+          {
+            "capability": {
+              "name": "notifications.send",
+              "version": 1
+            },
+            "rationale": "Send the current page announcement to the configured Discord webhook."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Store the Discord webhook in the plugin's private persistent data directory; the secret is never saved as ordinary UI settings."
+          },
+          {
+            "capability": {
+              "name": "plugin.settings",
+              "version": 1
+            },
+            "rationale": "Save the ordinary plugin-owned filter controls through the host settings API."
+          }
+        ],
+        "plugin_id": "example.ui-playground",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "announce-page"
+          ],
+          "menus": [
+            "overview",
+            "library",
+            "details",
+            "diagnostics"
+          ],
+          "pages": [
+            "overview",
+            "library",
+            "details",
+            "diagnostics"
+          ],
+          "settings": [
+            "filters",
+            "discord"
+          ]
+        },
+        "version": "1.5.0"
+      },
+      "package": {
+        "filename": "example.ui-playground-1.5.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 11507
+      },
+      "package_sha256": "f0ec80654592780f3eba595ba59612062992472f8c420213e9589ec77dbb2876",
+      "plugin_id": "example.ui-playground",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Plugin UI Playground\n\nThis demo uses a real Vue 3 frontend supplied by the plugin package.\n\nIt provides four pages, a private Discord webhook setting, and an **Announce this page to Discord** button on every page. The Vue app is loaded by the host in a sandboxed iframe and talks to the host through the plugin frontend bridge.\n\n## Secret handling\n\nThe manifest requests `plugin.storage` and `notifications.send`.\n\nThe webhook is **not** stored in `ui.json` or ordinary plugin settings. The frontend sends it to the host's secret API, which stores it as `secrets/discord_webhook` in the plugin's private persistent data directory. The runtime gives the plugin action access to that directory as `PLUGIN_DATA_DIR`; the action reads the webhook from there when it sends an announcement.\n\nPlugin storage is private to the plugin runtime, quota-limited, path-confined, and written with owner-only file permissions. The frontend does not put the webhook in browser localStorage/sessionStorage.\n\nInstallation creates pending permission requests. The plugin remains disabled until the requested permissions are approved.\n\nThe frontend example uses a pinned Vue CDN script to keep this demo self-contained. A production plugin should normally ship a self-contained Vue/Vite build under `frontend/`.\n\n## Where the pages appear\n\nAfter installation and permission approval, open **Settings → Plugins → Plugin UI Playground** in Unnamed Tracking. The host embeds the plugin frontend in the plugin UI panel. The four plugin-owned pages are the tabs inside that embedded panel:\n\n| Page | What to look for |\n| --- | --- |\n| **Overview** | The first/default tab; confirms the custom Vue frontend loaded. |\n| **Library** | Example filter controls and filtered sample rows; changing filters should immediately change the table. |\n| **Details** | Plugin/frontend/storage/action information. |\n| **Diagnostics** | Frontend bridge, page-count, filter, and secret-API smoke-test information. |\n\nThe **Discord announcement** controls appear below the current page. Enter a webhook, choose **Save webhook securely**, then use **Announce this page**. The action receives the current page context, so changing tabs and announcing should produce a different page name.\n\nThese are plugin-owned pages, not new top-level Unnamed Tracking routes. They should therefore remain inside the **Plugin UI Playground** panel under **Settings → Plugins**.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "0689c52504c7ddb18a91ac7a325cdd9c1a6b6dd707e094bdcba8c702391f4e3d",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "0689c52504c7ddb18a91ac7a325cdd9c1a6b6dd707e094bdcba8c702391f4e3d",
+        "signature": "v2:86sKFYysPXNw64wLASdftsXdW3EpkO9WZiPl9e+oym5mVR6QGmHAuzNOxvyskXsGnYMvkaqAAqQ6FMe1n5s0AA=="
+      },
+      "tags": [
+        "reference",
+        "frontend"
+      ],
+      "version": "1.5.0"
     }
   ],
   "version": 1

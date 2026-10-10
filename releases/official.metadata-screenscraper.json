@@ -294,6 +294,153 @@
         "official"
       ],
       "version": "0.1.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
+        "source_committed_at": "2026-10-10T19:28:39+08:00",
+        "source_digest": "788600badf1524263592a0dcc8f70558a777fc1c442fef6b3f4134d725fa868f",
+        "source_path": "official/metadata-screenscraper",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.media",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "d9dd8bac44e2fbe8a43222b1de306dd00b8bab80e6a786834ba69d79ba4335c8",
+          "signature": "v2:uX6Qg9umUb1EFEXvUN5bLSF/lzHjrDxiw+7UHzOI+K4HxhrtYgTykOKCnCMHHtW3UZdoo5RB7yYsI7UDs16HCQ=="
+        },
+        "manifest_version": 1,
+        "name": "ScreenScraper Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.media",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-screenscraper",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "media",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.2.0"
+      },
+      "package": {
+        "filename": "official.metadata-screenscraper-0.2.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 8144
+      },
+      "package_sha256": "820e27ea1b5f61a1746a0b6b9b8c644256d12ab52209d788bcb6f9f34e76d1d3",
+      "plugin_id": "official.metadata-screenscraper",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# ScreenScraper Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "d9dd8bac44e2fbe8a43222b1de306dd00b8bab80e6a786834ba69d79ba4335c8",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "d9dd8bac44e2fbe8a43222b1de306dd00b8bab80e6a786834ba69d79ba4335c8",
+        "signature": "v2:uX6Qg9umUb1EFEXvUN5bLSF/lzHjrDxiw+7UHzOI+K4HxhrtYgTykOKCnCMHHtW3UZdoo5RB7yYsI7UDs16HCQ=="
+      },
+      "tags": [
+        "metadata",
+        "screenscraper",
+        "official"
+      ],
+      "version": "0.2.0"
     }
   ],
   "version": 1

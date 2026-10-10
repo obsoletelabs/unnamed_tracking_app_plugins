@@ -541,6 +541,119 @@
         "statistics"
       ],
       "version": "1.4.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
+        "source_committed_at": "2026-10-10T19:28:39+08:00",
+        "source_digest": "f0c85f37f196de9bd1ee8ecaa10ab491c88cf159147eedaeed5b07849361d295",
+        "source_path": "examples/playtime-report",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "22259210059aeaf22429b1424ba1a803bc856b0289e5fb30e6ef3958246ec649"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "*",
+        "capabilities": [
+          {
+            "name": "games.read",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Builds a persistent playtime report from the user's game library.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "060b5860586953e1018d8af2572ad3110304df19f15a435c5f2477d8e69539dc",
+          "signature": "v2:HJjPujkKIGB5pkXzea9zPtX6sPd/o7YjDVo8rXibljo/1vevjn9oNq53M7r2ATbAjBii2RorqA5LiUjMAyQUAQ=="
+        },
+        "manifest_version": 1,
+        "name": "Playtime Report",
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.read",
+              "version": 1
+            },
+            "rationale": "Read the game library to calculate playtime statistics."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Store the latest generated report in the plugin namespace."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Expose the declared plugin page in the main navigation."
+          }
+        ],
+        "plugin_id": "example.playtime-report",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 2
+        },
+        "ui": {
+          "actions": [
+            "refresh"
+          ],
+          "pages": [
+            "report"
+          ],
+          "settings": []
+        },
+        "version": "1.5.0"
+      },
+      "package": {
+        "filename": "example.playtime-report-1.5.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 5255
+      },
+      "package_sha256": "4ce7952a9879faa465c5de50f408ca9f2185078a15c1612346fdcb1a9a523bf7",
+      "plugin_id": "example.playtime-report",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Playtime Report\n\nA real, small plugin rather than a protocol stub.\n\nThe **Refresh report** action asks the host for the signed-in user's game library,\ncalculates total playtime and the ten most-played games, returns the result and\npersists it under `users/<host-injected-user-id>/latest-report`. It requests\n`games.read`, `plugin.storage` and `frontend.navigation.main` for its sidebar page.\nThe supervised entrypoint reports ready and remains alive; library reads occur\non user action, not on every process restart.\n\nIt demonstrates a normal plugin pattern:\n\n1. request an approved core capability;\n2. perform application-specific logic entirely inside the plugin;\n3. persist only plugin-owned data;\n4. return a useful action result while the host supervises the worker.\n\nIt does not implement game storage, lifecycle management, or the plugin gateway itself.\n\nBuild/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).\nThe package includes this README, release-specific policy/tags and an icon.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "060b5860586953e1018d8af2572ad3110304df19f15a435c5f2477d8e69539dc",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "060b5860586953e1018d8af2572ad3110304df19f15a435c5f2477d8e69539dc",
+        "signature": "v2:HJjPujkKIGB5pkXzea9zPtX6sPd/o7YjDVo8rXibljo/1vevjn9oNq53M7r2ATbAjBii2RorqA5LiUjMAyQUAQ=="
+      },
+      "tags": [
+        "games",
+        "statistics"
+      ],
+      "version": "1.5.0"
     }
   ],
   "version": 1

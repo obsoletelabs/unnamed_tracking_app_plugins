@@ -40,3 +40,19 @@ def register_provider(
         "channel_context": channel_context,
         "transport": transport,
     })
+
+
+def poll_lifecycle(cursor: str | None = None, *, limit: int = 100) -> dict[str, Any]:
+    """Replay own installation metadata on host 1.1.4 with an explicit read grant.
+
+    Save the returned cursor only after processing its events. If
+    resync_required is true, discard stale local assumptions and restart using
+    the returned cursor; this feed cannot reconstruct expired state.
+    """
+    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200:
+        raise ValueError("Lifecycle limit must be an integer from 1 to 200")
+    if cursor is not None and (not isinstance(cursor, str) or not 1 <= len(cursor) <= 1024):
+        raise ValueError("Lifecycle cursor must be a nonempty bounded string")
+    return request("notifications.lifecycle.poll", "notifications.lifecycle.read", {
+        "cursor": cursor, "limit": limit,
+    })

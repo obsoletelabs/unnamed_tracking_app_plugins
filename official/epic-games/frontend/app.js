@@ -23,6 +23,8 @@
     $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
     $("connect-panel").hidden = snapshot.connected;
     $("disconnect").hidden = !snapshot.connected;
+    $("signin-url").value = snapshot.login_url || "";
+    $("copy-signin").disabled = busy || !snapshot.login_url;
     $("import").textContent = ["idle", "complete"].includes(snapshot.phase) ? "Import games" : "Resume import";
     for (const id of ["signin", "connect", "disconnect", "restart", "import"]) $(id).disabled = busy || (!["signin", "connect"].includes(id) && !snapshot.connected);
     $("pause").hidden = !busy;
@@ -51,6 +53,14 @@
     const authorization_code = $("code").value; $("code").value = "";
     void perform(async () => { snapshot = await request("connect", { authorization_code }); });
   }
+  function signIn() {
+    // Do not call window.open() from inside the sandbox. The declared
+    // external_navigation action is handled by the host after the action
+    // returns its validated redirect_url, so browser popup blockers are not
+    // involved and the plugin does not need popup/same-origin privileges.
+    if (busy) return;
+    void perform(async () => { await request("signin"); });
+  }
   // The host's opaque sandbox blocks native forms; use the action bridge.
   $("connect").onclick = connect;
   $("code").addEventListener("keydown", (event) => {
@@ -59,9 +69,21 @@
     }
   });
   $("disconnect").onclick = () => perform(async () => { const result = await request("disconnect"); if (!result.cancelled) snapshot = result; });
-  $("signin").onclick = () => perform(() => request("signin"));
-  $("import").onclick = () => perform(() => importGames(false));
-  $("restart").onclick = () => perform(() => importGames(true));
+  $("signin").onclick = signIn;
+  $("copy-signin").onclick = async () => {
+    const input = $("signin-url");
+    if (busy || !input.value) return;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      $("copy-status").textContent = "Link copied. Paste it into your regular browser.";
+    } catch {
+      input.focus(); input.select();
+      $("copy-status").textContent = "Copy the selected link using your browser's Copy command, then paste it into your regular browser.";
+    }
+  };
+  $("signin-url").onclick = () => $("signin-url").select();
+  $("import").onclick = () => perform(async () => importGames(false));
+  $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };
   void perform(async () => { snapshot = await request("status"); });
 })();
