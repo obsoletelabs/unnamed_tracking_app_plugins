@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "notifications",
+    "demo",
+    "failure-testing"
+  ],
+  "release_notes": "Initial demonstration renderer: approved fields, deterministic failures and bounded opaque simulation state.",
+  "automatic_update": true,
+  "icon": "icon.svg"
+}
