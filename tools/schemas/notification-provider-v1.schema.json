@@ -1,31 +1,16 @@
 {
   "additionalProperties": false,
-  "description": "A plugin-owned notification destination declaration. The plugin owns configuration and delivery.",
+  "description": "A plugin-owned notification destination declaration. Legacy host-owned providers remain supported.",
   "properties": {
-    "provider_id": {
-      "maxLength": 128,
-      "minLength": 3,
-      "pattern": "^[a-z0-9][a-z0-9._-]*$",
-      "type": "string"
-    },
+    "provider_id": {"maxLength": 128, "minLength": 3, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
     "name": {"maxLength": 128, "minLength": 1, "type": "string"},
-    "action_id": {
-      "maxLength": 128,
-      "minLength": 1,
-      "pattern": "^[a-z0-9][a-z0-9._-]*$",
-      "type": "string"
-    },
-    "destination_kind": {
-      "maxLength": 32,
-      "minLength": 1,
-      "pattern": "^[a-z0-9][a-z0-9._-]*$",
-      "type": "string"
-    },
+    "action_id": {"maxLength": 128, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
+    "destination_kind": {"maxLength": 32, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "default": "plugin", "type": "string"},
     "channel_context": {"enum": ["external", "internal"], "default": "external", "type": "string"},
     "privacy": {"enum": ["PUBLIC", "PRIVATE"], "default": "PUBLIC", "type": "string"},
-    "transport": {"enum": ["plugin_public", "plugin_private"], "type": "string"}
+    "transport": {"enum": ["legacy", "plugin_public", "plugin_private"], "default": "legacy", "type": "string"}
   },
-  "required": ["provider_id", "name", "action_id", "destination_kind", "privacy", "transport"],
+  "required": ["provider_id", "name", "action_id"],
   "title": "NotificationProviderDeclaration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
