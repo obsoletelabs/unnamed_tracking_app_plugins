@@ -1,4 +1,4 @@
- # Discord Bot Notifications
+# Discord Bot Notifications
 
 Private direct-message notifications using a dedicated Discord bot.
 
