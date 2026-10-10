@@ -5785,9 +5785,9 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
-        "source_committed_at": "2026-10-10T19:28:39+08:00",
-        "source_digest": "9fb25f33c3ff7b85f43cbda3b9dfd44ee2968a93489c57b5637ad962b00debcf",
+        "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+        "source_committed_at": "2026-10-10T22:51:37+08:00",
+        "source_digest": "5f1ddb3d4837b549f1ae7d7fe3ac493e831d446eccf85f99392d10287e9c9d72",
         "source_path": "examples/notification-chaos-provider",
         "version_bump": "minor"
       },
@@ -5855,8 +5855,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-          "sha256": "2c1740094025233dbbf77bc5221b91deece7c7acc3a4b3d9f04c1e0aae9eaf94",
-          "signature": "v2:XltixMLH4V2unKGTTPMEK9hXVWAoL5YCfYHOQfE1D3quBYdSG4wHbvgpofXKkBTAh7T4ZKRrR4sEGwYAiImRDg=="
+          "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+          "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
         },
         "manifest_version": 1,
         "name": "Notification Chaos Demo",
@@ -5905,15 +5905,15 @@
             "simulation"
           ]
         },
-        "version": "1.1.0"
+        "version": "1.2.0"
       },
       "name": "Notification Chaos Demo",
       "package": {
-        "filename": "example.notification-chaos-provider-1.1.0.utp",
+        "filename": "example.notification-chaos-provider-1.2.0.utp",
         "format": "utp-v1",
-        "size_bytes": 7905
+        "size_bytes": 8113
       },
-      "package_sha256": "09280b08994b630eff000f5d6cbec22256510fc9814f66fbc4671e5693159200",
+      "package_sha256": "5574bd4cf8e7743fbacd724d4ed52413b229d4ff4ff89269715561492c9988d2",
       "permissions": [
         {
           "capability": {
@@ -6202,14 +6202,141 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.notification-chaos-provider-1.1.0.utp",
           "version": "1.1.0"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+            "source_committed_at": "2026-10-10T22:51:37+08:00",
+            "source_digest": "5f1ddb3d4837b549f1ae7d7fe3ac493e831d446eccf85f99392d10287e9c9d72",
+            "source_path": "examples/notification-chaos-provider",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e6f4fe57c48d1f6ff5f83c305026b451a3d9776bbb8dc21689804b587b31b3ae"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": ">=1.0.0",
+            "capabilities": [
+              {
+                "name": "notification_providers.register",
+                "version": 1
+              },
+              {
+                "name": "notification_providers.deliver",
+                "version": 1
+              },
+              {
+                "name": "plugin.settings",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "DEMO ONLY: reversed approved fields and selectable renderer failures. Uses host-owned Discord webhooks.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+              "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+              "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
+            },
+            "manifest_version": 1,
+            "name": "Notification Chaos Demo",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_providers.register",
+                  "version": 1
+                },
+                "rationale": "Register a clearly labelled demonstration provider through the existing gateway."
+              },
+              {
+                "capability": {
+                  "name": "notification_providers.deliver",
+                  "version": 1
+                },
+                "rationale": "Render only approved field references; deliberately simulate renderer failures without credentials or routing authority."
+              },
+              {
+                "capability": {
+                  "name": "plugin.settings",
+                  "version": 1
+                },
+                "rationale": "Read the explicitly selected simulation mode; no destination configuration."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Remember at most 100 opaque notification IDs for the first-render failure simulation."
+              }
+            ],
+            "plugin_id": "example.notification-chaos-provider",
+            "sdk_version_range": "^1.1.2",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "render"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": [
+                "simulation"
+              ]
+            },
+            "version": "1.2.0"
+          },
+          "package": {
+            "filename": "example.notification-chaos-provider-1.2.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8113
+          },
+          "package_sha256": "5574bd4cf8e7743fbacd724d4ed52413b229d4ff4ff89269715561492c9988d2",
+          "plugin_id": "example.notification-chaos-provider",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Notification Chaos Demo\n\n**Demonstration only; unsuitable for production delivery.** This intentionally\nunreliable provider exercises the public Plugin API 1.1.2 protected renderer.\nIt is independent of the maintained official Discord Notifications provider.\nVersion 1.0.0 is published through reviewed demo-channel signing; preview packages are\navailable through the existing builder.\n\nInstall, review its four exact grants, and enable it. Choose a simulation mode\nin Plugin Manager settings, then explicitly enroll a webhook for **Notification\nChaos Demo** in Account Notifications. Use the host's destination test button.\nSuccessful modes really send to the configured Discord webhook; use a test\nchannel. No credential is entered into or returned to this plugin.\n\n| Mode | Behavior |\n| --- | --- |\n| Backwards embed (default) | Approved link, timestamp, body and title in backwards order |\n| Backwards plain message | The same field order in plain text |\n| Fail first render | Record an opaque ID, raise once, then allow core retry to render |\n| Fail every render | Raise every time; core eventually records permanent failure |\n| Invalid layout | Return an unsupported style; core rejects it before transport |\n\nThe host still selects public versus explicitly consented media fields. Webhooks\nremain PUBLIC and cannot receive private/security/recovery content. The renderer\ncannot append private text, return raw embeds, request credentials or set delivery\nstate. It declares no network, game-reading or sensitive-content permission.\n\nOnly the most recent 100 opaque notification UUIDs are retained in plugin-owned\nsimulation storage. This is a teaching ledger, not an authoritative attempt\ncounter: eviction, explicit data purge and concurrent renders may simulate another\nfirst failure. Reinstall does not reclaim old endpoints or replay notifications.\nCore leases, retries, dedupe, preferences and destination lifecycle remain authoritative.\n\n```sh\npython -m pytest tests/test_notification_chaos_provider.py -q\npython tools/build_packages.py\npython tools/check_reference_lifecycle.py --host-root /path/to/host\n```\n\nPackage tests cover exact grants, isolation, schema rejection, bounded persistent\nsimulation, temporary startup recovery and standalone imports. Real-worker\nlifecycle acceptance installs an independently signed package; it does not claim\nlive Discord delivery. Production notification behavior must not depend on this\ndemo being installed.\n",
+          "release_notes": "Initial demonstration renderer: approved fields, deterministic failures and bounded opaque simulation state.",
+          "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+          "signing": {
+            "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+            "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+            "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
+          },
+          "tags": [
+            "notifications",
+            "demo",
+            "failure-testing"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.notification-chaos-provider-1.2.0.utp",
+          "version": "1.2.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "2c1740094025233dbbf77bc5221b91deece7c7acc3a4b3d9f04c1e0aae9eaf94",
+      "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
       "signing": {
         "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-        "sha256": "2c1740094025233dbbf77bc5221b91deece7c7acc3a4b3d9f04c1e0aae9eaf94",
-        "signature": "v2:XltixMLH4V2unKGTTPMEK9hXVWAoL5YCfYHOQfE1D3quBYdSG4wHbvgpofXKkBTAh7T4ZKRrR4sEGwYAiImRDg=="
+        "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+        "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -6221,8 +6348,8 @@
         "demo",
         "failure-testing"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.notification-chaos-provider-1.1.0.utp",
-      "version": "1.1.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.notification-chaos-provider-1.2.0.utp",
+      "version": "1.2.0"
     },
     {
       "application_version_range": "*",
@@ -6231,9 +6358,9 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
-        "source_committed_at": "2026-10-10T19:28:39+08:00",
-        "source_digest": "49096cfeaadc16daae487fda94c11d524e1625c26f7c2793e1691f54eff4924c",
+        "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+        "source_committed_at": "2026-10-10T22:51:37+08:00",
+        "source_digest": "2df279c5387ad68b51b51a6d6daadb4d404f368fec86c82b49601cc06a4540d5",
         "source_path": "examples/password-reset-notification-demo",
         "version_bump": "minor"
       },
@@ -6301,8 +6428,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-          "sha256": "71ce99ba7e36b81f405def2a51994a13fbba984bfd18f4e859971807b70a7326",
-          "signature": "v2:nLUeRzIL2QFPrBpCCc5Y312BTUsYi8Clgkopteaq6GGMo3EvJ+dbT2mUdgOitt3xDcvl6IEZy7W5q66vU8kHAg=="
+          "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
+          "signature": "v2:S7HE5MgPejv8XLogXGxDQbe016/eibpyXiAL6RqkOHRWVW6IiJG7NssxmZhsCRKFgTu/xzIoehjSXa4DP69WDQ=="
         },
         "manifest_version": 1,
         "name": "Password Reset Routing Demo",
@@ -6349,15 +6476,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "1.2.0"
+        "version": "1.3.0"
       },
       "name": "Password Reset Routing Demo",
       "package": {
-        "filename": "example.password-reset-notification-demo-1.2.0.utp",
+        "filename": "example.password-reset-notification-demo-1.3.0.utp",
         "format": "utp-v1",
-        "size_bytes": 7794
+        "size_bytes": 8003
       },
-      "package_sha256": "1ce97485c57e58e3a56af39354c2c9ddb2dc2e5ceeb8c66a9a82c71b305eed16",
+      "package_sha256": "240e22ca4bddd3c5bc665bb739c1098a97d3c1e1e2c12b5c3a4bf68bccc3841d",
       "permissions": [
         {
           "capability": {
@@ -6764,14 +6891,138 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.2.0.utp",
           "version": "1.2.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+            "source_committed_at": "2026-10-10T22:51:37+08:00",
+            "source_digest": "2df279c5387ad68b51b51a6d6daadb4d404f368fec86c82b49601cc06a4540d5",
+            "source_path": "examples/password-reset-notification-demo",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8946c8b94ab94e8c130c16c74c36957e1cafd22912dfc8a69cc36e53783c529"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": "*",
+            "capabilities": [
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.emit",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "notifications.sensitive",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Executable notification routing demo. Does not change real authentication.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+              "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
+              "signature": "v2:S7HE5MgPejv8XLogXGxDQbe016/eibpyXiAL6RqkOHRWVW6IiJG7NssxmZhsCRKFgTu/xzIoehjSXa4DP69WDQ=="
+            },
+            "manifest_version": 1,
+            "name": "Password Reset Routing Demo",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Register this namespaced synthetic notification type."
+              },
+              {
+                "capability": {
+                  "name": "notifications.emit",
+                  "version": 1
+                },
+                "rationale": "Submit event facts for the authenticated user through the core."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Persist user-scoped expiring demo token digests and consumption state."
+              },
+              {
+                "capability": {
+                  "name": "notifications.sensitive",
+                  "version": 1
+                },
+                "rationale": "Explicit high-risk permission for the synthetic recovery token; SECURE external destinations only."
+              }
+            ],
+            "plugin_id": "example.password-reset-notification-demo",
+            "sdk_version_range": "^1.1.2",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "issue",
+                "confirm"
+              ],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.3.0"
+          },
+          "package": {
+            "filename": "example.password-reset-notification-demo-1.3.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8003
+          },
+          "package_sha256": "240e22ca4bddd3c5bc665bb739c1098a97d3c1e1e2c12b5c3a4bf68bccc3841d",
+          "plugin_id": "example.password-reset-notification-demo",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Password Reset Routing Demo\n\n**Demo only.** This executes a synthetic issue → notification → confirmation flow through the public Plugin API 1.1.2. It never changes passwords, creates accounts, grants membership or returns destination addresses/credentials. SMTP belongs to the host. There is no anonymous recovery endpoint or production reset/invite implementation.\n\nThe `issue` action registers `example.password-reset-notification-demo.requested`, stores an expiring token digest under the authenticated user's storage key and emits typed facts. Its result contains acceptance/notification identity and expiry, never the token. The core handles preferences, destination selection, trust, urgency, retries and SMTP rendering. Required trust is **SECURE**, purpose **recovery**. Recovery requires a verified external destination with explicit recovery opt-in, suitable transport and a separately reviewed notifications.sensitive grant; the inbox cannot receive this token.\n\nWith the plugin enabled and its declared permissions approved, call the authenticated host action API:\n\n```http\nPOST /api/plugins/example.password-reset-notification-demo/actions/issue\nContent-Type: application/json\n\n{\"values\": {}}\n```\n\nRead the token from the eligible notification, then explicitly submit it:\n\n```http\nPOST /api/plugins/example.password-reset-notification-demo/actions/confirm\nContent-Type: application/json\n\n{\"values\": {\"token\": \"TOKEN_FROM_NOTIFICATION\"}}\n```\n\nBoth calls require the existing authenticated host session/API authorization. The sender cannot select another user/address. A new issue replaces the previous challenge; it expires after ten minutes. Confirmation consumes it sequentially and rejects another owner, replacement, expiry, alteration and sequential replay. Storage get/put is not a compare-and-swap transaction; concurrent confirmation is intentionally not a production authentication guarantee. No real authority is attached to the demo token.\n\nPermissions are exactly source registration, notification emission and plugin storage, plus the separate critical notifications.sensitive grant. No full API, user enumeration, network access, host source imports or database access is requested. This is a protocol/action demonstration with no new frontend page; no screenshots apply.\n\nFrom the companion repository root:\n\n```sh\npython -m pytest tests/test_notification_demos.py\npython tools/check_source_layout.py\npython tools/build_packages.py\n```\n\nBuilds use the existing SDK/package format. Branch previews are unsigned and require explicit untrusted-package consent in the host. Signed main publication uses the existing demo signer; do not claim the source preview is a maintained official production auth plugin. Disable/uninstall retires source routing and queued work while the host retains notification history/preferences. Actual package/host acceptance is documented in the PR.\n",
+          "release_notes": "Synthetic owner-scoped notification source demonstration, Plugin API 1.1.2.",
+          "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
+          "signing": {
+            "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+            "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
+            "signature": "v2:S7HE5MgPejv8XLogXGxDQbe016/eibpyXiAL6RqkOHRWVW6IiJG7NssxmZhsCRKFgTu/xzIoehjSXa4DP69WDQ=="
+          },
+          "tags": [
+            "notifications",
+            "demo"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.3.0.utp",
+          "version": "1.3.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "71ce99ba7e36b81f405def2a51994a13fbba984bfd18f4e859971807b70a7326",
+      "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
       "signing": {
         "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-        "sha256": "71ce99ba7e36b81f405def2a51994a13fbba984bfd18f4e859971807b70a7326",
-        "signature": "v2:nLUeRzIL2QFPrBpCCc5Y312BTUsYi8Clgkopteaq6GGMo3EvJ+dbT2mUdgOitt3xDcvl6IEZy7W5q66vU8kHAg=="
+        "sha256": "ff51a459d08349efa50dbd0d481dd8189ca9373b831e03835e5a6eb335a840a1",
+        "signature": "v2:S7HE5MgPejv8XLogXGxDQbe016/eibpyXiAL6RqkOHRWVW6IiJG7NssxmZhsCRKFgTu/xzIoehjSXa4DP69WDQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -6782,8 +7033,8 @@
         "notifications",
         "demo"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.2.0.utp",
-      "version": "1.2.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.3.0.utp",
+      "version": "1.3.0"
     },
     {
       "application_version_range": "*",
@@ -15311,9 +15562,9 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
-        "source_committed_at": "2026-10-10T19:28:39+08:00",
-        "source_digest": "fb89a1efa7192bbf63aae3ed3f8bd5400b9d8471892a34b895298ed8a4e2cc96",
+        "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+        "source_committed_at": "2026-10-10T22:51:37+08:00",
+        "source_digest": "c3aa7cdf450d8447450d958dafc4df7ab508ba8fb704a369029c56f1b6adf496",
         "source_path": "examples/user-invite-notification-demo",
         "version_bump": "minor"
       },
@@ -15373,8 +15624,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-          "sha256": "de62b94574ee614dfeb23d4e83d1ba17158aaac419c4a1a949645cba7fb96035",
-          "signature": "v2:VLRJ39v6jKGy8t8OVMBHrnpKTgSRdrSGVy85E7bL0F75NeQ8jpNs+GoZjw465Jv3+m12DbNP7Gws8UcFTcPYBg=="
+          "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
+          "signature": "v2:q6Yj62KXXCh8yB8feZzfbM2+F0o1v2qYjW/AcBgOUfbfTdh7TerOyERc6Hd2VOeZuFpDuDandb7lEFUdMzG6DA=="
         },
         "manifest_version": 1,
         "name": "User Invite Routing Demo",
@@ -15414,15 +15665,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "1.2.0"
+        "version": "1.3.0"
       },
       "name": "User Invite Routing Demo",
       "package": {
-        "filename": "example.user-invite-notification-demo-1.2.0.utp",
+        "filename": "example.user-invite-notification-demo-1.3.0.utp",
         "format": "utp-v1",
-        "size_bytes": 7616
+        "size_bytes": 7818
       },
-      "package_sha256": "416ec22922d8a5df6581656bf9269e8b255b46ca3c4876e878aba3af311c1bc0",
+      "package_sha256": "3379ee463d6f4b01188a4d64491f78f4bbb67f81f6cb2944264c44a60bbf2736",
       "permissions": [
         {
           "capability": {
@@ -15789,14 +16040,127 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.2.0.utp",
           "version": "1.2.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+            "source_committed_at": "2026-10-10T22:51:37+08:00",
+            "source_digest": "c3aa7cdf450d8447450d958dafc4df7ab508ba8fb704a369029c56f1b6adf496",
+            "source_path": "examples/user-invite-notification-demo",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8946c8b94ab94e8c130c16c74c36957e1cafd22912dfc8a69cc36e53783c529"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": "*",
+            "capabilities": [
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.emit",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Executable notification routing demo. Does not change real authentication.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+              "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
+              "signature": "v2:q6Yj62KXXCh8yB8feZzfbM2+F0o1v2qYjW/AcBgOUfbfTdh7TerOyERc6Hd2VOeZuFpDuDandb7lEFUdMzG6DA=="
+            },
+            "manifest_version": 1,
+            "name": "User Invite Routing Demo",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Register this namespaced synthetic notification type."
+              },
+              {
+                "capability": {
+                  "name": "notifications.emit",
+                  "version": 1
+                },
+                "rationale": "Submit event facts for the authenticated user through the core."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Persist user-scoped expiring demo token digests and consumption state."
+              }
+            ],
+            "plugin_id": "example.user-invite-notification-demo",
+            "sdk_version_range": "^1.1.2",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "issue",
+                "confirm"
+              ],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.3.0"
+          },
+          "package": {
+            "filename": "example.user-invite-notification-demo-1.3.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 7818
+          },
+          "package_sha256": "3379ee463d6f4b01188a4d64491f78f4bbb67f81f6cb2944264c44a60bbf2736",
+          "plugin_id": "example.user-invite-notification-demo",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# User Invite Routing Demo\n\n**Demo only.** This executes a synthetic issue → notification → confirmation flow through the public Plugin API 1.1.2. It never changes passwords, creates accounts, grants membership or returns destination addresses/credentials. SMTP belongs to the host. There is no anonymous recovery endpoint or production reset/invite implementation.\n\nThe `issue` action registers `example.user-invite-notification-demo.requested`, stores an expiring token digest under the authenticated user's storage key and emits typed facts. Its result contains acceptance/notification identity and expiry, never the token. The core handles preferences, destination selection, trust, urgency, retries and SMTP rendering. Required trust is **PRIVATE**, purpose **standard**. An enrolled PRIVATE email or authenticated inbox can receive this ordinary invitation demo; PUBLIC webhooks cannot.\n\nWith the plugin enabled and its declared permissions approved, call the authenticated host action API:\n\n```http\nPOST /api/plugins/example.user-invite-notification-demo/actions/issue\nContent-Type: application/json\n\n{\"values\": {}}\n```\n\nRead the token from the eligible notification, then explicitly submit it:\n\n```http\nPOST /api/plugins/example.user-invite-notification-demo/actions/confirm\nContent-Type: application/json\n\n{\"values\": {\"token\": \"TOKEN_FROM_NOTIFICATION\"}}\n```\n\nBoth calls require the existing authenticated host session/API authorization. The sender cannot select another user/address. A new issue replaces the previous challenge; it expires after ten minutes. Confirmation consumes it sequentially and rejects another owner, replacement, expiry, alteration and sequential replay. Storage get/put is not a compare-and-swap transaction; concurrent confirmation is intentionally not a production authentication guarantee. No real authority is attached to the demo token.\n\nPermissions are exactly source registration, notification emission and plugin storage. No full API, user enumeration, network access, host source imports or database access is requested. This is a protocol/action demonstration with no new frontend page; no screenshots apply.\n\nFrom the companion repository root:\n\n```sh\npython -m pytest tests/test_notification_demos.py\npython tools/check_source_layout.py\npython tools/build_packages.py\n```\n\nBuilds use the existing SDK/package format. Branch previews are unsigned and require explicit untrusted-package consent in the host. Signed main publication uses the existing demo signer; do not claim the source preview is a maintained official production auth plugin. Disable/uninstall retires source routing and queued work while the host retains notification history/preferences. Actual package/host acceptance is documented in the PR.\n",
+          "release_notes": "Synthetic owner-scoped notification source demonstration, Plugin API 1.1.2.",
+          "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
+          "signing": {
+            "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+            "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
+            "signature": "v2:q6Yj62KXXCh8yB8feZzfbM2+F0o1v2qYjW/AcBgOUfbfTdh7TerOyERc6Hd2VOeZuFpDuDandb7lEFUdMzG6DA=="
+          },
+          "tags": [
+            "notifications",
+            "demo"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.3.0.utp",
+          "version": "1.3.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "de62b94574ee614dfeb23d4e83d1ba17158aaac419c4a1a949645cba7fb96035",
+      "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
       "signing": {
         "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-        "sha256": "de62b94574ee614dfeb23d4e83d1ba17158aaac419c4a1a949645cba7fb96035",
-        "signature": "v2:VLRJ39v6jKGy8t8OVMBHrnpKTgSRdrSGVy85E7bL0F75NeQ8jpNs+GoZjw465Jv3+m12DbNP7Gws8UcFTcPYBg=="
+        "sha256": "cfb6aff8b0bc28fdda780b06154d72790d68a2d97f76672ceb35ebab723df01e",
+        "signature": "v2:q6Yj62KXXCh8yB8feZzfbM2+F0o1v2qYjW/AcBgOUfbfTdh7TerOyERc6Hd2VOeZuFpDuDandb7lEFUdMzG6DA=="
       },
       "source": {
         "lifecycle": "source",
@@ -15807,8 +16171,8 @@
         "notifications",
         "demo"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.2.0.utp",
-      "version": "1.2.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.3.0.utp",
+      "version": "1.3.0"
     },
     {
       "application_version_range": ">=1.0.0",
@@ -15817,9 +16181,9 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
-        "source_committed_at": "2026-10-10T19:28:39+08:00",
-        "source_digest": "60dcee323002853043a7e94f5c1e39cc3aa85bede95de20cff436f3dd5769340",
+        "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+        "source_committed_at": "2026-10-10T22:51:37+08:00",
+        "source_digest": "e85caf54ad29ccf0e394d5bc27c0cb5cd64adb5e8005f43d6db5ab67f667c493",
         "source_path": "official/discord-notifications",
         "version_bump": "minor"
       },
@@ -15871,8 +16235,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "80ec460f351413e47616b581eee77da5c4fb42de9aed6e50416bb168f2681168",
-          "signature": "v2:n5fRtHsqXRZ27Wn7plXv3w9n0M1jY8DD5NeQV11J1AtJijnVwZ5OFZA1u7fIANZDwftJJ82ZJKJmC7TBovLrBg=="
+          "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
+          "signature": "v2:dJTXgJWQeAUvvGLO9A6gD7q7sCA3zOLseIYJgCUdSFDY2KcHxQH7NChd6oxT+fS5m6NX3Ygc7TX8Rl4/GW6+Ag=="
         },
         "manifest_version": 1,
         "name": "Discord Notifications",
@@ -15902,15 +16266,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "1.1.0"
+        "version": "1.2.0"
       },
       "name": "Discord Notifications",
       "package": {
-        "filename": "official.discord-notifications-1.1.0.utp",
+        "filename": "official.discord-notifications-1.2.0.utp",
         "format": "utp-v1",
-        "size_bytes": 6444
+        "size_bytes": 6658
       },
-      "package_sha256": "1470bf5d5ae52f4bc1f9401d49888c45b8b5bfc5e182b1a23c801f2a4ad69c8b",
+      "package_sha256": "baee79bb9cb12a8ce73c5b9195f2c5c0a3800fdf2245c47a5e97aa9d6fca0e72",
       "permissions": [
         {
           "capability": {
@@ -16131,14 +16495,114 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.1.0.utp",
           "version": "1.1.0"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+            "source_committed_at": "2026-10-10T22:51:37+08:00",
+            "source_digest": "e85caf54ad29ccf0e394d5bc27c0cb5cd64adb5e8005f43d6db5ab67f667c493",
+            "source_path": "official/discord-notifications",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "35878a54a656772077bd25fe042f7b715432b9b6ba67ee4080d6d3f5f69f758d"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": ">=1.0.0",
+            "capabilities": [
+              {
+                "name": "notification_providers.register",
+                "version": 1
+              },
+              {
+                "name": "notification_providers.deliver",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Maintained approved-field Discord notification layouts with host-owned encrypted user webhooks.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
+              "signature": "v2:dJTXgJWQeAUvvGLO9A6gD7q7sCA3zOLseIYJgCUdSFDY2KcHxQH7NChd6oxT+fS5m6NX3Ygc7TX8Rl4/GW6+Ag=="
+            },
+            "manifest_version": 1,
+            "name": "Discord Notifications",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_providers.register",
+                  "version": 1
+                },
+                "rationale": "Register the namespaced protected Discord provider with core."
+              },
+              {
+                "capability": {
+                  "name": "notification_providers.deliver",
+                  "version": 1
+                },
+                "rationale": "Render only core-approved fields; no access to webhook credentials or routing authority."
+              }
+            ],
+            "plugin_id": "official.discord-notifications",
+            "sdk_version_range": "^1.1.2",
+            "ui": {
+              "actions": [
+                "render"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.2.0"
+          },
+          "package": {
+            "filename": "official.discord-notifications-1.2.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 6658
+          },
+          "package_sha256": "baee79bb9cb12a8ce73c5b9195f2c5c0a3800fdf2245c47a5e97aa9d6fca0e72",
+          "plugin_id": "official.discord-notifications",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Discord Notifications\n\nMaintained official provider for owner-specific Discord webhooks, consuming the\nhost's Plugin API 1.1.2 protected provider contract. This is a new identity,\n`official.discord-notifications`; legacy example credentials/consent are never moved.\n\nInstall the package and grant `notification_providers.register` and\n`notification_providers.deliver`. An administrator must allow existing runtime\nDiscord egress. Enable the plugin, then open **Account → Notifications → Discord**\nin a compatible host to enroll each webhook. Choose notification types and use\n**Send test notification**. Configuration belongs to the host, not a plugin page.\n\nEach webhook is PUBLIC. Default release announcements use public facts. Explicit\nconfirmation on each destination allows its richer followed-media announcement;\nthat does not promote trust or permit account details, watch history, ratings,\nsecurity messages or recovery tokens. Webhook tokens remain host-encrypted and\nnever enter this plugin's inputs, files or storage. Removing a destination erases\nits secret while preserving history. Reinstallation requires new enrollment.\n\nThe renderer returns only `title`, `body`, `event_at` and `link` field references.\nThe host builds a bounded embed, disables mentions, rejects redirects and owns\nretries/failure state. Current implementation supports ordinary webhook channels,\nnot forum thread creation, DMs, attachments, artwork, Critical urgency or raw payloads.\nDelivery confirmation uses Discord's `wait=true` option; see the\n[official webhook documentation](https://docs.discord.com/developers/resources/webhook).\n\nTest: `python -m pytest tests/test_discord_notifications.py -q`.\nBuild: `python tools/build_packages.py` (isolated preview packages).\nActual host/runtime lifecycle acceptance is separate from unit tests. No external\nwebhook credentials are bundled. This source is initially an explicit catalogue\npreview pending paired acceptance and reviewed signed promotion.\n",
+          "release_notes": "Initial protected provider: core-approved field layouts and encrypted per-user webhooks. New identity; no legacy secret migration.",
+          "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
+            "signature": "v2:dJTXgJWQeAUvvGLO9A6gD7q7sCA3zOLseIYJgCUdSFDY2KcHxQH7NChd6oxT+fS5m6NX3Ygc7TX8Rl4/GW6+Ag=="
+          },
+          "tags": [
+            "notifications",
+            "discord",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.2.0.utp",
+          "version": "1.2.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "80ec460f351413e47616b581eee77da5c4fb42de9aed6e50416bb168f2681168",
+      "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "80ec460f351413e47616b581eee77da5c4fb42de9aed6e50416bb168f2681168",
-        "signature": "v2:n5fRtHsqXRZ27Wn7plXv3w9n0M1jY8DD5NeQV11J1AtJijnVwZ5OFZA1u7fIANZDwftJJ82ZJKJmC7TBovLrBg=="
+        "sha256": "68665206509c4e933a16cdc5fe4495ced6e1984d601396043c1dd5eb6ac9b373",
+        "signature": "v2:dJTXgJWQeAUvvGLO9A6gD7q7sCA3zOLseIYJgCUdSFDY2KcHxQH7NChd6oxT+fS5m6NX3Ygc7TX8Rl4/GW6+Ag=="
       },
       "source": {
         "lifecycle": "source",
@@ -16150,8 +16614,8 @@
         "discord",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.1.0.utp",
-      "version": "1.1.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.2.0.utp",
+      "version": "1.2.0"
     },
     {
       "application_version_range": ">=0.0.1",

@@ -252,6 +252,132 @@
         "failure-testing"
       ],
       "version": "1.1.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "1f41d8c5dcba4bef0941e5eb17a717d3c8b639e2",
+        "source_committed_at": "2026-10-10T22:51:37+08:00",
+        "source_digest": "5f1ddb3d4837b549f1ae7d7fe3ac493e831d446eccf85f99392d10287e9c9d72",
+        "source_path": "examples/notification-chaos-provider",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "e6f4fe57c48d1f6ff5f83c305026b451a3d9776bbb8dc21689804b587b31b3ae"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.2",
+        "application_version_range": ">=1.0.0",
+        "capabilities": [
+          {
+            "name": "notification_providers.register",
+            "version": 1
+          },
+          {
+            "name": "notification_providers.deliver",
+            "version": 1
+          },
+          {
+            "name": "plugin.settings",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "DEMO ONLY: reversed approved fields and selectable renderer failures. Uses host-owned Discord webhooks.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+          "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
+        },
+        "manifest_version": 1,
+        "name": "Notification Chaos Demo",
+        "permissions": [
+          {
+            "capability": {
+              "name": "notification_providers.register",
+              "version": 1
+            },
+            "rationale": "Register a clearly labelled demonstration provider through the existing gateway."
+          },
+          {
+            "capability": {
+              "name": "notification_providers.deliver",
+              "version": 1
+            },
+            "rationale": "Render only approved field references; deliberately simulate renderer failures without credentials or routing authority."
+          },
+          {
+            "capability": {
+              "name": "plugin.settings",
+              "version": 1
+            },
+            "rationale": "Read the explicitly selected simulation mode; no destination configuration."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Remember at most 100 opaque notification IDs for the first-render failure simulation."
+          }
+        ],
+        "plugin_id": "example.notification-chaos-provider",
+        "sdk_version_range": "^1.1.2",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "render"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": [
+            "simulation"
+          ]
+        },
+        "version": "1.2.0"
+      },
+      "package": {
+        "filename": "example.notification-chaos-provider-1.2.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 8113
+      },
+      "package_sha256": "5574bd4cf8e7743fbacd724d4ed52413b229d4ff4ff89269715561492c9988d2",
+      "plugin_id": "example.notification-chaos-provider",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Notification Chaos Demo\n\n**Demonstration only; unsuitable for production delivery.** This intentionally\nunreliable provider exercises the public Plugin API 1.1.2 protected renderer.\nIt is independent of the maintained official Discord Notifications provider.\nVersion 1.0.0 is published through reviewed demo-channel signing; preview packages are\navailable through the existing builder.\n\nInstall, review its four exact grants, and enable it. Choose a simulation mode\nin Plugin Manager settings, then explicitly enroll a webhook for **Notification\nChaos Demo** in Account Notifications. Use the host's destination test button.\nSuccessful modes really send to the configured Discord webhook; use a test\nchannel. No credential is entered into or returned to this plugin.\n\n| Mode | Behavior |\n| --- | --- |\n| Backwards embed (default) | Approved link, timestamp, body and title in backwards order |\n| Backwards plain message | The same field order in plain text |\n| Fail first render | Record an opaque ID, raise once, then allow core retry to render |\n| Fail every render | Raise every time; core eventually records permanent failure |\n| Invalid layout | Return an unsupported style; core rejects it before transport |\n\nThe host still selects public versus explicitly consented media fields. Webhooks\nremain PUBLIC and cannot receive private/security/recovery content. The renderer\ncannot append private text, return raw embeds, request credentials or set delivery\nstate. It declares no network, game-reading or sensitive-content permission.\n\nOnly the most recent 100 opaque notification UUIDs are retained in plugin-owned\nsimulation storage. This is a teaching ledger, not an authoritative attempt\ncounter: eviction, explicit data purge and concurrent renders may simulate another\nfirst failure. Reinstall does not reclaim old endpoints or replay notifications.\nCore leases, retries, dedupe, preferences and destination lifecycle remain authoritative.\n\n```sh\npython -m pytest tests/test_notification_chaos_provider.py -q\npython tools/build_packages.py\npython tools/check_reference_lifecycle.py --host-root /path/to/host\n```\n\nPackage tests cover exact grants, isolation, schema rejection, bounded persistent\nsimulation, temporary startup recovery and standalone imports. Real-worker\nlifecycle acceptance installs an independently signed package; it does not claim\nlive Discord delivery. Production notification behavior must not depend on this\ndemo being installed.\n",
+      "release_notes": "Initial demonstration renderer: approved fields, deterministic failures and bounded opaque simulation state.",
+      "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "5cd9c4c9b77ae649f17d9bcfd410950604153f9b6729aeb4c1ea5fcc274fb6eb",
+        "signature": "v2:YFpSGo5IFgbQ5MMTmJ93n4j6+I/2eEtli2zm1mwN0H56HbMS7CPSzaPMU8Sagauj1GDLgVgskUkwpK3WgTZiDQ=="
+      },
+      "tags": [
+        "notifications",
+        "demo",
+        "failure-testing"
+      ],
+      "version": "1.2.0"
     }
   ],
   "version": 1
