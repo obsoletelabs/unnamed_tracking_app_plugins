@@ -181,11 +181,19 @@ def _confirm_link(values: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(pending, dict) or int(pending.get("expires_at", 0)) <= now:
         _delete("pending-links/" + user_id)
         raise PluginError("The verification code expired. Start linking again.")
+    attempts_key = "link-code-attempts/" + user_id
+    attempts = int(_load(attempts_key, 0))
+    if attempts >= 5:
+        _delete("pending-links/" + user_id)
+        _delete(attempts_key)
+        raise PluginError("Too many incorrect codes. Start linking again.")
     digest = hashlib.sha256(
         f"{user_id}:{code}:{pending['expires_at']}".encode()
     ).hexdigest()
     if not hmac.compare_digest(digest, str(pending.get("code_digest", ""))):
+        _store(attempts_key, attempts + 1)
         raise PluginError("The verification code is incorrect.")
+    _delete(attempts_key)
     _store(
         "links/" + user_id,
         {
