@@ -8,6 +8,7 @@ The catalogue is generated from their actual packages, not this table.
 | Source | Scale / useful behavior | Tests |
 | --- | --- | --- |
 | [UI/API](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/ui-api) | Small reference: declarative page, setting, library action | examples, smoke, packaged worker, reference lifecycle |
+| [Epic Games Library](epic-games.md) | Official optional account connection and bounded resumable game imports | Epic wire, paging, tokens, restart and grant regressions |
 | [Playtime Report](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/playtime-report) | Small demo: calculate/store user report | real plugins, smoke, package, reference lifecycle |
 | [Recently Played Notifier](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/recently-played-notifier) | Small demo: library + notification | real plugins, smoke, reference lifecycle |
 | [Metadata Curator](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/metadata-curator) | Small demo: setting + search + normalized state | real plugins, smoke, reference lifecycle |

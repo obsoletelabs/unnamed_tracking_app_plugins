@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Epic Games Library</title>
+  <link rel="stylesheet" href="./appearance.css"><link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main>
+  <header><p class="eyebrow">Connected libraries</p><h1>Epic Games</h1><p>Bring your games and recorded playtime into your library. Your notes, ratings and chosen status stay with each game.</p></header>
+  <section aria-labelledby="connection-title">
+    <h2 id="connection-title">Your connection</h2>
+    <p id="account">Checking connection…</p>
+    <div id="connect-panel">
+      <ol><li><button id="signin" type="button">Sign in on Epic Games</button></li><li>Copy the one-time authorization code or the JSON page Epic shows.</li><li>Use your browser's Back button to return, then paste it below and connect.</li></ol>
+      <form id="connect-form"><label for="code">Epic authorization code</label><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" type="button">Connect Epic</button></form>
+      <p class="muted">Sign in on epicgames.com. This page only receives the one-time code. Saved tokens stay in private plugin storage.</p>
+    </div>
+    <button id="disconnect" type="button" hidden>Disconnect Epic</button>
+  </section>
+  <section aria-labelledby="import-title">
+    <h2 id="import-title">Import your library</h2>
+    <p>Imports run in small steps. You can pause or close this page, then resume. Games are marked unavailable only after a complete inventory.</p>
+    <div class="toolbar"><button id="import" type="button" disabled>Import games</button><button id="pause" type="button" hidden>Pause after this step</button><button id="restart" type="button" disabled>Start new inventory</button></div>
+    <p id="progress" role="status" aria-live="polite">No import started.</p>
+    <dl><div><dt>Inventory entries</dt><dd id="inventory-count">0</dd></div><div><dt>Games saved</dt><dd id="imported">0</dd></div><div><dt>Add-ons skipped</dt><dd id="skipped">0</dd></div><div><dt>Local conflicts</dt><dd id="conflicts">0</dd></div></dl>
+    <p id="warning" class="muted" hidden></p><p id="error" role="alert" hidden></p>
+  </section>
+  <p class="muted">Epic's launcher services can change without notice. Catalogue artwork and achievements are outside this import; use the host's game metadata tools for artwork.</p>
+</main>
+<script src="./appearance.js"></script><script src="./app.js"></script>
+</body>
+</html>

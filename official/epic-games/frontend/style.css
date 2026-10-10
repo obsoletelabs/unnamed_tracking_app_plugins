@@ -1,0 +1,13 @@
+body { margin: 0; font-family: system-ui, sans-serif; }
+main { max-width: 850px; margin: auto; padding: 20px; }
+h1 { font-size: 2rem; margin: 4px 0 12px; } h2 { font-size: 1.2rem; margin-top: 0; }
+p { line-height: 1.55; } section { margin-top: 20px; padding: 20px; border: 1px solid var(--ui-border); border-radius: 12px; background: var(--ui-surface); }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--ui-dim); }
+.muted, dt { color: var(--ui-dim); font-size: .9rem; } a { color: var(--ui-accent); } li { margin-bottom: 8px; }
+form { display: grid; gap: 10px; } label { font-weight: 600; } input { box-sizing: border-box; width: 100%; }
+button, input { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--ui-border); }
+button { cursor: pointer; background: var(--ui-accent); color: var(--ui-on-accent); } button:disabled { opacity: .5; cursor: default; }
+input { background: var(--ui-bg); color: var(--ui-text); } button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 3px; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; } dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } dd { margin: 6px 0 0; font-size: 1.4rem; font-weight: 600; }
+#error { color: var(--ui-danger, #b91c1c); } [hidden] { display: none !important; }
+@media (max-width: 550px) { main { padding: 12px; } section { padding: 16px; } dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } .toolbar button { flex: 1 1 130px; } }

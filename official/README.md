@@ -1,5 +1,12 @@
 # Official plugins
 
+[Epic Games Library](epic-games/README.md), **0.0.1**, connects a personal Epic
+account and imports games/playtime through Plugin API 1.1.3. It preserves manual
+library state and resumes bounded inventory/catalogue/import steps after failure.
+Its packaged sandbox UI uses narrow navigation, storage, network and game-write
+permissions. Branch CI supplies an unsigned preview; signed publication uses
+the existing protected official pipeline.
+
 [Extended Session Manager](extended-session-manager/README.md) enhances the
 built-in personal and administrator session pages with GeoIP, network, anomaly
 details and maps. It retains the ID `example.self-service-session-manager` so

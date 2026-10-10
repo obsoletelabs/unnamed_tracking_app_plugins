@@ -81,6 +81,8 @@ nav:
   - Examples and Screenshots:
       - Working examples: examples/index.md
       - Jellyfin Media Sync: examples/jellyfin.md
+      - Epic Games Library: examples/epic-games.md
+      - Epic package validation: examples/epic-games-validation.md
       - Real captures: assets/screenshots/index.md
       - Document behavior comparison: scoped-document-viewer.md
   - Historical Evidence:
