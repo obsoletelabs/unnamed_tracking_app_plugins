@@ -42,7 +42,11 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
     provider._register_provider()
     assert calls == [("notification_providers.register", "notification_providers.register", {
         "provider_id": "official.discord-bot-notifications.dm", "name": "Discord Bot DM", "action_id": "deliver",
-        "destination_kind": "discord_bot_dm", "privacy": "PRIVATE", "channel_context": "external", "transport": "plugin_private",
+        "transport": "plugin", "definition": {
+            "destinations": [{"kind": "discord_bot_dm", "label": "Discord Bot DM", "privacy": "PRIVATE", "fields": []}],
+            "configure_action": "save-bot-config", "retire_action": "clear-bot-token", "test_action": "test-dm",
+            "features": {"critical_supported": False, "multiple_destinations": False},
+        },
     })]
 
 
@@ -99,7 +103,7 @@ def test_delivery_only_sends_to_the_current_users_verified_link(monkeypatch):
     }.get(key, default))
     monkeypatch.setattr(provider, "_store", lambda key, value: None)
     monkeypatch.setattr(provider, "_send_dm", lambda token, user_id, content: sent.append((user_id, content)))
-    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Release", "body": "A new episode is available."}})
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "_notification_context": {"operation": "deliver", "destination": {"kind": "discord_bot_dm", "id": "12345678-1234-5678-1234-567812345678", "revision": 1}}, "delivery": {"title": "Release", "body": "A new episode is available."}})
     assert result == {"success": True, "retryable": False}
     assert sent == [("123456789012345678", "**Release**\nA new episode is available.")]
 
@@ -111,7 +115,7 @@ def test_delivery_without_verified_link_never_sends(monkeypatch):
     monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: {"token": "test-token", "guild_id": "123456789012345678"} if key == "secrets/bot-config" else default)
     monkeypatch.setattr(provider, "_send_dm", lambda *args: sent.append(args))
-    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Private", "body": "Do not send without linking."}})
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "_notification_context": {"operation": "deliver", "destination": {"kind": "discord_bot_dm", "id": "12345678-1234-5678-1234-567812345678", "revision": 1}}, "delivery": {"title": "Private", "body": "Do not send without linking."}})
     assert result["success"] is False
     assert result["error"] == "recipient_not_linked"
     assert sent == []
@@ -165,7 +169,7 @@ def test_delivery_reports_gateway_permission_errors_without_retrying(monkeypatch
         raise GatewayRequestError("permission denied", {"code": "forbidden"})
 
     monkeypatch.setattr(provider, "_load", denied_storage)
-    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Private", "body": "No delivery."}})
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "_notification_context": {"operation": "deliver", "destination": {"kind": "discord_bot_dm", "id": "12345678-1234-5678-1234-567812345678", "revision": 1}}, "delivery": {"title": "Private", "body": "No delivery."}})
     assert result["success"] is False
     assert result["retryable"] is False
     assert result["error"] == "discord_permission_denied"
