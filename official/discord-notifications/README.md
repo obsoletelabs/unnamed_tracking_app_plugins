@@ -5,10 +5,16 @@ host's Plugin API 1.1.2 protected provider contract. This is a new identity,
 `official.discord-notifications`; legacy example credentials/consent are never moved.
 
 Install the package and grant `notification_providers.register` and
-`notification_providers.deliver`. An administrator must allow existing runtime
-Discord egress. Enable the plugin, then open **Account → Notifications → Discord**
-in a compatible host to enroll each webhook. Choose notification types and use
-**Send test notification**. Configuration belongs to the host, not a plugin page.
+`notification_providers.deliver`. The plugin runtime must allow this narrow,
+host-brokered Discord webhook transport: set `PLUGIN_RUNTIME_DISCORD_EGRESS=true`
+on the `plugin-runtime` service. The root `compose.yaml` already enables it;
+deployments with their own runtime configuration must set it explicitly. The
+runtime rejects the send if egress is disabled, and the host records that as the
+permanent `discord_egress_disabled` failure rather than retrying it indefinitely.
+
+Enable the plugin, then open **Account → Notifications → Discord** in a compatible
+host to enroll each webhook. Choose notification types and use **Send test
+notification**. Configuration belongs to the host, not a plugin page.
 
 Each webhook is PUBLIC. Default release announcements use public facts. Explicit
 confirmation on each destination allows its richer followed-media announcement;
