@@ -34,7 +34,7 @@
   "sdk_version_range": "^1.1.2",
   "storage": {"quota_mb": 4},
   "ui": {
-    "actions": ["deliver", "test"],
+    "actions": ["save-webhook", "remove-webhook", "test", "deliver"],
     "menus": [],
     "pages": ["account"],
     "settings": []
