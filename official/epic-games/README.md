@@ -11,8 +11,7 @@ The host page/sign-in support is completed by
 
 Install this plugin's `.utp` through Settings → Plugins, approve the declared
 permissions and enable it. Open **Epic Games** in the sidebar or its plugin page.
-Use **Sign in on Epic Games**, then paste the one-time authorization code, JSON
-page or redirect URL into the password field after using browser Back to return.
+Use **Sign in on Epic Games** to open Epic in a separate tab, leaving the plugin page open. Copy the one-time authorization code, JSON page or redirect URL from Epic, then return to the plugin tab and paste it into the password field. If the browser blocks the new tab, allow pop-ups for this site and retry.
 The host opens the declared Epic sign-in destination outside the sandbox. Your password stays on Epic's site.
 The code is cleared immediately after submission and is never saved in settings.
 

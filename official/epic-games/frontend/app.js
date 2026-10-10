@@ -51,6 +51,30 @@
     const authorization_code = $("code").value; $("code").value = "";
     void perform(async () => { snapshot = await request("connect", { authorization_code }); });
   }
+  function signIn() {
+    if (busy) return;
+    // Open the window during the trusted click event, before awaiting the host
+    // bridge. Opening it only after the async response is commonly popup-blocked.
+    const authWindow = window.open("about:blank", "_blank");
+    if (!authWindow) {
+      $("error").textContent = "Your browser blocked the Epic sign-in tab. Allow pop-ups for this site, then try again. This page has been kept open so you can paste the code when you return.";
+      $("error").hidden = false;
+      return;
+    }
+    authWindow.opener = null;
+    void perform(async () => {
+      try {
+        const result = await request("signin");
+        if (typeof result.redirect_url !== "string" || !result.redirect_url.startsWith("https://www.epicgames.com/")) {
+          throw new Error("The host did not return a valid Epic sign-in address. Please retry.");
+        }
+        authWindow.location.replace(result.redirect_url);
+      } catch (error) {
+        authWindow.close();
+        throw error;
+      }
+    });
+  }
   // The host's opaque sandbox blocks native forms; use the action bridge.
   $("connect").onclick = connect;
   $("code").addEventListener("keydown", (event) => {
@@ -59,9 +83,9 @@
     }
   });
   $("disconnect").onclick = () => perform(async () => { const result = await request("disconnect"); if (!result.cancelled) snapshot = result; });
-  $("signin").onclick = () => perform(() => request("signin"));
-  $("import").onclick = () => perform(() => importGames(false));
-  $("restart").onclick = () => perform(() => importGames(true));
+  $("signin").onclick = signIn;
+  $("import").onclick = () => perform(async () => importGames(false));
+  $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };
   void perform(async () => { snapshot = await request("status"); });
 })();
