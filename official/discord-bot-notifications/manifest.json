@@ -141,10 +141,7 @@
       "admin",
       "account"
     ],
-    "settings": [
-      "discord-bot-admin",
-      "discord-bot-account"
-    ]
+    "settings": []
   },
   "version": "0.1.0"
 }
