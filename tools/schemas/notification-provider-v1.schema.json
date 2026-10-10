@@ -1,18 +1,382 @@
 {
-  "additionalProperties": false,
-  "description": "A plugin-owned notification destination declaration. Legacy host-owned providers remain supported.",
-  "properties": {
-    "provider_id": {"maxLength": 128, "minLength": 3, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
-    "name": {"maxLength": 128, "minLength": 1, "type": "string"},
-    "action_id": {"maxLength": 128, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
-    "destination_kind": {"maxLength": 32, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "default": "plugin", "type": "string"},
-    "channel_context": {"enum": ["external", "internal"], "default": "external", "type": "string"},
-    "privacy": {"enum": ["PUBLIC", "PRIVATE"], "default": "PUBLIC", "type": "string"},
-    "transport": {"enum": ["legacy", "plugin_public", "plugin_private"], "default": "legacy", "type": "string"}
+  "$defs": {
+    "NotificationDestinationDeclaration": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "privacy": {
+          "default": "PUBLIC",
+          "enum": [
+            "PUBLIC",
+            "PRIVATE"
+          ],
+          "title": "Privacy",
+          "type": "string"
+        },
+        "fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiField"
+          },
+          "maxItems": 32,
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "title": "NotificationDestinationDeclaration",
+      "type": "object"
+    },
+    "NotificationProviderDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "destinations": {
+          "items": {
+            "$ref": "#/$defs/NotificationDestinationDeclaration"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Destinations",
+          "type": "array"
+        },
+        "server_fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiField"
+          },
+          "maxItems": 32,
+          "title": "Server Fields",
+          "type": "array"
+        },
+        "configure_action": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Configure Action",
+          "type": "string"
+        },
+        "retire_action": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Retire Action",
+          "type": "string"
+        },
+        "test_action": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Test Action"
+        },
+        "features": {
+          "$ref": "#/$defs/NotificationProviderFeatures"
+        }
+      },
+      "required": [
+        "destinations",
+        "configure_action",
+        "retire_action"
+      ],
+      "title": "NotificationProviderDefinition",
+      "type": "object"
+    },
+    "NotificationProviderFeatures": {
+      "additionalProperties": false,
+      "properties": {
+        "critical_supported": {
+          "default": false,
+          "title": "Critical Supported",
+          "type": "boolean"
+        },
+        "critical_description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Critical Description",
+          "type": "string"
+        },
+        "multiple_destinations": {
+          "default": true,
+          "title": "Multiple Destinations",
+          "type": "boolean"
+        }
+      },
+      "title": "NotificationProviderFeatures",
+      "type": "object"
+    },
+    "UiField": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/UiFieldType"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "secret": {
+          "default": false,
+          "title": "Secret",
+          "type": "boolean"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
+        "options": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UiOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "validation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UiValidation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "type"
+      ],
+      "title": "UiField",
+      "type": "object"
+    },
+    "UiFieldType": {
+      "enum": [
+        "text",
+        "textarea",
+        "password",
+        "number",
+        "boolean",
+        "select",
+        "multiselect"
+      ],
+      "title": "UiFieldType",
+      "type": "string"
+    },
+    "UiOption": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "UiOption",
+      "type": "object"
+    },
+    "UiValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "min_length": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Length"
+        },
+        "max_length": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Length"
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum"
+        }
+      },
+      "title": "UiValidation",
+      "type": "object"
+    }
   },
-  "required": ["provider_id", "name", "action_id"],
-  "title": "NotificationProviderDeclaration",
+  "additionalProperties": false,
+  "properties": {
+    "provider_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Provider Id",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "action_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Action Id",
+      "type": "string"
+    },
+    "transport": {
+      "default": "legacy",
+      "enum": [
+        "legacy",
+        "discord_webhook",
+        "plugin"
+      ],
+      "title": "Transport",
+      "type": "string"
+    },
+    "definition": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NotificationProviderDefinition"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "provider_id",
+    "name",
+    "action_id"
+  ],
+  "title": "NotificationProviderRegistration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.3"
+  "x-api-contract-version": "1.1.5"
 }
