@@ -285,12 +285,6 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     if not isinstance(context, dict):
         return {"success": False, "retryable": False, "error": "recipient_context_missing"}
-    config = _load("secrets/bot-config", {})
-    link = _load("links/" + user_id)
-    if not isinstance(config, dict) or not config.get("token"):
-        return {"success": False, "retryable": False, "error": "bot_not_configured"}
-    if not isinstance(link, dict) or not link.get("discord_id"):
-        return {"success": False, "retryable": False, "error": "recipient_not_linked"}
     delivery = values.get("delivery")
     if not isinstance(delivery, dict):
         return {"success": False, "retryable": False, "error": "delivery_invalid"}
@@ -298,7 +292,20 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
     body = str(delivery.get("body", ""))[:1500]
     content = f"**{title}**\n{body}".strip()[:1900]
     try:
+        config = _load("secrets/bot-config", {})
+        link = _load("links/" + user_id)
+        if not isinstance(config, dict) or not config.get("token"):
+            return {"success": False, "retryable": False, "error": "bot_not_configured"}
+        if not isinstance(link, dict) or not link.get("discord_id"):
+            return {"success": False, "retryable": False, "error": "recipient_not_linked"}
         _send_dm(str(config["token"]), str(link["discord_id"]), content or "Notification")
+    except GatewayRequestError as exc:
+        retryable = exc.code in {"unavailable", "rate_limited"}
+        return {
+            "success": False,
+            "retryable": retryable,
+            "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied",
+        }
     except PluginError as exc:
         retryable = "temporarily unavailable" in str(exc).lower()
         return {
