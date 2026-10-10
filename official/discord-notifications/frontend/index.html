@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Discord Notifications</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Notification destination</p>
+    <h1>Discord Webhook</h1>
+    <p>Configure a Discord webhook for public notification projections. The webhook URL is stored by the plugin and is never sent to the host notification coordinator.</p>
+  </header>
+  <section>
+    <label for="webhook">Discord webhook URL</label>
+    <input id="webhook" type="password" autocomplete="off" spellcheck="false" placeholder="https://discord.com/api/webhooks/…">
+    <div class="actions">
+      <button id="save" type="button">Save webhook</button>
+      <button id="test" type="button">Send test</button>
+      <button id="clear" type="button">Remove webhook</button>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+  </section>
+</main>
+<script src="./app.js"></script>
+</body>
+</html>
