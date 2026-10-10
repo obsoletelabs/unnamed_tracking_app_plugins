@@ -101,7 +101,8 @@
         "api.full",
         "notifications.emit",
         "notification_sources.register",
-        "notifications.sensitive"
+        "notifications.sensitive",
+        "notifications.lifecycle.read"
       ],
       "title": "Capability",
       "type": "string"

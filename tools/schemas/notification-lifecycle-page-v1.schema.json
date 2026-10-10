@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "NotificationLifecycleEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "notification_id": {
+          "format": "uuid",
+          "title": "Notification Id",
+          "type": "string"
+        },
+        "delivery_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delivery Id"
+        },
+        "status": {
+          "enum": [
+            "created",
+            "read",
+            "unread",
+            "dismissed",
+            "deleted",
+            "expired",
+            "pending",
+            "processing",
+            "sent",
+            "retry_wait",
+            "failed_permanent",
+            "suppressed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "occurred_at": {
+          "title": "Occurred At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notification_id",
+        "status",
+        "occurred_at"
+      ],
+      "title": "NotificationLifecycleEvent",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "events": {
+      "items": {
+        "$ref": "#/$defs/NotificationLifecycleEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "cursor": {
+      "title": "Cursor",
+      "type": "string"
+    },
+    "has_more": {
+      "title": "Has More",
+      "type": "boolean"
+    },
+    "resync_required": {
+      "title": "Resync Required",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "events",
+    "cursor",
+    "has_more",
+    "resync_required"
+  ],
+  "title": "NotificationLifecyclePage",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.4"
+}
