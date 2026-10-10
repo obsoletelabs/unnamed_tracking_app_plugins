@@ -1,19 +1,19 @@
 {
-  "api_contract_version": "1.1.2",
+  "api_contract_version": "1.1.3",
   "application_version_range": ">=1.0.0",
   "capabilities": [
-    {
-      "name": "notification_providers.register",
-      "version": 1
-    },
-    {
-      "name": "notification_providers.deliver",
-      "version": 1
-    }
+    {"name": "notification_providers.register", "version": 1},
+    {"name": "notification_providers.deliver", "version": 1},
+    {"name": "plugin.storage", "version": 1},
+    {"name": "network.outbound", "version": 1},
+    {"name": "frontend.settings", "version": 1},
+    {"name": "frontend.navigation.settings", "version": 1},
+    {"name": "frontend.placement.settings.account", "version": 1}
   ],
   "dependencies": [],
-  "description": "Maintained approved-field Discord notification layouts with host-owned encrypted user webhooks.",
+  "description": "Public Discord webhook notifications with plugin-owned per-user webhook configuration.",
   "entrypoint": "plugin:main",
+  "frontend": {"entry": "frontend/index.html"},
   "integrity": {
     "key_id": null,
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
@@ -22,30 +22,22 @@
   "manifest_version": 1,
   "name": "Discord Notifications",
   "permissions": [
-    {
-      "capability": {
-        "name": "notification_providers.register",
-        "version": 1
-      },
-      "rationale": "Register the namespaced protected Discord provider with core."
-    },
-    {
-      "capability": {
-        "name": "notification_providers.deliver",
-        "version": 1
-      },
-      "rationale": "Render only core-approved fields; no access to webhook credentials or routing authority."
-    }
+    {"capability": {"name": "notification_providers.register", "version": 1}, "rationale": "Register the generic public Discord webhook destination contract."},
+    {"capability": {"name": "notification_providers.deliver", "version": 1}, "rationale": "Receive the host-approved public notification projection and deliver it to Discord."},
+    {"capability": {"name": "plugin.storage", "version": 1}, "rationale": "Store each user's Discord webhook URL inside the plugin-owned private storage namespace."},
+    {"capability": {"name": "network.outbound", "version": 1}, "rationale": "Send the notification to the configured Discord webhook."},
+    {"capability": {"name": "frontend.settings", "version": 1}, "rationale": "Provide the webhook configuration UI."},
+    {"capability": {"name": "frontend.navigation.settings", "version": 1}, "rationale": "Expose webhook configuration through settings navigation."},
+    {"capability": {"name": "frontend.placement.settings.account", "version": 1}, "rationale": "Place webhook configuration in the user's account settings."}
   ],
   "plugin_id": "official.discord-notifications",
   "sdk_version_range": "^1.1.2",
+  "storage": {"quota_mb": 4},
   "ui": {
-    "actions": [
-      "render"
-    ],
+    "actions": ["save-webhook", "remove-webhook", "test", "deliver"],
     "menus": [],
-    "pages": [],
+    "pages": ["account"],
     "settings": []
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
