@@ -42,7 +42,8 @@
   "native_frontend": {
     "entry": "native/app.js",
     "styles": [
-      "native/style.css"
+      "native/style.css",
+      "native/sidebar.css"
     ]
   }
 }
