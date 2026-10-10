@@ -95,7 +95,6 @@ export function activate(context) {
           const bot = c.bot || {};
           const guild = c.guild || {};
           const member = c.bot_member || {};
-          const linked = c.linked;
           const permissions = Array.isArray(member.permission_names) ? member.permission_names : [];
           const roles = Array.isArray(member.role_names) ? member.role_names : [];
           const features = Array.isArray(guild.features) ? guild.features : [];
