@@ -37,26 +37,27 @@ def register_provider(
     name: str,
     action_id: str,
     *,
-    destination_kind: str,
-    privacy: Literal["PUBLIC", "PRIVATE"] = "PUBLIC",
-    channel_context: Literal["external", "internal"] = "external",
+    transport: Literal["legacy", "discord_webhook", "plugin"] = "legacy",
+    definition: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Register a plugin-owned destination contract.
+    """Register a provider using the versioned host-owned transport contract.
 
-    The plugin owns its settings and performs the actual delivery action. The
-    host stores only an opaque routing record and the declared trust boundary.
+    Existing host-owned transports remain supported. Plugin-owned destinations
+    use the generic plugin transport plus a bounded declarative definition;
+    credentials and endpoint values remain inside plugin storage.
     """
-    transport = "plugin_private" if privacy == "PRIVATE" else "plugin_public"
+    if (transport == "plugin") != (definition is not None):
+        raise ValueError("Generic plugin providers require a definition; legacy transports forbid it")
+    payload: dict[str, Any] = {
+        "provider_id": provider_id,
+        "name": name,
+        "action_id": action_id,
+        "transport": transport,
+    }
+    if definition is not None:
+        payload["definition"] = definition
     return request(
         "notification_providers.register",
         "notification_providers.register",
-        {
-            "provider_id": provider_id,
-            "name": name,
-            "action_id": action_id,
-            "destination_kind": destination_kind,
-            "privacy": privacy,
-            "channel_context": channel_context,
-            "transport": transport,
-        },
+        payload,
     )
