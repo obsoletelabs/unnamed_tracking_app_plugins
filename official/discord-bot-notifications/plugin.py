@@ -66,10 +66,40 @@ def _bot_config() -> dict[str, str]:
 
 
 def _discord(token: str, method: str, path: str, body: dict | None = None) -> Any:
-    payload: dict[str, Any] = {"url": DISCORD_API + path, "method": method, "headers": {"Authorization": f"Bot {token}", "Content-Type": "application/json"}, "timeout_ms": 10000}
+    """Call Discord through the host's outbound gateway response contract."""
+    payload: dict[str, Any] = {
+        "url": DISCORD_API + path,
+        "method": method,
+        "headers": {
+            "Authorization": f"Bot {token}",
+            "Content-Type": "application/json",
+            "User-Agent": "UnnamedTrackingDiscordBot (https://github.com/obsoletelabs/unnamed_tracking_app, 1.0)",
+        },
+    }
     if body is not None:
-        payload["json"] = body
-    return request("network.request", "network.outbound", payload).get("json")
+        # network.outbound accepts an object under "body", not "json".
+        payload["body"] = body
+    response = request("network.request", "network.outbound", payload)
+    if not isinstance(response, dict):
+        raise PluginError("The Discord gateway returned an invalid response.")
+    status = response.get("status")
+    if not isinstance(status, int):
+        raise PluginError("The Discord gateway did not return an HTTP status.")
+    if status < 200 or status >= 300:
+        if status == 401:
+            raise PluginError("Discord rejected the bot token. Check that it is the current bot token.")
+        if status == 403:
+            raise PluginError("Discord denied access. Check the bot's server membership and permissions.")
+        if status == 404:
+            raise PluginError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
+        if status == 429:
+            raise PluginError("Discord is rate limiting requests. Wait briefly and try again.")
+        if status == 0:
+            raise PluginError("Discord could not be reached. Check the host's outbound network and TLS configuration.")
+        raise PluginError(f"Discord returned HTTP {status} for this request.")
+    if "data" not in response:
+        raise PluginError("Discord returned a successful response without JSON data.")
+    return response["data"]
 
 
 def _member_by_username(token: str, guild_id: str, username: str) -> dict[str, Any] | None:
@@ -126,10 +156,10 @@ def _permission_names(permission_value: int) -> list[str]:
 def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
     started = time.monotonic()
     bot = _discord(token, "GET", "/users/@me")
-    guild = _discord(token, "GET", f"/guilds/{quote(guild_id)}?with_counts=true")
     if not isinstance(bot, dict) or not bot.get("id"):
         raise PluginError("Discord did not return the configured bot identity.")
     bot_id = str(bot["id"])
+    guild = _discord(token, "GET", f"/guilds/{quote(guild_id)}?with_counts=true")
     member = _discord(token, "GET", f"/guilds/{quote(guild_id)}/members/{quote(bot_id)}")
     roles = _discord(token, "GET", f"/guilds/{quote(guild_id)}/roles")
     elapsed_ms = round((time.monotonic() - started) * 1000)
@@ -205,7 +235,18 @@ def save_bot_config(values: dict[str, Any]) -> dict[str, Any]:
     token = str(values.get("token", "")).strip(); guild_id = str(values.get("guild_id", "")).strip()
     if not token or not _SNOWFLAKE.fullmatch(guild_id):
         raise PluginError("Enter a valid Discord bot token and server ID.")
-    snapshot = _bot_snapshot(token, guild_id)
+    try:
+        snapshot = _bot_snapshot(token, guild_id)
+    except PluginError as exc:
+        if str(exc) != "Discord did not return the configured bot identity.":
+            raise
+        # A successful but incomplete /users/@me response is not proof of a
+        # bad token. Save it so the admin can inspect/retry configuration.
+        _store("secrets/bot-config", {"token": token, "guild_id": guild_id})
+        return {
+            "ok": True,
+            "warning": str(exc) + " The configuration was saved; retry validation after checking Discord's response.",
+        }
     _store("secrets/bot-config", {"token": token, "guild_id": guild_id})
     return {"ok": True, "message": f"Connected as {snapshot['bot']['username']} to {snapshot['guild']['name']}."}
 
