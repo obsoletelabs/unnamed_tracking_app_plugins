@@ -171,3 +171,37 @@ def test_delivery_without_a_verified_link_never_sends(monkeypatch):
     assert result["success"] is False
     assert result["error"] == "recipient_not_linked"
     assert sent == []
+
+
+def test_actor_normalizes_user_id_before_scoping_private_links(monkeypatch):
+    provider = load()
+    user_id = "12345678-1234-5678-1234-567812345678"
+    assert provider._actor({"_plugin_context": {"user_id": user_id.replace("-", "")}}) == user_id
+
+
+def test_status_never_returns_the_bot_token(monkeypatch):
+    provider = load()
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+    monkeypatch.setattr(
+        provider,
+        "_load",
+        lambda key, default=None: {
+            "secrets/bot-config": {
+                "token": "sensitive-bot-token",
+                "guild_id": "123456789012345678",
+                "bot_name": "Test Bot",
+            }
+        }.get(key, default),
+    )
+    result = provider.get_config(
+        {
+            "_plugin_context": {
+                "user_id": "12345678-1234-5678-1234-567812345678",
+                "is_admin": True,
+            }
+        }
+    )
+    assert result["bot_configured"] is True
+    assert result["bot_name"] == "Test Bot"
+    assert "token" not in result
+    assert "sensitive-bot-token" not in repr(result)
