@@ -12,6 +12,8 @@
     {"id": "confirm-link", "label": "Verify Discord account link", "handler": "plugin:confirm_link", "capability": {"name": "plugin.storage", "version": 1}},
     {"id": "unlink", "label": "Unlink Discord account", "handler": "plugin:unlink", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Unlink this Discord account from your host account?"},
     {"id": "test-dm", "label": "Send a test Discord DM", "handler": "plugin:test_dm", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "configure-destination", "label": "Enable Discord notifications", "handler": "plugin:configure_destination", "capability": {"name": "plugin.storage", "version": 1}},
+    {"id": "retire-destination", "label": "Retire Discord notification destination", "handler": "plugin:retire_destination", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Retire this destination and unlink the Discord account?"},
     {"id": "deliver", "label": "Deliver notification to Discord", "handler": "plugin:deliver", "capability": {"name": "notification_providers.deliver", "version": 1}}
   ],
   "menus": [],
