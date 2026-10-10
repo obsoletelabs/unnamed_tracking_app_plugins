@@ -13508,6 +13508,249 @@
       "version": "1.1.0"
     },
     {
+      "application_version_range": ">=1.0.0",
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "65c4b642e4c3d69a6ea7695eed4f9969eab1a4d3",
+        "source_committed_at": "2026-10-10T00:16:56Z",
+        "source_digest": "25afd8a6512f3b451917d11807f3c94d8351fab27a30351756ee0a2600807ecf",
+        "source_path": "official/discord-notifications",
+        "version_bump": "initial"
+      },
+      "capabilities": [
+        {
+          "name": "notification_providers.register",
+          "version": 1
+        },
+        {
+          "name": "notification_providers.deliver",
+          "version": 1
+        }
+      ],
+      "dependencies": [],
+      "description": "Maintained approved-field Discord notification layouts with host-owned encrypted user webhooks.",
+      "documentation": {
+        "format": "markdown",
+        "packaged": true,
+        "readme_path": "README.md"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "35878a54a656772077bd25fe042f7b715432b9b6ba67ee4080d6d3f5f69f758d"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.2",
+        "application_version_range": ">=1.0.0",
+        "capabilities": [
+          {
+            "name": "notification_providers.register",
+            "version": 1
+          },
+          {
+            "name": "notification_providers.deliver",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Maintained approved-field Discord notification layouts with host-owned encrypted user webhooks.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+          "signature": "v2:PWc3QAK+T+vkr4NYQIh/5dhpbSYuwGyESIu69t3Z/aeNIk5WFz+fJQDKKMUJ6q039a65ppifVaOaBa5u9hwrDA=="
+        },
+        "manifest_version": 1,
+        "name": "Discord Notifications",
+        "permissions": [
+          {
+            "capability": {
+              "name": "notification_providers.register",
+              "version": 1
+            },
+            "rationale": "Register the namespaced protected Discord provider with core."
+          },
+          {
+            "capability": {
+              "name": "notification_providers.deliver",
+              "version": 1
+            },
+            "rationale": "Render only core-approved fields; no access to webhook credentials or routing authority."
+          }
+        ],
+        "plugin_id": "official.discord-notifications",
+        "sdk_version_range": "^1.1.2",
+        "ui": {
+          "actions": [
+            "render"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "1.0.0"
+      },
+      "name": "Discord Notifications",
+      "package": {
+        "filename": "official.discord-notifications-1.0.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 6100
+      },
+      "package_sha256": "c39cbb386bb2547f651bf19e0528b6358f2b7225a7e6198b945f8e8b83483228",
+      "permissions": [
+        {
+          "capability": {
+            "name": "notification_providers.register",
+            "version": 1
+          },
+          "rationale": "Register the namespaced protected Discord provider with core."
+        },
+        {
+          "capability": {
+            "name": "notification_providers.deliver",
+            "version": 1
+          },
+          "rationale": "Render only core-approved fields; no access to webhook credentials or routing authority."
+        }
+      ],
+      "plugin_id": "official.discord-notifications",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Discord Notifications\n\nMaintained official provider for owner-specific Discord webhooks, consuming the\nhost's Plugin API 1.1.2 protected provider contract. This is a new identity,\n`official.discord-notifications`; legacy example credentials/consent are never moved.\n\nInstall the package and grant `notification_providers.register` and\n`notification_providers.deliver`. An administrator must allow existing runtime\nDiscord egress. Enable the plugin, then open **Account → Notifications → Discord**\nin a compatible host to enroll each webhook. Choose notification types and use\n**Send test notification**. Configuration belongs to the host, not a plugin page.\n\nEach webhook is PUBLIC. Default release announcements use public facts. Explicit\nconfirmation on each destination allows its richer followed-media announcement;\nthat does not promote trust or permit account details, watch history, ratings,\nsecurity messages or recovery tokens. Webhook tokens remain host-encrypted and\nnever enter this plugin's inputs, files or storage. Removing a destination erases\nits secret while preserving history. Reinstallation requires new enrollment.\n\nThe renderer returns only `title`, `body`, `event_at` and `link` field references.\nThe host builds a bounded embed, disables mentions, rejects redirects and owns\nretries/failure state. Current implementation supports ordinary webhook channels,\nnot forum thread creation, DMs, attachments, artwork, Critical urgency or raw payloads.\nDelivery confirmation uses Discord's `wait=true` option; see the\n[official webhook documentation](https://docs.discord.com/developers/resources/webhook).\n\nTest: `python -m pytest tests/test_discord_notifications.py -q`.\nBuild: `python tools/build_packages.py` (isolated preview packages).\nActual host/runtime lifecycle acceptance is separate from unit tests. No external\nwebhook credentials are bundled. This source is initially an explicit catalogue\npreview pending paired acceptance and reviewed signed promotion.\n",
+      "release_notes": "Initial protected provider: core-approved field layouts and encrypted per-user webhooks. New identity; no legacy secret migration.",
+      "releases": [
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "65c4b642e4c3d69a6ea7695eed4f9969eab1a4d3",
+            "source_committed_at": "2026-10-10T00:16:56Z",
+            "source_digest": "25afd8a6512f3b451917d11807f3c94d8351fab27a30351756ee0a2600807ecf",
+            "source_path": "official/discord-notifications",
+            "version_bump": "initial"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "35878a54a656772077bd25fe042f7b715432b9b6ba67ee4080d6d3f5f69f758d"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": ">=1.0.0",
+            "capabilities": [
+              {
+                "name": "notification_providers.register",
+                "version": 1
+              },
+              {
+                "name": "notification_providers.deliver",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Maintained approved-field Discord notification layouts with host-owned encrypted user webhooks.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+              "signature": "v2:PWc3QAK+T+vkr4NYQIh/5dhpbSYuwGyESIu69t3Z/aeNIk5WFz+fJQDKKMUJ6q039a65ppifVaOaBa5u9hwrDA=="
+            },
+            "manifest_version": 1,
+            "name": "Discord Notifications",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_providers.register",
+                  "version": 1
+                },
+                "rationale": "Register the namespaced protected Discord provider with core."
+              },
+              {
+                "capability": {
+                  "name": "notification_providers.deliver",
+                  "version": 1
+                },
+                "rationale": "Render only core-approved fields; no access to webhook credentials or routing authority."
+              }
+            ],
+            "plugin_id": "official.discord-notifications",
+            "sdk_version_range": "^1.1.2",
+            "ui": {
+              "actions": [
+                "render"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.0.0"
+          },
+          "package": {
+            "filename": "official.discord-notifications-1.0.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 6100
+          },
+          "package_sha256": "c39cbb386bb2547f651bf19e0528b6358f2b7225a7e6198b945f8e8b83483228",
+          "plugin_id": "official.discord-notifications",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Discord Notifications\n\nMaintained official provider for owner-specific Discord webhooks, consuming the\nhost's Plugin API 1.1.2 protected provider contract. This is a new identity,\n`official.discord-notifications`; legacy example credentials/consent are never moved.\n\nInstall the package and grant `notification_providers.register` and\n`notification_providers.deliver`. An administrator must allow existing runtime\nDiscord egress. Enable the plugin, then open **Account → Notifications → Discord**\nin a compatible host to enroll each webhook. Choose notification types and use\n**Send test notification**. Configuration belongs to the host, not a plugin page.\n\nEach webhook is PUBLIC. Default release announcements use public facts. Explicit\nconfirmation on each destination allows its richer followed-media announcement;\nthat does not promote trust or permit account details, watch history, ratings,\nsecurity messages or recovery tokens. Webhook tokens remain host-encrypted and\nnever enter this plugin's inputs, files or storage. Removing a destination erases\nits secret while preserving history. Reinstallation requires new enrollment.\n\nThe renderer returns only `title`, `body`, `event_at` and `link` field references.\nThe host builds a bounded embed, disables mentions, rejects redirects and owns\nretries/failure state. Current implementation supports ordinary webhook channels,\nnot forum thread creation, DMs, attachments, artwork, Critical urgency or raw payloads.\nDelivery confirmation uses Discord's `wait=true` option; see the\n[official webhook documentation](https://docs.discord.com/developers/resources/webhook).\n\nTest: `python -m pytest tests/test_discord_notifications.py -q`.\nBuild: `python tools/build_packages.py` (isolated preview packages).\nActual host/runtime lifecycle acceptance is separate from unit tests. No external\nwebhook credentials are bundled. This source is initially an explicit catalogue\npreview pending paired acceptance and reviewed signed promotion.\n",
+          "release_notes": "Initial protected provider: core-approved field layouts and encrypted per-user webhooks. New identity; no legacy secret migration.",
+          "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+            "signature": "v2:PWc3QAK+T+vkr4NYQIh/5dhpbSYuwGyESIu69t3Z/aeNIk5WFz+fJQDKKMUJ6q039a65ppifVaOaBa5u9hwrDA=="
+          },
+          "tags": [
+            "notifications",
+            "discord",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.0.0.utp",
+          "version": "1.0.0"
+        }
+      ],
+      "sdk_version_range": "^1.1.2",
+      "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "a82f9b77798aa1e34ad3cde1a5c2328364a96f396762d72bd90b8e1c3b91213e",
+        "signature": "v2:PWc3QAK+T+vkr4NYQIh/5dhpbSYuwGyESIu69t3Z/aeNIk5WFz+fJQDKKMUJ6q039a65ppifVaOaBa5u9hwrDA=="
+      },
+      "source": {
+        "lifecycle": "source",
+        "manifest_version": 1,
+        "path": "official/discord-notifications"
+      },
+      "tags": [
+        "notifications",
+        "discord",
+        "official"
+      ],
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-notifications-1.0.0.utp",
+      "version": "1.0.0"
+    },
+    {
       "application_version_range": "^1.0.0",
       "automatic_update": false,
       "build": {
