@@ -266,3 +266,64 @@ def test_save_config_allows_incomplete_bot_identity_but_rejects_bad_credentials(
     monkeypatch.setattr(provider, "_bot_snapshot", invalid_token)
     with pytest.raises(provider.PluginError, match="rejected the bot token"):
         provider.save_bot_config({"token": "bad-token", "guild_id": "123456789012345678"})
+
+
+
+def test_multiple_verified_accounts_are_preserved_and_unlinked_individually(monkeypatch):
+    provider = load()
+    storage = {}
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: storage.get(key, default))
+    monkeypatch.setattr(provider, "_store", lambda key, value: storage.__setitem__(key, value))
+    monkeypatch.setattr(provider, "_delete", lambda key: storage.pop(key, None))
+
+    provider._save_linked_accounts(user_id, [
+        {"discord_id": "123456789012345678", "linked_at": 100},
+        {"discord_id": "223456789012345678", "linked_at": 200},
+    ])
+    saved = storage["links/" + user_id]
+    assert [item["discord_id"] for item in provider._linked_accounts(saved)] == [
+        "123456789012345678", "223456789012345678"
+    ]
+    assert saved["discord_id"] == "123456789012345678"
+
+    result = provider.unlink({"discord_id": "123456789012345678"})
+    assert result["ok"] is True
+    remaining = provider._linked_accounts(storage["links/" + user_id])
+    assert [item["discord_id"] for item in remaining] == ["223456789012345678"]
+    assert storage["links/" + user_id]["discord_id"] == "223456789012345678"
+
+
+def test_delivery_sends_to_every_verified_account(monkeypatch):
+    provider = load()
+    sent = []
+    user_id = "12345678-1234-5678-1234-567812345678"
+    storage = {
+        "secrets/bot-config": {"token": "test-token", "guild_id": "123456789012345678"},
+        "links/" + user_id: {"accounts": [
+            {"discord_id": "123456789012345678", "linked_at": 100},
+            {"discord_id": "223456789012345678", "linked_at": 200},
+        ]},
+    }
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: storage.get(key, default))
+    monkeypatch.setattr(provider, "_store", lambda key, value: storage.__setitem__(key, value))
+    monkeypatch.setattr(provider, "_send_dm", lambda token, discord_id, content: sent.append((discord_id, content)))
+    monkeypatch.setattr(provider.time, "time", lambda: 500)
+
+    result = provider.deliver({
+        "_plugin_context": {"user_id": user_id},
+        "_notification_context": {"operation": "deliver", "destination": {"kind": "discord_bot_dm", "id": "dest", "revision": 1}},
+        "delivery": {"title": "Release", "body": "A new episode is available."},
+    })
+    assert result == {"success": True, "retryable": False}
+    assert [recipient for recipient, _ in sent] == ["123456789012345678", "223456789012345678"]
+    assert all(content == "**Release**\nA new episode is available." for _, content in sent)
+    assert all(account["last_delivery_at"] == 500 for account in storage["links/" + user_id]["accounts"])
+
+
+def test_legacy_single_link_is_read_as_one_account():
+    provider = load()
+    account = {"discord_id": "123456789012345678", "linked_at": 100}
+    assert provider._linked_accounts(account) == [account]

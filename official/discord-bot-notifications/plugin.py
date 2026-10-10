@@ -203,11 +203,31 @@ def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
     }
 
 
+def _linked_accounts(value: Any) -> list[dict[str, Any]]:
+    """Read both the original single-link format and the multi-account format."""
+    if not isinstance(value, dict):
+        return []
+    accounts = value.get("accounts")
+    if isinstance(accounts, list):
+        return [dict(account) for account in accounts if isinstance(account, dict) and _SNOWFLAKE.fullmatch(str(account.get("discord_id", "")))]
+    if _SNOWFLAKE.fullmatch(str(value.get("discord_id", ""))):
+        return [dict(value)]
+    return []
+
+
+def _save_linked_accounts(user_id: str, accounts: list[dict[str, Any]]) -> None:
+    """Persist a multi-account list while retaining legacy fields for old clients."""
+    if not accounts:
+        _delete("links/" + user_id)
+        return
+    _store("links/" + user_id, {**accounts[0], "accounts": accounts})
+
+
 def get_config(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     config = _load("secrets/bot-config", {})
-    link = _load("links/" + user_id, {})
-    result: dict[str, Any] = {"configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "bot_configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "guild_id": str(config.get("guild_id", "")) if isinstance(config, dict) else "", "linked": isinstance(link, dict) and bool(link.get("discord_id"))}
+    accounts = _linked_accounts(_load("links/" + user_id, {}))
+    result: dict[str, Any] = {"configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "bot_configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "guild_id": str(config.get("guild_id", "")) if isinstance(config, dict) else "", "linked": bool(accounts), "accounts": []}
     if result["configured"]:
         try:
             result.update(_bot_snapshot(str(config["token"]), str(config["guild_id"])))
@@ -215,18 +235,27 @@ def get_config(values: dict[str, Any]) -> dict[str, Any]:
             result["health"] = {"api_ok": False}; result["bot_error"] = "Discord could not be reached right now."
         except PluginError as exc:
             result["health"] = {"api_ok": False}; result["bot_error"] = str(exc)
-    if result["linked"] and result["configured"]:
-        linked_id = str(link["discord_id"])
-        try:
-            linked_user = _discord(str(config["token"]), "GET", f"/users/{quote(linked_id)}")
-            linked_member = _discord(str(config["token"]), "GET", f"/guilds/{quote(str(config['guild_id']))}/members/{quote(linked_id)}")
-            if isinstance(linked_user, dict):
-                result["username"] = linked_user.get("username", ""); result["global_name"] = linked_user.get("global_name"); result["discord_id"] = linked_id; result["avatar_url"] = _avatar_url(linked_user)
-            if isinstance(linked_member, dict):
-                result["server_nickname"] = linked_member.get("nick"); result["server_joined_at"] = linked_member.get("joined_at"); result["server_roles"] = linked_member.get("roles", [])
-            result["linked_at"] = link.get("linked_at"); result["last_test_at"] = link.get("last_test_at"); result["last_delivery_at"] = link.get("last_delivery_at")
-        except GatewayRequestError:
-            result["link_warning"] = "The linked Discord account could not be refreshed."
+    if result["configured"]:
+        for account in accounts:
+            item = dict(account)
+            linked_id = str(account["discord_id"])
+            try:
+                linked_user = _discord(str(config["token"]), "GET", f"/users/{quote(linked_id)}")
+                linked_member = _discord(str(config["token"]), "GET", f"/guilds/{quote(str(config['guild_id']))}/members/{quote(linked_id)}")
+                if isinstance(linked_user, dict):
+                    item.update({"username": linked_user.get("username", ""), "global_name": linked_user.get("global_name"), "avatar_url": _avatar_url(linked_user)})
+                if isinstance(linked_member, dict):
+                    item.update({"server_nickname": linked_member.get("nick"), "server_joined_at": linked_member.get("joined_at"), "server_roles": linked_member.get("roles", [])})
+            except (GatewayRequestError, PluginError):
+                result["link_warning"] = "One or more linked Discord accounts could not be refreshed."
+            result["accounts"].append(item)
+    else:
+        result["accounts"] = accounts
+    if accounts:
+        result.update({key: value for key, value in accounts[0].items() if key != "accounts"})
+        result["discord_id"] = str(accounts[0]["discord_id"])
+        if result["accounts"]:
+            result.update({key: result["accounts"][0].get(key) for key in ("username", "global_name", "avatar_url", "server_nickname", "server_joined_at", "server_roles")})
     return result
 
 
@@ -279,21 +308,36 @@ def confirm_link(values: dict[str, Any]) -> dict[str, Any]:
     code = str(values.get("code", "")); pending["attempts"] = attempts + 1; _store("pending-links/" + user_id, pending)
     if not hmac.compare_digest(hashlib.sha256(code.encode()).hexdigest(), str(pending.get("code_hash", ""))):
         raise PluginError("That verification code is incorrect.")
-    _store("links/" + user_id, {"discord_id": str(pending["discord_id"]), "linked_at": int(time.time())}); _delete("pending-links/" + user_id)
-    return {"ok": True, "message": "Discord account linked."}
+    accounts = _linked_accounts(_load("links/" + user_id, {}))
+    discord_id = str(pending["discord_id"])
+    if any(str(account.get("discord_id")) == discord_id for account in accounts):
+        _delete("pending-links/" + user_id)
+        raise PluginError("That Discord account is already linked.")
+    accounts.append({"discord_id": discord_id, "linked_at": int(time.time())})
+    _save_linked_accounts(user_id, accounts)
+    _delete("pending-links/" + user_id)
+    return {"ok": True, "message": "Discord account linked. Notifications will be sent to all linked Discord accounts."}
 
 
 def unlink(values: dict[str, Any]) -> dict[str, Any]:
-    user_id = _actor(values); _delete("links/" + user_id); _delete("pending-links/" + user_id)
-    return {"ok": True, "message": "Discord account unlinked."}
+    user_id = _actor(values)
+    discord_id = str(values.get("discord_id", "")).strip()
+    accounts = _linked_accounts(_load("links/" + user_id, {}))
+    if discord_id:
+        accounts = [account for account in accounts if str(account.get("discord_id")) != discord_id]
+    else:
+        accounts = []
+    _save_linked_accounts(user_id, accounts)
+    _delete("pending-links/" + user_id)
+    return {"ok": True, "message": "Discord account unlinked." if discord_id else "All Discord accounts unlinked."}
 
 
 def configure_destination(values: dict[str, Any]) -> dict[str, Any]:
     """Allow host routing only after this user has verified a Discord account."""
     user_id = _actor(values)
-    link = _load("links/" + user_id)
-    if not isinstance(link, dict) or not link.get("discord_id"):
-        raise PluginError("Link and verify your Discord account before enabling this destination.")
+    accounts = _linked_accounts(_load("links/" + user_id))
+    if not accounts:
+        raise PluginError("Link and verify at least one Discord account before enabling this destination.")
     return {"ok": True, "message": "Verified Discord account is ready for private notifications."}
 
 
@@ -306,11 +350,15 @@ def retire_destination(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def test_dm(values: dict[str, Any]) -> dict[str, Any]:
-    user_id = _actor(values); config = _bot_config(); link = _load("links/" + user_id)
-    if not isinstance(link, dict) or not link.get("discord_id"):
-        raise PluginError("Link and verify your Discord account first.")
-    _send_dm(config["token"], link["discord_id"], "Discord notification test from your tracking app.")
-    link["last_test_at"] = int(time.time()); _store("links/" + user_id, link)
+    user_id = _actor(values); config = _bot_config()
+    discord_id = str(values.get("discord_id", "")).strip()
+    accounts = _linked_accounts(_load("links/" + user_id))
+    account = next((item for item in accounts if str(item.get("discord_id")) == discord_id), None) if discord_id else (accounts[0] if accounts else None)
+    if account is None:
+        raise PluginError("Select a linked Discord account first.")
+    _send_dm(config["token"], str(account["discord_id"]), "Discord notification test from your tracking app.")
+    account["last_test_at"] = int(time.time())
+    _save_linked_accounts(user_id, accounts)
     return {"ok": True, "message": "Test DM sent."}
 
 
@@ -330,11 +378,14 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
         ):
             return {"success": False, "retryable": False, "error": "notification_context_invalid"}
         title = str(delivery.get("title", "Notification"))[:250]; body = str(delivery.get("body", ""))[:1500]; content = f"**{title}**\n{body}".strip()[:1900]
-        config = _bot_config(); link = _load("links/" + user_id)
-        if not isinstance(link, dict) or not link.get("discord_id"):
+        config = _bot_config(); accounts = _linked_accounts(_load("links/" + user_id))
+        if not accounts:
             return {"success": False, "retryable": False, "error": "recipient_not_linked"}
-        _send_dm(config["token"], str(link["discord_id"]), content or "Notification")
-        link["last_delivery_at"] = int(time.time()); _store("links/" + user_id, link)
+        delivered_at = int(time.time())
+        for account in accounts:
+            _send_dm(config["token"], str(account["discord_id"]), content or "Notification")
+            account["last_delivery_at"] = delivered_at
+        _save_linked_accounts(user_id, accounts)
     except GatewayRequestError as exc:
         retryable = exc.code in {"unavailable", "rate_limited"}
         return {"success": False, "retryable": retryable, "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied"}

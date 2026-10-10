@@ -152,28 +152,30 @@ export function activate(context) {
             ]),
           ];
 
-          const accountCards = linked ? [
-            infoCard("Verified Discord account", [
-              h("div", { class: "discord-identity" }, [
-                image(c.avatar_url, c.username || "Discord account", "discord-avatar"),
-                h("div", [
-                  h("strong", c.global_name || c.username || "Discord account"),
-                  h("span", "@" + (c.username || "—")),
-                  h("span", { class: "discord-muted" }, "Discord ID: " + (c.discord_id || "—")),
-                ]),
-                badge("Verified", true),
+          const accounts = Array.isArray(c.accounts) ? c.accounts : [];
+          const accountCards = accounts.map(account => infoCard(account.global_name || account.username || "Verified Discord account", [
+            h("div", { class: "discord-identity" }, [
+              image(account.avatar_url, account.username || "Discord account", "discord-avatar"),
+              h("div", [
+                h("strong", account.global_name || account.username || "Discord account"),
+                h("span", "@" + (account.username || "—")),
+                h("span", { class: "discord-muted" }, "Discord ID: " + (account.discord_id || "—")),
               ]),
-              h("div", { class: "discord-grid" }, [
-                text("Linked", c.linked_at ? new Date(c.linked_at * 1000).toLocaleString() : "—"),
-                text("Server nickname", c.server_nickname),
-                text("Joined server", c.server_joined_at ? new Date(c.server_joined_at).toLocaleString() : "—"),
-                text("Last test DM", c.last_test_at ? new Date(c.last_test_at * 1000).toLocaleString() : "Never"),
-                text("Last notification", c.last_delivery_at ? new Date(c.last_delivery_at * 1000).toLocaleString() : "Never"),
-              ]),
-              c.link_warning ? h("p", { class: "discord-hint" }, c.link_warning) : null,
-              h("div", { class: "discord-actions" }, [button("Refresh Discord details", "get-config"), button("Send test DM", "test-dm"), button("Unlink Discord account", "unlink", () => ({}), true)]),
+              badge("Verified", true),
             ]),
-          ] : [];
+            h("div", { class: "discord-grid" }, [
+              text("Linked", account.linked_at ? new Date(account.linked_at * 1000).toLocaleString() : "—"),
+              text("Server nickname", account.server_nickname),
+              text("Joined server", account.server_joined_at ? new Date(account.server_joined_at).toLocaleString() : "—"),
+              text("Last test DM", account.last_test_at ? new Date(account.last_test_at * 1000).toLocaleString() : "Never"),
+              text("Last notification", account.last_delivery_at ? new Date(account.last_delivery_at * 1000).toLocaleString() : "Never"),
+            ]),
+            c.link_warning ? h("p", { class: "discord-hint" }, c.link_warning) : null,
+            h("div", { class: "discord-actions" }, [
+              button("Send test DM", "test-dm", () => ({ discord_id: account.discord_id })),
+              button("Unlink account", "unlink", () => ({ discord_id: account.discord_id }), true),
+            ]),
+          ]));
 
           return h("section", { class: "discord-bot-settings" }, [
             h("div", { class: "discord-header" }, [
@@ -192,12 +194,15 @@ export function activate(context) {
               ]),
               ...(c.configured ? adminCards : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
             ] : [
-              ...(linked ? accountCards : [infoCard("Link your Discord account", [
-                h("p", "Enter your exact Discord username from the configured server. The bot sends an eight-digit code by DM; only the account that receives the code can be linked."),
-                field("Discord username", userForm, "username", "text"), h("div", { class: "discord-actions" }, [button("Send verification code", "start-link", () => ({ username: userForm.username }))]),
-                field("Eight-digit verification code", userForm, "code", "text", "one-time-code"), h("div", { class: "discord-actions" }, [button("Verify and link", "confirm-link", () => ({ code: userForm.code }))]),
-                h("p", { class: "discord-hint" }, "Codes expire after ten minutes and failed verification attempts are limited."),
-              ])]),
+              ...accountCards,
+              infoCard("Link another Discord account", [
+                h("p", accounts.length ? "Add another Discord account. Notifications routed to Discord will be sent to every account listed above." : "Enter your exact Discord username from the configured server. The bot sends an eight-digit code by DM; only the account that receives the code can be linked."),
+                field("Discord username", userForm, "username", "text"),
+                h("div", { class: "discord-actions" }, [button("Send verification code", "start-link", () => ({ username: userForm.username }))]),
+                field("Eight-digit verification code", userForm, "code", "text", "one-time-code"),
+                h("div", { class: "discord-actions" }, [button("Verify and link account", "confirm-link", () => ({ code: userForm.code }))]),
+                h("p", { class: "discord-hint" }, "Codes expire after ten minutes and failed verification attempts are limited. Each Discord account must be verified separately."),
+              ]),
             ]),
           ]);
         };
