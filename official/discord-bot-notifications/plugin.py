@@ -150,6 +150,7 @@ def _start_link(values: dict[str, Any]) -> dict[str, Any]:
     code = f"{secrets.randbelow(100_000_000):08d}"
     expires_at = now + _LINK_TTL
     digest = hashlib.sha256(f"{user_id}:{code}:{expires_at}".encode()).hexdigest()
+    _delete("link-code-attempts/" + user_id)
     _store(
         "pending-links/" + user_id,
         {
