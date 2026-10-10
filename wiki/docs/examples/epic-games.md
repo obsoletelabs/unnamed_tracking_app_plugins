@@ -5,10 +5,20 @@ outside the core app. It requires the host's additive **Plugin API 1.1.3**
 `games.import` contract. Its sandboxed page offers personal sign-in, imports,
 pause/resume and disconnect through declared actions.
 
-Sign in on Epic's own site and submit its one-time code. The plugin retains
+Sign in on Epic's own site and submit its one-time code. Use **Copy sign-in link**
+to open Epic in your regular browser while leaving the app open; if clipboard
+access is unavailable, copy the selected link manually. The plugin retains
 rotating tokens in private per-user storage and saves the replacement refresh
 token before later requests. Runtime storage is isolated by filesystem permissions
 and is not encrypted at rest. Protect deployment data and backups.
+
+The regular-browser option leaves this page open. These screenshots exercise the
+packaged frontend's opaque sandbox with a status/action fixture; they do not
+claim a successful live account connection.
+
+![Phone sign-in link and manual-copy fallback](../assets/epic-signin/epic-copy-link-390.png)
+
+![Desktop sign-in link and manual-copy fallback](../assets/epic-signin/epic-copy-link-1440.png)
 
 Each action performs bounded work: one inventory page, optional playtime, one
 catalogue namespace batch or a host import of at most 25 games. The saved checkpoint

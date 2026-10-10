@@ -226,6 +226,32 @@ def test_rotated_refresh_is_saved_before_inventory_failure(service):
     assert not any(key.startswith("leases/") for key in service.storage)
 
 
+def test_large_launcher_tokens_connect_and_reach_inventory_without_public_disclosure(service):
+    service.tokens["access_token"] = "eg1~" + "x" * 4269
+    service.tokens["refresh_token"] = "r" * 1071
+    result = service.plugin.connect(context(authorization_code=CODE))
+    assert result["connected"]
+    assert service.tokens["access_token"] not in json.dumps(result)
+    assert service.tokens["refresh_token"] not in json.dumps(result)
+    service.plugin.start(context())
+    assert service.plugin.step(context())["phase"] == "playtime"
+
+
+@pytest.mark.parametrize("field", ["access_token", "refresh_token"])
+@pytest.mark.parametrize("invalid", [None, "", "x" * 8193, "token\r\nInjected: value"])
+def test_invalid_replacement_token_retains_previous_connection(service, field, invalid):
+    assert service.plugin.connect(context(authorization_code=CODE))["connected"]
+    previous = service.storage["secrets/users/" + USER]
+    service.tokens[field] = invalid
+    result = service.plugin.connect(context(authorization_code=CODE))
+    assert result["ok"] is False
+    assert "previous connection is retained" in result["error"]
+    assert service.storage["secrets/users/" + USER] == previous
+    assert CODE not in json.dumps(result)
+    if invalid:
+        assert invalid not in json.dumps(result)
+
+
 def test_page_catalogue_batching_namespace_identity_and_addon_filter(service):
     rows = [row(str(i), "one", str(i)) for i in range(27)]
     rows += [row("0", "two", "other"), row("engine", "ue"), row("private", sandboxType="PRIVATE")]

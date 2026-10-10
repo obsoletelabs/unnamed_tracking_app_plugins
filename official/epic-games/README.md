@@ -11,7 +11,9 @@ The host page/sign-in support is completed by
 
 Install this plugin's `.utp` through Settings → Plugins, approve the declared
 permissions and enable it. Open **Epic Games** in the sidebar or its plugin page.
-Use **Sign in on Epic Games**. The action is declared as external navigation, so
+Use **Copy sign-in link** to open Epic in your regular browser while leaving the
+app open. If clipboard access is unavailable, copy the selected link manually.
+Alternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so
 the host validates Epic's returned HTTPS destination and navigates the host tab;
 the sandboxed plugin does not open a popup itself. After signing in, use browser
 Back to return to the plugin page, then paste the one-time authorization code,
@@ -19,6 +21,12 @@ JSON page or redirect URL into the password field. No popup permission is needed
 The host opens the declared Epic sign-in destination outside the sandbox. Your
 password stays on Epic's site. The code is cleared immediately after submission
 and is never saved in settings.
+
+Launcher access/refresh tokens are validated independently from the 32-character
+account ID and bounded to 8 KiB. Hosts must support authorization headers larger
+than the original 2 KiB limit; older hosts need the companion token-header fix
+before an import can use these tokens. Failed replacement sign-ins retain an
+existing connection and never show token values in errors.
 
 Choose **Import games**. Inventory paging, playtime, catalogue lookup and host
 imports run as separate bounded steps. **Pause after this step**, closing the

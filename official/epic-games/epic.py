@@ -29,6 +29,7 @@ LOGIN_URL = "https://www.epicgames.com/id/login?" + urlencode(
     }
 )
 IDENTIFIER = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
+MAX_TOKEN_LENGTH = 8192
 NON_GAME = {"addons", "digitalextras", "plugins", "engines"}
 
 
@@ -86,14 +87,19 @@ def token_pair(form):
     data = http(TOKEN_URL, form=form)
     if not isinstance(data, dict) or data.get("errorCode"):
         raise EpicError("Epic did not return a valid sign-in. Sign in again on Epic.")
-    if not all(
-        isinstance(data.get(key), str) and 0 < len(data[key]) <= 2000
-        for key in ("access_token", "refresh_token", "account_id")
+    for key, label in (("access_token", "access token"), ("refresh_token", "refresh token")):
+        value = data.get(key)
+        if not isinstance(value, str) or not value:
+            raise EpicError(
+                f"Epic returned no valid {label}. Your previous connection is retained."
+            )
+        if len(value) > MAX_TOKEN_LENGTH or any(c.isspace() for c in value):
+            raise EpicError(
+                f"Epic returned an unsupported {label}. Your previous connection is retained."
+            )
+    if not isinstance(data.get("account_id"), str) or not re.fullmatch(
+        r"[0-9a-fA-F]{32}", data["account_id"]
     ):
-        raise EpicError(
-            "Epic returned an incomplete sign-in. Your previous connection is retained."
-        )
-    if not re.fullmatch(r"[0-9a-fA-F]{32}", data["account_id"]):
         raise EpicError("Epic returned an invalid account identity.")
     expiry = data.get("expires_in")
     if (

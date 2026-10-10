@@ -4,5 +4,5 @@
   "tags": ["games", "epic", "imports", "official"],
   "icon": "icon.svg",
   "automatic_update": false,
-  "release_notes": "Personal Epic game imports with private rotating tokens, bounded resumable inventory/catalogue steps and preserved host library state. Requires host Plugin API 1.1.3."
+  "release_notes": "Accept bounded launcher tokens with larger signed claims and copy the Epic sign-in link to use a regular browser. Clipboard restrictions offer manual copy fallback. Requires host Plugin API 1.1.3 with the authorization-header size fix."
 }
