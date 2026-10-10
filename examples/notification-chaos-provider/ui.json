@@ -1,0 +1,56 @@
+{
+  "api_contract_version": "1.1.2",
+  "schema_version": "v1",
+  "plugin_id": "example.notification-chaos-provider",
+  "title": "Notification Chaos Demo",
+  "settings": [
+    {
+      "id": "simulation",
+      "title": "Demo delivery behavior",
+      "description": "Demonstration only. Successful modes send to an explicitly enrolled Discord webhook. Core owns retries and failure history.",
+      "fields": [
+        {
+          "id": "mode",
+          "label": "Simulation mode",
+          "type": "select",
+          "default": "embed",
+          "options": [
+            {
+              "value": "embed",
+              "label": "Backwards embed"
+            },
+            {
+              "value": "plain",
+              "label": "Backwards plain message"
+            },
+            {
+              "value": "fail_first",
+              "label": "Fail first render, then recover"
+            },
+            {
+              "value": "always_fail",
+              "label": "Fail every render"
+            },
+            {
+              "value": "invalid_layout",
+              "label": "Return invalid layout (core rejects it)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "render",
+      "label": "Internal demo renderer",
+      "handler": "plugin:render",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
+    }
+  ],
+  "pages": [],
+  "menus": []
+}

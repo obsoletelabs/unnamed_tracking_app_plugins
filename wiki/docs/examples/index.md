@@ -45,3 +45,7 @@ enroll each webhook in Account Notifications. Uninstall the legacy plugin after
 reviewing retained notification history; credentials and disclosure consent are
 never copied to the replacement. The host retains compatibility with already
 installed legacy packages during migration.
+
+## Notification Chaos Demo
+
+The unreleased [Notification Chaos Demo](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/notification-chaos-provider) uses protected Discord transport with reversed approved fields, persistent first-render failure, repeated failure and invalid-layout modes. It is deliberately unreliable, requests no credential/network access and is independent of the official provider. Unit/package tests and the real reference-worker lifecycle harness cover it. Core owns delivery history, retries and routing; no production feature depends on the demo.

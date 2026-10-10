@@ -1,0 +1,78 @@
+{
+  "api_contract_version": "1.1.2",
+  "application_version_range": ">=1.0.0",
+  "capabilities": [
+    {
+      "name": "notification_providers.register",
+      "version": 1
+    },
+    {
+      "name": "notification_providers.deliver",
+      "version": 1
+    },
+    {
+      "name": "plugin.settings",
+      "version": 1
+    },
+    {
+      "name": "plugin.storage",
+      "version": 1
+    }
+  ],
+  "dependencies": [],
+  "description": "DEMO ONLY: reversed approved fields and selectable renderer failures. Uses host-owned Discord webhooks.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "Notification Chaos Demo",
+  "permissions": [
+    {
+      "capability": {
+        "name": "notification_providers.register",
+        "version": 1
+      },
+      "rationale": "Register a clearly labelled demonstration provider through the existing gateway."
+    },
+    {
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      },
+      "rationale": "Render only approved field references; deliberately simulate renderer failures without credentials or routing authority."
+    },
+    {
+      "capability": {
+        "name": "plugin.settings",
+        "version": 1
+      },
+      "rationale": "Read the explicitly selected simulation mode; no destination configuration."
+    },
+    {
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      },
+      "rationale": "Remember at most 100 opaque notification IDs for the first-render failure simulation."
+    }
+  ],
+  "plugin_id": "example.notification-chaos-provider",
+  "sdk_version_range": "^1.1.2",
+  "storage": {
+    "quota_mb": 1
+  },
+  "ui": {
+    "actions": [
+      "render"
+    ],
+    "menus": [],
+    "pages": [],
+    "settings": [
+      "simulation"
+    ]
+  },
+  "version": "1.0.0"
+}

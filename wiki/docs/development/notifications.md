@@ -61,8 +61,8 @@ Each webhook stays PUBLIC, even after explicit richer-media consent. Security
 and recovery content is ineligible. The new plugin requests only provider
 registration/delivery, without storage, data-reading or frontend permissions.
 
-This is an explicit source preview until paired host lifecycle acceptance and
-reviewed signed promotion. Legacy example credentials are not transferred.
+The official provider is signed and published after paired host lifecycle acceptance
+and reviewed promotion. Legacy example credentials are not transferred.
 Standalone consumer tests: `python -m pytest tests/test_discord_notifications.py -q`.
 
 ## Scoped lifecycle replay (Plugin API 1.1.4)
@@ -74,3 +74,7 @@ Only the authenticated user/current installation's own source notification lifec
 Responses contain `events`, `cursor`, `has_more` and `resync_required`. Process and deduplicate stable event UUIDs before saving the next opaque cursor. A null cursor begins retained history. When `resync_required` is true, discard stale local assumptions and restart using the returned cursor; expired history cannot be reconstructed. This is a change feed rather than a state snapshot. Core publication occurs through the existing job loop in bounded batches; backlog may span multiple ticks.
 
 The host's server-configurable default is 90 days (`NOTIFICATION_AUDIT_RETENTION_DAYS`), independently of inbox retention and longer-lived dedupe receipts. The core owns ordering, audit persistence, leases and delivery retries. These exported schemas are compared with the paired host's public models by `tools/check_host_contract.py`; plugins import only the SDK. This extension depends on host PR [#47](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/47).
+
+## Failure simulation
+
+The signed Notification Chaos Demo exercises the same protected renderer without a second transport API. Its settings select reversed approved fields, a bounded persistent first-render failure, repeated failure or an intentionally invalid layout. Exceptions enter core retry handling; invalid layouts are rejected before network I/O. Its ledger stores only opaque notification IDs, never delivery rows or credentials. See [examples](../examples/index.md#notification-chaos-demo) and `tests/test_notification_chaos_provider.py`.
