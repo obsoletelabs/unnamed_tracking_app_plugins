@@ -104,15 +104,156 @@ def _send_dm(token: str, discord_id: str, content: str) -> None:
     _discord(token, "POST", f"/channels/{channel_id}/messages", {"content": content[:1900], "allowed_mentions": {"parse": []}})
 
 
+def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:
+    if not isinstance(user, dict) or not user.get("id") or not user.get("avatar"):
+        return None
+    return f"https://cdn.discordapp.com/avatars/{user['id']}/{user['avatar']}.png?size={size}"
+
+
+def _permission_names(permission_value: int) -> list[str]:
+    permissions = {
+        0x0000000000000001: "CREATE_INSTANT_INVITE",
+        0x0000000000000002: "KICK_MEMBERS",
+        0x0000000000000004: "BAN_MEMBERS",
+        0x0000000000000008: "ADMINISTRATOR",
+        0x0000000000000010: "MANAGE_CHANNELS",
+        0x0000000000000020: "MANAGE_GUILD",
+        0x0000000000000400: "VIEW_CHANNEL",
+        0x0000000000000800: "SEND_MESSAGES",
+        0x0000000000001000: "SEND_TTS_MESSAGES",
+        0x0000000000002000: "MANAGE_MESSAGES",
+        0x0000000000004000: "EMBED_LINKS",
+        0x0000000000008000: "ATTACH_FILES",
+        0x0000000000010000: "READ_MESSAGE_HISTORY",
+        0x0000000000020000: "MENTION_EVERYONE",
+        0x0000000000040000: "USE_EXTERNAL_EMOJIS",
+        0x0000000000080000: "VIEW_GUILD_INSIGHTS",
+        0x0000000000100000: "CONNECT",
+        0x0000000000200000: "SPEAK",
+        0x0000000000400000: "MUTE_MEMBERS",
+        0x0000000000800000: "DEAFEN_MEMBERS",
+        0x0000000001000000: "MOVE_MEMBERS",
+        0x0000000002000000: "USE_VAD",
+        0x0000000004000000: "PRIORITY_SPEAKER",
+        0x0000000008000000: "STREAM",
+        0x0000000010000000: "USE_APPLICATION_COMMANDS",
+        0x0000000020000000: "MANAGE_THREADS",
+        0x0000000040000000: "USE_PUBLIC_THREADS",
+        0x0000000080000000: "USE_PRIVATE_THREADS",
+        0x0000000100000000: "USE_EXTERNAL_STICKERS",
+        0x0000000200000000: "SEND_MESSAGES_IN_THREADS",
+        0x0000000400000000: "USE_EMBEDDED_ACTIVITIES",
+        0x0000000800000000: "MODERATE_MEMBERS",
+        0x0000002000000000: "VIEW_AUDIT_LOG",
+        0x0000004000000000: "VIEW_GUILD_ANALYTICS",
+        0x0000010000000000: "MANAGE_EVENTS",
+        0x0000040000000000: "VIEW_CREATOR_MONETIZATION_ANALYTICS",
+        0x0000080000000000: "USE_SOUNDBOARD",
+        0x0000100000000000: "CREATE_GUILD_EXPRESSIONS",
+        0x0000200000000000: "CREATE_EVENTS",
+        0x0000400000000000: "USE_EXTERNAL_SOUNDS",
+        0x0000800000000000: "SEND_VOICE_MESSAGES",
+    }
+    return [name for bit, name in permissions.items() if permission_value & bit]
+
+
+def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
+    started = time.monotonic()
+    bot = _discord(token, "GET", "/users/@me")
+    guild = _discord(token, "GET", f"/guilds/{quote(guild_id)}?with_counts=true")
+    member = _discord(token, "GET", f"/guilds/{quote(guild_id)}/members/@me")
+    roles = _discord(token, "GET", f"/guilds/{quote(guild_id)}/roles")
+    elapsed_ms = round((time.monotonic() - started) * 1000)
+    if not isinstance(bot, dict) or not bot.get("id"):
+        raise PluginError("Discord did not return the configured bot identity.")
+    if not isinstance(guild, dict) or not guild.get("id"):
+        raise PluginError("Discord could not read the configured server.")
+    if not isinstance(member, dict):
+        member = {}
+    if not isinstance(roles, list):
+        roles = []
+    role_by_id = {str(role.get("id")): role for role in roles if isinstance(role, dict)}
+    role_names = [str(role_by_id[rid].get("name")) for rid in member.get("roles", []) if str(rid) in role_by_id]
+    try:
+        permission_value = int(member.get("permissions", "0"))
+    except (TypeError, ValueError):
+        permission_value = 0
+    return {
+        "bot": {
+            "id": str(bot.get("id")),
+            "username": str(bot.get("username", "")),
+            "global_name": bot.get("global_name"),
+            "discriminator": str(bot.get("discriminator", "0")),
+            "avatar_url": _avatar_url(bot),
+            "verified": bot.get("verified"),
+            "bot": bot.get("bot") is True,
+            "public_flags": bot.get("public_flags"),
+        },
+        "guild": {
+            "id": str(guild.get("id")),
+            "name": str(guild.get("name", "")),
+            "icon_url": f"https://cdn.discordapp.com/icons/{guild['id']}/{guild['icon']}.png?size=256" if guild.get("icon") else None,
+            "description": guild.get("description"),
+            "owner_id": guild.get("owner_id"),
+            "member_count": guild.get("approximate_member_count"),
+            "online_count": guild.get("approximate_presence_count"),
+            "verification_level": guild.get("verification_level"),
+            "premium_tier": guild.get("premium_tier"),
+            "preferred_locale": guild.get("preferred_locale"),
+            "features": guild.get("features", []),
+            "nsfw_level": guild.get("nsfw_level"),
+            "vanity_url_code": guild.get("vanity_url_code"),
+        },
+        "bot_member": {
+            "nickname": member.get("nick"),
+            "joined_at": member.get("joined_at"),
+            "pending": member.get("pending"),
+            "role_names": role_names,
+            "role_count": len(role_names),
+            "permissions": permission_value,
+            "permission_names": _permission_names(permission_value),
+        },
+        "health": {"api_ok": True, "request_ms": elapsed_ms},
+    }
+
+
 def get_config(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     config = _load("secrets/bot-config", {})
     link = _load("links/" + user_id, {})
-    return {
+    result: dict[str, Any] = {
         "configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")),
+        "bot_configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")),
         "guild_id": str(config.get("guild_id", "")) if isinstance(config, dict) else "",
         "linked": isinstance(link, dict) and bool(link.get("discord_id")),
     }
+    if result["configured"]:
+        try:
+            result.update(_bot_snapshot(str(config["token"]), str(config["guild_id"])))
+        except GatewayRequestError:
+            result["health"] = {"api_ok": False}
+            result["bot_error"] = "Discord could not be reached right now."
+        except PluginError as exc:
+            result["health"] = {"api_ok": False}
+            result["bot_error"] = str(exc)
+    if result["linked"]:
+        linked_id = str(link["discord_id"])
+        try:
+            linked_user = _discord(str(config["token"]), "GET", f"/users/{quote(linked_id)}") if result["configured"] else None
+            linked_member = _discord(str(config["token"]), "GET", f"/guilds/{quote(str(config.get('guild_id', '')))}/members/{quote(linked_id)}") if result["configured"] else None
+            if isinstance(linked_user, dict):
+                result["username"] = linked_user.get("username", "")
+                result["global_name"] = linked_user.get("global_name")
+                result["discord_id"] = linked_id
+                result["avatar_url"] = _avatar_url(linked_user)
+            if isinstance(linked_member, dict):
+                result["server_nickname"] = linked_member.get("nick")
+                result["server_joined_at"] = linked_member.get("joined_at")
+                result["server_roles"] = linked_member.get("roles", [])
+            result["linked_at"] = link.get("linked_at")
+        except GatewayRequestError:
+            result["link_warning"] = "The linked Discord account could not be refreshed."
+    return result
 
 
 def save_bot_config(values: dict[str, Any]) -> dict[str, Any]:
@@ -121,8 +262,9 @@ def save_bot_config(values: dict[str, Any]) -> dict[str, Any]:
     guild_id = str(values.get("guild_id", "")).strip()
     if not token or not _SNOWFLAKE.fullmatch(guild_id):
         raise PluginError("Enter a valid Discord bot token and server ID.")
+    snapshot = _bot_snapshot(token, guild_id)
     _store("secrets/bot-config", {"token": token, "guild_id": guild_id})
-    return {"ok": True, "message": "Discord bot configuration saved."}
+    return {"ok": True, "message": f"Connected as {snapshot['bot']['username']} to {snapshot['guild']['name']}."}
 
 
 def clear_bot_token(values: dict[str, Any]) -> dict[str, Any]:
@@ -143,7 +285,7 @@ def start_link(values: dict[str, Any]) -> dict[str, Any]:
     code = f"{secrets.randbelow(100_000_000):08d}"
     _store("pending-links/" + user_id, {"discord_id": str(member["id"]), "code_hash": hashlib.sha256(code.encode()).hexdigest(), "expires_at": int(time.time()) + _LINK_TTL, "attempts": 0})
     _send_dm(config["token"], str(member["id"]), f"Your verification code is **{code}**.")
-    return {"ok": True, "message": "Verification code sent to your Discord DMs."}
+    return {"ok": True, "message": "Verification code sent to your Discord DMs.", "expires_in_seconds": _LINK_TTL}
 
 
 def confirm_link(values: dict[str, Any]) -> dict[str, Any]:
@@ -159,7 +301,7 @@ def confirm_link(values: dict[str, Any]) -> dict[str, Any]:
     _store("pending-links/" + user_id, pending)
     if not hmac.compare_digest(hashlib.sha256(code.encode()).hexdigest(), str(pending.get("code_hash", ""))):
         raise PluginError("That verification code is incorrect.")
-    _store("links/" + user_id, {"discord_id": str(pending["discord_id"])})
+    _store("links/" + user_id, {"discord_id": str(pending["discord_id"]), "linked_at": int(time.time())})
     _delete("pending-links/" + user_id)
     return {"ok": True, "message": "Discord account linked."}
 
@@ -199,8 +341,8 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
     except GatewayRequestError as exc:
         retryable = exc.code in {"unavailable", "rate_limited"}
         return {"success": False, "retryable": retryable, "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied"}
-    except PluginError as exc:
-        return {"success": False, "retryable": False, "error": "discord_delivery_failed" if str(exc) else "discord_delivery_failed"}
+    except PluginError:
+        return {"success": False, "retryable": False, "error": "discord_delivery_failed"}
     return {"success": True, "retryable": False}
 
 
