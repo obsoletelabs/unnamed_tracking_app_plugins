@@ -58,7 +58,7 @@ jobs:
             ref="${DEFAULT_HOST_REF:-main}"
             # The v1.1 host is merged; use the verified conformance-tool revision.
             # Explicit overrides remain supported; only open paired PRs shadow main.
-candidate_branch="$COMPANION_BRANCH"
+            candidate_branch="$COMPANION_BRANCH"
             # The bot plugin depends on the generic notification-provider host API;
             # its host companion uses a deliberately different branch name.
             if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ]; then
