@@ -94,7 +94,7 @@ jobs:
             # Current native plugins require the public Plugin API 1.1 host.
             ref=main
             # Use matching branches only while their host PR is still open.
-candidate_branch="$COMPANION_BRANCH"
+            candidate_branch="$COMPANION_BRANCH"
             # The bot plugin depends on the generic notification-provider host API;
             # its host companion uses a deliberately different branch name.
             if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ]; then
