@@ -3,14 +3,12 @@
 import hashlib
 import importlib.util
 import json
-import re
 from pathlib import Path
 
 import jsonschema
 import pytest
 
 from sdk import notifications
-from sdk.plugin_protocol import GatewayRequestError
 
 ROOT = Path(__file__).parents[1]
 PLUGIN_PATH = ROOT / "official/discord-bot-notifications/plugin.py"
