@@ -2,13 +2,16 @@
 
 Private direct-message notifications using a dedicated Discord bot.
 
+**Host requirement:** this preview uses the generic plugin-owned notification provider contract in Plugin API 1.1.5. Deploy the paired host notification-provider change (PR #54) before installing this plugin. Older hosts reject provider registration and the plugin will repeatedly restart.
+
 ## Setup
 
 1. Create a dedicated bot application in the Discord Developer Portal. Keep its bot token private; never paste it into a chat or commit it to a repository.
 2. Invite the bot to the Discord server that contains the users who want to link their accounts. Enable the **Server Members Intent** if Discord requires it for member search.
 3. In **Settings → Administration → Discord Bot Notifications**, enter the bot token and that server's numeric ID. The plugin validates the credentials against Discord before saving. The token is write-only and is never returned by the status action.
 4. Each user opens **Settings → Account → Discord Bot Notifications**, enters their exact Discord username, and requests a link code. The bot DMs a short-lived code to the matching server member. Enter the code to prove control of that Discord account.
-5. Enable the plugin-owned **Discord Bot DM** destination in the host's notification routing settings. The host's normal notification dispatcher applies user preferences and privacy policy before invoking the plugin.
+5. Open **Settings → Preferences → Notifications → Your providers**. Under **Discord Bot Notifications**, add the **Discord Bot DM** destination, then enable the provider for your account.
+6. Under **Notification types**, expand the types you want and enable routing to the new Discord destination. The host's normal dispatcher still applies its privacy policy and your per-type preferences before invoking the plugin.
 
 A username is only used to locate one exact match inside the configured server. The plugin refuses zero or ambiguous matches. The linked Discord user ID is saved after verification, so later username changes do not silently redirect notifications. The bot must be able to create DMs with linked users; users may need to allow direct messages from server members.
 
