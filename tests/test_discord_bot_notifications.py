@@ -27,6 +27,12 @@ def test_manifest_declares_only_required_privileges_and_known_transport():
     )
     schema = json.loads((ROOT / "tools/schemas/manifest-v1.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(manifest, schema)
+    ui = json.loads(
+        (ROOT / "official/discord-bot-notifications/ui.json").read_text(encoding="utf-8")
+    )
+    assert set(manifest["ui"]["actions"]) == {item["id"] for item in ui["actions"]}
+    assert set(manifest["ui"]["pages"]) == {item["id"] for item in ui["pages"]}
+    assert set(manifest["ui"]["settings"]) == {item["id"] for item in ui["settings"]}
     assert "network.outbound" in {item["name"] for item in manifest["capabilities"]}
     assert "notification_providers.deliver" in {
         item["name"] for item in manifest["capabilities"]
