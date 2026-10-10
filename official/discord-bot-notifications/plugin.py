@@ -11,6 +11,7 @@ import sys
 import time
 from typing import Any
 from urllib.parse import quote
+from uuid import UUID
 
 from sdk.notifications import register_provider
 from sdk.plugin_protocol import GatewayRequestError, request
@@ -40,7 +41,10 @@ def _actor(values: dict[str, Any], *, admin: bool = False) -> str:
             if admin
             else "Sign in to manage your Discord link."
         )
-    return str(context["user_id"])
+    try:
+        return str(UUID(str(context["user_id"])))
+    except (TypeError, ValueError, AttributeError):
+        raise PluginError("Sign in to manage your Discord link.") from None
 
 
 def _load(key: str, default: Any = None) -> Any:
