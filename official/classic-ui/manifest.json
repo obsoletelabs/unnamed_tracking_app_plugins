@@ -1,0 +1,38 @@
+{
+  "manifest_version": 1,
+  "api_contract_version": "1.1.0",
+  "plugin_id": "official.classic-ui",
+  "name": "Classic UI",
+  "version": "0.1.0",
+  "description": "Restores the darker, denser and more boxy visual language of the classic Unnamed Tracking UI without replacing application functionality.",
+  "entrypoint": "plugin:main",
+  "sdk_version_range": "^1.1.0",
+  "application_version_range": "*",
+  "capabilities": [
+    {
+      "name": "frontend.themes",
+      "version": 1
+    }
+  ],
+  "permissions": [
+    {
+      "capability": {
+        "name": "frontend.themes",
+        "version": 1
+      },
+      "rationale": "Expose the Classic UI preset in the host Appearance settings so the presentation can be selected and removed without changing application functionality."
+    }
+  ],
+  "dependencies": [],
+  "ui": {
+    "settings": [],
+    "actions": [],
+    "pages": [],
+    "menus": []
+  },
+  "integrity": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null,
+    "key_id": null
+  }
+}

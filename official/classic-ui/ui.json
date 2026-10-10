@@ -1,0 +1,49 @@
+{
+  "schema_version": "v1",
+  "api_contract_version": "1.1.0",
+  "plugin_id": "official.classic-ui",
+  "title": "Classic UI",
+  "themes": [
+    {
+      "id": "classic",
+      "label": "Classic UI",
+      "description": "The darker, denser and more boxy visual style of the classic Unnamed Tracking application.",
+      "colors": {
+        "light": {
+          "background": "#f2f0ec",
+          "surface": "#ffffff",
+          "surface_alt": "#e8e5df",
+          "text": "#242424",
+          "muted": "#66605a",
+          "accent": "#b86618",
+          "success": "#216e3e",
+          "warning": "#855000",
+          "error": "#b42318",
+          "info": "#265a8b",
+          "purple": "#6951a2"
+        },
+        "dark": {
+          "background": "#0d0d0d",
+          "surface": "#1a1a1a",
+          "surface_alt": "#222222",
+          "text": "#f2f2f2",
+          "muted": "#9c9c9c",
+          "accent": "#d68a34",
+          "success": "#75c58b",
+          "warning": "#e2ad5b",
+          "error": "#e47b7b",
+          "info": "#79a9d6",
+          "purple": "#b8a5df"
+        }
+      },
+      "order": 0
+    }
+  ],
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css",
+      "native/sidebar.css"
+    ]
+  }
+}
