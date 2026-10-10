@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "official",
+    "frontend",
+    "themes",
+    "classic-ui"
+  ],
+  "automatic_update": null,
+  "release_notes": "Initial Classic UI theme: darker dark mode, compact boxy surfaces, classic navigation treatment, and older-style menus, dialogs and Settings presentation."
+}
