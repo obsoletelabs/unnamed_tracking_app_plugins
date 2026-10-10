@@ -247,6 +247,23 @@ def unlink(values: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "message": "Discord account unlinked."}
 
 
+def configure_destination(values: dict[str, Any]) -> dict[str, Any]:
+    """Allow host routing only after this user has verified a Discord account."""
+    user_id = _actor(values)
+    link = _load("links/" + user_id)
+    if not isinstance(link, dict) or not link.get("discord_id"):
+        raise PluginError("Link and verify your Discord account before enabling this destination.")
+    return {"ok": True, "message": "Verified Discord account is ready for private notifications."}
+
+
+def retire_destination(values: dict[str, Any]) -> dict[str, Any]:
+    """Remove the user's routing identity when they retire this destination."""
+    user_id = _actor(values)
+    _delete("links/" + user_id)
+    _delete("pending-links/" + user_id)
+    return {"ok": True, "message": "Discord notification destination retired and account unlinked."}
+
+
 def test_dm(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values); config = _bot_config(); link = _load("links/" + user_id)
     if not isinstance(link, dict) or not link.get("discord_id"):
@@ -303,8 +320,8 @@ def _register_provider() -> None:
                             "fields": [],
                         }
                     ],
-                    "configure_action": "save-bot-config",
-                    "retire_action": "clear-bot-token",
+                    "configure_action": "configure-destination",
+                    "retire_action": "retire-destination",
                     "test_action": "test-dm",
                     "features": {"critical_supported": False, "multiple_destinations": False},
                 },
