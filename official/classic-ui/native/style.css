@@ -4,92 +4,81 @@
  */
 
 :root {
-  /* The classic application was deliberately much darker than the redesigned shell. */
   --ui-bg: #0d0d0d !important;
   --ui-surface: #1a1a1a !important;
   --ui-surface-2: #222222 !important;
   --ui-popover: #171717 !important;
   --ui-border-soft: #202020 !important;
   --ui-border: #2b2b2b !important;
+  --ui-border-strong: #3a3a3a !important;
   --ui-text: #f2f2f2 !important;
   --ui-dim: #9c9c9c !important;
   --ui-faint: #666666 !important;
-
-  /* Classic controls were compact and visibly boxier. */
+  --ui-accent: #d68a34 !important;
+  --ui-accent-soft: rgba(214, 138, 52, 0.16) !important;
+  --ui-good: #75c58b !important;
+  --ui-warning: #e2ad5b !important;
+  --ui-error: #e47b7b !important;
+  --ui-info: #79a9d6 !important;
   --ui-radius-control: 6px !important;
   --ui-radius-row: 7px !important;
   --ui-radius-card: 8px !important;
   --ui-radius-dialog: 9px !important;
+  --ui-control-height: 38px !important;
+}
+
+:root[data-theme="dark"] {
+  --ui-bg: #0d0d0d !important;
+  --ui-surface: #1a1a1a !important;
+  --ui-surface-2: #222222 !important;
+  --ui-popover: #171717 !important;
+  --ui-text: #f2f2f2 !important;
+  --ui-dim: #9c9c9c !important;
+  --ui-accent: #d68a34 !important;
 }
 
 html,
 body,
 #app {
   background: #0d0d0d !important;
-  color: #f2f2f2;
+  color: #f2f2f2 !important;
 }
 
-/* Keep the old app's dark baseline even when individual redesigned components
-   carry their own surface colours. */
-:where(.app, .app-shell, .page, .main-content, .content, .view) {
-  background-color: #0d0d0d;
-  color: #f2f2f2;
+:where(.app, .app-shell, .page, .main-content, .content, .view, .page-content) {
+  background-color: #0d0d0d !important;
+  color: #f2f2f2 !important;
 }
 
 /* --------------------------------------------------------------------------
-   Shape language
+   Shape language: prefer bordered boxes over floating pills/cards.
    -------------------------------------------------------------------------- */
 
 :where(
-  .card,
-  .game-card,
-  .media-card,
-  .collection-card,
-  .home-widget,
-  .settings-card,
-  .preview-card,
-  .panel,
-  .section-card,
-  .account-chip,
-  .settings-nav,
-  .dialog,
-  .app-dialog,
-  .modal,
-  .popover,
-  .dropdown,
-  .menu,
-  input,
-  select,
-  textarea,
-  button,
-  .ui-btn
+  .card, .game-card, .media-card, .collection-card, .home-widget,
+  .settings-card, .preview-card, .panel, .section-card, .account-chip,
+  .settings-nav, .dialog, .app-dialog, .modal, .popover, .dropdown,
+  .menu, .context-menu, input, select, textarea, button, .ui-btn,
+  .tab, .tabs button, .segmented-control, .toast, .notification,
+  .table, .pagination, .search-box
 ) {
   border-radius: 6px !important;
 }
 
 :where(
-  .card,
-  .game-card,
-  .media-card,
-  .collection-card,
-  .home-widget,
-  .settings-card,
-  .preview-card,
-  .panel,
-  .section-card
+  .card, .game-card, .media-card, .collection-card, .home-widget,
+  .settings-card, .preview-card, .panel, .section-card
 ) {
-  border-color: #2b2b2b !important;
+  border: 1px solid #2b2b2b !important;
   background: #1a1a1a !important;
   box-shadow: none !important;
 }
 
-/* Avoid the newer floating/pill visual language. */
-:where(.chip, .tag, .badge, .filter-chip) {
+:where(.chip, .tag, .badge, .filter-chip, .pill, .status-pill) {
   border-radius: 4px !important;
 }
 
 /* --------------------------------------------------------------------------
-   Sidebar / navigation — visual treatment only
+   Sidebar / navigation — visual treatment only.
    -------------------------------------------------------------------------- */
 
 :where(.navigation, .sidebar, .app-sidebar, .phone-navigation, .mobile-tabs) {
@@ -120,34 +109,22 @@ body,
 }
 
 /* --------------------------------------------------------------------------
-   Popups, menus and dialogs
+   Popups, menus, tooltips and dialogs.
    -------------------------------------------------------------------------- */
 
-:where(.popover, .dropdown, .menu, .context-menu, .profile-menu, .notification-menu) {
+:where(.popover, .dropdown, .menu, .context-menu, .profile-menu, .notification-menu, .tooltip) {
   background: #171717 !important;
   border: 1px solid #2b2b2b !important;
   border-radius: 6px !important;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55) !important;
 }
 
-:where(
-  .popover-item,
-  .dropdown-item,
-  .menu-item,
-  .profile-menu button,
-  .notification-menu button
-) {
+:where(.popover-item, .dropdown-item, .menu-item, .profile-menu button, .notification-menu button) {
   min-height: 34px;
   border-radius: 4px !important;
 }
 
-:where(
-  .popover-item:hover,
-  .dropdown-item:hover,
-  .menu-item:hover,
-  .profile-menu button:hover,
-  .notification-menu button:hover
-) {
+:where(.popover-item:hover, .dropdown-item:hover, .menu-item:hover, .profile-menu button:hover, .notification-menu button:hover) {
   background: rgba(255, 255, 255, 0.07) !important;
 }
 
@@ -163,9 +140,13 @@ body,
 }
 
 /* --------------------------------------------------------------------------
-   Settings — make the redesigned settings surface visually read like the old
-   compact, card-and-row interface without changing its grouping or routes.
+   Settings: keep the current routes/grouping but restore the dense old
+   card-and-row visual language.
    -------------------------------------------------------------------------- */
+
+:where(.settings-page, .settings-layout, .settings-content) {
+  background: #0d0d0d !important;
+}
 
 .settings-nav {
   background: #141414 !important;
@@ -218,10 +199,10 @@ body,
 }
 
 /* --------------------------------------------------------------------------
-   Controls — compact, square-ish, old dark surfaces
+   Controls, switches, fields and segmented controls.
    -------------------------------------------------------------------------- */
 
-:where(input, select, textarea, .ui-field) {
+:where(input, select, textarea, .ui-field, .search-input) {
   background: #1a1a1a !important;
   border: 1px solid #2b2b2b !important;
   color: #f2f2f2 !important;
@@ -229,11 +210,11 @@ body,
   box-shadow: none !important;
 }
 
-:where(input:hover, select:hover, textarea:hover) {
+:where(input:hover, select:hover, textarea:hover, .ui-field:hover) {
   border-color: #3a3a3a !important;
 }
 
-:where(input:focus, select:focus, textarea:focus) {
+:where(input:focus, select:focus, textarea:focus, .ui-field:focus-within) {
   border-color: #d68a34 !important;
   box-shadow: 0 0 0 1px rgba(214, 138, 52, 0.25) !important;
 }
@@ -243,17 +224,120 @@ body,
   box-shadow: none !important;
 }
 
-:where(.ui-btn, .button, button.primary, .btn-primary) {
+:where(.ui-btn, .button, button.primary, .btn-primary, .primary-button) {
   min-height: 36px;
 }
 
-/* Keep the classic accent instead of introducing a second theme colour. */
-:where(.ui-btn-primary, button.primary, .btn-primary, .active) {
-  --ui-accent: #d68a34;
+:where(.ui-btn-primary, button.primary, .btn-primary, .primary-button) {
+  background: #d68a34 !important;
+  border-color: #d68a34 !important;
+  color: #111 !important;
+}
+
+:where(.ui-btn-primary:hover, button.primary:hover, .btn-primary:hover, .primary-button:hover) {
+  background: #e09a4c !important;
+}
+
+:where(.switch, .toggle, [role="switch"]) {
+  border-radius: 5px !important;
+  background: #303030 !important;
+  border: 1px solid #454545 !important;
+}
+
+:where(.switch.active, .switch[aria-checked="true"], .toggle.active, [role="switch"][aria-checked="true"]) {
+  background: #d68a34 !important;
+  border-color: #d68a34 !important;
+}
+
+:where(.checkbox, .radio, input[type="checkbox"], input[type="radio"]) {
+  accent-color: #d68a34 !important;
+}
+
+:where(.segmented-control, .segmented-control button, .tabs, .tabs button) {
+  border-color: #2b2b2b !important;
+  background: #141414 !important;
+}
+
+:where(.tabs .active, .tabs button.active, .segmented-control .active, .segmented-control button.active) {
+  background: #222222 !important;
+  color: #d68a34 !important;
+  box-shadow: inset 0 -2px 0 #d68a34 !important;
 }
 
 /* --------------------------------------------------------------------------
-   Typography and small details
+   Tables, lists, pagination and status surfaces.
+   -------------------------------------------------------------------------- */
+
+:where(table, .table, .data-table) {
+  background: #1a1a1a !important;
+  border: 1px solid #2b2b2b !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:where(th, .table-header) {
+  background: #141414 !important;
+  color: #f2f2f2 !important;
+  border-bottom: 1px solid #2b2b2b !important;
+}
+
+:where(td, th) {
+  border-color: #2b2b2b !important;
+}
+
+:where(tbody tr:hover, .table-row:hover) {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+:where(.pagination, .pagination button) {
+  border-color: #2b2b2b !important;
+  background: #1a1a1a !important;
+}
+
+:where(.pagination .active, .pagination button.active) {
+  background: rgba(214, 138, 52, 0.16) !important;
+  color: #d68a34 !important;
+  border-color: #d68a34 !important;
+}
+
+:where(.toast, .notification, .alert, .callout, .info-box) {
+  background: #171717 !important;
+  border: 1px solid #2b2b2b !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+:where(.toast.success, .notification.success, .alert.success, .callout.success) { border-left: 3px solid #75c58b !important; }
+:where(.toast.warning, .notification.warning, .alert.warning, .callout.warning) { border-left: 3px solid #e2ad5b !important; }
+:where(.toast.error, .notification.error, .alert.error, .callout.error) { border-left: 3px solid #e47b7b !important; }
+:where(.toast.info, .notification.info, .alert.info, .callout.info) { border-left: 3px solid #79a9d6 !important; }
+
+/* --------------------------------------------------------------------------
+   Images, progress and utility surfaces.
+   -------------------------------------------------------------------------- */
+
+:where(.progress, .progress-bar, progress) {
+  background: #222 !important;
+  border: 1px solid #2b2b2b !important;
+  border-radius: 4px !important;
+  accent-color: #d68a34 !important;
+}
+
+:where(.progress > *, .progress-bar > *) {
+  background: #d68a34 !important;
+}
+
+:where(pre, code, .code-block) {
+  background: #111 !important;
+  border: 1px solid #2b2b2b !important;
+  border-radius: 5px !important;
+}
+
+:where(.divider, hr) {
+  border-color: #2b2b2b !important;
+}
+
+/* --------------------------------------------------------------------------
+   Typography and small details.
    -------------------------------------------------------------------------- */
 
 :where(.page-header h1, .page-header h2, .settings-page h1, .settings-page h2) {
@@ -266,8 +350,12 @@ body,
   color: #777 !important;
 }
 
-:where(.divider, hr) {
-  border-color: #2b2b2b !important;
+:where(a) {
+  color: #e0a15c;
+}
+
+:where(a:hover) {
+  color: #f0b877;
 }
 
 :focus-visible {
@@ -275,8 +363,6 @@ body,
   outline-offset: 2px !important;
 }
 
-/* Classic dark scrollbar: narrow, neutral and substantially darker than the
-   redesigned browser-like treatment. */
 html {
   scrollbar-color: #444 #121212 !important;
   scrollbar-width: thin;
@@ -299,4 +385,15 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Keep the classic density on small screens without changing layout logic. */
+@media (max-width: 700px) {
+  :where(.card, .settings-card, .settings-section, .panel) {
+    border-radius: 5px !important;
+  }
+
+  :where(.settings-row, .setting-row) {
+    min-height: 42px;
+  }
 }
