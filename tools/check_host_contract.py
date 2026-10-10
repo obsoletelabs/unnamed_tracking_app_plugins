@@ -83,12 +83,15 @@ def main() -> None:
     )
     for name, model in (("notification-type-v1", NotificationTypeRegistration),
                         ("notification-event-v1", NotificationEventEmission),
-                        ("notification-provider-v1", NotificationProviderRegistration),
                         ("notification-layout-v1", NotificationFieldLayout)):
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         schema["x-api-contract-version"] = "1.1.2"
         assert schema == json.loads((root / "tools/schemas" / f"{name}.schema.json").read_bytes()), name
+    schema = NotificationProviderRegistration.model_json_schema()
+    schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+    schema["x-api-contract-version"] = "1.1.4"
+    assert schema == json.loads((root / "tools/schemas" / "notification-provider-v1.schema.json").read_bytes()), "notification-provider-v1"
     catalogue = json.loads((args.distribution_root / "list.json").read_text(encoding="utf-8"))
     # Evaluate the actual public catalogue entry model without loading database
     # configuration or the API server. Additional distribution fields remain
@@ -122,7 +125,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):
