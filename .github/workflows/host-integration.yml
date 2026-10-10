@@ -58,14 +58,20 @@ jobs:
             ref="${DEFAULT_HOST_REF:-main}"
             # The v1.1 host is merged; use the verified conformance-tool revision.
             # Explicit overrides remain supported; only open paired PRs shadow main.
-            if [ "$COMPANION_BRANCH" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$COMPANION_BRANCH" >/dev/null; then
-              encoded_branch="$(printf '%s' "$COMPANION_BRANCH" | jq -sRr @uri)"
+candidate_branch="$COMPANION_BRANCH"
+            # The bot plugin depends on the generic notification-provider host API;
+            # its host companion uses a deliberately different branch name.
+            if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ]; then
+              candidate_branch="feat/plugin-owned-notification-providers"
+            fi
+            if [ "$candidate_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$candidate_branch" >/dev/null; then
+              encoded_branch="$(printf '%s' "$candidate_branch" | jq -sRr @uri)"
               open_prs="$(curl -fsSL \
                 -H "Authorization: Bearer $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github+json" \
                 "https://api.github.com/repos/obsoletelabs/unnamed_tracking_app_2/pulls?state=open&head=obsoletelabs%3A${encoded_branch}")"
               if printf '%s' "$open_prs" | jq -e 'length > 0' >/dev/null; then
-                ref="$COMPANION_BRANCH"
+                ref="$candidate_branch"
               fi
             fi
           fi
