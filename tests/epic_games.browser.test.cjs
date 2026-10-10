@@ -76,7 +76,7 @@ test("Epic sign-in opens a separate tab and leaves the code-entry page available
     const popupPromise = page.waitForEvent("popup");
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).click();
     const popup = await popupPromise;
-    await popup.waitForURL("https://www.epicgames.com/id/login?fixture=1");
+    await popup.waitForURL("https://www.epicgames.com/id/login?fixture=1", { waitUntil: "commit" });
     await frame.getByLabel("Epic authorization code").fill("code-can-be-pasted-here");
     assert.equal(await frame.getByLabel("Epic authorization code").inputValue(), "code-can-be-pasted-here");
     await popup.close();
