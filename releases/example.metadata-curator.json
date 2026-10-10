@@ -606,6 +606,132 @@
         "metadata"
       ],
       "version": "1.4.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "4ca2644faa2bae9a4d5406edfc8d5511e052ec8c",
+        "source_committed_at": "2026-10-10T19:28:39+08:00",
+        "source_digest": "c45fce7e211796d5a17d667684432f4b51346efad0ac0889cf3371087b4bb026",
+        "source_path": "examples/metadata-curator",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c5eea6121363c504976ca3f6675141f40480693b6a1b646e7298366b5c8e8ede"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "*",
+        "capabilities": [
+          {
+            "name": "games.read",
+            "version": 1
+          },
+          {
+            "name": "plugin.settings",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Runs a configurable metadata search and stores a normalized local result set.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "4dfae66eaf1b69f06b61bd55afc5e309b97a02d159ce4666e0871c38b3a413ae",
+          "signature": "v2:p2Xmn6hfOC0IN6vj1qoHugKzmfLbiKGJ73S5NAejieJZmMQl3omahJz1laJ+VG/Z85RU/Wdb91ILOeSBDNE7Cw=="
+        },
+        "manifest_version": 1,
+        "name": "Metadata Curator",
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.read",
+              "version": 1
+            },
+            "rationale": "Search game metadata."
+          },
+          {
+            "capability": {
+              "name": "plugin.settings",
+              "version": 1
+            },
+            "rationale": "Read the configured search query."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Store the latest normalized search results."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Expose the declared plugin page in the main navigation."
+          }
+        ],
+        "plugin_id": "example.metadata-curator",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 2
+        },
+        "ui": {
+          "actions": [
+            "search"
+          ],
+          "pages": [
+            "search"
+          ],
+          "settings": [
+            "query"
+          ]
+        },
+        "version": "1.5.0"
+      },
+      "package": {
+        "filename": "example.metadata-curator-1.5.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 5080
+      },
+      "package_sha256": "f2d33fdad2b475f5c7703ce26bf078a57d8f8a5c57a171f6c85d82578cec9959",
+      "plugin_id": "example.metadata-curator",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Metadata Curator\n\nA configurable metadata-search demo with real application logic.\n\nThe **Search** action reads its `query` setting, calls the host metadata API,\nnormalizes returned records, returns them and stores a compact snapshot under\n`users/<host-injected-user-id>/latest-search`. It requests `games.read`,\n`plugin.settings`, `plugin.storage` and `frontend.navigation.main`. Its declarative\npage has a real settings section and executable handler. The supervised entrypoint\nreports ready and stays alive. It demonstrates useful behavior without importing\nor duplicating application metadata-provider code.\n\nBuild/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).\nEach new package carries its own README, tags, icon and automatic-update policy.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "4dfae66eaf1b69f06b61bd55afc5e309b97a02d159ce4666e0871c38b3a413ae",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "4dfae66eaf1b69f06b61bd55afc5e309b97a02d159ce4666e0871c38b3a413ae",
+        "signature": "v2:p2Xmn6hfOC0IN6vj1qoHugKzmfLbiKGJ73S5NAejieJZmMQl3omahJz1laJ+VG/Z85RU/Wdb91ILOeSBDNE7Cw=="
+      },
+      "tags": [
+        "games",
+        "metadata"
+      ],
+      "version": "1.5.0"
     }
   ],
   "version": 1
