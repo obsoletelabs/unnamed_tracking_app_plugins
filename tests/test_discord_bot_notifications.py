@@ -40,91 +40,66 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
 
     monkeypatch.setattr(notifications, "request", fake_request)
     provider._register_provider()
-    assert calls == [
-        (
-            "notification_providers.register",
-            "notification_providers.register",
-            {
-                "provider_id": "official.discord-bot-notifications.dm",
-                "name": "Discord Bot DM",
-                "action_id": "deliver",
-                "destination_kind": "discord_bot_dm",
-                "privacy": "PRIVATE",
-                "channel_context": "external",
-                "transport": "plugin_private",
-            },
-        )
-    ]
+    assert calls == [("notification_providers.register", "notification_providers.register", {
+        "provider_id": "official.discord-bot-notifications.dm", "name": "Discord Bot DM", "action_id": "deliver",
+        "destination_kind": "discord_bot_dm", "privacy": "PRIVATE", "channel_context": "external", "transport": "plugin_private",
+    })]
 
 
 def test_link_code_must_be_verified_before_identity_is_saved(monkeypatch):
     provider = load()
     storage = {}
     sent = []
-    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_bot_config", lambda: {"token": "test-token", "guild_id": "123456789012345678"})
     monkeypatch.setattr(provider.time, "time", lambda: 1000)
     monkeypatch.setattr(provider.secrets, "randbelow", lambda maximum: 1234567)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: storage.get(key, default))
     monkeypatch.setattr(provider, "_store", lambda key, value: storage.__setitem__(key, value))
     monkeypatch.setattr(provider, "_delete", lambda key: storage.pop(key, None))
-    monkeypatch.setattr(
-        provider,
-        "_discord",
-        lambda token, method, path, body=None: [{"user": {"username": "casey", "id": "123456789012345678"}}],
-    )
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body=None: [{"user": {"username": "casey", "id": "123456789012345678"}}])
     monkeypatch.setattr(provider, "_send_dm", lambda token, user_id, content: sent.append(content))
 
     result = provider.start_link({"username": "casey"})
     assert result["ok"] is True
     assert result["expires_in_seconds"] == 600
     assert sent and "01234567" in sent[0]
-    assert "links/12345678-1234-5678-1234-567812345678" not in storage
+    assert "links/" + user_id not in storage
 
     with pytest.raises(provider.PluginError, match="incorrect"):
         provider.confirm_link({"code": "00000000"})
-    assert "links/12345678-1234-5678-1234-567812345678" not in storage
+    assert "links/" + user_id not in storage
 
     confirmed = provider.confirm_link({"code": "01234567"})
     assert confirmed["ok"] is True
-    assert storage["links/12345678-1234-5678-1234-567812345678"]["discord_id"] == "123456789012345678"
-    assert "linked_at" in storage["links/12345678-1234-5678-1234-567812345678"]
-    assert "pending-links/12345678-1234-5678-1234-567812345678" not in storage
+    assert storage["links/" + user_id]["discord_id"] == "123456789012345678"
+    assert "linked_at" in storage["links/" + user_id]
+    assert "pending-links/" + user_id not in storage
 
 
 def test_username_lookup_refuses_ambiguous_matches(monkeypatch):
     provider = load()
-    monkeypatch.setattr(
-        provider,
-        "_discord",
-        lambda token, method, path, body=None: [
-            {"user": {"username": "casey", "id": "123456789012345678"}},
-            {"user": {"username": "casey", "id": "223456789012345678"}},
-        ],
-    )
-    with pytest.raises(provider.PluginError, match="exactly one"):
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body=None: [
+        {"user": {"username": "casey", "id": "123456789012345678"}},
+        {"user": {"username": "casey", "id": "223456789012345678"}},
+    ])
+    with pytest.raises(provider.PluginError, match="more than one"):
         provider._member_by_username("token", "123456789012345678", "casey")
 
 
 def test_delivery_only_sends_to_the_current_users_verified_link(monkeypatch):
     provider = load()
     sent = []
-    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
-    monkeypatch.setattr(
-        provider,
-        "_load",
-        lambda key, default=None: {
-            "secrets/bot-config": {"token": "test-token", "guild_id": "123456789012345678"},
-            "links/12345678-1234-5678-1234-567812345678": {"discord_id": "123456789012345678", "username": "casey"},
-        }.get(key, default),
-    )
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: {
+        "secrets/bot-config": {"token": "test-token", "guild_id": "123456789012345678"},
+        "links/" + user_id: {"discord_id": "123456789012345678", "username": "casey"},
+    }.get(key, default))
+    monkeypatch.setattr(provider, "_store", lambda key, value: None)
     monkeypatch.setattr(provider, "_send_dm", lambda token, user_id, content: sent.append((user_id, content)))
-    result = provider.deliver(
-        {
-            "_plugin_context": {"user_id": "12345678-1234-5678-1234-567812345678"},
-            "delivery": {"title": "Release", "body": "A new episode is available."},
-        }
-    )
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Release", "body": "A new episode is available."}})
     assert result == {"success": True, "retryable": False}
     assert sent == [("123456789012345678", "**Release**\nA new episode is available.")]
 
@@ -132,15 +107,11 @@ def test_delivery_only_sends_to_the_current_users_verified_link(monkeypatch):
 def test_delivery_without_verified_link_never_sends(monkeypatch):
     provider = load()
     sent = []
-    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: {"token": "test-token", "guild_id": "123456789012345678"} if key == "secrets/bot-config" else default)
     monkeypatch.setattr(provider, "_send_dm", lambda *args: sent.append(args))
-    result = provider.deliver(
-        {
-            "_plugin_context": {"user_id": "12345678-1234-5678-1234-567812345678"},
-            "delivery": {"title": "Private", "body": "Do not send without linking."},
-        }
-    )
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Private", "body": "Do not send without linking."}})
     assert result["success"] is False
     assert result["error"] == "recipient_not_linked"
     assert sent == []
@@ -148,7 +119,8 @@ def test_delivery_without_verified_link_never_sends(monkeypatch):
 
 def test_status_never_returns_the_bot_token(monkeypatch):
     provider = load()
-    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: {"secrets/bot-config": {"token": "sensitive-bot-token", "guild_id": "123456789012345678"}}.get(key, default))
     monkeypatch.setattr(provider, "_bot_snapshot", lambda token, guild_id: {
         "bot": {"id": "123456789012345678", "username": "Tracking Bot", "global_name": "Tracking Bot", "avatar_url": None, "verified": True},
@@ -156,7 +128,7 @@ def test_status_never_returns_the_bot_token(monkeypatch):
         "bot_member": {"role_names": ["Bot"], "role_count": 1, "permissions": 2048, "permission_names": ["SEND_MESSAGES"]},
         "health": {"api_ok": True, "request_ms": 31},
     })
-    result = provider.get_config({"_plugin_context": {"user_id": "12345678-1234-5678-1234-567812345678"}})
+    result = provider.get_config({"_plugin_context": {"user_id": user_id}})
     assert result["bot_configured"] is True
     assert result["bot"]["username"] == "Tracking Bot"
     assert result["guild"]["member_count"] == 42
@@ -186,13 +158,14 @@ def test_bot_snapshot_exposes_identity_server_membership_and_permissions(monkeyp
 
 def test_delivery_reports_gateway_permission_errors_without_retrying(monkeypatch):
     provider = load()
-    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
 
     def denied_storage(key, default=None):
         raise GatewayRequestError("permission denied", {"code": "forbidden"})
 
     monkeypatch.setattr(provider, "_load", denied_storage)
-    result = provider.deliver({"_plugin_context": {"user_id": "12345678-1234-5678-1234-567812345678"}, "delivery": {"title": "Private", "body": "No delivery."}})
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "Private", "body": "No delivery."}})
     assert result["success"] is False
     assert result["retryable"] is False
     assert result["error"] == "discord_permission_denied"
