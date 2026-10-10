@@ -162,6 +162,13 @@ def test_signin_uses_fixed_declared_destination_without_tokens(service):
     assert service.calls == []
 
 
+def test_sandbox_assets_are_inlined_and_scripts_follow_the_form():
+    manifest = json.loads((SOURCE / "manifest.json").read_text())
+    assert manifest["frontend"]["inline_assets"] is True
+    html = (SOURCE / "frontend/index.html").read_text()
+    assert html.index('id="connect-form"') < html.index('<script src="./app.js"')
+
+
 @pytest.mark.parametrize(
     "value",
     [
