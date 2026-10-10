@@ -12,11 +12,11 @@ except ImportError:
 def check(root=ROOT) -> None:
     plugins = discover_plugins(root)
     for source, manifest in plugins:
-        supported_contracts = {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4"}
+        supported_contracts = {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5"}
         if manifest.get("api_contract_version") not in supported_contracts:
             raise ValueError(
                 f"{source.name}: maintained source must explicitly target a supported "
-                "Plugin API contract version through v1.1.4"
+                "Plugin API contract version through v1.1.5"
             )
         files, metadata = collect_payload(root, source, manifest)
         # The existing validator expects generated version/policy fields.
