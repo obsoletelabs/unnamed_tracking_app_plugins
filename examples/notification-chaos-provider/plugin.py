@@ -59,20 +59,8 @@ def _register_provider() -> None:
     delay = 1
     while True:
         try:
-            register_provider(
-                PROVIDER_ID,
-                "Notification Chaos Demo",
-                "render",
-                transport="plugin",
-                definition={
-                    "destinations": [
-                        {"kind": "notification_chaos", "label": "Notification Chaos Demo", "privacy": "PUBLIC"}
-                    ],
-                    "configure_action": "configure",
-                    "retire_action": "retire",
-                    "test_action": "test",
-                },
-            )
+            register_provider(PROVIDER_ID, "Notification Chaos Demo", "render",
+                              transport="discord_webhook")
             return
         except GatewayRequestError as exc:
             if exc.code != "unavailable":

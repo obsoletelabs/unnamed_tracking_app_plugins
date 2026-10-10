@@ -4,7 +4,7 @@ h1 { font-size: 2rem; margin: 4px 0 12px; } h2 { font-size: 1.2rem; margin-top: 
 p { line-height: 1.55; } section { margin-top: 20px; padding: 20px; border: 1px solid var(--ui-border); border-radius: 12px; background: var(--ui-surface); }
 .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--ui-dim); }
 .muted, dt { color: var(--ui-dim); font-size: .9rem; } a { color: var(--ui-accent); } li { margin-bottom: 8px; }
-form { display: grid; gap: 10px; } label { font-weight: 600; } input { box-sizing: border-box; width: 100%; }
+form, .signin-link { display: grid; gap: 10px; } .signin-link { margin: 16px 0; } .signin-link p { margin: 0; } label { font-weight: 600; } input { box-sizing: border-box; width: 100%; min-width: 0; }
 button, input { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--ui-border); }
 button { cursor: pointer; background: var(--ui-accent); color: var(--ui-on-accent); } button:disabled { opacity: .5; cursor: default; }
 input { background: var(--ui-bg); color: var(--ui-text); } button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 3px; }

@@ -6,7 +6,7 @@ import json
 import sys
 from typing import Any
 
-API_CONTRACT_VERSION = "1.1.2"
+API_CONTRACT_VERSION = "1.1.4"
 
 
 class GatewayRequestError(RuntimeError):

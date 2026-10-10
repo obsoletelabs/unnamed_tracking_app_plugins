@@ -123,11 +123,7 @@ def test_registration_recovers_only_transient_host_unavailability(demo, monkeypa
     plugin._register_provider()
     assert delays == [1, 2] and all(call == calls[0] for call in calls)
     assert calls[0] == ("notification_providers.register", "notification_providers.register", {
-        "provider_id": ID + ".webhook", "name": "Notification Chaos Demo", "action_id": "render",
-        "transport": "plugin", "definition": {
-            "destinations": [{"kind": "notification_chaos", "label": "Notification Chaos Demo", "privacy": "PUBLIC"}],
-            "configure_action": "configure", "retire_action": "retire", "test_action": "test",
-        }})
+        "provider_id": ID + ".webhook", "name": "Notification Chaos Demo", "action_id": "render", "transport": "discord_webhook"})
     def denied(*args):
         raise GatewayRequestError("Denied", {"code": "forbidden"})
     monkeypatch.setattr(notifications, "request", denied)

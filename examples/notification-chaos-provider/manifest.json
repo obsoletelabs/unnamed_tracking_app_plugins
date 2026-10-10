@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.5",
+  "api_contract_version": "1.1.2",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -74,5 +74,5 @@
       "simulation"
     ]
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
