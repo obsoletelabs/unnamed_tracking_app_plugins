@@ -1,0 +1,39 @@
+{
+  "real_installed_plugin": true,
+  "real_actions_and_database": true,
+  "provider_http_fixture": true,
+  "checks": [
+    {
+      "width": 390,
+      "mode": "light",
+      "source_frame_sandbox": "allow-scripts",
+      "declared_external_navigation": true,
+      "code_cleared": true,
+      "safe_invalid_code_error": true,
+      "pause_reload_resume": true,
+      "imported_games": 27,
+      "skipped_addons": 1,
+      "page_errors": [],
+      "horizontal_overflow": false
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "source_frame_sandbox": "allow-scripts",
+      "declared_external_navigation": true,
+      "code_cleared": true,
+      "safe_invalid_code_error": true,
+      "pause_reload_resume": true,
+      "imported_games": 27,
+      "skipped_addons": 1,
+      "page_errors": [],
+      "horizontal_overflow": false
+    }
+  ],
+  "screenshots": [
+    "epic-connect-390-light.png",
+    "epic-complete-390-light.png",
+    "epic-connect-1440-dark.png",
+    "epic-complete-1440-dark.png"
+  ]
+}

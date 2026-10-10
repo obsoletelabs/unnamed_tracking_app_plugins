@@ -31,3 +31,6 @@ Regression coverage is in `tests/test_epic_games.py`, including malformed paging
 rotating tokens, namespace collisions, DLC filtering, optional playtime,
 permission denial and replay after a host commit/checkpoint failure. Browser and
 actual packaged runtime/database evidence are linked in the implementation PR.
+
+See [installed-package validation](epic-games-validation.md) for the repeatable
+checks, provider-fixture boundaries and limitations.
