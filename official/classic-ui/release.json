@@ -7,6 +7,7 @@
     "themes",
     "classic-ui"
   ],
+  "icon": "icon.svg",
   "automatic_update": null,
-  "release_notes": "Initial Classic UI theme: darker dark mode, compact boxy surfaces, classic navigation treatment, and older-style menus, dialogs and Settings presentation."
+  "release_notes": "First Classic UI pass: substantially darker dark mode, compact boxy surfaces, classic orange accents, denser controls, navigation, menus, dialogs and settings styling. This release changes presentation only and does not replace host routes or functionality."
 }
