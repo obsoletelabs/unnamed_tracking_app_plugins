@@ -544,6 +544,142 @@
         "official"
       ],
       "version": "0.1.0"
+    },
+    {
+      "automatic_update": false,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "a2acc632ec4359f58cb393e4763380474dff12c9",
+        "source_committed_at": "2026-10-10T20:00:43+08:00",
+        "source_digest": "b148e4c21da5505512ce7278e6eac947365b10cc2a2ef619ed95fe1a423a413e",
+        "source_path": "official/epic-games",
+        "version_bump": "patch"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "e8ae273cee46093c738e16ceca8687ea120b1289dc64e502aa4f27f0342db2d7"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.3",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "games.write",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Connect a personal Epic account and import its games with resumable inventory, catalogue and playtime steps.",
+        "entrypoint": "plugin:main",
+        "frontend": {
+          "entry": "frontend/index.html",
+          "inline_assets": true
+        },
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "0c109b30ce8aafbba747cdc9750ab1a83b0b08307e035a98b73e67aba1ea3050",
+          "signature": "v2:ztV0gNw1V1ynNJnlyzJbURANcUnkaR/WTBiP1zkg2WEUdy+FSSgGQEQQco8bGK/bnGcgh1kRAu76c5AAC2ueCQ=="
+        },
+        "manifest_version": 1,
+        "name": "Epic Games Library",
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.write",
+              "version": 1
+            },
+            "rationale": "Import games into the authenticated user's library and update provider metadata, playtime and availability while preserving personal state."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Exchange the user's Epic authorization code and contact Epic's account, library and catalogue services through the bounded host network gateway."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Keep each user's rotating Epic tokens private and save resumable inventory/import checkpoints inside this plugin's storage."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Offer an Epic Games page in the host navigation for connection, imports and disconnecting."
+          }
+        ],
+        "plugin_id": "official.epic-games",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 16
+        },
+        "ui": {
+          "actions": [
+            "status",
+            "signin",
+            "connect",
+            "disconnect",
+            "start",
+            "step"
+          ],
+          "menus": [],
+          "pages": [
+            "library"
+          ],
+          "settings": []
+        },
+        "version": "0.1.1"
+      },
+      "package": {
+        "filename": "official.epic-games-0.1.1.utp",
+        "format": "utp-v1",
+        "size_bytes": 18934
+      },
+      "package_sha256": "28dd3ae0d26b04c281e0e7fd6de6d8781abde5d11cfade92844a978e49880adb",
+      "plugin_id": "official.epic-games",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.3**. Requires\n[host PR38](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/38) or a later\nhost release implementing `games.import`. Older hosts reject this package during\ncompatibility review. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open **Epic Games** in the sidebar or its plugin page.\nUse **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and navigates the host tab;\nthe sandboxed plugin does not open a popup itself. After signing in, use browser\nBack to return to the plugin page, then paste the one-time authorization code,\nJSON page or redirect URL into the password field. No popup permission is needed.\nThe host opens the declared Epic sign-in destination outside the sandbox. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace; a missing catalogue response retains the batch\nfor retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n",
+      "release_notes": "Accept bounded launcher tokens with larger signed claims and copy the Epic sign-in link to use a regular browser. Clipboard restrictions offer manual copy fallback. Requires host Plugin API 1.1.3 with the authorization-header size fix.",
+      "sha256": "0c109b30ce8aafbba747cdc9750ab1a83b0b08307e035a98b73e67aba1ea3050",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "0c109b30ce8aafbba747cdc9750ab1a83b0b08307e035a98b73e67aba1ea3050",
+        "signature": "v2:ztV0gNw1V1ynNJnlyzJbURANcUnkaR/WTBiP1zkg2WEUdy+FSSgGQEQQco8bGK/bnGcgh1kRAu76c5AAC2ueCQ=="
+      },
+      "tags": [
+        "games",
+        "epic",
+        "imports",
+        "official"
+      ],
+      "version": "0.1.1"
     }
   ],
   "version": 1
