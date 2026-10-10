@@ -5160,11 +5160,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "20dc8b17af9a58abb9fd21376088228a11de552a",
-        "source_committed_at": "2026-10-09T22:26:41+08:00",
-        "source_digest": "9b7b1617bb7faacc77dd6c63046b6181b028f1d97f92deda562466fbed968b8c",
+        "source_commit": "7af9cc7f0e8ef89e91406b2ac2e869ef56d123ae",
+        "source_committed_at": "2026-10-10T08:13:30+08:00",
+        "source_digest": "bc845593e797c95f8df2754d251d86bb89c5943f8548dcb42dc6fbd97b06ea48",
         "source_path": "examples/password-reset-notification-demo",
-        "version_bump": "initial"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -5230,8 +5230,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-          "sha256": "f9eab09b0d56ff32de0c5c44b3ee0da183941aa99b14432515c51897797380f4",
-          "signature": "v2:PEJMAZ3Ri+ktjIyyS2yZAbeE6Q4oAbQTNCnjCWITSNf29nczoIfDEE87m/MnYu/6GnQHwg4EV6Po26TdCmA7Aw=="
+          "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
+          "signature": "v2:dH2iCSz66A2p14eN31PXpUD+f6fm8NlCDNWEJoD5T4U+NgmFzr4jC62PAnQ/M8P/yngvQ9EclnjAnIHi+9/qAQ=="
         },
         "manifest_version": 1,
         "name": "Password Reset Routing Demo",
@@ -5278,15 +5278,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "1.0.0"
+        "version": "1.1.0"
       },
       "name": "Password Reset Routing Demo",
       "package": {
-        "filename": "example.password-reset-notification-demo-1.0.0.utp",
+        "filename": "example.password-reset-notification-demo-1.1.0.utp",
         "format": "utp-v1",
-        "size_bytes": 7318
+        "size_bytes": 7447
       },
-      "package_sha256": "514a3fbe113f5fc10cfb96d64735b31fadc894f3222ab7a2928c7d83819ae6b6",
+      "package_sha256": "8afb599c557c485b1dedd5fc49f30fadddc89717698a286334ccfa3e44a51e6e",
       "permissions": [
         {
           "capability": {
@@ -5445,14 +5445,138 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.0.0.utp",
           "version": "1.0.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "7af9cc7f0e8ef89e91406b2ac2e869ef56d123ae",
+            "source_committed_at": "2026-10-10T08:13:30+08:00",
+            "source_digest": "bc845593e797c95f8df2754d251d86bb89c5943f8548dcb42dc6fbd97b06ea48",
+            "source_path": "examples/password-reset-notification-demo",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8946c8b94ab94e8c130c16c74c36957e1cafd22912dfc8a69cc36e53783c529"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": "*",
+            "capabilities": [
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.emit",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "notifications.sensitive",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Executable notification routing demo. Does not change real authentication.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+              "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
+              "signature": "v2:dH2iCSz66A2p14eN31PXpUD+f6fm8NlCDNWEJoD5T4U+NgmFzr4jC62PAnQ/M8P/yngvQ9EclnjAnIHi+9/qAQ=="
+            },
+            "manifest_version": 1,
+            "name": "Password Reset Routing Demo",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Register this namespaced synthetic notification type."
+              },
+              {
+                "capability": {
+                  "name": "notifications.emit",
+                  "version": 1
+                },
+                "rationale": "Submit event facts for the authenticated user through the core."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Persist user-scoped expiring demo token digests and consumption state."
+              },
+              {
+                "capability": {
+                  "name": "notifications.sensitive",
+                  "version": 1
+                },
+                "rationale": "Explicit high-risk permission for the synthetic recovery token; SECURE external destinations only."
+              }
+            ],
+            "plugin_id": "example.password-reset-notification-demo",
+            "sdk_version_range": "^1.1.2",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "issue",
+                "confirm"
+              ],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.1.0"
+          },
+          "package": {
+            "filename": "example.password-reset-notification-demo-1.1.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 7447
+          },
+          "package_sha256": "8afb599c557c485b1dedd5fc49f30fadddc89717698a286334ccfa3e44a51e6e",
+          "plugin_id": "example.password-reset-notification-demo",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Password Reset Routing Demo\n\n**Demo only.** This executes a synthetic issue → notification → confirmation flow through the public Plugin API 1.1.2. It never changes passwords, creates accounts, grants membership or returns destination addresses/credentials. SMTP belongs to the host. There is no anonymous recovery endpoint or production reset/invite implementation.\n\nThe `issue` action registers `example.password-reset-notification-demo.requested`, stores an expiring token digest under the authenticated user's storage key and emits typed facts. Its result contains acceptance/notification identity and expiry, never the token. The core handles preferences, destination selection, trust, urgency, retries and SMTP rendering. Required trust is **SECURE**, purpose **recovery**. Recovery requires a verified external destination with explicit recovery opt-in, suitable transport and a separately reviewed notifications.sensitive grant; the inbox cannot receive this token.\n\nWith the plugin enabled and its declared permissions approved, call the authenticated host action API:\n\n```http\nPOST /api/plugins/example.password-reset-notification-demo/actions/issue\nContent-Type: application/json\n\n{\"values\": {}}\n```\n\nRead the token from the eligible notification, then explicitly submit it:\n\n```http\nPOST /api/plugins/example.password-reset-notification-demo/actions/confirm\nContent-Type: application/json\n\n{\"values\": {\"token\": \"TOKEN_FROM_NOTIFICATION\"}}\n```\n\nBoth calls require the existing authenticated host session/API authorization. The sender cannot select another user/address. A new issue replaces the previous challenge; it expires after ten minutes. Confirmation consumes it sequentially and rejects another owner, replacement, expiry, alteration and sequential replay. Storage get/put is not a compare-and-swap transaction; concurrent confirmation is intentionally not a production authentication guarantee. No real authority is attached to the demo token.\n\nPermissions are exactly source registration, notification emission and plugin storage, plus the separate critical notifications.sensitive grant. No full API, user enumeration, network access, host source imports or database access is requested. This is a protocol/action demonstration with no new frontend page; no screenshots apply.\n\nFrom the companion repository root:\n\n```sh\npython -m pytest tests/test_notification_demos.py\npython tools/check_source_layout.py\npython tools/build_packages.py\n```\n\nBuilds use the existing SDK/package format. Branch previews are unsigned and require explicit untrusted-package consent in the host. Signed main publication uses the existing demo signer; do not claim the source preview is a maintained official production auth plugin. Disable/uninstall retires source routing and queued work while the host retains notification history/preferences. Actual package/host acceptance is documented in the PR.\n",
+          "release_notes": "Synthetic owner-scoped notification source demonstration, Plugin API 1.1.2.",
+          "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
+          "signing": {
+            "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+            "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
+            "signature": "v2:dH2iCSz66A2p14eN31PXpUD+f6fm8NlCDNWEJoD5T4U+NgmFzr4jC62PAnQ/M8P/yngvQ9EclnjAnIHi+9/qAQ=="
+          },
+          "tags": [
+            "notifications",
+            "demo"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.1.0.utp",
+          "version": "1.1.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "f9eab09b0d56ff32de0c5c44b3ee0da183941aa99b14432515c51897797380f4",
+      "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
       "signing": {
         "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-        "sha256": "f9eab09b0d56ff32de0c5c44b3ee0da183941aa99b14432515c51897797380f4",
-        "signature": "v2:PEJMAZ3Ri+ktjIyyS2yZAbeE6Q4oAbQTNCnjCWITSNf29nczoIfDEE87m/MnYu/6GnQHwg4EV6Po26TdCmA7Aw=="
+        "sha256": "3c6169af2f42f2001fc877dc2c90995ab963508d81947a84c282fe9960bd9510",
+        "signature": "v2:dH2iCSz66A2p14eN31PXpUD+f6fm8NlCDNWEJoD5T4U+NgmFzr4jC62PAnQ/M8P/yngvQ9EclnjAnIHi+9/qAQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -5463,8 +5587,8 @@
         "notifications",
         "demo"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.0.0.utp",
-      "version": "1.0.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.password-reset-notification-demo-1.1.0.utp",
+      "version": "1.1.0"
     },
     {
       "application_version_range": "*",
@@ -12997,11 +13121,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "20dc8b17af9a58abb9fd21376088228a11de552a",
-        "source_committed_at": "2026-10-09T22:26:41+08:00",
-        "source_digest": "d6eb9b7b380a892ad7aa934eb7d20ebf12368bff36a7e8cb098334b4bfbaa75b",
+        "source_commit": "7af9cc7f0e8ef89e91406b2ac2e869ef56d123ae",
+        "source_committed_at": "2026-10-10T08:13:30+08:00",
+        "source_digest": "746749f8bf741b427b2bd905ce316fbffa23a46beffe842d14ba9b26f7e93330",
         "source_path": "examples/user-invite-notification-demo",
-        "version_bump": "initial"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -13059,8 +13183,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-          "sha256": "e1fc37a92c18d0dbb65c4d92dd4bcea45a811dee2b24a5040fdca02fafb0033d",
-          "signature": "v2:Sd4Bx2U3mOPN3RXPKNpt1TqmErWopeSh5lLVK7/0O3e9SAQnWu1uKx8GrhTH7VtM8SUMRERadiMZLD5h0gs6Ag=="
+          "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
+          "signature": "v2:yvu++yTrvlqBjrMkxeid9/uJ4CX3/9/ziH3UxIhHGNeR1iI+fUbU6ZlPGMw07unIXyyZJoQfrt7TsVAcB7uhAg=="
         },
         "manifest_version": 1,
         "name": "User Invite Routing Demo",
@@ -13100,15 +13224,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "1.0.0"
+        "version": "1.1.0"
       },
       "name": "User Invite Routing Demo",
       "package": {
-        "filename": "example.user-invite-notification-demo-1.0.0.utp",
+        "filename": "example.user-invite-notification-demo-1.1.0.utp",
         "format": "utp-v1",
-        "size_bytes": 7132
+        "size_bytes": 7262
       },
-      "package_sha256": "9b13b47d2efabc5d63210689a7ce7adc97dad80a650e1c96129b6ccc914df1d7",
+      "package_sha256": "f68cb41065c4084d3dba59a3a4695e13bd63ac71eeeff81bb4103f7c5faa24f9",
       "permissions": [
         {
           "capability": {
@@ -13249,14 +13373,127 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.0.0.utp",
           "version": "1.0.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "7af9cc7f0e8ef89e91406b2ac2e869ef56d123ae",
+            "source_committed_at": "2026-10-10T08:13:30+08:00",
+            "source_digest": "746749f8bf741b427b2bd905ce316fbffa23a46beffe842d14ba9b26f7e93330",
+            "source_path": "examples/user-invite-notification-demo",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8946c8b94ab94e8c130c16c74c36957e1cafd22912dfc8a69cc36e53783c529"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.2",
+            "application_version_range": "*",
+            "capabilities": [
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.emit",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Executable notification routing demo. Does not change real authentication.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+              "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
+              "signature": "v2:yvu++yTrvlqBjrMkxeid9/uJ4CX3/9/ziH3UxIhHGNeR1iI+fUbU6ZlPGMw07unIXyyZJoQfrt7TsVAcB7uhAg=="
+            },
+            "manifest_version": 1,
+            "name": "User Invite Routing Demo",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Register this namespaced synthetic notification type."
+              },
+              {
+                "capability": {
+                  "name": "notifications.emit",
+                  "version": 1
+                },
+                "rationale": "Submit event facts for the authenticated user through the core."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Persist user-scoped expiring demo token digests and consumption state."
+              }
+            ],
+            "plugin_id": "example.user-invite-notification-demo",
+            "sdk_version_range": "^1.1.2",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "issue",
+                "confirm"
+              ],
+              "pages": [],
+              "settings": []
+            },
+            "version": "1.1.0"
+          },
+          "package": {
+            "filename": "example.user-invite-notification-demo-1.1.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 7262
+          },
+          "package_sha256": "f68cb41065c4084d3dba59a3a4695e13bd63ac71eeeff81bb4103f7c5faa24f9",
+          "plugin_id": "example.user-invite-notification-demo",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# User Invite Routing Demo\n\n**Demo only.** This executes a synthetic issue → notification → confirmation flow through the public Plugin API 1.1.2. It never changes passwords, creates accounts, grants membership or returns destination addresses/credentials. SMTP belongs to the host. There is no anonymous recovery endpoint or production reset/invite implementation.\n\nThe `issue` action registers `example.user-invite-notification-demo.requested`, stores an expiring token digest under the authenticated user's storage key and emits typed facts. Its result contains acceptance/notification identity and expiry, never the token. The core handles preferences, destination selection, trust, urgency, retries and SMTP rendering. Required trust is **PRIVATE**, purpose **standard**. An enrolled PRIVATE email or authenticated inbox can receive this ordinary invitation demo; PUBLIC webhooks cannot.\n\nWith the plugin enabled and its declared permissions approved, call the authenticated host action API:\n\n```http\nPOST /api/plugins/example.user-invite-notification-demo/actions/issue\nContent-Type: application/json\n\n{\"values\": {}}\n```\n\nRead the token from the eligible notification, then explicitly submit it:\n\n```http\nPOST /api/plugins/example.user-invite-notification-demo/actions/confirm\nContent-Type: application/json\n\n{\"values\": {\"token\": \"TOKEN_FROM_NOTIFICATION\"}}\n```\n\nBoth calls require the existing authenticated host session/API authorization. The sender cannot select another user/address. A new issue replaces the previous challenge; it expires after ten minutes. Confirmation consumes it sequentially and rejects another owner, replacement, expiry, alteration and sequential replay. Storage get/put is not a compare-and-swap transaction; concurrent confirmation is intentionally not a production authentication guarantee. No real authority is attached to the demo token.\n\nPermissions are exactly source registration, notification emission and plugin storage. No full API, user enumeration, network access, host source imports or database access is requested. This is a protocol/action demonstration with no new frontend page; no screenshots apply.\n\nFrom the companion repository root:\n\n```sh\npython -m pytest tests/test_notification_demos.py\npython tools/check_source_layout.py\npython tools/build_packages.py\n```\n\nBuilds use the existing SDK/package format. Branch previews are unsigned and require explicit untrusted-package consent in the host. Signed main publication uses the existing demo signer; do not claim the source preview is a maintained official production auth plugin. Disable/uninstall retires source routing and queued work while the host retains notification history/preferences. Actual package/host acceptance is documented in the PR.\n",
+          "release_notes": "Synthetic owner-scoped notification source demonstration, Plugin API 1.1.2.",
+          "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
+          "signing": {
+            "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+            "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
+            "signature": "v2:yvu++yTrvlqBjrMkxeid9/uJ4CX3/9/ziH3UxIhHGNeR1iI+fUbU6ZlPGMw07unIXyyZJoQfrt7TsVAcB7uhAg=="
+          },
+          "tags": [
+            "notifications",
+            "demo"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.1.0.utp",
+          "version": "1.1.0"
         }
       ],
       "sdk_version_range": "^1.1.2",
-      "sha256": "e1fc37a92c18d0dbb65c4d92dd4bcea45a811dee2b24a5040fdca02fafb0033d",
+      "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
       "signing": {
         "key_id": "unnamed-tracking-examples-2026-10-07-v2",
-        "sha256": "e1fc37a92c18d0dbb65c4d92dd4bcea45a811dee2b24a5040fdca02fafb0033d",
-        "signature": "v2:Sd4Bx2U3mOPN3RXPKNpt1TqmErWopeSh5lLVK7/0O3e9SAQnWu1uKx8GrhTH7VtM8SUMRERadiMZLD5h0gs6Ag=="
+        "sha256": "14b5cd71f026ddc2981263d14e60253b984a6e5bc22be3f0a5c3523e161f2046",
+        "signature": "v2:yvu++yTrvlqBjrMkxeid9/uJ4CX3/9/ziH3UxIhHGNeR1iI+fUbU6ZlPGMw07unIXyyZJoQfrt7TsVAcB7uhAg=="
       },
       "source": {
         "lifecycle": "source",
@@ -13267,8 +13504,8 @@
         "notifications",
         "demo"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.0.0.utp",
-      "version": "1.0.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/example.user-invite-notification-demo-1.1.0.utp",
+      "version": "1.1.0"
     },
     {
       "application_version_range": "^1.0.0",
