@@ -12,10 +12,6 @@
     {
       "name": "frontend.themes",
       "version": 1
-    },
-    {
-      "name": "frontend.native",
-      "version": 1
     }
   ],
   "permissions": [
@@ -25,23 +21,9 @@
         "version": 1
       },
       "rationale": "Expose the Classic UI preset in the host Appearance settings so the presentation can be selected and removed without changing application functionality."
-    },
-    {
-      "capability": {
-        "name": "frontend.native",
-        "version": 1
-      },
-      "rationale": "Load presentation-only styles that restore the classic application's darker surfaces, compact controls, square cards, sidebar and older visual hierarchy. It does not read or modify application data."
     }
   ],
   "dependencies": [],
-  "native_frontend": {
-    "entry": "native/app.js",
-    "styles": [
-      "native/style.css",
-      "native/sidebar.css"
-    ]
-  },
   "ui": {
     "settings": [],
     "actions": [],
