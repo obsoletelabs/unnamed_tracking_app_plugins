@@ -262,6 +262,15 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
         user_id = _actor(values); delivery = values.get("delivery")
         if not isinstance(delivery, dict):
             return {"success": False, "retryable": False, "error": "delivery_invalid"}
+        context = values.get("_notification_context")
+        destination = context.get("destination") if isinstance(context, dict) else None
+        if (
+            not isinstance(context, dict)
+            or context.get("operation") != "deliver"
+            or not isinstance(destination, dict)
+            or destination.get("kind") != "discord_bot_dm"
+        ):
+            return {"success": False, "retryable": False, "error": "notification_context_invalid"}
         title = str(delivery.get("title", "Notification"))[:250]; body = str(delivery.get("body", ""))[:1500]; content = f"**{title}**\n{body}".strip()[:1900]
         config = _bot_config(); link = _load("links/" + user_id)
         if not isinstance(link, dict) or not link.get("discord_id"):
@@ -280,7 +289,26 @@ def _register_provider() -> None:
     delay = 1
     while True:
         try:
-            register_provider(PROVIDER_ID, "Discord Bot DM", "deliver", destination_kind="discord_bot_dm", privacy="PRIVATE")
+            register_provider(
+                PROVIDER_ID,
+                "Discord Bot DM",
+                "deliver",
+                transport="plugin",
+                definition={
+                    "destinations": [
+                        {
+                            "kind": "discord_bot_dm",
+                            "label": "Discord Bot DM",
+                            "privacy": "PRIVATE",
+                            "fields": [],
+                        }
+                    ],
+                    "configure_action": "save-bot-config",
+                    "retire_action": "clear-bot-token",
+                    "test_action": "test-dm",
+                    "features": {"critical_supported": False, "multiple_destinations": False},
+                },
+            )
             return
         except GatewayRequestError as exc:
             if exc.code != "unavailable":
