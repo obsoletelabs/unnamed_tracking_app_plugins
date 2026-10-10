@@ -1,44 +1,18 @@
 {
   "additionalProperties": false,
-  "description": "A plugin-owned provider registered with the core delivery coordinator.",
+  "description": "A plugin-owned notification destination declaration. Legacy host-owned providers remain supported.",
   "properties": {
-    "provider_id": {
-      "maxLength": 128,
-      "minLength": 3,
-      "pattern": "^[a-z0-9][a-z0-9._-]*$",
-      "title": "Provider Id",
-      "type": "string"
-    },
-    "name": {
-      "maxLength": 128,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-    },
-    "action_id": {
-      "maxLength": 128,
-      "minLength": 1,
-      "pattern": "^[a-z0-9][a-z0-9._-]*$",
-      "title": "Action Id",
-      "type": "string"
-    },
-    "transport": {
-      "default": "legacy",
-      "enum": [
-        "legacy",
-        "discord_webhook"
-      ],
-      "title": "Transport",
-      "type": "string"
-    }
+    "provider_id": {"maxLength": 128, "minLength": 3, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
+    "name": {"maxLength": 128, "minLength": 1, "type": "string"},
+    "action_id": {"maxLength": 128, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "type": "string"},
+    "destination_kind": {"maxLength": 32, "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$", "default": "plugin", "type": "string"},
+    "channel_context": {"enum": ["external", "internal"], "default": "external", "type": "string"},
+    "privacy": {"enum": ["PUBLIC", "PRIVATE"], "default": "PUBLIC", "type": "string"},
+    "transport": {"enum": ["legacy", "plugin_public", "plugin_private"], "default": "legacy", "type": "string"}
   },
-  "required": [
-    "provider_id",
-    "name",
-    "action_id"
-  ],
-  "title": "NotificationProviderRegistration",
+  "required": ["provider_id", "name", "action_id"],
+  "title": "NotificationProviderDeclaration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.2"
+  "x-api-contract-version": "1.1.3"
 }
