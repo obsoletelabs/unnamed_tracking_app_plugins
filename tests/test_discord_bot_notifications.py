@@ -201,3 +201,68 @@ def test_delivery_rejects_forged_or_missing_core_destination_context(monkeypatch
     monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "No context"}})
     assert result == {"success": False, "retryable": False, "error": "notification_context_invalid"}
+
+
+def test_discord_uses_host_outbound_gateway_data_contract(monkeypatch):
+    provider = load()
+    captured = {}
+
+    def fake_request(method, capability, payload):
+        captured.update(method=method, capability=capability, payload=payload)
+        return {"status": 200, "data": {"id": "123456789012345678", "username": "Tracking Bot"}}
+
+    monkeypatch.setattr(provider, "request", fake_request)
+    result = provider._discord("test-token", "POST", "/example", {"hello": "world"})
+    assert result == {"id": "123456789012345678", "username": "Tracking Bot"}
+    assert captured["method"] == "network.request"
+    assert captured["capability"] == "network.outbound"
+    assert captured["payload"]["body"] == {"hello": "world"}
+    assert "json" not in captured["payload"]
+    assert captured["payload"]["headers"]["Authorization"] == "Bot test-token"
+    assert "User-Agent" in captured["payload"]["headers"]
+
+
+@pytest.mark.parametrize(
+    ("status", "message"),
+    [
+        (401, "rejected the bot token"),
+        (403, "denied access"),
+        (404, "could not find the requested server"),
+        (429, "rate limiting"),
+    ],
+)
+def test_discord_http_errors_are_actionable(monkeypatch, status, message):
+    provider = load()
+    monkeypatch.setattr(
+        provider,
+        "request",
+        lambda *args, **kwargs: {"status": status, "error": "Remote server rejected the request."},
+    )
+    with pytest.raises(provider.PluginError, match=message):
+        provider._discord("test-token", "GET", "/users/@me")
+
+
+def test_save_config_allows_incomplete_bot_identity_but_rejects_bad_credentials(monkeypatch):
+    provider = load()
+    saved = {}
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: "12345678-1234-5678-1234-567812345678")
+
+    def incomplete_identity(token, guild_id):
+        raise provider.PluginError("Discord did not return the configured bot identity.")
+
+    monkeypatch.setattr(provider, "_bot_snapshot", incomplete_identity)
+    monkeypatch.setattr(provider, "_store", lambda key, value: saved.update({key: value}))
+    result = provider.save_bot_config({"token": "possibly-valid-token", "guild_id": "123456789012345678"})
+    assert result["ok"] is True
+    assert "warning" in result
+    assert saved["secrets/bot-config"] == {
+        "token": "possibly-valid-token",
+        "guild_id": "123456789012345678",
+    }
+
+    def invalid_token(token, guild_id):
+        raise provider.PluginError("Discord rejected the bot token. Check that it is the current bot token.")
+
+    monkeypatch.setattr(provider, "_bot_snapshot", invalid_token)
+    with pytest.raises(provider.PluginError, match="rejected the bot token"):
+        provider.save_bot_config({"token": "bad-token", "guild_id": "123456789012345678"})
