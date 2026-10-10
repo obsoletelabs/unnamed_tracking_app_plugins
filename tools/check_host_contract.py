@@ -91,8 +91,23 @@ def main() -> None:
                         ("notification-lifecycle-page-v1", NotificationLifecyclePage)):
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-        schema["x-api-contract-version"] = "1.1.5" if "lifecycle" in name else "1.1.2"
-        assert schema == json.loads((root / "tools/schemas" / f"{name}.schema.json").read_bytes()), name
+        schema["x-api-contract-version"] = {
+            "notification-provider-v1": "1.1.5",
+            "notification-lifecycle-query-v1": "1.1.4",
+            "notification-lifecycle-page-v1": "1.1.4",
+        }.get(name, "1.1.2")
+        expected_schema = json.loads(
+            (root / "tools/schemas" / f"{name}.schema.json").read_bytes()
+        )
+        if schema != expected_schema and name == "notification-provider-v1":
+            print("\\n".join(difflib.unified_diff(
+                json.dumps(expected_schema, indent=2, ensure_ascii=False).splitlines(),
+                json.dumps(schema, indent=2, ensure_ascii=False).splitlines(),
+                fromfile="checked-in provider schema",
+                tofile="host-generated provider schema",
+                lineterm="",
+            )))
+        assert schema == expected_schema, name
     catalogue = json.loads((args.distribution_root / "list.json").read_text(encoding="utf-8"))
     # Evaluate the actual public catalogue entry model without loading database
     # configuration or the API server. Additional distribution fields remain
