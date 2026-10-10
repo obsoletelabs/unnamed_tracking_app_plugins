@@ -78,7 +78,7 @@ def test_link_code_must_be_verified_before_the_discord_identity_is_saved(monkeyp
     )
     monkeypatch.setattr(provider, "_send_dm", lambda token, user_id, content: sent.append(content))
 
-    result = provider._start_link({"username": "casey"})
+    result = provider.start_link({"username": "casey"})
     assert result["ok"] is True
     assert sent and "01234567" in sent[0]
     pending = storage["pending-links/host-user"]
@@ -88,10 +88,10 @@ def test_link_code_must_be_verified_before_the_discord_identity_is_saved(monkeyp
     assert "links/host-user" not in storage
 
     with pytest.raises(provider.PluginError, match="incorrect"):
-        provider._confirm_link({"code": "00000000"})
+        provider.confirm_link({"code": "00000000"})
     assert "links/host-user" not in storage
 
-    confirmed = provider._confirm_link({"code": "01234567"})
+    confirmed = provider.confirm_link({"code": "01234567"})
     assert confirmed["ok"] is True
     assert storage["links/host-user"]["discord_id"] == "123456789012345678"
     assert storage["links/host-user"]["username"] == "casey"
@@ -115,7 +115,7 @@ def test_username_lookup_refuses_ambiguous_matches(monkeypatch):
     )
     monkeypatch.setattr(provider, "_send_dm", lambda *args: sent.append(args))
     with pytest.raises(provider.PluginError, match="exactly one"):
-        provider._start_link({"username": "casey"})
+        provider.start_link({"username": "casey"})
     assert sent == []
 
 
