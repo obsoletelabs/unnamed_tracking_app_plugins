@@ -10,11 +10,22 @@
   "application_version_range": "*",
   "capabilities": [
     {
+      "name": "frontend.themes",
+      "version": 1
+    },
+    {
       "name": "frontend.native",
       "version": 1
     }
   ],
   "permissions": [
+    {
+      "capability": {
+        "name": "frontend.themes",
+        "version": 1
+      },
+      "rationale": "Expose the Classic UI preset in the host Appearance settings so the presentation can be selected and removed without changing application functionality."
+    },
     {
       "capability": {
         "name": "frontend.native",
