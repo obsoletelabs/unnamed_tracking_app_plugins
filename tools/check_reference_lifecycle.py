@@ -127,6 +127,7 @@ def main() -> None:
         try:
             for plugin_id, package in first.items():
                 identity = str(uuid4())
+                activation_user = str(uuid4()) if plugin_id == "example.notification-chaos-provider" else "acceptance-user"
 
                 def active():
                     return next(p for p in registry.list() if p["plugin_id"] == plugin_id)
@@ -148,13 +149,13 @@ def main() -> None:
                 def install(path, replace=False):
                     operation = stage(path, replace)
                     registry.finish_installation(plugin_id, operation, commit=True)
-                    registry.start(plugin_id, user_id="acceptance-user")
+                    registry.start(plugin_id, user_id=activation_user)
                     assert registry.health(plugin_id), registry.diagnostics(plugin_id)
                     registry.finish_activation(plugin_id, operation, commit=True)
 
                 install(package)
                 if plugin_id == "example.notification-chaos-provider":
-                    actor = str(uuid4())
+                    actor = activation_user
                     render_work = {"delivery": {"notification_id": str(uuid4())}}
 
                     def render():
@@ -253,7 +254,7 @@ def main() -> None:
                 failed = stage(broken[plugin_id], replace=True)
                 registry.finish_installation(plugin_id, failed, commit=True)
                 try:
-                    registry.start(plugin_id, user_id="acceptance-user")
+                    registry.start(plugin_id, user_id=activation_user)
                 except RuntimePolicyError:
                     pass
                 assert not registry.health(plugin_id), "broken candidate was reported healthy"
