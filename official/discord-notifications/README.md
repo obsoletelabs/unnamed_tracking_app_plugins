@@ -1,34 +1,30 @@
 # Discord Notifications
 
-Maintained official provider for owner-specific Discord webhooks, consuming the
-host's Plugin API 1.1.2 protected provider contract. This is a new identity,
+Maintained official provider for owner-specific Discord webhooks using the generic
+plugin-owned notification provider contract. This is a new identity,
 `official.discord-notifications`; legacy example credentials/consent are never moved.
 
 Install the package and grant `notification_providers.register` and
-`notification_providers.deliver`. The plugin runtime must allow this narrow,
-host-brokered Discord webhook transport: set `PLUGIN_RUNTIME_DISCORD_EGRESS=true`
-on the `plugin-runtime` service. The root `compose.yaml` already enables it;
-deployments with their own runtime configuration must set it explicitly. The
-runtime rejects the send if egress is disabled, and the host records that as the
-permanent `discord_egress_disabled` failure rather than retrying it indefinitely.
+`notification_providers.deliver`, plus the plugin's declared storage, outbound
+network and settings capabilities. Enable the plugin, then open the plugin-owned
+Discord Webhook settings page under **Account → Settings**. Enter a webhook URL,
+save it, and use **Send test** to verify the destination.
 
-Enable the plugin, then open **Account → Notifications → Discord** in a compatible
-host to enroll each webhook. Choose notification types and use **Send test
-notification**. Configuration belongs to the host, not a plugin page.
+The webhook URL is stored in the plugin's private storage namespace and is never
+sent to the host notification coordinator. The host stores only generic routing
+metadata and an opaque configuration reference. The plugin performs the Discord
+HTTP request itself through its declared `network.outbound` capability.
 
-Each webhook is PUBLIC. Default release announcements use public facts. Explicit
-confirmation on each destination allows its richer followed-media announcement;
-that does not promote trust or permit account details, watch history, ratings,
-security messages or recovery tokens. Webhook tokens remain host-encrypted and
-never enter this plugin's inputs, files or storage. Removing a destination erases
-its secret while preserving history. Reinstallation requires new enrollment.
+Each webhook is PUBLIC. The notification coordinator therefore supplies only the
+public projection allowed for that destination. Explicit destination preferences
+do not promote trust or permit account details, watch history, ratings, security
+messages or recovery tokens.
 
-The renderer returns only `title`, `body`, `event_at` and `link` field references.
-The host builds a bounded embed, disables mentions, rejects redirects and owns
-retries/failure state. Current implementation supports ordinary webhook channels,
-not forum thread creation, DMs, attachments, artwork, Critical urgency or raw payloads.
-Delivery confirmation uses Discord's `wait=true` option; see the
-[official webhook documentation](https://docs.discord.com/developers/resources/webhook).
+The plugin validates HTTPS Discord webhook URLs, disables Discord mention parsing,
+keeps credentials out of notification payloads and maps bounded network failures
+to the host's normal retry/result contract. The provider advertises its destination
+kind, privacy level, capabilities and settings UI; no Discord-specific transport or
+credential handling is required in the host application.
 
 Test: `python -m pytest tests/test_discord_notifications.py -q`.
 Build: `python tools/build_packages.py` (isolated preview packages).
