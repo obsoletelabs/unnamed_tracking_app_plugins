@@ -31,8 +31,10 @@ async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixtu
       if (event.data.method === "plugin.run-action") {
         window.actions.push({ action: payload.actionId, code: payload.values.authorization_code });
         if (payload.actionId === "status") result = { connected: false, phase: "idle" };
-        else if (payload.actionId === "signin") result = { redirect_url: signinUrl };
-        else if (payload.values.authorization_code === "b".repeat(32)) result = { connected: true, display_name: "Fixture player", phase: "idle" };
+        else if (payload.actionId === "signin") {
+          result = { redirect_url: signinUrl };
+          window.setTimeout(() => window.location.assign(signinUrl), 0);
+        } else if (payload.values.authorization_code === "b".repeat(32)) result = { connected: true, display_name: "Fixture player", phase: "idle" };
         else result = { ok: false, error: "Paste a valid one-time code." };
       }
       event.source.postMessage({ type: "plugin-api-response", requestId, result }, "*");
@@ -46,7 +48,7 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
   try {
-    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>');
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
     await mount(page);
     const frame = page.frameLocator("iframe");
     await frame.getByText("Connect your Epic account to start.", { exact: true }).waitFor();
@@ -66,19 +68,16 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
   } finally { await page.close(); }
 });
 
-test("Epic sign-in opens a separate tab and leaves the code-entry page available", async () => {
+test("Epic sign-in delegates external navigation to the host without popup privileges", async () => {
   const page = await browser.newPage();
+  const signinUrl = "https://www.epicgames.com/id/login?fixture=1";
   try {
-    await page.setContent('<iframe title="Epic" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>');
-    await mount(page);
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
+    await mount(page, signinUrl);
     const frame = page.frameLocator("iframe");
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).waitFor();
-    const popupPromise = page.waitForEvent("popup");
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).click();
-    const popup = await popupPromise;
-    await popup.waitForURL("https://www.epicgames.com/id/login?fixture=1", { waitUntil: "commit" });
-    await frame.getByLabel("Epic authorization code").fill("code-can-be-pasted-here");
-    assert.equal(await frame.getByLabel("Epic authorization code").inputValue(), "code-can-be-pasted-here");
-    await popup.close();
+    await page.waitForURL(signinUrl, { waitUntil: "commit", timeout: 10000 });
+    assert.equal(page.url(), signinUrl);
   } finally { await page.close(); }
 });
