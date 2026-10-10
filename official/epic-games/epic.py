@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import re
 import time
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
@@ -30,6 +31,7 @@ LOGIN_URL = "https://www.epicgames.com/id/login?" + urlencode(
 )
 IDENTIFIER = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
 MAX_TOKEN_LENGTH = 8192
+MAX_REFRESH_INTERVAL = 86400
 NON_GAME = {"addons", "digitalextras", "plugins", "engines"}
 
 
@@ -105,14 +107,16 @@ def token_pair(form):
     if (
         isinstance(expiry, bool)
         or not isinstance(expiry, (int, float))
-        or not 60 <= expiry <= 86400
+        or expiry <= 0
+        or (isinstance(expiry, float) and not math.isfinite(expiry))
     ):
         raise EpicError("Epic returned an invalid sign-in expiry.")
     return {
         "access_token": data["access_token"],
         "refresh_token": data["refresh_token"],
         "account_id": data["account_id"].lower(),
-        "expires_at": time.time() + expiry,
+        # Provider lifetimes may exceed a day; still rotate locally at least daily.
+        "expires_at": time.time() + min(expiry, MAX_REFRESH_INTERVAL),
         "display_name": str(data.get("displayName") or "Epic account")[:200],
     }
 

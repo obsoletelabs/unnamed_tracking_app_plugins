@@ -229,11 +229,48 @@ def test_rotated_refresh_is_saved_before_inventory_failure(service):
 def test_large_launcher_tokens_connect_and_reach_inventory_without_public_disclosure(service):
     service.tokens["access_token"] = "eg1~" + "x" * 4269
     service.tokens["refresh_token"] = "r" * 1071
+    service.tokens["expires_in"] = 2592000
     result = service.plugin.connect(context(authorization_code=CODE))
     assert result["connected"]
     assert service.tokens["access_token"] not in json.dumps(result)
     assert service.tokens["refresh_token"] not in json.dumps(result)
     service.plugin.start(context())
+    assert service.plugin.step(context())["phase"] == "playtime"
+
+
+@pytest.mark.parametrize("expiry", [15, 3600, 86400, 86401, 2592000, 10**100])
+def test_provider_expiry_connects_with_bounded_local_refresh(service, monkeypatch, expiry):
+    monkeypatch.setattr(service.plugin.epic.time, "time", lambda: 1000)
+    service.tokens["expires_in"] = expiry
+    result = service.plugin.connect(context(authorization_code=CODE))
+    assert result["connected"]
+    session = json.loads(service.storage["secrets/users/" + USER])
+    assert session["expires_at"] == 1000 + min(expiry, 86400)
+    assert service.tokens["access_token"] not in json.dumps(result)
+    assert service.tokens["refresh_token"] not in json.dumps(result)
+
+
+@pytest.mark.parametrize("expiry", [None, True, False, "3600", 0, -1, float("nan"), float("inf")])
+def test_invalid_provider_expiry_retains_previous_connection(service, expiry):
+    assert service.plugin.connect(context(authorization_code=CODE))["connected"]
+    previous = service.storage["secrets/users/" + USER]
+    service.tokens["expires_in"] = expiry
+    result = service.plugin.connect(context(authorization_code=CODE))
+    assert result == {"ok": False, "error": "Epic returned an invalid sign-in expiry."}
+    assert service.storage["secrets/users/" + USER] == previous
+    assert CODE not in json.dumps(result)
+
+
+def test_long_provider_lifetime_still_rotates_before_import_after_a_day(service, monkeypatch):
+    now = [1000]
+    monkeypatch.setattr(service.epic.time, "time", lambda: now[0])
+    service.tokens["expires_in"] = 2592000
+    assert service.plugin.connect(context(authorization_code=CODE))["connected"]
+    now[0] += 86400
+    service.plugin.start(context())
+    session = json.loads(service.storage["secrets/users/" + USER])
+    assert session["refresh_token"] == "rotated-refresh"
+    assert session["expires_at"] == now[0] + 86400
     assert service.plugin.step(context())["phase"] == "playtime"
 
 

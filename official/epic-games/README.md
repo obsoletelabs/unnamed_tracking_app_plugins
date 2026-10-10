@@ -28,6 +28,11 @@ than the original 2 KiB limit; older hosts need the companion token-header fix
 before an import can use these tokens. Failed replacement sign-ins retain an
 existing connection and never show token values in errors.
 
+Positive, finite access-token lifetimes from Epic are accepted, including lifetimes
+longer than one day. The plugin schedules refresh at the shorter of that lifetime
+and one day, so a longer provider lifetime does not delay local token rotation.
+Malformed expiry values retain an existing connection.
+
 Choose **Import games**. Inventory paging, playtime, catalogue lookup and host
 imports run as separate bounded steps. **Pause after this step**, closing the
 page or a failed request retains the checkpoint. **Resume import** continues it.

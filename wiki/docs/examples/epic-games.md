@@ -12,6 +12,11 @@ rotating tokens in private per-user storage and saves the replacement refresh
 token before later requests. Runtime storage is isolated by filesystem permissions
 and is not encrypted at rest. Protect deployment data and backups.
 
+The access-token lifetime must be a positive finite number. A provider lifetime
+longer than one day is accepted, while local refresh still occurs at the shorter
+of the provider lifetime and one day. Invalid lifetimes keep the previous
+connection rather than replacing it.
+
 The regular-browser option leaves this page open. These screenshots exercise the
 packaged frontend's opaque sandbox with a status/action fixture; they do not
 claim a successful live account connection.
