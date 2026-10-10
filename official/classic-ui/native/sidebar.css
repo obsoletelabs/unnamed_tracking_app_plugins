@@ -1,0 +1,290 @@
+/* Classic sidebar restoration.
+ * Deliberately presentation-only: no layout routes, navigation logic or state.
+ */
+
+/* Desktop sidebar shell: darker, narrower, flatter and more clearly separated
+   from the page, matching the older application's persistent navigation. */
+@media (min-width: 701px) {
+  :where(
+    aside,
+    .sidebar,
+    .app-sidebar,
+    .navigation-sidebar,
+    .navigation,
+    [data-sidebar],
+    [data-navigation]
+  ) {
+    background: #111 !important;
+    color: #e8e8e8 !important;
+    border-right: 1px solid #2b2b2b !important;
+    box-shadow: none !important;
+  }
+
+  :where(
+    aside,
+    .sidebar,
+    .app-sidebar,
+    .navigation-sidebar,
+    [data-sidebar]
+  ) {
+    width: 248px;
+    min-width: 248px;
+  }
+}
+
+/* The old sidebar reads as a single solid panel rather than a collection of
+   floating cards. */
+:where(
+  aside,
+  .sidebar,
+  .app-sidebar,
+  .navigation-sidebar,
+  .navigation,
+  [data-sidebar],
+  [data-navigation]
+) {
+  background-color: #111 !important;
+  border-color: #2b2b2b !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar header / brand area. */
+:where(
+  aside > header,
+  .sidebar > header,
+  .app-sidebar > header,
+  .sidebar-header,
+  .navigation-header,
+  [data-sidebar-header]
+) {
+  background: #111 !important;
+  border-bottom: 1px solid #2b2b2b !important;
+  min-height: 54px !important;
+  padding: 10px 12px !important;
+  border-radius: 0 !important;
+}
+
+:where(
+  aside .brand,
+  aside .logo,
+  .sidebar .brand,
+  .sidebar .logo,
+  .app-sidebar .brand,
+  .app-sidebar .logo,
+  [data-sidebar] .brand,
+  [data-sidebar] .logo
+) {
+  color: #f2f2f2 !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+}
+
+/* Navigation groups: compact headings and tight vertical rhythm. */
+:where(
+  aside nav,
+  .sidebar nav,
+  .app-sidebar nav,
+  .navigation nav,
+  [data-sidebar] nav
+) {
+  padding: 8px !important;
+  gap: 2px !important;
+}
+
+:where(
+  aside .nav-section-title,
+  aside .nav-group-title,
+  aside .section-title,
+  .sidebar .nav-section-title,
+  .sidebar .nav-group-title,
+  .sidebar .section-title,
+  .navigation .nav-section-title,
+  .navigation .nav-group-title,
+  [data-sidebar] .nav-section-title,
+  [data-sidebar] .nav-group-title
+) {
+  color: #777 !important;
+  font-size: 0.69rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 10px 10px 5px !important;
+}
+
+/* Catch both link- and button-based navigation implementations. */
+:where(
+  aside nav a,
+  aside nav button,
+  aside > a,
+  aside > button,
+  .sidebar nav a,
+  .sidebar nav button,
+  .sidebar > a,
+  .sidebar > button,
+  .app-sidebar nav a,
+  .app-sidebar nav button,
+  .navigation a,
+  .navigation button,
+  [data-sidebar] nav a,
+  [data-sidebar] nav button
+) {
+  min-height: 36px !important;
+  padding: 7px 10px !important;
+  margin: 1px 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: #b8b8b8 !important;
+  box-shadow: none !important;
+  font-size: 0.91rem !important;
+  text-align: left;
+}
+
+:where(
+  aside nav a:hover,
+  aside nav button:hover,
+  aside > a:hover,
+  aside > button:hover,
+  .sidebar nav a:hover,
+  .sidebar nav button:hover,
+  .sidebar > a:hover,
+  .sidebar > button:hover,
+  .app-sidebar nav a:hover,
+  .app-sidebar nav button:hover,
+  .navigation a:hover,
+  .navigation button:hover,
+  [data-sidebar] nav a:hover,
+  [data-sidebar] nav button:hover
+) {
+  background: #1b1b1b !important;
+  border-color: #2b2b2b !important;
+  color: #f2f2f2 !important;
+}
+
+/* Active item: the classic orange rail is intentionally stronger than the
+   newer rounded/pill active treatment. */
+:where(
+  aside nav a.active,
+  aside nav button.active,
+  aside nav a[aria-current="page"],
+  aside nav button[aria-current="page"],
+  .sidebar nav a.active,
+  .sidebar nav button.active,
+  .sidebar nav a[aria-current="page"],
+  .sidebar nav button[aria-current="page"],
+  .app-sidebar nav a.active,
+  .app-sidebar nav button.active,
+  .navigation .active,
+  .navigation [aria-current="page"],
+  [data-sidebar] nav a.active,
+  [data-sidebar] nav button.active,
+  [data-sidebar] nav a[aria-current="page"]
+) {
+  background: #222 !important;
+  border-color: #3a3a3a !important;
+  border-left: 3px solid #d68a34 !important;
+  color: #f2f2f2 !important;
+  padding-left: 8px !important;
+  box-shadow: none !important;
+}
+
+/* Icons stay aligned and receive the old warm accent only for active items. */
+:where(
+  aside nav a svg,
+  aside nav button svg,
+  .sidebar nav a svg,
+  .sidebar nav button svg,
+  .app-sidebar nav a svg,
+  .app-sidebar nav button svg,
+  .navigation a svg,
+  .navigation button svg,
+  [data-sidebar] nav a svg,
+  [data-sidebar] nav button svg
+) {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+}
+
+:where(
+  aside nav a.active svg,
+  aside nav button.active svg,
+  aside nav a[aria-current="page"] svg,
+  .sidebar nav a.active svg,
+  .sidebar nav button.active svg,
+  .app-sidebar nav a.active svg,
+  .navigation .active svg,
+  [data-sidebar] nav a.active svg
+) {
+  color: #d68a34 !important;
+}
+
+/* Bottom account/actions area: keep it attached to the sidebar instead of
+   making it look like a floating modern card. */
+:where(
+  aside > footer,
+  .sidebar > footer,
+  .app-sidebar > footer,
+  .sidebar-footer,
+  .navigation-footer,
+  [data-sidebar-footer]
+) {
+  background: #111 !important;
+  border-top: 1px solid #2b2b2b !important;
+  border-radius: 0 !important;
+  padding: 8px !important;
+}
+
+:where(
+  aside .account,
+  aside .account-chip,
+  aside .profile,
+  .sidebar .account,
+  .sidebar .account-chip,
+  .sidebar .profile,
+  .app-sidebar .account,
+  .app-sidebar .account-chip,
+  [data-sidebar] .account,
+  [data-sidebar] .account-chip
+) {
+  background: #1a1a1a !important;
+  border: 1px solid #2b2b2b !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar separators should look like old 1px rules rather than cards. */
+:where(
+  aside hr,
+  .sidebar hr,
+  .app-sidebar hr,
+  .navigation hr,
+  [data-sidebar] hr
+) {
+  border-color: #2b2b2b !important;
+  margin: 7px 8px !important;
+}
+
+/* Mobile navigation keeps the same visual language without forcing desktop
+   dimensions onto the responsive layout. */
+@media (max-width: 700px) {
+  :where(.phone-navigation, .mobile-tabs, .mobile-navigation) {
+    background: #111 !important;
+    border-color: #2b2b2b !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  :where(.phone-navigation a, .phone-navigation button, .mobile-tabs a, .mobile-tabs button) {
+    border-radius: 4px !important;
+    min-height: 38px !important;
+    color: #aaa !important;
+  }
+
+  :where(.phone-navigation .active, .mobile-tabs .active) {
+    background: #222 !important;
+    color: #d68a34 !important;
+    box-shadow: inset 0 -2px 0 #d68a34 !important;
+  }
+}
