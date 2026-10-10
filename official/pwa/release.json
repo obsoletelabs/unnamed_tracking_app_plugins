@@ -9,5 +9,5 @@
   ],
   "icon": "pwa/pwa-icon.svg",
   "automatic_update": true,
-  "release_notes": "Reviewed 0.0.4 mobile assets. Offline installed themes take precedence over native palette overrides, with personal-color fallback when theme CSS is unavailable; private data remains uncached."
+  "release_notes": "Bundle additive public SDK contract 1.1.4. Reviewed mobile 0.0.4 assets, permissions and private-data caching policy remain unchanged."
 }
