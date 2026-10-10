@@ -87,7 +87,9 @@ test("copying the sign-in link retains the page and offers manual copying in an 
     const page = await browser.newPage({ viewport: { width, height: 1100 } });
     const errors = [];
     page.on("pageerror", error => errors.push(String(error)));
-    const signinUrl = "https://www.epicgames.com/id/login?redirectUrl=" + "x".repeat(300);
+    const signinUrl = "https://www.epicgames.com/id/login?redirectUrl=" + encodeURIComponent(
+      "https://www.epicgames.com/id/api/redirect?clientId=34a02cf8f4414e29b15921876da36f9a&responseType=code",
+    );
     try {
       await page.setContent('<iframe title="Epic" sandbox="allow-scripts" style="width:100%;height:1000px;border:0"></iframe>');
       await mount(page, signinUrl);

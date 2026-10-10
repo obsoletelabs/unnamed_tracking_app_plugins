@@ -12,6 +12,14 @@ rotating tokens in private per-user storage and saves the replacement refresh
 token before later requests. Runtime storage is isolated by filesystem permissions
 and is not encrypted at rest. Protect deployment data and backups.
 
+The regular-browser option leaves this page open. These screenshots exercise the
+packaged frontend's opaque sandbox with a status/action fixture; they do not
+claim a successful live account connection.
+
+![Phone sign-in link and manual-copy fallback](../assets/epic-signin/epic-copy-link-390.png)
+
+![Desktop sign-in link and manual-copy fallback](../assets/epic-signin/epic-copy-link-1440.png)
+
 Each action performs bounded work: one inventory page, optional playtime, one
 catalogue namespace batch or a host import of at most 25 games. The saved checkpoint
 survives errors and page closure. Namespace/catalogue identities are scoped to
