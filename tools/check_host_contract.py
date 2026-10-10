@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import difflib
 import json
 import sys
 import tempfile
