@@ -112,12 +112,15 @@ export function activate(context) {
                 ]),
                 badge(serverStatus, serverStatus === "Connected"),
               ]),
+              c.bot_error ? h("p", { class: "discord-error" }, c.bot_error) : null,
               h("div", { class: "discord-grid" }, [
                 text("API health", c.health?.api_ok === false ? "Unavailable" : "Healthy"),
                 text("Plugin request", c.health?.request_ms ? c.health.request_ms + " ms" : "—"),
                 text("Browser refresh", c.browser_refresh_ms ? c.browser_refresh_ms + " ms" : "—"),
                 text("Verified bot", bot.verified === true ? "Yes" : bot.verified === false ? "No" : "Unknown"),
               ]),
+              bot.invite_url ? h("a", { href: bot.invite_url, target: "_blank", rel: "noopener noreferrer", class: "discord-link" }, "Open Discord bot invite") : null,
+              bot.recommended_intents?.length ? h("p", { class: "discord-hint" }, "Required/recommended intents: " + bot.recommended_intents.join(", ")) : null,
             ]),
             infoCard("Discord server", [
               h("div", { class: "discord-identity" }, [
@@ -129,28 +132,22 @@ export function activate(context) {
                 ]),
               ]),
               h("div", { class: "discord-grid" }, [
-                text("Members", guild.member_count),
-                text("Online", guild.online_count),
-                text("Verification", guild.verification_level),
-                text("Boost tier", guild.premium_tier),
-                text("Locale", guild.preferred_locale),
-                text("NSFW level", guild.nsfw_level),
-                text("Owner ID", guild.owner_id),
-                text("Vanity code", guild.vanity_url_code),
+                text("Members", guild.member_count), text("Online", guild.online_count), text("Verification", guild.verification_level),
+                text("Boost tier", guild.premium_tier), text("Boosts", guild.premium_subscription_count), text("Locale", guild.preferred_locale),
+                text("NSFW level", guild.nsfw_level), text("MFA level", guild.mfa_level), text("Owner ID", guild.owner_id), text("Vanity code", guild.vanity_url_code),
+                text("AFK timeout", guild.afk_timeout ? guild.afk_timeout + " s" : "—"), text("Widget", guild.widget_enabled ? "Enabled" : "Disabled"),
+                text("Explicit filter", guild.explicit_content_filter), text("Default notifications", guild.default_message_notifications),
               ]),
               features.length ? h("div", { class: "discord-chips" }, features.map(feature => badge(feature))) : null,
             ]),
             infoCard("Bot membership & permissions", [
               h("div", { class: "discord-grid" }, [
-                text("Nickname", member.nickname),
-                text("Joined server", member.joined_at ? new Date(member.joined_at).toLocaleString() : "—"),
-                text("Pending", member.pending ? "Yes" : "No"),
-                text("Role count", member.role_count),
-                text("Permission value", member.permissions),
+                text("Nickname", member.nickname), text("Joined server", member.joined_at ? new Date(member.joined_at).toLocaleString() : "—"),
+                text("Pending", member.pending ? "Yes" : "No"), text("Role count", member.role_count), text("Permission value", member.permissions),
               ]),
               h("h4", "Roles"),
               roles.length ? h("div", { class: "discord-chips" }, roles.map(role => badge(role))) : h("span", { class: "discord-muted" }, "No roles returned."),
-              h("h4", "Permissions returned by Discord"),
+              h("h4", "Effective permissions"),
               permissions.length ? h("div", { class: "discord-chips" }, permissions.map(permission => badge(permission, permission === "ADMINISTRATOR"))) : h("span", { class: "discord-muted" }, "No permissions returned."),
             ]),
           ];
@@ -170,6 +167,8 @@ export function activate(context) {
                 text("Linked", c.linked_at ? new Date(c.linked_at * 1000).toLocaleString() : "—"),
                 text("Server nickname", c.server_nickname),
                 text("Joined server", c.server_joined_at ? new Date(c.server_joined_at).toLocaleString() : "—"),
+                text("Last test DM", c.last_test_at ? new Date(c.last_test_at * 1000).toLocaleString() : "Never"),
+                text("Last notification", c.last_delivery_at ? new Date(c.last_delivery_at * 1000).toLocaleString() : "Never"),
               ]),
               c.link_warning ? h("p", { class: "discord-hint" }, c.link_warning) : null,
               h("div", { class: "discord-actions" }, [button("Refresh Discord details", "get-config"), button("Send test DM", "test-dm"), button("Unlink Discord account", "unlink", () => ({}), true)]),
@@ -187,26 +186,18 @@ export function activate(context) {
             ...(admin ? [
               infoCard("Bot configuration", [
                 h("p", c.bot_configured ? "The token is configured and never displayed back to the browser." : "No bot token configured."),
-                field("Bot token (write-only)", tokenForm, "token", "password", "new-password"),
-                field("Discord server ID", tokenForm, "guild_id", "text"),
-                h("div", { class: "discord-actions" }, [
-                  button("Validate and save", "save-bot-config", () => ({ token: tokenForm.token, guild_id: tokenForm.guild_id })),
-                  button("Clear bot token", "clear-bot-token", () => ({}), true),
-                ]),
+                field("Bot token (write-only)", tokenForm, "token", "password", "new-password"), field("Discord server ID", tokenForm, "guild_id", "text"),
+                h("div", { class: "discord-actions" }, [button("Validate and save", "save-bot-config", () => ({ token: tokenForm.token, guild_id: tokenForm.guild_id })), button("Clear bot token", "clear-bot-token", () => ({}), true)]),
                 h("p", { class: "discord-hint" }, "The bot must be a member of this server. Member lookup may require the Server Members Intent."),
               ]),
               ...(c.configured ? adminCards : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
             ] : [
-              ...(linked ? accountCards : [
-                infoCard("Link your Discord account", [
-                  h("p", "Enter your exact Discord username from the configured server. The bot sends an eight-digit code by DM; only the account that receives the code can be linked."),
-                  field("Discord username", userForm, "username", "text"),
-                  h("div", { class: "discord-actions" }, [button("Send verification code", "start-link", () => ({ username: userForm.username }))]),
-                  field("Eight-digit verification code", userForm, "code", "text", "one-time-code"),
-                  h("div", { class: "discord-actions" }, [button("Verify and link", "confirm-link", () => ({ code: userForm.code }))]),
-                  h("p", { class: "discord-hint" }, "Codes expire after ten minutes and failed verification attempts are limited."),
-                ]),
-              ]),
+              ...(linked ? accountCards : [infoCard("Link your Discord account", [
+                h("p", "Enter your exact Discord username from the configured server. The bot sends an eight-digit code by DM; only the account that receives the code can be linked."),
+                field("Discord username", userForm, "username", "text"), h("div", { class: "discord-actions" }, [button("Send verification code", "start-link", () => ({ username: userForm.username }))]),
+                field("Eight-digit verification code", userForm, "code", "text", "one-time-code"), h("div", { class: "discord-actions" }, [button("Verify and link", "confirm-link", () => ({ code: userForm.code }))]),
+                h("p", { class: "discord-hint" }, "Codes expire after ten minutes and failed verification attempts are limited."),
+              ])]),
             ]),
           ]);
         };
