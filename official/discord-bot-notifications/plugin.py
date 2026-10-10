@@ -139,8 +139,9 @@ def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
         member = {}
     if not isinstance(roles, list):
         roles = []
-    member_role_ids = {str(rid) for rid in member.get("roles", [])}
-    member_role_ids.add(str(guild.get("id")))
+    member_role_ids = [str(rid) for rid in member.get("roles", [])]
+    if str(guild.get("id")) not in member_role_ids:
+        member_role_ids.insert(0, str(guild.get("id")))
     role_by_id = {str(role.get("id")): role for role in roles if isinstance(role, dict)}
     role_names = [str(role_by_id[rid].get("name")) for rid in member_role_ids if rid in role_by_id]
     permission_value = 0
@@ -181,11 +182,9 @@ def get_config(values: dict[str, Any]) -> dict[str, Any]:
         try:
             result.update(_bot_snapshot(str(config["token"]), str(config["guild_id"])))
         except GatewayRequestError:
-            result["health"] = {"api_ok": False}
-            result["bot_error"] = "Discord could not be reached right now."
+            result["health"] = {"api_ok": False}; result["bot_error"] = "Discord could not be reached right now."
         except PluginError as exc:
-            result["health"] = {"api_ok": False}
-            result["bot_error"] = str(exc)
+            result["health"] = {"api_ok": False}; result["bot_error"] = str(exc)
     if result["linked"] and result["configured"]:
         linked_id = str(link["discord_id"])
         try:
