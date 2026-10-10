@@ -12,7 +12,8 @@
     <h2 id="connection-title">Your connection</h2>
     <p id="account">Checking connection…</p>
     <div id="connect-panel">
-      <ol><li><button id="signin" type="button">Sign in on Epic Games</button></li><li>Copy the one-time authorization code or the JSON page Epic shows.</li><li>Use your browser's Back button to return, then paste it below and connect.</li></ol>
+      <ol><li><button id="signin" type="button">Sign in on Epic Games</button>, or copy the link below and open it in your regular browser.</li><li>Copy the one-time authorization code or the JSON page Epic shows.</li><li>Return to this page, then paste it below and connect.</li></ol>
+      <div class="signin-link"><label for="signin-url">Epic sign-in link</label><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" type="button" disabled>Copy sign-in link</button><p id="copy-status" class="muted" role="status" aria-live="polite"></p></div>
       <form id="connect-form"><label for="code">Epic authorization code</label><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" type="button">Connect Epic</button></form>
       <p class="muted">Sign in on epicgames.com. This page only receives the one-time code. Saved tokens stay in private plugin storage.</p>
     </div>

@@ -23,6 +23,8 @@
     $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
     $("connect-panel").hidden = snapshot.connected;
     $("disconnect").hidden = !snapshot.connected;
+    $("signin-url").value = snapshot.login_url || "";
+    $("copy-signin").disabled = busy || !snapshot.login_url;
     $("import").textContent = ["idle", "complete"].includes(snapshot.phase) ? "Import games" : "Resume import";
     for (const id of ["signin", "connect", "disconnect", "restart", "import"]) $(id).disabled = busy || (!["signin", "connect"].includes(id) && !snapshot.connected);
     $("pause").hidden = !busy;
@@ -68,6 +70,18 @@
   });
   $("disconnect").onclick = () => perform(async () => { const result = await request("disconnect"); if (!result.cancelled) snapshot = result; });
   $("signin").onclick = signIn;
+  $("copy-signin").onclick = async () => {
+    const input = $("signin-url");
+    if (busy || !input.value) return;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      $("copy-status").textContent = "Link copied. Paste it into your regular browser.";
+    } catch {
+      input.focus(); input.select();
+      $("copy-status").textContent = "Copy the selected link using your browser's Copy command, then paste it into your regular browser.";
+    }
+  };
+  $("signin-url").onclick = () => $("signin-url").select();
   $("import").onclick = () => perform(async () => importGames(false));
   $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };

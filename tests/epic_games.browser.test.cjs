@@ -30,7 +30,7 @@ async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixtu
       let result = {};
       if (event.data.method === "plugin.run-action") {
         window.actions.push({ action: payload.actionId, code: payload.values.authorization_code });
-        if (payload.actionId === "status") result = { connected: false, phase: "idle" };
+        if (payload.actionId === "status") result = { connected: false, phase: "idle", login_url: signinUrl };
         else if (payload.actionId === "signin") {
           result = { redirect_url: signinUrl };
           window.setTimeout(() => window.location.assign(signinUrl), 0);
@@ -80,4 +80,30 @@ test("Epic sign-in delegates external navigation to the host without popup privi
     await page.waitForURL(signinUrl, { waitUntil: "commit", timeout: 10000 });
     assert.equal(page.url(), signinUrl);
   } finally { await page.close(); }
+});
+
+test("copying the sign-in link retains the page and offers manual copying in an opaque sandbox", async () => {
+  for (const width of [320, 390, 1440]) {
+    const page = await browser.newPage({ viewport: { width, height: 1100 } });
+    const errors = [];
+    page.on("pageerror", error => errors.push(String(error)));
+    const signinUrl = "https://www.epicgames.com/id/login?redirectUrl=" + "x".repeat(300);
+    try {
+      await page.setContent('<iframe title="Epic" sandbox="allow-scripts" style="width:100%;height:1000px;border:0"></iframe>');
+      await mount(page, signinUrl);
+      const frame = page.frameLocator("iframe");
+      await frame.getByRole("button", { name: "Copy sign-in link" }).click();
+      await frame.getByText("Copy the selected link using your browser's Copy command, then paste it into your regular browser.", { exact: true }).waitFor();
+      assert.equal(await frame.getByLabel("Epic sign-in link").inputValue(), signinUrl);
+      assert.equal(await frame.getByLabel("Epic sign-in link").getAttribute("readonly"), "");
+      assert.equal(page.url(), "about:blank");
+      assert.deepEqual(await page.evaluate(() => window.actions.map(item => item.action)), ["status"]);
+      assert(await frame.locator("body").evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      if (process.env.EPIC_COPY_SCREENSHOTS) {
+        fs.mkdirSync(process.env.EPIC_COPY_SCREENSHOTS, { recursive: true });
+        await page.screenshot({ path: path.join(process.env.EPIC_COPY_SCREENSHOTS, `epic-copy-link-${width}.png`), fullPage: true });
+      }
+      assert.deepEqual(errors, []);
+    } finally { await page.close(); }
+  }
 });
