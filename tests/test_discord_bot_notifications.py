@@ -44,7 +44,7 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
         "provider_id": "official.discord-bot-notifications.dm", "name": "Discord Bot DM", "action_id": "deliver",
         "transport": "plugin", "definition": {
             "destinations": [{"kind": "discord_bot_dm", "label": "Discord Bot DM", "privacy": "PRIVATE", "fields": []}],
-            "configure_action": "save-bot-config", "retire_action": "clear-bot-token", "test_action": "test-dm",
+            "configure_action": "configure-destination", "retire_action": "retire-destination", "test_action": "test-dm",
             "features": {"critical_supported": False, "multiple_destinations": False},
         },
     })]
@@ -173,3 +173,31 @@ def test_delivery_reports_gateway_permission_errors_without_retrying(monkeypatch
     assert result["success"] is False
     assert result["retryable"] is False
     assert result["error"] == "discord_permission_denied"
+
+
+def test_generic_destination_requires_a_verified_link(monkeypatch):
+    provider = load()
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: None)
+    with pytest.raises(provider.PluginError, match="Link and verify"):
+        provider.configure_destination({"_plugin_context": {"user_id": user_id}})
+
+
+def test_retiring_destination_removes_link_and_pending_challenge(monkeypatch):
+    provider = load()
+    user_id = "12345678-1234-5678-1234-567812345678"
+    deleted = []
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_delete", deleted.append)
+    result = provider.retire_destination({"_plugin_context": {"user_id": user_id}})
+    assert result["ok"] is True
+    assert deleted == ["links/" + user_id, "pending-links/" + user_id]
+
+
+def test_delivery_rejects_forged_or_missing_core_destination_context(monkeypatch):
+    provider = load()
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    result = provider.deliver({"_plugin_context": {"user_id": user_id}, "delivery": {"title": "No context"}})
+    assert result == {"success": False, "retryable": False, "error": "notification_context_invalid"}
