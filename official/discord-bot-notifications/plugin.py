@@ -22,7 +22,6 @@ DISCORD_API = "https://discord.com/api/v10"
 _USERNAME = re.compile(r"^[a-z0-9._]{2,32}$")
 _SNOWFLAKE = re.compile(r"^[0-9]{17,20}$")
 _LINK_TTL = 600
-_MAX_LINK_STARTS_PER_HOUR = 5
 
 
 class PluginError(ValueError):
@@ -31,16 +30,8 @@ class PluginError(ValueError):
 
 def _actor(values: dict[str, Any], *, admin: bool = False) -> str:
     context = values.get("_plugin_context", {})
-    if (
-        not isinstance(context, dict)
-        or not context.get("user_id")
-        or (admin and context.get("is_admin") is not True)
-    ):
-        raise PluginError(
-            "Administrator access is required."
-            if admin
-            else "Sign in to manage your Discord link."
-        )
+    if not isinstance(context, dict) or not context.get("user_id") or (admin and context.get("is_admin") is not True):
+        raise PluginError("Administrator access is required." if admin else "Sign in to manage your Discord link.")
     try:
         return str(UUID(str(context["user_id"])))
     except (TypeError, ValueError, AttributeError):
@@ -110,13 +101,21 @@ def _send_dm(token: str, discord_id: str, content: str) -> None:
     channel_id = channel.get("id") if isinstance(channel, dict) else None
     if not isinstance(channel_id, str):
         raise PluginError("Discord could not open a direct message channel.")
-    _discord(token, "POST", f"/channels/{channel_id}/messages", {
-        "content": content[:1900],
-        "allowed_mentions": {"parse": []},
-    })
+    _discord(token, "POST", f"/channels/{channel_id}/messages", {"content": content[:1900], "allowed_mentions": {"parse": []}})
 
 
-def configure_admin(values: dict[str, Any]) -> dict[str, Any]:
+def get_config(values: dict[str, Any]) -> dict[str, Any]:
+    user_id = _actor(values)
+    config = _load("secrets/bot-config", {})
+    link = _load("links/" + user_id, {})
+    return {
+        "configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")),
+        "guild_id": str(config.get("guild_id", "")) if isinstance(config, dict) else "",
+        "linked": isinstance(link, dict) and bool(link.get("discord_id")),
+    }
+
+
+def save_bot_config(values: dict[str, Any]) -> dict[str, Any]:
     _actor(values, admin=True)
     token = str(values.get("token", "")).strip()
     guild_id = str(values.get("guild_id", "")).strip()
@@ -126,7 +125,13 @@ def configure_admin(values: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "message": "Discord bot configuration saved."}
 
 
-def link_start(values: dict[str, Any]) -> dict[str, Any]:
+def clear_bot_token(values: dict[str, Any]) -> dict[str, Any]:
+    _actor(values, admin=True)
+    _delete("secrets/bot-config")
+    return {"ok": True, "message": "Bot token and server configuration removed. User links were retained."}
+
+
+def start_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     config = _bot_config()
     username = str(values.get("username", "")).strip()
@@ -136,17 +141,12 @@ def link_start(values: dict[str, Any]) -> dict[str, Any]:
     if member is None or not _SNOWFLAKE.fullmatch(str(member.get("id", ""))):
         raise PluginError("That Discord username was not found in the configured server.")
     code = f"{secrets.randbelow(100_000_000):08d}"
-    _store("pending-links/" + user_id, {
-        "discord_id": str(member["id"]),
-        "code_hash": hashlib.sha256(code.encode()).hexdigest(),
-        "expires_at": int(time.time()) + _LINK_TTL,
-        "attempts": 0,
-    })
+    _store("pending-links/" + user_id, {"discord_id": str(member["id"]), "code_hash": hashlib.sha256(code.encode()).hexdigest(), "expires_at": int(time.time()) + _LINK_TTL, "attempts": 0})
     _send_dm(config["token"], str(member["id"]), f"Your verification code is **{code}**.")
     return {"ok": True, "message": "Verification code sent to your Discord DMs."}
 
 
-def link_confirm(values: dict[str, Any]) -> dict[str, Any]:
+def confirm_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     pending = _load("pending-links/" + user_id)
     if not isinstance(pending, dict) or int(pending.get("expires_at", 0)) < int(time.time()):
@@ -157,18 +157,11 @@ def link_confirm(values: dict[str, Any]) -> dict[str, Any]:
     code = str(values.get("code", ""))
     pending["attempts"] = attempts + 1
     _store("pending-links/" + user_id, pending)
-    expected = str(pending.get("code_hash", ""))
-    if not hmac.compare_digest(hashlib.sha256(code.encode()).hexdigest(), expected):
+    if not hmac.compare_digest(hashlib.sha256(code.encode()).hexdigest(), str(pending.get("code_hash", ""))):
         raise PluginError("That verification code is incorrect.")
     _store("links/" + user_id, {"discord_id": str(pending["discord_id"])})
     _delete("pending-links/" + user_id)
     return {"ok": True, "message": "Discord account linked."}
-
-
-def configure_remove(values: dict[str, Any]) -> dict[str, Any]:
-    _actor(values, admin=True)
-    _delete("secrets/bot-config")
-    return {"ok": True, "message": "Bot token and server configuration removed. User links were retained."}
 
 
 def unlink(values: dict[str, Any]) -> dict[str, Any]:
@@ -190,33 +183,24 @@ def test_dm(values: dict[str, Any]) -> dict[str, Any]:
 
 def deliver(values: dict[str, Any]) -> dict[str, Any]:
     """Send only to the verified recipient mapped to the host-supplied user context."""
-    user_id = _actor(values)
-    delivery = values.get("delivery")
-    if not isinstance(delivery, dict):
-        return {"success": False, "retryable": False, "error": "delivery_invalid"}
-    title = str(delivery.get("title", "Notification"))[:250]
-    body = str(delivery.get("body", ""))[:1500]
-    content = f"**{title}**\n{body}".strip()[:1900]
     try:
+        user_id = _actor(values)
+        delivery = values.get("delivery")
+        if not isinstance(delivery, dict):
+            return {"success": False, "retryable": False, "error": "delivery_invalid"}
+        title = str(delivery.get("title", "Notification"))[:250]
+        body = str(delivery.get("body", ""))[:1500]
+        content = f"**{title}**\n{body}".strip()[:1900]
         config = _bot_config()
         link = _load("links/" + user_id)
-        if not link.get("discord_id") if isinstance(link, dict) else True:
+        if not isinstance(link, dict) or not link.get("discord_id"):
             return {"success": False, "retryable": False, "error": "recipient_not_linked"}
         _send_dm(config["token"], str(link["discord_id"]), content or "Notification")
     except GatewayRequestError as exc:
         retryable = exc.code in {"unavailable", "rate_limited"}
-        return {
-            "success": False,
-            "retryable": retryable,
-            "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied",
-        }
+        return {"success": False, "retryable": retryable, "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied"}
     except PluginError as exc:
-        retryable = "temporarily unavailable" in str(exc).lower()
-        return {
-            "success": False,
-            "retryable": retryable,
-            "error": "discord_temporarily_unavailable" if retryable else "discord_delivery_failed",
-        }
+        return {"success": False, "retryable": False, "error": "discord_delivery_failed" if str(exc) else "discord_delivery_failed"}
     return {"success": True, "retryable": False}
 
 
@@ -224,22 +208,12 @@ def _register_provider() -> None:
     delay = 1
     while True:
         try:
-            register_provider(
-                PROVIDER_ID,
-                "Discord Bot DM",
-                "deliver",
-                destination_kind="discord_bot_dm",
-                privacy="PRIVATE",
-            )
+            register_provider(PROVIDER_ID, "Discord Bot DM", "deliver", destination_kind="discord_bot_dm", privacy="PRIVATE")
             return
         except GatewayRequestError as exc:
             if exc.code != "unavailable":
                 raise
-            print(
-                "Waiting for the host gateway before registering Discord Bot DM.",
-                file=sys.stderr,
-                flush=True,
-            )
+            print("Waiting for the host gateway before registering Discord Bot DM.", file=sys.stderr, flush=True)
             time.sleep(delay)
             delay = min(delay * 2, 30)
 
