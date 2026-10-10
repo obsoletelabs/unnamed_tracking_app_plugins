@@ -34,7 +34,7 @@
   "sdk_version_range": "^1.1.2",
   "storage": {"quota_mb": 8},
   "ui": {
-    "actions": ["get-config", "save-bot-config", "clear-bot-token", "start-link", "confirm-link", "unlink", "test-dm", "deliver"],
+    "actions": ["get-config", "save-bot-config", "clear-bot-token", "start-link", "confirm-link", "unlink", "test-dm", "configure-destination", "retire-destination", "deliver"],
     "menus": [],
     "pages": ["admin", "account"],
     "settings": []
