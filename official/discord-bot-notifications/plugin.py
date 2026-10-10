@@ -106,7 +106,7 @@ def _send_dm(token: str, discord_user_id: str, content: str) -> None:
     )
 
 
-def _start_link(values: dict[str, Any]) -> dict[str, Any]:
+def start_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     username = values.get("username")
     if not isinstance(username, str) or not _USERNAME.fullmatch(username.lower()):
@@ -172,7 +172,7 @@ def _start_link(values: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _confirm_link(values: dict[str, Any]) -> dict[str, Any]:
+def confirm_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values)
     code = values.get("code")
     if not isinstance(code, str) or not re.fullmatch(r"[0-9]{8}", code):
