@@ -138,3 +138,13 @@ long to fit is omitted whole with a prompt to open the app.
 ![Administrator channel allowlist and member picker (synthetic directory)](../assets/notification-mail-auth/discord-channel-directory-desktop.jpg)
 
 ![Account allowed-channel selection (synthetic directory)](../assets/notification-mail-auth/discord-channel-selection-desktop.jpg)
+
+### Discord bot release identity
+
+The maintained Discord bot source declares the registered **Unnamed Tracking Official**
+publisher and keeps **manual updates**. The existing signed publication workflow
+controls its first catalogue promotion; a source preview is not an installable signed
+release. Previously independently signed previews require uninstall/fresh installation,
+credential configuration, destination activation and fresh host verification/recovery
+consent. Signing identity changes must not inherit old destination proof. Current
+native configuration requires Plugin API 1.1.10.

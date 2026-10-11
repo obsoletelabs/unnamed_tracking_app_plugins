@@ -45,3 +45,20 @@ def test_workflows_parse_and_unsigned_previews_run_for_all_branch_pushes():
     assert any(step.get("with", {}).get("name") == "unsigned-dist" for step in preview["steps"])
     publication = yaml.load((workflows / "publish.yml").read_text(), Loader=yaml.BaseLoader)
     assert publication["on"]["push"]["branches"] == ["**"]
+
+
+def test_bot_release_matches_registered_official_publisher_and_retains_manual_updates():
+    """A maintained bot release must be signable without changing registry authority."""
+    from tools.publisher_registry import load_registry
+
+    source = ROOT / "official/discord-bot-notifications"
+    release = json.loads((source / "release.json").read_text())
+    manifest = json.loads((source / "manifest.json").read_text())
+    assert release["publisher"] == "Unnamed Tracking Official"
+    assert release["automatic_update"] is False
+    assert any(
+        record.publisher == release["publisher"]
+        and record.channel == "official"
+        and record.allows_plugin(manifest["plugin_id"], release=True)
+        for record in load_registry().values()
+    )

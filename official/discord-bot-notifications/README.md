@@ -1,8 +1,8 @@
 # Discord Bot Notifications
 
-Private direct-message notifications using a dedicated Discord bot.
+PRIVATE direct messages, optional host-verified SECURE recovery, and PUBLIC channel notifications using a dedicated Discord bot.
 
-**Host requirement:** this preview uses the generic plugin-owned notification provider contract in Plugin API 1.1.6. Deploy the paired host destination-verification change (PR #71) before installing this plugin. Older hosts reject provider registration and the plugin will repeatedly restart.
+**Host requirement:** use a host with Plugin API 1.1.10 for the current generic provider and native configuration UI. Older hosts may reject registration or lack the required settings integrations. The source declares the existing provider contract; transport and secrets remain plugin-owned.
 
 ## Per-account destinations
 
@@ -15,6 +15,10 @@ For SECURE delivery, separately approve the critical `notification_providers.sen
 Each attempt sends to exactly one account; missing, retired, changed or differently owned mappings fail instead of broadcasting. Temporary Discord/gateway failures are reported to the host retry queue. Oversized messages fail rather than truncating recovery secrets. The core owns all delivery state.
 
 ### Existing bot migration
+
+The first maintained release is prepared for the existing signed catalogue publication workflow under **Unnamed Tracking Official**, with automatic updates disabled. Until publication succeeds and the bot appears in the catalogue, source/unsigned previews are not a published release.
+
+If you installed an independently signed preview, uninstall it and freshly install the official package. Reconfigure credentials, activate destinations and repeat host verification and recovery consent. Do not use replacement installation to retain proof across signing identities. Existing preview credentials or verification must not be silently transferred to the official publisher.
 
 The existing grouped **Discord Bot DM** provider and its native dashboard/account linking remain working as PRIVATE compatibility routes. Plugin link verification is not host SECURE proof. Existing links and tokens are retained and never automatically promoted or copied to the new provider. Configure the new per-account provider, explicitly activate and verify each desired account, then disable the old grouped provider to avoid receiving duplicate ordinary notices. Removing one new destination erases its plugin target into an opaque revision tombstone and leaves other accounts and legacy links intact. Reinstall requires fresh activation/configuration; old credentials cannot be reclaimed.
 
@@ -71,7 +75,7 @@ The dashboard never displays the bot token. Refreshing the dashboard re-queries 
 
 The plugin declares its PRIVATE account and PUBLIC channel providers, fields, features, privacy and configuration/delivery actions through the existing generic provider API. The host does not need Discord-specific credential handling or delivery code.
 
-The native link page now supports **Link for PRIVATE notifications** without receiving a code. Optional legacy profile proof does not upgrade destination trust. For recovery use the separate **Discord account DM** destination in Account → Notifications, host verification, recovery opt-in and the high-risk delivery grant. The administrator must configure its revision-bound server fields in Admin → Notifications. DMs use native rich cards; Discord does not render email HTML. This independent preview keeps its existing publisher and update policy.
+The native link page now supports **Link for PRIVATE notifications** without receiving a code. Optional legacy profile proof does not upgrade destination trust. For recovery use the separate **Discord account DM** destination in Account → Notifications, host verification, recovery opt-in and the high-risk delivery grant. The administrator must configure its revision-bound server fields in Admin → Notifications. DMs use native rich cards; Discord does not render email HTML. The maintained release uses the registered **Unnamed Tracking Official** publisher and keeps **manual updates**.
 
 All DMs use native rich cards with spaced paragraphs, an emphasized verification code and a short **here** action link. HTTP delivery does not show the bot as online: persistent Discord Gateway presence is deferred until the host exposes an approved WebSocket transport with connection/heartbeat/reconnect lifecycle. Direct sockets are unavailable in the isolated plugin runtime.
 
