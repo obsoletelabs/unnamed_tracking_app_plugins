@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "publisher": "Independent developer",
+  "publisher": "Unnamed Tracking Official",
   "tags": [
     "discord",
     "notifications"
   ],
   "icon": "native/icon.svg",
   "automatic_update": false,
-  "release_notes": "Initial preview: verified Discord account linking and private bot direct-message notifications."
+  "release_notes": "First maintained release: PRIVATE per-account DMs, host-verified SECURE recovery, PUBLIC allowed channels, and readable text fallback when embeds are denied."
 }
