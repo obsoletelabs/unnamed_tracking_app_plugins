@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "NotificationDestinationStatus": {
+      "additionalProperties": false,
+      "description": "No addresses, display labels, configuration, notification content or proof secrets.",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provider_id": {
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "trust": {
+          "enum": [
+            "PUBLIC",
+            "PRIVATE",
+            "SECURE"
+          ],
+          "title": "Trust",
+          "type": "string"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "provider_available": {
+          "title": "Provider Available",
+          "type": "boolean"
+        },
+        "verification_available": {
+          "title": "Verification Available",
+          "type": "boolean"
+        },
+        "recovery_allowed": {
+          "title": "Recovery Allowed",
+          "type": "boolean"
+        },
+        "recovery_status": {
+          "enum": [
+            "unsupported",
+            "provider_unavailable",
+            "destination_disabled",
+            "verification_required",
+            "sensitive_permission_required",
+            "recovery_not_allowed",
+            "routing_disabled",
+            "eligible"
+          ],
+          "title": "Recovery Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "kind",
+        "revision",
+        "trust",
+        "active",
+        "enabled",
+        "provider_available",
+        "verification_available",
+        "recovery_allowed",
+        "recovery_status"
+      ],
+      "title": "NotificationDestinationStatus",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "installation_id": {
+      "format": "uuid",
+      "title": "Installation Id",
+      "type": "string"
+    },
+    "destinations": {
+      "items": {
+        "$ref": "#/$defs/NotificationDestinationStatus"
+      },
+      "title": "Destinations",
+      "type": "array"
+    },
+    "next_after": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next After"
+    }
+  },
+  "required": [
+    "installation_id",
+    "destinations"
+  ],
+  "title": "NotificationDestinationStatusPage",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.11"
+}

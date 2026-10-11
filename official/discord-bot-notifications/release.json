@@ -7,5 +7,5 @@
   ],
   "icon": "native/icon.svg",
   "automatic_update": false,
-  "release_notes": "First maintained release: PRIVATE per-account DMs, host-verified SECURE recovery, PUBLIC allowed channels, and readable text fallback when embeds are denied."
+  "release_notes": "Accurate host-verified destination trust and password-reset routing status, focused host verification controls, and searchable server/channel/account selection. Requires Plugin API 1.1.11 and explicit destination-status permission; manual updates retained."
 }

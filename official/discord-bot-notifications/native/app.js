@@ -33,17 +33,35 @@ export function activate(context) {
         const allowedChannels = ref([]);
         const memberSelection = ref("");
         const memberSearch = ref("");
+        const channelSearch = ref("");
+        const accountSearch = ref("");
+        const serverSearch = ref("");
+        const servers = ref([]);
+        const serverCursor = ref(null);
+        const destinations = ref([]);
+        const destinationError = ref("");
+        const destinationCursor = ref(null);
+        const matches = (query, ...values) => values.join(" ").toLowerCase().includes(query.trim().toLowerCase());
+        const notificationUrl = (destination, provider, adminArea = false) => {
+          const query = new URLSearchParams({ area: adminArea ? "administration" : "account", section: "notifications" });
+          if (destination) query.set("notification_destination", destination);
+          if (provider) query.set("notification_provider", provider);
+          return "/settings?" + query;
+        };
         let live = true;
         onBeforeUnmount(() => { live = false; });
 
         async function refresh() {
           loading.value = true;
           error.value = "";
+          destinations.value = [];
+          destinationCursor.value = null;
           const started = performance.now();
           try {
             const result = await props.host.runAction("get-config");
             if (!live) return;
             config.value = { ...result, browser_refresh_ms: Math.round(performance.now() - started) };
+            await loadDestinations();
             if (!admin && result.configured) {
               const choices = await props.host.runAction("channel-choices");
               if (!live) return;
@@ -75,6 +93,45 @@ export function activate(context) {
             if (live) busy.value = false;
           }
         }
+
+        async function loadDestinations(after = null) {
+          destinationError.value = "";
+          // A failed refresh must never leave a previously verified badge on screen.
+          if (!after) destinations.value = [];
+          try {
+            const result = await props.host.runAction("get-destinations", after ? { after } : {});
+            if (!live) return;
+            const current = after ? destinations.value : [];
+            destinations.value = [...new Map([...current, ...(result.destinations || [])].map(item => [item.id, item])).values()];
+            destinationCursor.value = result.next_after || null;
+          } catch (err) {
+            if (live) {
+              destinations.value = [];
+              destinationCursor.value = null;
+              destinationError.value = "Host destination status is unavailable. Review the destination-status permission or open Notifications to check current proof and recovery routing.";
+            }
+          }
+        }
+
+        async function loadServers(after = "0") {
+          busy.value = true;
+          error.value = "";
+          try {
+            const result = await props.host.runAction("list-servers", { after, token: tokenForm.token });
+            if (!live) return;
+            servers.value = [...new Map([...(after === "0" ? [] : servers.value), ...(result.servers || [])].map(item => [item.id, item])).values()];
+            serverCursor.value = result.next_after || null;
+          } catch (err) {
+            if (live) error.value = err?.message || "Discord servers could not be loaded.";
+          } finally {
+            if (live) busy.value = false;
+          }
+        }
+
+        const searchField = (label, target, placeholder) => h("label", { class: "discord-field" }, [
+          h("span", label), h("input", { type: "search", value: target.value, placeholder,
+            onInput: event => { target.value = event.target.value; } }),
+        ]);
 
         async function loadDirectory(after = "0") {
           busy.value = true;
@@ -182,7 +239,13 @@ export function activate(context) {
             h("p", "Allow text or announcement channels for PUBLIC notifications. Removing a channel stops its deliveries immediately. Member linking is PRIVATE; only the host can verify a notification destination."),
             h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value, onClick: () => loadDirectory() }, "Load Discord directory")]),
             ...(directory.value ? [
-              h("div", { class: "discord-directory" }, directory.value.channels.map(channel => h("label", { class: "discord-channel-choice" }, [
+              searchField("Find a channel", channelSearch, "Channel name or ID"),
+              h("div", { class: "discord-actions" }, [
+                h("button", { type: "button", disabled: busy.value, onClick: () => { allowedChannels.value = [...new Set([...allowedChannels.value, ...directory.value.channels.filter(channel => matches(channelSearch.value, channel.name, channel.id)).map(channel => channel.id)])]; } }, "Allow matching channels"),
+                h("button", { type: "button", disabled: busy.value, onClick: () => { const visible = new Set(directory.value.channels.filter(channel => matches(channelSearch.value, channel.name, channel.id)).map(channel => channel.id)); allowedChannels.value = allowedChannels.value.filter(id => !visible.has(id)); } }, "Remove matching channels"),
+              ]),
+              h("p", { class: "discord-hint" }, allowedChannels.value.length + " channels selected; save below to apply."),
+              h("div", { class: "discord-directory" }, directory.value.channels.filter(channel => matches(channelSearch.value, channel.name, channel.id)).map(channel => h("label", { class: "discord-channel-choice" }, [
                 h("input", { type: "checkbox", checked: allowedChannels.value.includes(channel.id), disabled: busy.value,
                   onChange: event => { allowedChannels.value = event.target.checked ? [...allowedChannels.value, channel.id] : allowedChannels.value.filter(id => id !== channel.id); } }),
                 h("span", "#" + channel.name), h("small", channel.id),
@@ -191,7 +254,7 @@ export function activate(context) {
               h("label", { class: "discord-field" }, [h("span", "Find a server user"), h("input", { value: memberSearch.value, onInput: event => { memberSearch.value = event.target.value; }, placeholder: "Username or display name" })]),
               h("label", { class: "discord-field" }, [h("span", "Discord member"), h("select", { value: memberSelection.value, disabled: busy.value, onChange: event => { memberSelection.value = event.target.value; } }, [
                 h("option", { value: "" }, "Choose a Discord member"),
-                ...directory.value.users.filter(user => (user.username + " " + user.label).toLowerCase().includes(memberSearch.value.toLowerCase())).map(user => h("option", { value: user.username }, user.label + " (@" + user.username + ") · " + user.id)),
+                ...directory.value.users.filter(user => matches(memberSearch.value, user.username, user.label, user.id)).map(user => h("option", { value: user.username }, user.label + " (@" + user.username + ") · " + user.id)),
               ])]),
               h("p", { class: "discord-hint" }, "Link the selected member to your signed-in app account. This does not verify access or change another app user's destinations."),
               h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value || !memberSelection.value, onClick: () => perform("link-private", { username: memberSelection.value }) }, "Link selected member to my account")]),
@@ -200,8 +263,9 @@ export function activate(context) {
           ]);
           const allowedChannelCard = infoCard("Your allowed notification channels", [
             h("p", "Choose an administrator-allowed channel, then add a Discord server channel destination in Notifications. Leave its channel ID blank to use this selection. Each destination keeps its chosen channel; use per-type routing to decide what it receives."),
+            searchField("Find an allowed channel", channelSearch, "Channel name or ID"),
             h("label", { class: "discord-field" }, [h("span", "Default channel for new destinations"), h("select", { value: channelSelection.value, disabled: busy.value, onChange: event => { channelSelection.value = event.target.value; } }, [
-              h("option", { value: "" }, "Choose an allowed channel"), ...channelChoices.value.map(channel => h("option", { value: channel.id }, "#" + channel.name + " · " + channel.id)),
+              h("option", { value: "" }, "Choose an allowed channel"), ...channelChoices.value.filter(channel => channel.id === channelSelection.value || matches(channelSearch.value, channel.name, channel.id)).map(channel => h("option", { value: channel.id }, "#" + channel.name + " · " + channel.id)),
             ])]),
             h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value || !channelSelection.value, onClick: () => perform("select-channel", { channel_id: channelSelection.value }) }, "Use this channel for new destinations")]),
             channelChoices.value.length ? null : h("p", { class: "discord-hint" }, "An administrator has not allowed any channels yet."),
@@ -209,7 +273,7 @@ export function activate(context) {
           ]);
 
           const accounts = Array.isArray(c.accounts) ? c.accounts : [];
-          const accountCards = accounts.map(account => infoCard(account.global_name || account.username || "Linked Discord account", [
+          const accountCards = accounts.filter(account => matches(accountSearch.value, account.global_name, account.username, account.discord_id)).map(account => infoCard(account.global_name || account.username || "Linked Discord account", [
             h("div", { class: "discord-identity" }, [
               image(account.avatar_url, account.username || "Discord account", "discord-avatar"),
               h("div", [
@@ -217,7 +281,7 @@ export function activate(context) {
                 h("span", "@" + (account.username || "—")),
                 h("span", { class: "discord-muted" }, "Discord ID: " + (account.discord_id || "—")),
               ]),
-              badge("PRIVATE", false),
+              badge("Legacy profile link · PRIVATE", false),
             ]),
             h("div", { class: "discord-grid" }, [
               text("Linked", account.linked_at ? new Date(account.linked_at * 1000).toLocaleString() : "—"),
@@ -233,32 +297,73 @@ export function activate(context) {
             ]),
           ]));
 
+          const recoveryLabels = {
+            eligible: "Ready for password-reset delivery",
+            unsupported: "Recovery is not supported by this destination",
+            provider_unavailable: "Provider unavailable; review installation, permissions and server configuration",
+            destination_disabled: "Enable this destination and provider in Notifications",
+            verification_required: "Verify this specific DM destination to enable recovery",
+            sensitive_permission_required: "Grant the plugin sensitive-content permission for recovery",
+            recovery_not_allowed: "Verified; allow recovery messages in Notifications",
+            routing_disabled: "Password-reset routing disabled by preferences or server policy",
+          };
+          const destinationCards = destinations.value.filter(item => matches(accountSearch.value, item.username, item.discord_id, item.channel_id, item.kind, item.id, item.trust)).map(item => infoCard(
+            item.username ? "@" + item.username : item.channel_id ? "Discord channel " + item.channel_id : item.kind === "discord_account_dm" ? "Discord account DM" : item.kind === "discord_bot_channel" ? "Discord server channel" : "Compatibility destination",
+            [
+              h("div", { class: "discord-identity" }, [h("strong", item.kind === "discord_account_dm" ? "Direct message destination" : item.kind === "discord_bot_channel" ? "PUBLIC server channel" : "Legacy grouped destination"), badge(item.trust, item.trust === "SECURE")]),
+              h("p", { class: "discord-hint" }, item.active && item.enabled ? "Configured · Revision " + item.revision : "Inactive or disabled · Revision " + item.revision),
+              h("p", { role: "status" }, recoveryLabels[item.recovery_status] || "Check recovery eligibility in Notifications"),
+              h("div", { class: "discord-actions" }, [h("a", {
+                href: notificationUrl(item.id, item.provider_id), class: "discord-notification-link",
+              }, item.trust !== "SECURE" && item.kind === "discord_account_dm" ? "Verify DM and configure recovery" : item.recovery_status === "recovery_not_allowed" ? "Enable password-reset delivery" : "Manage this destination")]),
+              item.recovery_status === "eligible" ? h("p", { class: "discord-hint" }, "Destination routing is ready. The administrator must also enable the password-reset plugin; the host rechecks all permissions and choices when sending.") : null,
+            ],
+          ));
+
           return h("section", { class: "discord-bot-settings" }, [
             h("div", { class: "discord-header" }, [
-              h("div", [h("h2", admin ? "Discord bot administration" : "Your Discord connection"), h("p", admin ? "Everything the plugin can safely discover about the configured bot and server." : "Link accounts for PRIVATE delivery without verification. SECURE recovery uses individually host-verified destinations in Notifications.")]),
+              h("div", [h("h2", admin ? "Discord bot administration" : "Your Discord connection"), h("p", admin ? "Everything the plugin can safely discover about the configured bot and server." : "PRIVATE DMs work before verification. Actual destination trust and password-reset routing below come from the host; verification and recovery choices are managed in Notifications.")]),
               h("button", { type: "button", disabled: loading.value || busy.value, onClick: refresh }, loading.value ? "Refreshing…" : "Refresh"),
             ]),
             loading.value ? h("p", { role: "status" }, "Loading Discord information…") : null,
             error.value ? h("p", { role: "alert", class: "discord-error" }, error.value) : null,
             message.value ? h("p", { role: "status", class: "discord-message" }, message.value) : null,
             ...(admin ? [
-              infoCard("Bot configuration", [
+              infoCard("Compatibility bot and directory configuration", [
                 h("p", c.bot_configured ? "The token is configured and never displayed back to the browser." : "No bot token configured."),
-                field("Bot token (write-only)", tokenForm, "token", "password", "new-password"), field("Discord server ID", tokenForm, "guild_id", "text"),
+                field("Bot token (write-only)", tokenForm, "token", "password", "new-password"),
+                h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value, onClick: () => loadServers() }, "Find bot servers")]),
+                searchField("Find a server", serverSearch, "Server name or ID"),
+                h("label", { class: "discord-field" }, [h("span", "Select a server joined by this bot"), h("select", { value: tokenForm.guild_id, disabled: busy.value, onChange: event => { tokenForm.guild_id = event.target.value; directory.value = null; } }, [
+                  h("option", { value: "" }, "Choose a server"),
+                  ...(tokenForm.guild_id && !servers.value.some(server => server.id === tokenForm.guild_id) ? [h("option", { value: tokenForm.guild_id }, "Current server · " + tokenForm.guild_id)] : []),
+                  ...servers.value.filter(server => server.id === tokenForm.guild_id || matches(serverSearch.value, server.name, server.id)).map(server => h("option", { value: server.id }, server.name + " · " + server.id)),
+                ])]),
+                serverCursor.value ? h("button", { type: "button", disabled: busy.value, onClick: () => loadServers(serverCursor.value) }, "Load more servers") : null,
+                field("Discord server ID (manual entry)", tokenForm, "guild_id", "text"),
                 h("div", { class: "discord-actions" }, [button("Validate and save", "save-bot-config", () => ({ token: tokenForm.token, guild_id: tokenForm.guild_id })), button("Clear bot token", "clear-bot-token", () => ({}), true)]),
-                h("p", { class: "discord-hint" }, "The bot must be a member of this server. Member lookup may require the Server Members Intent."),
+                h("p", { class: "discord-hint" }, "Server discovery uses the new token above or the stored compatibility token. Saving this section configures directory access and legacy grouped delivery. Per-account DMs and PUBLIC channels have separate, revision-bound provider settings below. Changing their server disables old destinations until explicitly configured again."),
+                h("div", { class: "discord-actions" }, [
+                  h("a", { href: notificationUrl(null, context.pluginId + ".account-dm", true) }, "Configure account DM provider"),
+                  h("a", { href: notificationUrl(null, context.pluginId + ".channel", true) }, "Configure channel provider"),
+                ]),
               ]),
               ...(c.configured ? [...adminCards, directoryCard] : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
             ] : [
-              h("a", { href: "/settings?area=account&section=notifications", class: "discord-notification-link" }, "Open notification destinations and SECURE verification"),
-              ...accountCards,
+              h("a", { href: notificationUrl(null, context.pluginId + ".account-dm"), class: "discord-notification-link" }, "Add a DM destination or configure notification routing"),
+              searchField("Find your destinations or linked accounts", accountSearch, "Username, channel, destination ID or trust"),
+              destinationError.value ? h("p", { role: "alert", class: "discord-error" }, destinationError.value) : null,
+              ...destinationCards,
+              !destinationError.value && !destinations.value.length ? h("p", { class: "discord-hint" }, "No host notification destinations configured. Add a DM destination for ordinary PRIVATE delivery; verify it and allow recovery for password resets.") : null,
+              destinationCursor.value ? h("button", { type: "button", onClick: () => loadDestinations(destinationCursor.value) }, "Load more destinations") : null,
+              ...(accountCards.length ? [h("details", [h("summary", "Compatibility profile links (" + accounts.length + ")"), h("p", { class: "discord-hint" }, "These profile links belong to the legacy grouped PRIVATE provider. Optional profile verification does not establish host destination trust. Use actual destinations above for security and recovery."), ...accountCards])] : []),
               ...(c.configured ? [allowedChannelCard] : []),
-              infoCard("Link another Discord account", [
-                h("p", accounts.length ? "Add another Discord account. Notifications routed to Discord will be sent to every account listed above." : "Enter your exact Discord username from the configured server. You can link it now for PRIVATE notifications; profile verification below is optional."),
+              infoCard("Compatibility profile linking", [
+                h("p", accounts.length ? "Add a compatibility profile link for the legacy grouped PRIVATE provider. Per-account destinations above each deliver to only their configured account." : "Enter your exact Discord username from the configured server. You can link it now for PRIVATE notifications; profile verification below is optional."),
                 field("Discord username", userForm, "username", "text"),
                 h("div", { class: "discord-actions" }, [button("Link for PRIVATE notifications", "link-private", () => ({ username: userForm.username })), button("Send optional profile verification code", "start-link", () => ({ username: userForm.username }))]),
                 field("Eight-digit verification code", userForm, "code", "text", "one-time-code"),
-                h("div", { class: "discord-actions" }, [button("Verify and link account", "confirm-link", () => ({ code: userForm.code }))]),
+                h("div", { class: "discord-actions" }, [button("Confirm optional profile code", "confirm-link", () => ({ code: userForm.code }))]),
                 h("p", { class: "discord-hint" }, "Optional profile codes expire after ten minutes. This legacy grouped destination stays PRIVATE, even with profile proof. For recovery: configure Discord account DM in Notifications, complete the host challenge and enable recovery. The provider also needs the separate high-risk grant."),
               ]),
             ]),
