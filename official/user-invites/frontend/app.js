@@ -20,6 +20,7 @@ async function refresh() {
  const state = await action("status");
  registered = state.registered === true;
  el("lifetime").value = state.token_lifetime_seconds;
+ el("enable").disabled = false;
  el("issue").disabled = !registered;
  el("disable").disabled = !registered;
  el("status").textContent = registered ? "Invitations enabled" : "Invitations disabled";
@@ -30,7 +31,7 @@ async function refresh() {
  for(const row of rows) {
   const article=document.createElement("article"), address=document.createElement("strong"), info=document.createElement("p");
   address.textContent=row.email;
-  info.textContent=`${row.status} · Delivery: ${row.delivery_status || "unavailable"} · Expires ${when(row.expires_at)}`;
+  info.textContent=`${row.status} Â· Delivery: ${row.delivery_status || "unavailable"} Â· Expires ${when(row.expires_at)}`;
   article.append(address,info);
   if(row.status === "pending") {
    const button=document.createElement("button"); button.type="button"; button.textContent="Revoke invitation";
@@ -45,8 +46,15 @@ async function run(button, callback) {
  try {await callback();} catch(error) {el("status").textContent=error.message;el("status").className="error";}
  finally {button.disabled=(button.id==="issue"||button.id==="disable")&&!registered;resize();}
 }
-el("configuration").onsubmit=event=>{event.preventDefault();run(event.submitter,async()=>{await action("enable",{token_lifetime_seconds:Number(el("lifetime").value)});await refresh();});};
+// Opaque host iframes intentionally forbid native form navigation. Use the
+// public action bridge for both pointer and Enter-key activation.
+function control(formId, buttonId, callback) {
+ const form=el(formId), button=el(buttonId);
+ button.onclick=()=>{if(form.reportValidity())run(button,callback);};
+ form.onkeydown=event=>{if(event.key==="Enter"&&!event.isComposing){event.preventDefault();button.click();}};
+}
+control("configuration","enable",async()=>{await action("enable",{token_lifetime_seconds:Number(el("lifetime").value)});await refresh();});
 el("disable").onclick=event=>run(event.target,async()=>{await action("disable");await refresh();});
-el("send").onsubmit=event=>{event.preventDefault();run(el("issue"),async()=>{await action("issue",{email:el("email").value.trim()});el("email").value="";await refresh();el("status").textContent="Invitation queued. Delivery status appears below.";});};
+control("send","issue",async()=>{await action("issue",{email:el("email").value.trim()});el("email").value="";await refresh();el("status").textContent="Invitation queued. Delivery status appears below.";});
 el("refresh").onclick=event=>run(event.target,refresh);
 refresh().catch(error=>{el("status").textContent=error.message;el("status").className="error";});

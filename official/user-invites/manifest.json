@@ -70,6 +70,7 @@
     "menus": []
   },
   "frontend": {
-    "entry": "frontend/index.html"
+    "entry": "frontend/index.html",
+    "inline_assets": true
   }
 }

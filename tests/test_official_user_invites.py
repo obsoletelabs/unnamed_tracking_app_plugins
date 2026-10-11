@@ -95,8 +95,17 @@ def test_plugin_owned_admin_ui_uses_public_bridge_and_safe_text_rendering():
     source = Path(__file__).parents[1] / "official/user-invites"
     manifest = json.loads((source / "manifest.json").read_text())
     assert manifest["frontend"]["entry"] == "frontend/index.html"
+    assert manifest["frontend"]["inline_assets"] is True
     script = (source / "frontend/app.js").read_text()
     assert "plugin.run-action" in script and "textContent" in script
     assert "fetch(" not in script and "innerHTML" not in script
 
 
+
+
+def test_sandbox_controls_use_bridge_instead_of_blocked_native_form_navigation():
+    source = Path(__file__).parents[1] / "official/user-invites/frontend"
+    html = (source / "index.html").read_text()
+    script = (source / "app.js").read_text()
+    assert 'type="submit"' not in html
+    assert "form.reportValidity()" in script and "event.preventDefault()" in script
