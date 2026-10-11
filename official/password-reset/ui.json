@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.10",
+  "api_contract_version": "1.1.11",
   "plugin_id": "official.password-reset",
   "title": "Password Reset",
   "settings": [],
@@ -16,7 +16,7 @@
     },
     {
       "id": "enable",
-      "label": "Enable or save recovery",
+      "label": "Enable recovery",
       "handler": "plugin:enable",
       "capability": {
         "name": "auth.password_reset",
@@ -32,6 +32,15 @@
         "version": 1
       },
       "confirmation": "Disable recovery and invalidate outstanding reset links?"
+    },
+    {
+      "id": "save",
+      "label": "Save settings",
+      "handler": "plugin:save",
+      "capability": {
+        "name": "auth.password_reset",
+        "version": 1
+      }
     }
   ],
   "pages": [
@@ -43,7 +52,8 @@
       "actions": [
         "status",
         "enable",
-        "disable"
+        "disable",
+        "save"
       ],
       "tables": [],
       "dialogs": []
@@ -53,16 +63,12 @@
   "menus": [],
   "tables": [],
   "dialogs": [],
-  "settings_sections": [
+  "settings_sections": [],
+  "extensions": [
     {
-      "id": "password-recovery-settings",
-      "label": "Password recovery",
-      "page_id": "configure",
-      "area": "administration",
-      "group": "Account security",
-      "visibility": {
-        "admin_only": true
-      }
+      "id": "configuration",
+      "slot": "administration.password-policy.after",
+      "page_id": "configure"
     }
   ]
 }
