@@ -844,6 +844,130 @@
         "notifications"
       ],
       "version": "1.6.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "d1c822fdb48f8180acdbd1810e1c13e07e07172d",
+        "source_committed_at": "2026-10-11T11:34:13+08:00",
+        "source_digest": "0b9076ae347948c840fc62ff3ec9626156226235bb6bffd81a066297c7bb1462",
+        "source_path": "examples/recently-played-notifier",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "78e2d50e8b691423ff7bd29f3499a420f4ef00f1854f2b2d0a241c24ed96e4e0"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.2",
+        "application_version_range": "*",
+        "capabilities": [
+          {
+            "name": "games.read",
+            "version": 1
+          },
+          {
+            "name": "notifications.send",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Creates a small notification from the most recently played games.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+          "sha256": "f52dcad642ecd6a06ecb91934e62d3ea9152e523794ad0af3e36e85007282dd1",
+          "signature": "v2:dTEfolM7eUWFohZljki9s1z8Hh5JcAlD5TQpQEouRVK1EKeh4niYtIa+ZGNh2xBGMwpKulfid55BoP+gDBC0Cw=="
+        },
+        "manifest_version": 1,
+        "name": "Recently Played Notifier",
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.read",
+              "version": 1
+            },
+            "rationale": "Read recent game activity."
+          },
+          {
+            "capability": {
+              "name": "notifications.send",
+              "version": 1
+            },
+            "rationale": "Notify the user about recent activity."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Remember the last generated notification."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Expose the declared plugin page in the main navigation."
+          }
+        ],
+        "plugin_id": "example.recently-played-notifier",
+        "sdk_version_range": "^1.1.2",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "run"
+          ],
+          "pages": [
+            "main"
+          ],
+          "settings": []
+        },
+        "version": "1.7.0"
+      },
+      "package": {
+        "filename": "example.recently-played-notifier-1.7.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 5335
+      },
+      "package_sha256": "c809942db8134d71db4c83d11f59554822c36558e94cf68d79724a6ae1ecffc6",
+      "plugin_id": "example.recently-played-notifier",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Recently Played Notifier\n\nThe **Send notification** action reads the signed-in user's recent games,\nformats a notification, returns the result and stores a small execution record\nunder `users/<host-injected-user-id>/last-run`. It requests `games.read`,\n`notifications.send`, `plugin.storage` and `frontend.navigation.main` for its\nsidebar page. The supervised entrypoint reports ready and stays alive; restarting\nit does not send duplicate notifications automatically.\n\nIt is intentionally application-level behavior. The host owns the notification service and game data; the plugin only consumes those capabilities.\n\nBuild/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).\nREADME, tags, icon and resolved release policy are included in each new package.\n\n## Notification contract 1.1.2\n\n`notifications.send` submits a PRIVATE notice to the host controller for the authenticated user. Its result reports acceptance, not successful external transport. User type/destination preferences can suppress it. Public webhooks cannot receive this personal game summary. Rich game sale/release/price-threshold source registration is a later API extension; this example does not invent live prices from purchase costs.\n",
+      "release_notes": "Package lifecycle metadata, embedded documentation and validated Plugin API v1 contributions.",
+      "sha256": "f52dcad642ecd6a06ecb91934e62d3ea9152e523794ad0af3e36e85007282dd1",
+      "signing": {
+        "key_id": "unnamed-tracking-examples-2026-10-07-v2",
+        "sha256": "f52dcad642ecd6a06ecb91934e62d3ea9152e523794ad0af3e36e85007282dd1",
+        "signature": "v2:dTEfolM7eUWFohZljki9s1z8Hh5JcAlD5TQpQEouRVK1EKeh4niYtIa+ZGNh2xBGMwpKulfid55BoP+gDBC0Cw=="
+      },
+      "tags": [
+        "games",
+        "notifications"
+      ],
+      "version": "1.7.0"
     }
   ],
   "version": 1
