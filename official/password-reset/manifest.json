@@ -1,0 +1,81 @@
+{
+  "manifest_version": 1,
+  "plugin_id": "official.password-reset",
+  "name": "Password Reset",
+  "version": "1.0.0",
+  "api_contract_version": "1.1.7",
+  "sdk_version_range": "^1.1.7",
+  "application_version_range": ">=1.0.0",
+  "entrypoint": "plugin:main",
+  "description": "Host-mediated, single-use password recovery through verified external notification destinations.",
+  "capabilities": [
+    {
+      "name": "auth.password_reset",
+      "version": 1
+    },
+    {
+      "name": "plugin.storage",
+      "version": 1
+    },
+    {
+      "name": "frontend.navigation.admin",
+      "version": 1
+    },
+    {
+      "version": 1,
+      "name": "plugin.settings"
+    }
+  ],
+  "permissions": [
+    {
+      "capability": {
+        "name": "auth.password_reset",
+        "version": 1
+      },
+      "rationale": "Enable administrator-configured host-mediated password recovery for local accounts. The host owns tokens, password changes and session revocation; this plugin cannot read credentials or bypass destination trust."
+    },
+    {
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      },
+      "rationale": "Remember whether this installation enables recovery and its configured token lifetime. No reset credentials are stored by this plugin."
+    },
+    {
+      "capability": {
+        "name": "frontend.navigation.admin",
+        "version": 1
+      },
+      "rationale": "Show the administrator-only password recovery configuration entry."
+    },
+    {
+      "capability": {
+        "version": 1,
+        "name": "plugin.settings"
+      },
+      "rationale": "Render and save the administrator configuration field using existing plugin settings controls."
+    }
+  ],
+  "dependencies": [],
+  "storage": {
+    "quota_mb": 1
+  },
+  "integrity": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "key_id": null,
+    "signature": null
+  },
+  "ui": {
+    "pages": [
+      "configure"
+    ],
+    "settings": [
+      "recovery"
+    ],
+    "actions": [
+      "enable",
+      "disable"
+    ],
+    "menus": []
+  }
+}

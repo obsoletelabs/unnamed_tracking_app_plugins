@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "official",
+    "notifications",
+    "security"
+  ],
+  "automatic_update": false,
+  "icon": "icon.svg",
+  "release_notes": "Functional host-mediated password recovery with single-use links, SECURE external routing, session revocation and retained API keys. Requires host API1.1.7 and explicit administrator activation."
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": "v1",
+  "api_contract_version": "1.1.7",
+  "plugin_id": "official.password-reset",
+  "title": "Password Reset",
+  "settings": [
+    {
+      "id": "recovery",
+      "title": "Account recovery",
+      "description": "Recovery requires a verified external destination with recovery enabled. API keys remain active after a reset.",
+      "fields": [
+        {
+          "id": "token_lifetime_seconds",
+          "label": "Link lifetime (seconds)",
+          "type": "number",
+          "default": 1200,
+          "required": true,
+          "validation": {
+            "minimum": 600,
+            "maximum": 3600
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "enable",
+      "label": "Enable or save recovery",
+      "handler": "plugin:enable",
+      "capability": {
+        "name": "auth.password_reset",
+        "version": 1
+      }
+    },
+    {
+      "id": "disable",
+      "label": "Disable recovery",
+      "handler": "plugin:disable",
+      "capability": {
+        "name": "auth.password_reset",
+        "version": 1
+      },
+      "confirmation": "Disable recovery and invalidate outstanding reset links?"
+    }
+  ],
+  "pages": [
+    {
+      "id": "configure",
+      "title": "Password recovery",
+      "description": "Enable the sign-in recovery flow. The host creates reset links, checks routing, changes passwords and signs out sessions. This plugin never receives passwords or reset tokens.",
+      "settings": [
+        "recovery"
+      ],
+      "actions": [
+        "enable",
+        "disable"
+      ],
+      "tables": [],
+      "dialogs": []
+    }
+  ],
+  "navigation": [
+    {
+      "id": "recovery",
+      "location": "administration",
+      "label": "Password recovery",
+      "page_id": "configure",
+      "visibility": {
+        "admin_only": true
+      }
+    }
+  ],
+  "menus": [],
+  "tables": [],
+  "dialogs": []
+}
