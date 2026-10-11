@@ -1,13 +1,6 @@
 {
-  "manifest_version": 1,
-  "plugin_id": "official.user-invites",
-  "name": "User Invites",
-  "version": "1.0.0",
   "api_contract_version": "1.1.8",
-  "sdk_version_range": "^1.1.8",
   "application_version_range": ">=1.0.0",
-  "entrypoint": "plugin:main",
-  "description": "Administrator email invitations with expiring single-use acceptance and account creation only after confirmation.",
   "capabilities": [
     {
       "name": "auth.user_invites",
@@ -22,6 +15,20 @@
       "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Administrator email invitations with expiring single-use acceptance and account creation only after confirmation.",
+  "entrypoint": "plugin:main",
+  "frontend": {
+    "entry": "frontend/index.html",
+    "inline_assets": true
+  },
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "User Invites",
   "permissions": [
     {
       "capability": {
@@ -45,20 +52,12 @@
       "rationale": "Show the administrator-only invitation controls."
     }
   ],
-  "dependencies": [],
+  "plugin_id": "official.user-invites",
+  "sdk_version_range": "^1.1.8",
   "storage": {
     "quota_mb": 1
   },
-  "integrity": {
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "key_id": null,
-    "signature": null
-  },
   "ui": {
-    "pages": [
-      "manage"
-    ],
-    "settings": [],
     "actions": [
       "status",
       "enable",
@@ -67,10 +66,11 @@
       "list-invites",
       "revoke"
     ],
-    "menus": []
+    "menus": [],
+    "pages": [
+      "manage"
+    ],
+    "settings": []
   },
-  "frontend": {
-    "entry": "frontend/index.html",
-    "inline_assets": true
-  }
+  "version": "1.0.0"
 }
