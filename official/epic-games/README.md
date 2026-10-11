@@ -1,16 +1,19 @@
 # Epic Games Library
 
-Optional personal Epic game imports through **Plugin API 1.1.3**. Requires
-[host PR38](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/38) or a later
-host release implementing `games.import`. Older hosts reject this package during
-compatibility review. This plugin uses the existing SDK v1.1.1 wire helper.
+Optional personal Epic game imports through **Plugin API 1.1.9**. Requires a host
+that implements `games.import` and the `connections` UI contribution (host
+Plugin API 1.1.9). Older hosts reject this package during compatibility review;
+use an earlier Epic release on a host that predates 1.1.9. This plugin uses the existing SDK v1.1.1 wire helper.
 The host page/sign-in support is completed by
 [host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).
 
 ## Connect and import
 
 Install this plugin's `.utp` through Settings → Plugins, approve the declared
-permissions and enable it. Open **Epic Games** in the sidebar or its plugin page.
+permissions and enable it. Open Settings → Account → Connections, where **Epic Games**
+is listed with its connection status. Choose **Connect** (or **Manage** once
+connected) to open the plugin page in a popup. The page is also reachable at its
+plugin route, but it no longer adds a sidebar entry.
 Use **Copy sign-in link** to open Epic in your regular browser while leaving the
 app open. If clipboard access is unavailable, copy the selected link manually.
 Alternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so

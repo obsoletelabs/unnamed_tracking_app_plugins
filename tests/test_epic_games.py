@@ -169,6 +169,32 @@ def test_sandbox_assets_are_inlined_and_scripts_follow_the_form():
     assert html.index('id="connect-form"') < html.index('<script src="./app.js"')
 
 
+def test_epic_is_a_connection_not_a_sidebar_page():
+    manifest = json.loads((SOURCE / "manifest.json").read_text())
+    document = json.loads((SOURCE / "ui.json").read_text())
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.9"
+    capabilities = {item["name"] for item in manifest["capabilities"]}
+    assert "frontend.connections" in capabilities
+    assert "frontend.navigation.main" not in capabilities
+    assert {item["capability"]["name"] for item in manifest["permissions"]} == capabilities
+    assert all("navigation" not in page for page in document["pages"])
+    (connection,) = document["connections"]
+    assert connection["page_id"] in {page["id"] for page in document["pages"]}
+    actions = {item["id"]: item for item in document["actions"]}
+    # The status action is the one the host runs to show Connected / Not connected.
+    assert connection["status_action_id"] == "status"
+    assert actions["status"]["capability"]["name"] == "plugin.storage"
+
+
+def test_status_reports_only_connected_flag_and_account_name(service):
+    assert service.plugin.status(context())["connected"] is False
+    connected(service)
+    status = service.plugin.status(context())
+    assert status["connected"] is True
+    assert status["display_name"] == "Fixture player"
+    assert "token" not in json.dumps(status)
+
+
 @pytest.mark.parametrize(
     "value",
     [

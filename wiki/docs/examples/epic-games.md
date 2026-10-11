@@ -1,8 +1,8 @@
 # Epic Games Library
 
 The official `official.epic-games` plugin keeps Epic connection and import behavior
-outside the core app. It requires the host's additive **Plugin API 1.1.3**
-`games.import` contract. Its sandboxed page offers personal sign-in, imports,
+outside the core app. It requires the host's additive **Plugin API 1.1.9**
+`games.import` and `connections` contracts. Its sandboxed page offers personal sign-in, imports,
 pause/resume and disconnect through declared actions.
 
 Sign in on Epic's own site and submit its one-time code. Use **Copy sign-in link**
@@ -32,8 +32,11 @@ the connected account and host actor; manual status, notes, ratings and field
 locks remain under the host's import policy. Complete valid inventory is required
 before marking missing games unavailable. Games are never deleted by the plugin.
 
-Permissions are `games.write`, `network.outbound`, `plugin.storage` and
-`frontend.navigation.main`. There are no host source imports, direct database
+Epic Games is listed on **Settings > Account > Connections** through the
+`connections` contribution, whose `status` action reports whether the account is
+connected. **Connect** and **Manage** open the page above in a popup, so there is
+no sidebar entry. Permissions are `games.write`, `network.outbound`,
+`plugin.storage` and `frontend.connections`. There are no host source imports, direct database
 connections, native frontend permission or automatic background requests.
 
 See the [plugin README](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/epic-games/README.md)
