@@ -26,7 +26,7 @@ def test_source_validation_rejects_unmigrated_contracts(tmp_path, contract):
     else:
         manifest["api_contract_version"] = contract
     path.write_text(json.dumps(manifest), encoding="utf-8")
-    with pytest.raises(ValueError, match="explicitly target Plugin API v1.1.0"):
+    with pytest.raises(ValueError, match="explicitly target a supported Plugin API contract version"):
         check(tmp_path)
 
 

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "publisher": "Independent developer",
+  "tags": [
+    "discord",
+    "notifications"
+  ],
+  "icon": "native/icon.svg",
+  "automatic_update": false,
+  "release_notes": "Initial preview: verified Discord account linking and private bot direct-message notifications."
+}
