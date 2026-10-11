@@ -41,3 +41,6 @@ paired preview for private direct messages. It registers a generic plugin-owned
 PRIVATE notification destination and performs Discord API delivery inside the
 plugin. The host supplies routing and privacy policy; it does not own Discord
 credentials or a Discord-specific transport.
+
+
+Maintained password recovery: `official.password-reset` uses host API1.1.7 with explicit administrator activation and verified external recovery destinations. It performs real password recovery through host-owned tokens/account mutation; synthetic notification demos remain separate. See [setup](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/password-reset).

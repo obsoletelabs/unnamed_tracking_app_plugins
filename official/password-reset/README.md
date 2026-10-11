@@ -1,10 +1,10 @@
 # Password Reset
 
-Maintained optional password recovery integration for host Plugin API1.1.7. This is a functional account flow; the synthetic example remains a separate demonstration.
+Maintained optional password recovery integration for host Plugin API 1.1.7. This is a functional account flow; the synthetic example remains a separate demonstration.
 
 ## Setup
 
-Install the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password recovery**, choose a link lifetime (600–3600 seconds, default1200), and click **Enable or save recovery**. Disable invalidates outstanding links; installation alone does not enable public recovery.
+Install the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password recovery**, choose a link lifetime (600–3600 seconds, default 1200), and click **Enable or save recovery**. Disable invalidates outstanding links; installation alone does not enable public recovery.
 
 Each user must configure an external notification destination, verify it and separately enable recovery delivery. SMTP is built into the host. A plugin destination must declare verification/security/recovery support and hold the independent high-risk provider grant. The authenticated inbox and browser push cannot carry recovery links. Normal routing preferences and administrator restrictions apply; there is no direct SMTP bypass.
 
@@ -19,3 +19,5 @@ The host stores encrypted delivery material only until consumption/expiry and ne
 ## Testing
 
 Run `pytest tests/test_official_password_reset.py` and the paired host recovery suite. Actual signed-package installation and the host request/link/redemption workflow are required before release. Temporary SMTP capture is suitable for local acceptance; no production SMTP account is required.
+
+Startup uses auth_flows.password_reset.restore to resume only an already-active matching installation and definition. Withdrawal or reinstallation requires explicit activation; regranting permission cannot revive an old reset credential.
