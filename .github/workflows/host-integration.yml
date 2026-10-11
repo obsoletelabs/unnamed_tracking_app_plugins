@@ -69,6 +69,8 @@ jobs:
               candidate_branch="feat/plugin-user-invites"
             elif [ "$COMPANION_BRANCH" = "feat/official-password-reset" ]; then
               candidate_branch="feat/plugin-password-reset"
+            elif [ "$COMPANION_BRANCH" = "fix/discord-destination-trust-labels" ]; then
+              candidate_branch="feat/plugin-destination-status"
             elif [ "$COMPANION_BRANCH" = "fix/notification-provider-upgrades" ]; then
               candidate_branch="fix/notification-mail-and-auth-controls"
             fi
