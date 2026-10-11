@@ -1,11 +1,12 @@
 # Epic Games Library
 
 The official `official.epic-games` plugin keeps Epic connection and import behavior
-outside the core app. It requires the host's additive **Plugin API 1.1.9**
-`games.import` and `connections` contracts. Its sandboxed page offers personal sign-in, imports,
-pause/resume and disconnect through declared actions.
+outside the core app. It requires the host's additive **Plugin API 1.1.10**
+`games.import` and connection sync contracts. Its sandboxed connection window offers
+personal sign-in, imports, pause/resume and disconnect through declared actions.
 
-Sign in on Epic's own site and submit its one-time code. Use **Copy sign-in link**
+Sign in on Epic's own site (**Sign in on Epic Games** opens it in a new tab) and
+submit its one-time code. Use **Copy sign-in link**
 to open Epic in your regular browser while leaving the app open; if clipboard
 access is unavailable, copy the selected link manually. The plugin retains
 rotating tokens in private per-user storage and saves the replacement refresh
@@ -34,8 +35,10 @@ before marking missing games unavailable. Games are never deleted by the plugin.
 
 Epic Games is listed on **Settings > Account > Connections** through the
 `connections` contribution, whose `status` action reports whether the account is
-connected. **Connect** and **Manage** open the page above in a popup, so there is
-no sidebar entry. Permissions are `games.write`, `network.outbound`,
+connected and whose `sync` action powers the row's **Sync now**: it starts a new
+inventory when idle and otherwise resumes, one bounded step per call, until the
+import completes. **Connect** and **Manage** open the connection window, so there
+is no sidebar entry. Permissions are `games.write`, `network.outbound`,
 `plugin.storage` and `frontend.connections`. There are no host source imports, direct database
 connections, native frontend permission or automatic background requests.
 

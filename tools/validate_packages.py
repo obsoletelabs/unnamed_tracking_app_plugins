@@ -345,6 +345,11 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
                 raise ValueError("connection refers to a missing page")
             if connection.get("status_action_id") not in (None, *action_ids):
                 raise ValueError("connection refers to a missing status action")
+            if connection.get("sync_action_id") is not None:
+                if contract_version < (1, 1, 10):
+                    raise ValueError("connection sync actions require Plugin API v1.1.10")
+                if connection["sync_action_id"] not in action_ids:
+                    raise ValueError("connection refers to a missing sync action")
     if document.get("shortcuts"):
         required.add("frontend.shortcuts")
         validate_shortcut_targets(document, contract_version)

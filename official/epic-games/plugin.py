@@ -292,6 +292,35 @@ def step(values):
         return public_status(user)
 
 
+PHASE_MESSAGES = {
+    "inventory": "Reading your Epic inventory…",
+    "playtime": "Reading recorded playtime…",
+    "catalogue": "Looking up game details…",
+    "import": "Saving games to your library…",
+    "missing": "Checking availability against the complete inventory…",
+}
+
+
+@safe_action
+def sync(values):
+    """One bounded step of the host's Sync now: start a new inventory when idle, else resume."""
+    user = actor(values)
+    state = load("sync/users/" + user, {})
+    phase = state.get("phase", "idle") if state else "idle"
+    result = start(values) if phase in ("idle", "complete") else step(values)
+    if result.get("ok") is False:
+        return result
+    if result["phase"] == "complete":
+        return {
+            "complete": True,
+            "message": (
+                f"Import complete: {result['imported']} games saved, "
+                f"{result['skipped']} add-ons skipped, {result['conflicts']} local conflicts."
+            ),
+        }
+    return {"complete": False, "message": PHASE_MESSAGES.get(result["phase"], "Importing…")}
+
+
 def main():
     while True:
         time.sleep(3600)

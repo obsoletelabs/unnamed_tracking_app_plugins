@@ -1,13 +1,28 @@
-body { margin: 0; font-family: system-ui, sans-serif; }
-main { max-width: 850px; margin: auto; padding: 20px; }
-h1 { font-size: 2rem; margin: 4px 0 12px; } h2 { font-size: 1.2rem; margin-top: 0; }
-p { line-height: 1.55; } section { margin-top: 20px; padding: 20px; border: 1px solid var(--ui-border); border-radius: 12px; background: var(--ui-surface); }
-.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--ui-dim); }
-.muted, dt { color: var(--ui-dim); font-size: .9rem; } a { color: var(--ui-accent); } li { margin-bottom: 8px; }
-form, .signin-link { display: grid; gap: 10px; } .signin-link { margin: 16px 0; } .signin-link p { margin: 0; } label { font-weight: 600; } input { box-sizing: border-box; width: 100%; min-width: 0; }
-button, input { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--ui-border); }
-button { cursor: pointer; background: var(--ui-accent); color: var(--ui-on-accent); } button:disabled { opacity: .5; cursor: default; }
-input { background: var(--ui-bg); color: var(--ui-text); } button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 3px; }
-.toolbar { display: flex; gap: 10px; flex-wrap: wrap; } dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } dd { margin: 6px 0 0; font-size: 1.4rem; font-weight: 600; }
+/* A connection panel shown inside the host's Connections dialog, so it follows the
+   host's own dialog controls rather than presenting a page of its own. */
+html, body { background: transparent; }
+body { margin: 0; color: var(--ui-text); font: .9rem/1.55 var(--ui-font-family, system-ui, sans-serif); }
+main { display: grid; gap: 16px; padding: 2px; }
+p, ol { margin: 0; } ol { padding-left: 1.2rem; display: grid; gap: 8px; }
+.muted, dt { color: var(--ui-dim); font-size: .85rem; }
+.footnote { padding-top: 12px; border-top: 1px solid var(--ui-border-soft, var(--ui-border)); }
+.status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pill { font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: var(--ui-dim); background: color-mix(in srgb, var(--ui-text) 8%, transparent); }
+.pill.ok { color: var(--ui-good); background: color-mix(in srgb, var(--ui-good) 14%, transparent); }
+section { display: grid; gap: 14px; }
+.field { display: grid; gap: 6px; } .field p { margin: 0; } label { color: var(--ui-dim); font-size: .85rem; }
+.inline { display: flex; gap: 8px; } .inline input { flex: 1; }
+input { box-sizing: border-box; width: 100%; min-width: 0; min-height: 38px; padding: 0 12px; background: var(--ui-surface); color: var(--ui-text); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-control, 10px); font: inherit; font-size: .85rem; }
+input::placeholder { color: var(--ui-dim); } input:hover { border-color: var(--ui-border-strong); } input:focus { outline: none; border-color: var(--ui-accent); }
+.btn { min-height: 38px; padding: 0 14px; border: 1px solid transparent; border-radius: var(--ui-radius-control, 10px); font: inherit; font-weight: 700; font-size: .85rem; cursor: pointer; white-space: nowrap; }
+.btn.primary { background: var(--ui-accent); color: var(--ui-on-accent); }
+.btn.secondary { background: var(--ui-surface-2); color: var(--ui-text); }
+.btn.danger { background: var(--ui-danger-soft, transparent); color: var(--ui-error); margin-left: auto; }
+li .btn { min-height: 32px; padding: 0 12px; }
+.btn:hover:not(:disabled) { filter: brightness(1.08); } .btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--ui-accent); outline-offset: 2px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+dl { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px; background: var(--ui-surface-2); border-radius: var(--ui-radius-control, 10px); }
+dd { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; }
 #error { color: var(--ui-danger, #b91c1c); } [hidden] { display: none !important; }
-@media (max-width: 550px) { main { padding: 12px; } section { padding: 16px; } dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } .toolbar button { flex: 1 1 130px; } }
+@media (max-width: 550px) { dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } .inline { flex-direction: column; } .btn.danger { margin-left: 0; } .actions .btn { flex: 1 1 130px; } }

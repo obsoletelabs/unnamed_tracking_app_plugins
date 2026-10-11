@@ -172,7 +172,7 @@ def test_sandbox_assets_are_inlined_and_scripts_follow_the_form():
 def test_epic_is_a_connection_not_a_sidebar_page():
     manifest = json.loads((SOURCE / "manifest.json").read_text())
     document = json.loads((SOURCE / "ui.json").read_text())
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.9"
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.10"
     capabilities = {item["name"] for item in manifest["capabilities"]}
     assert "frontend.connections" in capabilities
     assert "frontend.navigation.main" not in capabilities
@@ -184,6 +184,10 @@ def test_epic_is_a_connection_not_a_sidebar_page():
     # The status action is the one the host runs to show Connected / Not connected.
     assert connection["status_action_id"] == "status"
     assert actions["status"]["capability"]["name"] == "plugin.storage"
+    # The row's Sync now runs this action; an import needs the games.write grant.
+    assert connection["sync_action_id"] == "sync"
+    assert actions["sync"]["capability"]["name"] == "games.write"
+    assert "sync" in manifest["ui"]["actions"]
 
 
 def test_status_reports_only_connected_flag_and_account_name(service):
@@ -444,3 +448,45 @@ def test_active_lease_prevents_rotating_token_or_checkpoint_races(service):
         "Another Epic action" in service.plugin.connect(context(authorization_code=CODE))["error"]
     )
     assert not any(call[0] == "network.request" for call in service.calls)
+
+
+def drive_sync(service, user=USER, limit=100):
+    """Call the sync action the way the host does: repeat until it reports completion."""
+    results = []
+    for _ in range(limit):
+        result = service.plugin.sync(context(user))
+        results.append(result)
+        if result.get("ok") is False or result["complete"]:
+            return results
+    raise AssertionError("Sync never completed")
+
+
+def test_sync_runs_the_whole_import_one_bounded_step_at_a_time(service):
+    service.plugin.connect(context(authorization_code=CODE))
+    results = drive_sync(service)
+    assert all(set(result) == {"complete", "message"} for result in results)
+    assert [result["complete"] for result in results[:-1]] == [False] * (len(results) - 1)
+    assert results[0]["message"] == "Reading your Epic inventory…"
+    assert results[-1]["message"].startswith("Import complete: 1 games saved")
+    assert len(service.imports) == 1
+    assert service.plugin.status(context())["phase"] == "complete"
+    # Syncing again after completion starts a fresh inventory instead of stalling.
+    assert drive_sync(service)[0]["message"] == "Reading your Epic inventory…"
+
+
+def test_sync_resumes_an_import_started_in_the_page(service):
+    connected(service)
+    service.plugin.step(context())
+    assert service.plugin.status(context())["phase"] != "inventory"
+    results = drive_sync(service)
+    assert results[-1]["complete"] is True
+    assert len(service.imports) == 1
+
+
+def test_sync_reports_failures_as_actions_do_without_leaking_details(service):
+    assert drive_sync(service)[-1] == {"ok": False, "error": "Connect your Epic account first."}
+    connected(service)
+    service.denied.add("games.write")
+    failure = drive_sync(service)[-1]
+    assert failure["ok"] is False
+    assert "SECRET" not in json.dumps(failure)

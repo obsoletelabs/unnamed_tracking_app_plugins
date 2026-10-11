@@ -1,9 +1,9 @@
 # Epic Games Library
 
-Optional personal Epic game imports through **Plugin API 1.1.9**. Requires a host
-that implements `games.import` and the `connections` UI contribution (host
-Plugin API 1.1.9). Older hosts reject this package during compatibility review;
-use an earlier Epic release on a host that predates 1.1.9. This plugin uses the existing SDK v1.1.1 wire helper.
+Optional personal Epic game imports through **Plugin API 1.1.10**. Requires a host
+that implements `games.import` and connection sync actions (host Plugin API
+1.1.10). Older hosts reject this package during compatibility review; use an
+earlier Epic release on a host that predates 1.1.10. This plugin uses the existing SDK v1.1.1 wire helper.
 The host page/sign-in support is completed by
 [host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).
 
@@ -12,15 +12,17 @@ The host page/sign-in support is completed by
 Install this plugin's `.utp` through Settings → Plugins, approve the declared
 permissions and enable it. Open Settings → Account → Connections, where **Epic Games**
 is listed with its connection status. Choose **Connect** (or **Manage** once
-connected) to open the plugin page in a popup. The page is also reachable at its
-plugin route, but it no longer adds a sidebar entry.
+connected) to open the connection window. Once connected, **Sync now** on the row
+imports your library without opening the window; progress appears in the host's
+task panel and a stopped import resumes where it left off.
 Use **Copy sign-in link** to open Epic in your regular browser while leaving the
 app open. If clipboard access is unavailable, copy the selected link manually.
-Alternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so
-the host validates Epic's returned HTTPS destination and navigates the host tab;
-the sandboxed plugin does not open a popup itself. After signing in, use browser
-Back to return to the plugin page, then paste the one-time authorization code,
-JSON page or redirect URL into the password field. No popup permission is needed.
+Alternatively, use **Sign in on Epic Games**. The action is declared as external
+navigation, so the host validates Epic's returned HTTPS destination and opens it in
+a new tab; the sandboxed plugin does not open a popup itself and the app stays
+where it was. After signing in, return to the connection window, then paste the
+one-time authorization code, JSON page or redirect URL into the password field. No
+popup permission is needed.
 The host opens the declared Epic sign-in destination outside the sandbox. Your
 password stays on Epic's site. The code is cleared immediately after submission
 and is never saved in settings.

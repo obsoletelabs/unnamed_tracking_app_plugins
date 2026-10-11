@@ -4,5 +4,5 @@
   "tags": ["games", "epic", "imports", "official"],
   "icon": "icon.svg",
   "automatic_update": false,
-  "release_notes": "Epic Games now lives on Settings > Account > Connections: connect, import and disconnect from a popup there instead of a sidebar page. Replaces the main-navigation permission with the low-risk frontend.connections permission and requires host Plugin API 1.1.9. Connection, import and token handling are unchanged."
+  "release_notes": "Epic Games now lives on Settings > Account > Connections with a window styled like the host's own connection dialogs, a Sync now button on its row, and a sign-in button that opens Epic in a new tab instead of replacing the app. Connection, import and token handling are unchanged. Requires host Plugin API 1.1.10."
 }

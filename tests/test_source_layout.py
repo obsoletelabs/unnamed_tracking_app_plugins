@@ -46,7 +46,7 @@ def test_discovery_rejects_layout_drift(tmp_path, defect):
         discover_plugins(tmp_path)
 
 
-@pytest.mark.parametrize("defect", ["ungranted", "missing-page", "missing-action", "old-contract"])
+@pytest.mark.parametrize("defect", ["ungranted", "missing-page", "missing-action", "missing-sync-action", "old-contract", "old-sync-contract"])
 def test_connection_contract_is_checked_in_source(defect):
     from tools.distribution import canonical_json, collect_payload
     from tools.validate_packages import validate_current_contract
@@ -73,9 +73,13 @@ def test_connection_contract_is_checked_in_source(defect):
         document["connections"][0]["page_id"] = "missing"
     elif defect == "missing-action":
         document["connections"][0]["status_action_id"] = "missing"
+    elif defect == "missing-sync-action":
+        document["connections"][0]["sync_action_id"] = "missing"
     else:
-        manifest = {**manifest, "api_contract_version": "1.1.8"}
-        document["api_contract_version"] = "1.1.8"
+        # connections need 1.1.9; the sync action needs 1.1.10
+        old = "1.1.8" if defect == "old-contract" else "1.1.9"
+        manifest = {**manifest, "api_contract_version": old}
+        document["api_contract_version"] = old
     files["ui.json"] = json.dumps(document).encode()
     with pytest.raises(ValueError):
         validate_current_contract(manifest, files)

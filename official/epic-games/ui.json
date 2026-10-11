@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.9",
+  "api_contract_version": "1.1.10",
   "plugin_id": "official.epic-games",
   "title": "Epic Games Library",
   "settings": [],
@@ -10,9 +10,10 @@
     {"id": "connect", "label": "Connect Epic", "handler": "plugin:connect", "capability": {"name": "network.outbound", "version": 1}},
     {"id": "disconnect", "label": "Disconnect Epic", "handler": "plugin:disconnect", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Remove your saved Epic sign-in and current import checkpoint? Your imported games will remain in your library."},
     {"id": "start", "label": "Start new import", "handler": "plugin:start", "capability": {"name": "games.write", "version": 1}},
-    {"id": "step", "label": "Resume import", "handler": "plugin:step", "capability": {"name": "games.write", "version": 1}}
+    {"id": "step", "label": "Resume import", "handler": "plugin:step", "capability": {"name": "games.write", "version": 1}},
+    {"id": "sync", "label": "Sync now", "handler": "plugin:sync", "capability": {"name": "games.write", "version": 1}}
   ],
   "pages": [{"id": "library", "title": "Epic Games", "description": "Connect and import a personal Epic library. Sign in only on epicgames.com; imported games remain yours after disconnecting.", "actions": ["status", "signin", "connect", "disconnect", "start", "step"]}],
-  "connections": [{"id": "epic-games", "label": "Epic Games", "description": "Import your Epic library and recorded playtime.", "page_id": "library", "status_action_id": "status", "order": 0}],
+  "connections": [{"id": "epic-games", "label": "Epic Games", "description": "Import your Epic library and recorded playtime.", "page_id": "library", "status_action_id": "status", "sync_action_id": "sync", "order": 0}],
   "tables": [], "dialogs": [], "menus": []
 }

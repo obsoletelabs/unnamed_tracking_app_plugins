@@ -2,32 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Epic Games Library</title>
+  <title>Epic Games</title>
   <link rel="stylesheet" href="./appearance.css"><link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main>
-  <header><p class="eyebrow">Connected libraries</p><h1>Epic Games</h1><p>Bring your games and recorded playtime into your library. Your notes, ratings and chosen status stay with each game.</p></header>
-  <section aria-labelledby="connection-title">
-    <h2 id="connection-title">Your connection</h2>
-    <p id="account">Checking connection…</p>
-    <div id="connect-panel">
-      <ol><li><button id="signin" type="button">Sign in on Epic Games</button>, or copy the link below and open it in your regular browser.</li><li>Copy the one-time authorization code or the JSON page Epic shows.</li><li>Return to this page, then paste it below and connect.</li></ol>
-      <div class="signin-link"><label for="signin-url">Epic sign-in link</label><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" type="button" disabled>Copy sign-in link</button><p id="copy-status" class="muted" role="status" aria-live="polite"></p></div>
-      <form id="connect-form"><label for="code">Epic authorization code</label><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" type="button">Connect Epic</button></form>
-      <p class="muted">Sign in on epicgames.com. This page only receives the one-time code. Saved tokens stay in private plugin storage.</p>
-    </div>
-    <button id="disconnect" type="button" hidden>Disconnect Epic</button>
+  <p class="status-line"><span id="pill" class="pill">Checking…</span><span id="account">Checking connection…</span></p>
+  <section id="connect-panel" aria-label="Connect your Epic account" hidden>
+    <ol>
+      <li><button id="signin" class="btn primary" type="button">Sign in on Epic Games</button><span> opens Epic in a new tab. You can also copy the link below and open it in your regular browser.</span></li>
+      <li>Copy the one-time authorization code or the JSON page Epic shows.</li>
+      <li>Come back here, paste it below and connect.</li>
+    </ol>
+    <div class="field"><label for="signin-url">Epic sign-in link</label>
+      <div class="inline"><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" class="btn secondary" type="button" disabled>Copy sign-in link</button></div>
+      <p id="copy-status" class="muted" role="status" aria-live="polite"></p></div>
+    <form id="connect-form"><div class="field"><label for="code">Epic authorization code</label>
+      <div class="inline"><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" class="btn primary" type="button">Connect Epic</button></div></div></form>
+    <p class="muted">Sign in on epicgames.com. This window only receives the one-time code. Saved tokens stay in private plugin storage.</p>
   </section>
-  <section aria-labelledby="import-title">
-    <h2 id="import-title">Import your library</h2>
-    <p>Imports run in small steps. You can pause or close this page, then resume. Games are marked unavailable only after a complete inventory.</p>
-    <div class="toolbar"><button id="import" type="button" disabled>Import games</button><button id="pause" type="button" hidden>Pause after this step</button><button id="restart" type="button" disabled>Start new inventory</button></div>
-    <p id="progress" role="status" aria-live="polite">No import started.</p>
+  <section id="library-panel" aria-label="Library import" hidden>
+    <p class="muted">Imports run in small steps. You can pause or close this window, then resume. Games are marked unavailable only after a complete inventory.</p>
     <dl><div><dt>Inventory entries</dt><dd id="inventory-count">0</dd></div><div><dt>Games saved</dt><dd id="imported">0</dd></div><div><dt>Add-ons skipped</dt><dd id="skipped">0</dd></div><div><dt>Local conflicts</dt><dd id="conflicts">0</dd></div></dl>
-    <p id="warning" class="muted" hidden></p><p id="error" role="alert" hidden></p>
+    <p id="progress" role="status" aria-live="polite">No import started.</p>
+    <div class="actions"><button id="import" class="btn primary" type="button" disabled>Import games</button><button id="pause" class="btn secondary" type="button" hidden>Pause after this step</button><button id="restart" class="btn secondary" type="button" disabled>Start new inventory</button><button id="disconnect" class="btn danger" type="button" hidden>Disconnect Epic</button></div>
   </section>
-  <p class="muted">Epic's launcher services can change without notice. Catalogue artwork and achievements are outside this import; use the host's game metadata tools for artwork.</p>
+  <p id="warning" class="muted" hidden></p><p id="error" role="alert" hidden></p>
+  <p class="muted footnote">Epic's launcher services can change without notice. Catalogue artwork and achievements are outside this import; use the host's game metadata tools for artwork.</p>
 </main>
 <script src="./appearance.js"></script><script src="./app.js"></script>
 </body>

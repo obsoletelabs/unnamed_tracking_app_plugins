@@ -3,6 +3,7 @@
   let snapshot = { connected: false, phase: "idle" };
   let busy = false;
   let paused = false;
+  let loaded = false;
   const phases = { idle: "No import started.", inventory: "Reading your Epic inventory…", playtime: "Reading recorded playtime…", catalogue: "Looking up game details…", import: "Saving games to your library…", missing: "Checking availability against the complete inventory…", complete: "Import complete." };
   function request(actionId, values = {}) {
     return new Promise((resolve, reject) => {
@@ -20,8 +21,11 @@
     });
   }
   function render() {
-    $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
-    $("connect-panel").hidden = snapshot.connected;
+    $("pill").textContent = !loaded ? "Checking…" : snapshot.connected ? "Connected" : "Not connected";
+    $("pill").classList.toggle("ok", loaded && snapshot.connected);
+    $("account").textContent = !loaded ? "Checking connection…" : snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
+    $("connect-panel").hidden = !loaded || snapshot.connected;
+    $("library-panel").hidden = !loaded || !snapshot.connected;
     $("disconnect").hidden = !snapshot.connected;
     $("signin-url").value = snapshot.login_url || "";
     $("copy-signin").disabled = busy || !snapshot.login_url;
@@ -85,5 +89,5 @@
   $("import").onclick = () => perform(async () => importGames(false));
   $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };
-  void perform(async () => { snapshot = await request("status"); });
+  void perform(async () => { snapshot = await request("status"); }).finally(() => { loaded = true; render(); });
 })();

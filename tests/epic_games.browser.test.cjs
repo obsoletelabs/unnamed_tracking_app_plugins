@@ -33,7 +33,8 @@ async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixtu
         if (payload.actionId === "status") result = { connected: false, phase: "idle", login_url: signinUrl };
         else if (payload.actionId === "signin") {
           result = { redirect_url: signinUrl };
-          window.setTimeout(() => window.location.assign(signinUrl), 0);
+          // the host validates the URL and opens it in a new tab itself
+          window.opened = (window.opened || []).concat(signinUrl);
         } else if (payload.values.authorization_code === "b".repeat(32)) result = { connected: true, display_name: "Fixture player", phase: "idle" };
         else result = { ok: false, error: "Paste a valid one-time code." };
       }
@@ -68,7 +69,7 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
   } finally { await page.close(); }
 });
 
-test("Epic sign-in delegates external navigation to the host without popup privileges", async () => {
+test("Epic sign-in asks the host to open Epic in a new tab without popup privileges", async () => {
   const page = await browser.newPage();
   const signinUrl = "https://www.epicgames.com/id/login?fixture=1";
   try {
@@ -77,8 +78,10 @@ test("Epic sign-in delegates external navigation to the host without popup privi
     const frame = page.frameLocator("iframe");
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).waitFor();
     await frame.getByRole("button", { name: "Sign in on Epic Games" }).click();
-    await page.waitForURL(signinUrl, { waitUntil: "commit", timeout: 10000 });
-    assert.equal(page.url(), signinUrl);
+    await page.waitForFunction(() => window.opened?.length === 1);
+    assert.deepEqual(await page.evaluate(() => window.opened), [signinUrl]);
+    // the app tab, and the dialog showing this page, are left where they were
+    assert.equal(page.url(), "about:blank");
   } finally { await page.close(); }
 });
 
