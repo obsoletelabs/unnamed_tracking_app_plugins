@@ -22,3 +22,6 @@ Notification source/event/provider/layout schemas describe the public API 1.1.2 
 Lifecycle query/page snapshots describe the additive public API 1.1.4 extension. Older notification schemas retain their 1.1.2 identities. The explicit read grant is standalone and not implied by sending/provider permissions.
 
 The provider schema and capability enum include the additive API1.1.6 possession-proof extension. PRIVATE kinds declare verification/sensitive/recovery features, never SECURE trust. Host challenge proof and an independent critical notification_providers.sensitive grant govern handoff. Existing content/destination DTOs retain their API1.1.5 shape.
+
+
+API1.1.7 adds the independent critical auth.password_reset permission and auth-password-reset-v1 contribution schema, exported by host tools/export_auth_contract.py. The provider/content schemas retain their previous versions. Paired host checks validate this schema and actual packaged consumers.

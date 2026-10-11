@@ -9,5 +9,5 @@
   ],
   "icon": "pwa/pwa-icon.svg",
   "automatic_update": true,
-  "release_notes": "Bundle public SDK 1.1.6, including per-destination provider feature support. PWA activation, worker lifecycle and private caching behavior are unchanged."
+  "release_notes": "Refresh the shared Plugin API1.1.7 SDK bundle. Existing browser/PWA lifecycle and PRIVATE generic push behavior are unchanged."
 }
