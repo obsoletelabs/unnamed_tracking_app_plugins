@@ -28,6 +28,10 @@ class PluginError(ValueError):
     """Safe user-facing plugin action failure."""
 
 
+class DiscordForbiddenError(PluginError):
+    """A definite HTTP 403 rejection; no message was accepted by Discord."""
+
+
 class DiscordTemporaryError(PluginError):
     """Transient Discord failure; core owns retry timing and persisted attempts."""
 
@@ -93,7 +97,7 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
         if status == 401:
             raise PluginError("Discord rejected the bot token. Check that it is the current bot token.")
         if status == 403:
-            raise PluginError("Discord denied access. Check the bot's server membership and permissions.")
+            raise DiscordForbiddenError("Discord denied access. Check the bot's server membership and permissions.")
         if status == 404:
             raise PluginError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
         if status == 429:
@@ -171,7 +175,32 @@ def _send_channel(token: str, channel_id: str, content: str) -> None:
              "footer": {"text": "Your tracking app · Notification"}}
     if link:
         embed["url"] = link
-    _discord(token, "POST", f"/channels/{channel_id}/messages", {"embeds": [embed], "allowed_mentions": {"parse": []}})
+    path = f"/channels/{channel_id}/messages"
+    try:
+        _discord(token, "POST", path, {"embeds": [embed], "allowed_mentions": {"parse": []}})
+    except DiscordForbiddenError:
+        # The gateway intentionally redacts remote error bodies. A 403 may be
+        # missing Embed Links or broader access: try text once on the same target.
+        # Suppress automatic URL embeds too; never retry an ambiguous acceptance.
+        label = "View notification"
+        if "reset" in title.casefold() and "password" in title.casefold():
+            label = "Reset your password"
+        elif "invit" in title.casefold():
+            label = "Accept invitation"
+        elif "verif" in title.casefold():
+            label = "Verify destination"
+        action = ""
+        if link:
+            target = quote(link, safe=":/?#[]@!$&'*+,;=%")
+            description = description.replace(f"Click [here]({target}) to continue.", "")
+            action = f"\n\n[{label}]({target})"
+            if len(action) > 1700:
+                action = "\n\nOpen your tracking app to use this notification's link."
+        heading = f"**{title[:256]}**\n\n"
+        text = heading + description[:2000 - len(heading) - len(action)].rstrip() + action
+        _discord(token, "POST", path, {
+            "content": text, "flags": 4, "allowed_mentions": {"parse": []},
+        })
 
 
 def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:

@@ -117,3 +117,19 @@ API 1.1.10 adds live recovery status and the generic Users action dialog. Authen
 The bot now declares a separate PUBLIC channel provider through the generic API. Admin Discord settings provide a channel allowlist and paginated server-member directory; account Discord settings select a default allowed channel for new notification destinations. Add each channel under Account → Notifications, then choose its per-type routes. Text/announcement channels only; View Channel, Send Messages and Embed Links are required. The allowlist and Discord server/type are checked again for every send. Channel membership never grants PRIVATE/SECURE trust. Unverified username enrollment supports normal PRIVATE DMs; recovery needs a concrete host-verified SECURE account destination, explicit recovery opt-in and the high-risk grant.
 
 Online presence and direct profile integration are tracked in [issue #28](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/28).
+
+
+The Discord bot prefers rich cards. A definite HTTP 403 rejection of the embed
+permits one text fallback using the same core-approved content and destination.
+The fallback suppresses URL embeds and mentions and respects Discord's 2,000
+character text limit. The gateway redacts remote error bodies, so a broader
+permission denial can also trigger this one attempt; failure still reaches the
+core. Timeouts, rate limits and server failures do not trigger immediate fallback,
+avoiding a second send after ambiguous acceptance. Routing/trust remain unchanged.
+
+
+Text fallback uses spaced paragraphs and named links (View notification, Reset
+your password, Accept invitation or Verify destination). It reserves room for a
+complete action rather than truncating its URL. Local previews keep their local
+URL; deployed notifications use the host-resolved notification URL. An action too
+long to fit is omitted whole with a prompt to open the app.
