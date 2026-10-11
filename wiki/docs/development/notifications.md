@@ -105,9 +105,9 @@ The working `official.user-invites` plugin enables administrator email invitatio
 
 ## Live authentication settings and rich delivery
 
-API 1.1.10 adds live recovery status and the generic Users action dialog. Authentication configuration uses distinct Settings contributions under Administration → Account security. Discord DMs use native embeds for tests, verification and recovery; SMTP uses the host shared escaped HTML card and plain alternative. PRIVATE native linking does not claim host proof; per-account verification is still required for SECURE delivery.
+API 1.1.10 adds live recovery status and the generic Users action dialog. API 1.1.11 integrates invitations on Administration → Users and recovery on Administration → Password policy. Discord DMs use native embeds for tests, verification and recovery; SMTP uses the host shared escaped HTML card and plain alternative. PRIVATE native linking does not claim host proof; per-account verification is still required for SECURE delivery.
 
-![Live recovery configuration](../assets/notification-mail-auth/recovery-enabled-desktop.png)
+![Integrated recovery configuration](../assets/plugin-integrated-ui/after-password-recovery.png)
 
 ![PRIVATE account linking](../assets/notification-mail-auth/discord-private-link-desktop.png)
 

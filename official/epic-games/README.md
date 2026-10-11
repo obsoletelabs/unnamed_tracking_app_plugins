@@ -1,9 +1,9 @@
 # Epic Games Library
 
-Optional personal Epic game imports through **Plugin API 1.1.9**. Requires a host
-that implements `games.import` and the `connections` UI contribution (host
-Plugin API 1.1.9). Older hosts reject this package during compatibility review;
-use an earlier Epic release on a host that predates 1.1.9. This plugin uses the existing SDK v1.1.1 wire helper.
+Optional personal Epic game imports through **Plugin API 1.1.11**. Requires a host
+that implements `games.import`, connection sync actions and personal scheduled
+tasks. Older hosts reject this package during compatibility review;
+use an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.
 The host page/sign-in support is completed by
 [host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).
 
@@ -14,7 +14,8 @@ permissions and enable it. Open Settings → Account → Connections, where **Ep
 is listed with its connection status. Choose **Connect** (or **Manage** once
 connected) to open the plugin page in a popup. The page is also reachable at its
 plugin route, but it no longer adds a sidebar entry.
-Use **Copy sign-in link** to open Epic in your regular browser while leaving the
+The popup uses the host's appearance and spacing, with an account summary and
+import controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the
 app open. If clipboard access is unavailable, copy the selected link manually.
 Alternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so
 the host validates Epic's returned HTTPS destination and navigates the host tab;
@@ -41,6 +42,20 @@ imports run as separate bounded steps. **Pause after this step**, closing the
 page or a failed request retains the checkpoint. **Resume import** continues it.
 **Start new inventory** deliberately replaces the current checkpoint. Disconnect
 removes this user's saved tokens/checkpoint and keeps imported games.
+
+The popup follows Steam's host dialog sizing and shared appearance. Disconnected
+accounts show sign-in controls; import controls appear after connecting.
+On Games, **Sync / import → Sync Epic Games** starts or resumes the same
+import flow. The menu does not add a second connection page.
+
+For automatic imports, open **Account → Background tasks → Epic Games autosync**.
+Approve the declared `tasks.background` access and enable your own schedule; it
+starts off and normally runs daily. Intervals can range from 5 minutes to 1 week.
+Each run advances one bounded checkpoint; incomplete work requests the next step
+after 60 seconds, even with the page closed. Completion restores your chosen interval.
+Disabling autosync stops queued steps. Manual and automatic imports share the same
+per-user lease, tokens, checkpoint and preservation rules; another user's schedule
+cannot adopt your Epic account or change your library.
 
 Games use namespace + catalogue identity within the connected account. Similar
 titles and another Epic account cannot adopt each other's games. Engine assets,

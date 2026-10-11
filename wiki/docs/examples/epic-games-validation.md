@@ -27,7 +27,7 @@ For a configured disposable validation host, provide `UI_REVIEW_USERNAME` and
 ```sh
 python tools/check_epic_host.py \
   --host http://127.0.0.1:8010 \
-  --package .validation/dist/official.epic-games-0.0.1.utp \
+  --package .validation/dist/official.epic-games-0.7.0.utp \
   --evidence .validation/epic-evidence \
   --fixture-state /path/to/fixture.json --browser
 ```
@@ -45,8 +45,8 @@ reviewed replacement and browser checks after a previous API run. Temporary
 browser cookies are removed even when validation fails.
 
 Live validation still requires a person to sign in on Epic's own site and verify
-their library. Catalogue artwork, achievements and automatic background sync
-remain outside this initial plugin.
+their library. Catalogue artwork and achievements remain outside this plugin.
+Personal background sync is available through the host's opt-in schedule.
 
 ## Recorded acceptance
 

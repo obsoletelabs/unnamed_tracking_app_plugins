@@ -8,5 +8,5 @@
   ],
   "automatic_update": false,
   "icon": "icon.svg",
-  "release_notes": "Functional administrator email invitations. Host API1.1.8 creates normal accounts only on single-use acceptance; SMTP and invitation credentials stay in the host."
+  "release_notes": "Integrated Users-page settings and Invite user button beside Create user. Separate save/enable/disable controls, expiry units and customizable email wording, sender display name, greeting and appearance. Requires host API1.1.11; the host retains SMTP, credential and account ownership."
 }

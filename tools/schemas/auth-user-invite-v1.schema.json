@@ -18,6 +18,70 @@
       "minimum": 3600,
       "title": "Token Lifetime Seconds",
       "type": "integer"
+    },
+    "sender_name": {
+      "default": "",
+      "maxLength": 80,
+      "title": "Sender Name",
+      "type": "string"
+    },
+    "email_subject": {
+      "default": "You are invited",
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Email Subject",
+      "type": "string"
+    },
+    "email_heading": {
+      "default": "Join our library",
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Email Heading",
+      "type": "string"
+    },
+    "welcome_message": {
+      "default": "You have been invited to create an account.",
+      "maxLength": 2000,
+      "title": "Welcome Message",
+      "type": "string"
+    },
+    "greeting": {
+      "default": "personal",
+      "enum": [
+        "personal",
+        "generic",
+        "none"
+      ],
+      "title": "Greeting",
+      "type": "string"
+    },
+    "button_label": {
+      "default": "Accept invitation",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Button Label",
+      "type": "string"
+    },
+    "email_layout": {
+      "default": "card",
+      "enum": [
+        "card",
+        "simple"
+      ],
+      "title": "Email Layout",
+      "type": "string"
+    },
+    "accent_color": {
+      "default": "#3458d4",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "title": "Accent Color",
+      "type": "string"
+    },
+    "footer_message": {
+      "default": "Sent by your tracking app.",
+      "maxLength": 500,
+      "title": "Footer Message",
+      "type": "string"
     }
   },
   "required": [
@@ -27,5 +91,5 @@
   "title": "UserInviteFlowDefinition",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.8"
+  "x-api-contract-version": "1.1.11"
 }

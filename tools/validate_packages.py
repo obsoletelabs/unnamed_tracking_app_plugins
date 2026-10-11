@@ -345,6 +345,17 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
                 raise ValueError("connection refers to a missing page")
             if connection.get("status_action_id") not in (None, *action_ids):
                 raise ValueError("connection refers to a missing status action")
+            if connection.get("sync_action_id") not in (None, *action_ids):
+                raise ValueError("connection refers to a missing sync action")
+            if connection.get("sync_action_id") and contract_version < (1, 1, 11):
+                raise ValueError("connection sync actions require Plugin API v1.1.11")
+    for extension in document.get("extensions", []):
+        if extension["slot"] in {"administration.users.settings", "administration.password-policy.after"}:
+            if contract_version < (1, 1, 11):
+                raise ValueError("administration settings slots require Plugin API v1.1.11")
+            if extension["page_id"] not in page_ids:
+                raise ValueError("administration settings slot refers to a missing page")
+            required.add("frontend.settings")
     if document.get("shortcuts"):
         required.add("frontend.shortcuts")
         validate_shortcut_targets(document, contract_version)
@@ -379,6 +390,8 @@ def validate_scheduled_tasks(
         raise ValueError("duplicate scheduled tasks")
     actions = {action["id"]: action for action in document.get("actions", [])}
     for task in tasks:
+        if task.get("scope", "server") == "user" and contract_version < (1, 1, 11):
+            raise ValueError("personal scheduled tasks require Plugin API v1.1.11")
         action = actions.get(task["action_id"])
         if action is None or not action.get("handler") or action.get("confirmation") is not None:
             raise ValueError("scheduled task action must exist and have no confirmation")

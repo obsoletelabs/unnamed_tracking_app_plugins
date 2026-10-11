@@ -28,7 +28,7 @@ def plugin(monkeypatch):
 def test_enable_has_no_credentials_account_queries_or_direct_notification_sender(plugin):
     module, calls, storage = plugin
     assert module.enable({"token_lifetime_seconds": 900}) == {"enabled": True, "token_lifetime_seconds": 900, "registered": True}
-    assert calls[0] == ("auth_flows.password_reset.register", "auth.password_reset", {"mode": "password_reset", "name": "Password Reset", "token_lifetime_seconds": 900})
+    assert calls[1] == ("auth_flows.password_reset.register", "auth.password_reset", {"mode": "password_reset", "name": "Password Reset", "token_lifetime_seconds": 900})
     assert json.loads(storage[module.KEY])["enabled"] is True
     assert {capability for _, capability, _ in calls} == {"auth.password_reset", "plugin.storage"}
 
@@ -38,7 +38,7 @@ def test_host_lifetime_bounds_are_validated_without_sending_invalid_requests(plu
     module, calls, _ = plugin
     with pytest.raises(ValueError):
         module.enable({"token_lifetime_seconds": lifetime})
-    assert not calls
+    assert not any(method.startswith("auth_flows.") for method, _, _ in calls)
 
 
 def test_installation_starts_disabled_and_explicit_activation_survives_restart(plugin):
@@ -50,7 +50,7 @@ def test_installation_starts_disabled_and_explicit_activation_survives_restart(p
     module.restore_configuration()
     assert calls[-1][0] == "auth_flows.password_reset.restore"
     module.disable({})
-    assert calls[-2] == ("auth_flows.password_reset.unregister", "auth.password_reset", {})
+    assert ("auth_flows.password_reset.unregister", "auth.password_reset", {}) in calls
     calls.clear()
     module.restore_configuration()
     assert all(method != "auth_flows.password_reset.register" for method, _, _ in calls)
@@ -71,13 +71,25 @@ def test_declared_admin_controls_and_signed_official_identity():
     manifest = json.loads((source / "manifest.json").read_text())
     document = json.loads((source / "ui.json").read_text())
     assert manifest["plugin_id"] == "official.password-reset"
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.10"
-    assert {item["name"] for item in manifest["capabilities"]} == {"auth.password_reset", "plugin.storage", "frontend.settings", "frontend.placement.settings.admin"}
-    assert document["settings_sections"][0]["visibility"]["admin_only"] is True
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.11"
+    assert {item["name"] for item in manifest["capabilities"]} == {"auth.password_reset", "plugin.storage", "frontend.settings"}
+    assert document["extensions"][0]["slot"] == "administration.password-policy.after"
+    assert not document["settings_sections"]
     assert json.loads((source / "release.json").read_text())["publisher"] == "Unnamed Tracking Official"
 
 def test_status_asks_the_host_instead_of_trusting_saved_activation(plugin):
     module, calls, storage = plugin
     storage[module.KEY] = json.dumps({"enabled": True})
-    assert module.status({"include_tokens": True}) == {"registered": False}
-    assert calls == [("auth_flows.password_reset.status", "auth.password_reset", {})]
+    assert module.status({"include_tokens": True}) == {"registered": False, "token_lifetime_seconds": 1200}
+    assert calls[0] == ("auth_flows.password_reset.status", "auth.password_reset", {})
+
+
+def test_save_disabled_settings_then_enable_and_disable_preserves_lifetime(plugin):
+    module, calls, storage = plugin
+    module.save({"token_lifetime_seconds": 1800})
+    assert json.loads(storage[module.KEY])["enabled"] is False
+    assert not any(method.endswith(".register") for method, _, _ in calls)
+    module.enable({})
+    assert calls[-2][2]["token_lifetime_seconds"] == 1800
+    module.disable({})
+    assert module.status({}) == {"registered": False, "token_lifetime_seconds": 1800}

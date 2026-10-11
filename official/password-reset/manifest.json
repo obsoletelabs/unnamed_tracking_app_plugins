@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.10",
+  "api_contract_version": "1.1.11",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -12,10 +12,6 @@
     },
     {
       "name": "frontend.settings",
-      "version": 1
-    },
-    {
-      "name": "frontend.placement.settings.admin",
       "version": 1
     }
   ],
@@ -54,13 +50,6 @@
         "version": 1
       },
       "rationale": "Expose administrator-only authentication configuration in plugin Settings."
-    },
-    {
-      "capability": {
-        "name": "frontend.placement.settings.admin",
-        "version": 1
-      },
-      "rationale": "Place authentication configuration in the Administration settings area."
     }
   ],
   "plugin_id": "official.password-reset",
@@ -72,7 +61,8 @@
     "actions": [
       "status",
       "enable",
-      "disable"
+      "disable",
+      "save"
     ],
     "menus": [],
     "pages": [
@@ -80,5 +70,5 @@
     ],
     "settings": []
   },
-  "version": "1.1.1"
+  "version": "1.2.0"
 }

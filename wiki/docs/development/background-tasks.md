@@ -34,6 +34,21 @@ ordinary reinstall retain settings within the same installation identity. The
 UI/API example includes this recipe. Long-running sync should retain its existing
 supervised worker and durable queue approach below.
 
+### Personal schedules (v1.1.11)
+
+Set `scope: "user"` on a declaration to place it on Account → Background tasks.
+The host binds each schedule to the account enabling it, checks that account's
+background/action grants live and dispatches with its authenticated action context.
+The default scope remains `server`; personal tasks cannot expose server maintenance
+jobs or override the background identity of an existing server task.
+
+For a resumable import, return `completed: false`, a bounded public `summary` and
+`continue_after_seconds: 60`. The host clamps the delay to 60–3600 seconds, keeps
+steps within the existing action limit and continues only while autosync remains
+enabled. Return `completed: true` after the final checkpoint to restore the user's
+chosen interval. Returning a failure without a delay waits for that interval.
+Epic Games uses the same `sync` action for its Games menu and personal schedule.
+
 ## Goal
 
 Have an action record durable work for one supervised worker.

@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.10",
+  "api_contract_version": "1.1.11",
   "plugin_id": "official.user-invites",
   "title": "User Invites",
   "settings": [],
@@ -16,7 +16,7 @@
     },
     {
       "id": "enable",
-      "label": "Enable or save invitations",
+      "label": "Enable invitations",
       "handler": "plugin:enable",
       "capability": {
         "name": "auth.user_invites",
@@ -60,6 +60,15 @@
         "version": 1
       },
       "confirmation": "Revoke this invitation and cancel any pending delivery?"
+    },
+    {
+      "id": "save",
+      "label": "Save settings",
+      "handler": "plugin:save",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      }
     }
   ],
   "pages": [
@@ -70,7 +79,8 @@
       "actions": [
         "status",
         "enable",
-        "disable"
+        "disable",
+        "save"
       ],
       "tables": [],
       "dialogs": []
@@ -93,23 +103,17 @@
   "menus": [],
   "tables": [],
   "dialogs": [],
-  "settings_sections": [
-    {
-      "id": "user-invitation-settings",
-      "label": "User invitations",
-      "page_id": "configure",
-      "area": "administration",
-      "group": "Account security",
-      "visibility": {
-        "admin_only": true
-      }
-    }
-  ],
+  "settings_sections": [],
   "extensions": [
     {
       "id": "invite-user",
       "slot": "administration.users.actions",
       "page_id": "invite"
+    },
+    {
+      "id": "configuration",
+      "slot": "administration.users.settings",
+      "page_id": "configure"
     }
   ]
 }
