@@ -1,0 +1,32 @@
+{
+  "additionalProperties": false,
+  "description": "Opaque core-generated endpoint authority; contains no account or credential data.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "revision": {
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "kind": {
+      "maxLength": 32,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Kind",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "revision",
+    "kind"
+  ],
+  "title": "PluginNotificationDestination",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.5"
+}

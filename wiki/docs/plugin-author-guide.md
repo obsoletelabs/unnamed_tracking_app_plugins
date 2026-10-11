@@ -467,3 +467,40 @@ SECURE types additionally need the explicit critical notifications.sensitive gra
 The host persists source interpretation and installation identity, creates deliveries, applies preferences/trust, isolates transport failures and rechecks source grants before I/O. It retains types, history and inactive preferences after uninstall. Reinstall requires fresh activation/grants and cannot reclaim destinations or replay old deliveries. Source registration is bounded to 32 retained types; acceptance to 100 new events per plugin/user/hour using server time. Replay with conflicting facts fails. The demo sources do not import host code or handle SMTP credentials.
 
 See the reset and invite demonstrations in the [example map](examples/index.md). They use synthetic owner-scoped tokens and never mutate real authentication. The existing storage get/put demonstration is not an atomic production token-consumption service.
+
+
+## Generic notification providers (1.1.5)
+
+`sdk.notifications.register_provider(..., transport="plugin", definition=...)`
+declares destination kinds, PUBLIC/PRIVATE privacy, bounded existing `UiField`
+configuration fields, server fields, configure/retire/test action IDs and features
+such as multiple destinations and critical urgency. The host uses these declarations
+to render configuration; adding a provider using the existing storage/network API
+does not require host UI or transport changes. Legacy and protected registrations
+retain their existing SDK signature and behavior.
+
+Configuration values are transient and write-only at the host boundary. Plugins
+own validation, secret storage and transport. Use `provider_context(values,
+operation="configure"|"retire"|"deliver")` inside declared actions to validate the
+private runtime context. Store installation/destination revision beside credentials,
+reject stale configuration callbacks, retain retirement tombstones and require
+matching revisions during delivery. Configure returns `configured: true`, retire
+returns `retired: true`; delivery returns the existing success/retryable/error result.
+Ordinary frontend action values cannot forge the private context.
+
+Existing fieldless linked-account integrations keep authenticated configure actions
+and their `ok: true` result. This compatibility path remains PRIVATE/PUBLIC; a
+provider declaration or plugin verification flag cannot assert SECURE ownership.
+The maintained Discord bot continues to use this path. Per-account core verification
+is separate work and is not implemented by this release.
+
+Delivery receives approved title, body, event type/time, urgency and resolved link,
+plus opaque notification/destination handles. Host routing rechecks user policy,
+trust, installation and grants before handoff. Plugin transport determines its final
+bytes, so permission review must explain that it receives approved content and its
+own configured secrets. The host never shares SMTP credentials. Failures are safely
+normalized and isolated; core retains global attempt/history/retry state.
+
+The maintained [Discord webhook](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-notifications/README.md)
+exercises declared-field configuration; the separately maintained Discord bot
+exercises linked-account enrollment. Historical protected demo renderers still work.

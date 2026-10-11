@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from uuid import uuid4
 
 import pytest
 
@@ -54,6 +55,8 @@ def load_plugin(name: str):
             {
                 "notification_providers.register",
                 "notification_providers.deliver",
+                "plugin.storage",
+                "network.outbound",
             },
         ),
     ],
@@ -67,7 +70,7 @@ def test_domain_manifests_are_minimally_scoped(name: str, expected: set[str]) ->
     assert requested == expected
     assert all(item["rationale"].strip() for item in manifest["permissions"])
     if name == "discord-notifications":
-        assert not manifest.get("frontend") and not manifest.get("storage")
+        assert not manifest.get("frontend") and manifest.get("storage")
     else:
         assert manifest["frontend"]["entry"] == "frontend/index.html"
 
@@ -218,7 +221,7 @@ def test_session_manager_routes_preserve_self_service_and_admin_capabilities(
     assert all(route["authorization"] == "admin" for route in admin_routes)
 
 
-def test_delivery_provider_registers_namespaced_protected_provider(monkeypatch) -> None:
+def test_delivery_provider_registers_namespaced_generic_provider(monkeypatch) -> None:
     from sdk import notifications
 
     plugin = load_plugin("discord-notifications")
@@ -238,31 +241,50 @@ def test_delivery_provider_registers_namespaced_protected_provider(monkeypatch) 
             "notification_providers.register",
             {
                 "provider_id": "official.discord-notifications.webhook",
-                "name": "Discord",
-                "action_id": "render",
-                "transport": "discord_webhook",
+                "name": "Discord Webhook",
+                "action_id": "deliver",
+                "transport": "plugin",
+                "definition": plugin.DEFINITION,
             },
         )
     ]
 
 
-def test_delivery_provider_returns_field_references_without_content_or_secrets() -> None:
+def test_delivery_provider_sends_only_approved_content_without_unrelated_secrets(monkeypatch) -> None:
     plugin = load_plugin("discord-notifications")
-    result = plugin.render(
-        {"delivery": {"title": "T" * 400, "body": "B" * 5000, "event_at": 1},
+    calls = []
+    def request(method, capability, payload):
+        calls.append((method, capability, payload))
+        if method == "storage.get":
+            return {"value": json.dumps({"revision": 1, "url": "https://discord.com/api/webhooks/123/token"})}
+        assert method == "network.request" and capability == "network.outbound"
+        return {"status": 204, "text": ""}
+    monkeypatch.setattr(plugin, "request", request)
+    context = {"operation": "deliver", "scope": "destination", "installation_id": str(uuid4()),
+               "attempt_id": str(uuid4()), "server_revision": 1,
+               "destination": {"id": str(uuid4()), "revision": 1, "kind": "discord_webhook"}}
+    result = plugin.deliver(
+        {"_notification_context": context,
+         "delivery": {"title": "T" * 400, "body": "B" * 5000, "event_at": 1},
          "unrelated_secret": "never expose"}
     )
-    assert result == {"style": "embed", "fields": ["title", "body", "event_at", "link"]}
-    assert "never expose" not in json.dumps(result)
+    assert result == {"success": True, "retryable": False}
+    payload = calls[-1][2]["body"]
+    assert payload["embeds"][0]["title"] == "T" * 256
+    assert payload["embeds"][0]["description"] == "B" * 4000
+    assert payload["allowed_mentions"] == {"parse": []}
+    assert "never expose" not in json.dumps(payload)
+    assert "token" not in json.dumps(payload)
     assert "webhook" not in result and "content" not in result
 
 
-def test_delivery_provider_cannot_invent_content_from_malformed_work() -> None:
+def test_delivery_provider_cannot_invent_content_from_malformed_work(monkeypatch) -> None:
     plugin = load_plugin("discord-notifications")
-    # Field layouts are independent of data; core validates and bounds actual work.
-    assert plugin.render({"delivery": {}}) == {
-        "style": "embed", "fields": ["title", "body", "event_at", "link"]
-    }
+    calls = []
+    monkeypatch.setattr(plugin, "request", lambda *args: calls.append(args))
+    result = plugin.deliver({"delivery": {}})
+    assert result["success"] is False and result["retryable"] is False
+    assert calls == []
 
 
 def test_reference_frontends_use_only_the_host_bridge() -> None:

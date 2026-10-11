@@ -82,17 +82,22 @@ def main() -> None:
         NotificationTypeRegistration, NotificationEventEmission,
         NotificationProviderRegistration, NotificationFieldLayout,
         NotificationLifecycleQuery, NotificationLifecyclePage,
+        PluginNotificationContent, PluginNotificationDestination,
     )
     for name, model in (("notification-type-v1", NotificationTypeRegistration),
                         ("notification-event-v1", NotificationEventEmission),
                         ("notification-provider-v1", NotificationProviderRegistration),
                         ("notification-layout-v1", NotificationFieldLayout),
+                        ("notification-content-v1", PluginNotificationContent),
+                        ("notification-destination-v1", PluginNotificationDestination),
                         ("notification-lifecycle-query-v1", NotificationLifecycleQuery),
                         ("notification-lifecycle-page-v1", NotificationLifecyclePage)):
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         schema["x-api-contract-version"] = {
             "notification-provider-v1": "1.1.5",
+            "notification-content-v1": "1.1.5",
+            "notification-destination-v1": "1.1.5",
             "notification-lifecycle-query-v1": "1.1.4",
             "notification-lifecycle-page-v1": "1.1.4",
         }.get(name, "1.1.2")

@@ -6,7 +6,7 @@
     "discord",
     "official"
   ],
-  "release_notes": "Initial protected provider: core-approved field layouts and encrypted per-user webhooks. New identity; no legacy secret migration.",
-  "automatic_update": true,
+  "release_notes": "Generic 1.1.5 destination settings with plugin-owned webhook credentials/transport, revision-bound configuration and safe HTTP failure handling. Explicit new enrollment required; historical protected routes are retired without moving credentials.",
+  "automatic_update": false,
   "icon": "icon.svg"
 }

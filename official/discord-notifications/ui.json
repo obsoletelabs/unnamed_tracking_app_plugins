@@ -1,20 +1,40 @@
 {
-  "api_contract_version": "1.1.2",
+  "api_contract_version": "1.1.5",
   "schema_version": "v1",
   "plugin_id": "official.discord-notifications",
   "title": "Discord Notifications",
   "settings": [],
+  "pages": [],
+  "menus": [],
+  "tables": [],
+  "dialogs": [],
   "actions": [
     {
-      "id": "render",
-      "label": "Render approved notification",
-      "handler": "plugin:render",
+      "id": "configure",
+      "label": "Configure Discord destination",
+      "handler": "plugin:configure",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
+    },
+    {
+      "id": "retire",
+      "label": "Retire Discord destination",
+      "handler": "plugin:retire",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
+    },
+    {
+      "id": "deliver",
+      "label": "Deliver Discord notification",
+      "handler": "plugin:deliver",
       "capability": {
         "name": "notification_providers.deliver",
         "version": 1
       }
     }
-  ],
-  "menus": [],
-  "pages": []
+  ]
 }
