@@ -513,3 +513,12 @@ parameter selects presentation only. Account security settings use the existing
 `frontend.settings` and `frontend.placement.settings.admin` grants. The recovery
 contribution reads live `auth_flows.password_reset.status` rather than trusting
 saved activation. Host PR85 supplies this additive contract.
+
+API 1.1.11 adds `administration.users.settings` and
+`administration.password-policy.after`, guarded by `frontend.settings` and an
+administrator. These render inline with host appearance and no extra plugin title,
+using the same opaque sandbox and action bridge. The maintained invite and recovery
+plugins use these locations and separate saving settings from enabling/disabling.
+Invitation registration also supports escaped plain-text email presentation and an
+optional recipient name on issuance. SMTP sender addresses and acceptance links
+remain host owned; wording-only edits preserve outstanding links.

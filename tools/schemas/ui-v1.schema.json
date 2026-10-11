@@ -110,7 +110,9 @@
         "media.detail.after-header",
         "app.global",
         "home.replace",
-        "administration.users.actions"
+        "administration.users.actions",
+        "administration.users.settings",
+        "administration.password-policy.after"
       ],
       "title": "HostExtensionSlot",
       "type": "string"
@@ -287,6 +289,21 @@
           ],
           "default": null,
           "title": "Status Action Id"
+        },
+        "sync_action_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sync Action Id"
         },
         "icon": {
           "anyOf": [
@@ -1924,5 +1941,5 @@
   "title": "PluginUiDocument",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.10"
+  "x-api-contract-version": "1.1.11"
 }
