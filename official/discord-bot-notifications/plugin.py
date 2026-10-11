@@ -13,7 +13,7 @@ from typing import Any
 from urllib.parse import quote
 from uuid import UUID
 
-from sdk.notifications import register_provider
+from sdk.notifications import provider_context, register_provider
 from sdk.plugin_protocol import GatewayRequestError, request
 
 PLUGIN_ID = "official.discord-bot-notifications"
@@ -26,6 +26,10 @@ _LINK_TTL = 600
 
 class PluginError(ValueError):
     """Safe user-facing plugin action failure."""
+
+
+class DiscordTemporaryError(PluginError):
+    """Transient Discord failure; core owns retry timing and persisted attempts."""
 
 
 def _actor(values: dict[str, Any], *, admin: bool = False) -> str:
@@ -93,9 +97,11 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
         if status == 404:
             raise PluginError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
         if status == 429:
-            raise PluginError("Discord is rate limiting requests. Wait briefly and try again.")
+            raise DiscordTemporaryError("Discord is rate limiting requests. Wait briefly and try again.")
         if status == 0:
-            raise PluginError("Discord could not be reached. Check the host's outbound network and TLS configuration.")
+            raise DiscordTemporaryError("Discord could not be reached. Check the host's outbound network and TLS configuration.")
+        if status >= 500:
+            raise DiscordTemporaryError("Discord is temporarily unavailable. Try again later.")
         raise PluginError(f"Discord returned HTTP {status} for this request.")
     if "data" not in response:
         raise PluginError("Discord returned a successful response without JSON data.")
@@ -394,6 +400,146 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
     return {"success": True, "retryable": False}
 
 
+
+# Separate from the grouped PRIVATE compatibility provider and its native configuration.
+ACCOUNT_PROVIDER_ID = PLUGIN_ID + ".account-dm"
+ACCOUNT_DEFINITION = {
+    "destinations": [{
+        "kind": "discord_account_dm", "label": "Discord account DM", "privacy": "PRIVATE",
+        "verification_supported": True, "sensitive_supported": True, "recovery_supported": True,
+        "fields": [{"id": "username", "label": "Discord username", "type": "text", "required": True,
+                    "description": "Exact username in the configured Discord server. PRIVATE delivery works before verification.",
+                    "validation": {"min_length": 2, "max_length": 32}}],
+    }],
+    "server_fields": [
+        {"id": "token", "label": "Bot token", "type": "password", "required": True, "secret": True,
+         "description": "Stored by this plugin, independently of its legacy native settings.", "validation": {"max_length": 512}},
+        {"id": "guild_id", "label": "Discord server ID", "type": "text", "required": True,
+         "validation": {"min_length": 17, "max_length": 20}},
+    ],
+    "configure_action": "configure-account-destination", "retire_action": "retire-account-destination",
+    "test_action": "deliver-account", "features": {"multiple_destinations": True, "critical_supported": False},
+}
+
+
+def _account_context(values: dict[str, Any], operation: str) -> dict[str, Any]:
+    try:
+        context = provider_context(values, operation=operation, provider_id=ACCOUNT_PROVIDER_ID)
+        if context["scope"] == "destination" and context["destination"]["kind"] != "discord_account_dm":
+            raise ValueError("Wrong destination kind")
+        return context
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PluginError("A core-authorized per-account Discord destination is required.") from exc
+
+
+def _account_server_key(context: dict[str, Any]) -> str:
+    return "account-dm/server/" + context["installation_id"]
+
+
+def _account_key(context: dict[str, Any]) -> str:
+    return f"account-dm/destinations/{context['installation_id']}/{context['destination']['id']}"
+
+
+def _account_record(key: str) -> dict[str, Any] | None:
+    record = _load(key)
+    if record is not None and (not isinstance(record, dict) or type(record.get("revision")) is not int):
+        raise PluginError("Saved per-account configuration is damaged; configure it again.")
+    return record
+
+
+def _current_account_server(context: dict[str, Any]) -> dict[str, Any]:
+    server = _account_record(_account_server_key(context))
+    if not server or server.get("retired") or not server.get("token") or not server.get("guild_id"):
+        raise PluginError("Configure this provider in administrator notification settings first.")
+    return server
+
+
+def configure_account_destination(values: dict[str, Any]) -> dict[str, Any]:
+    """Only core revision-bound configuration can set a concrete Discord target."""
+    context = _account_context(values, "configure")
+    actor = _actor(values, admin=context["scope"] == "server")
+    configuration = values.get("configuration")
+    if not isinstance(configuration, dict):
+        raise PluginError("Discord configuration fields are required.")
+    if context["scope"] == "server":
+        if set(configuration) - {"token", "guild_id"}:
+            raise PluginError("Unsupported Discord server configuration fields.")
+        key = _account_server_key(context)
+        current = _account_record(key)
+        revision = context["revision"]
+        if current and current["revision"] >= revision:
+            raise PluginError("This server configuration is stale.")
+        token = configuration.get("token", current.get("token") if current else None)
+        guild_id = configuration.get("guild_id", current.get("guild_id") if current else None)
+        if not isinstance(token, str) or not token.strip() or not isinstance(guild_id, str) or not _SNOWFLAKE.fullmatch(guild_id):
+            raise PluginError("Enter a bot token and valid Discord server ID.")
+        # Validate before storing; failed saves leave host routes inactive.
+        _bot_snapshot(token.strip(), guild_id)
+        _store(key, {"revision": revision, "token": token.strip(), "guild_id": guild_id})
+        return {"configured": True}
+    if set(configuration) - {"username"}:
+        raise PluginError("Unsupported Discord account configuration fields.")
+    key = _account_key(context)
+    current = _account_record(key)
+    revision = context["destination"]["revision"]
+    if current and (current["revision"] >= revision or current.get("retired")):
+        raise PluginError("This destination configuration is stale or retired.")
+    server = _current_account_server(context)
+    username = configuration.get("username", current.get("username") if current else None)
+    if not isinstance(username, str) or not _USERNAME.fullmatch(username):
+        raise PluginError("Enter your exact Discord username.")
+    member = _member_by_username(server["token"], server["guild_id"], username)
+    if member is None or not _SNOWFLAKE.fullmatch(str(member.get("id", ""))):
+        raise PluginError("That username was not found in the configured Discord server.")
+    # No code, DM or plugin assertion promotes host trust. Enrollment stays PRIVATE.
+    _store(key, {"revision": revision, "server_revision": server["revision"], "user_id": actor,
+                 "username": username, "discord_id": str(member["id"])})
+    return {"configured": True}
+
+
+def retire_account_destination(values: dict[str, Any]) -> dict[str, Any]:
+    context = _account_context(values, "retire")
+    actor = _actor(values)
+    current = _account_record(_account_key(context))
+    revision = context["destination"]["revision"]
+    if current and (current["revision"] > revision or current.get("user_id", actor) != actor):
+        raise PluginError("This retirement is stale or belongs to another user.")
+    # Opaque tombstone; cannot restore target or reuse an old revision after deletion.
+    _store(_account_key(context), {"revision": revision, "retired": True})
+    return {"retired": True}
+
+
+def deliver_account(values: dict[str, Any]) -> dict[str, Any]:
+    """Deliver to exactly one revision-bound account; never fall back to broadcast."""
+    try:
+        context = _account_context(values, "deliver")
+        actor = _actor(values)
+        record = _account_record(_account_key(context))
+        server = _current_account_server(context)
+        if (not record or record.get("retired") or record["revision"] != context["destination"]["revision"]
+                or record.get("user_id") != actor or record.get("server_revision") != server["revision"]
+                or context["server_revision"] != server["revision"]
+                or not _SNOWFLAKE.fullmatch(str(record.get("discord_id", "")))):
+            raise PluginError("This configured account revision is unavailable.")
+        delivery = values.get("delivery")
+        if not isinstance(delivery, dict) or not isinstance(delivery.get("title"), str) or not isinstance(delivery.get("body"), str):
+            raise PluginError("Notification content is invalid.")
+        content = f"**{delivery['title'][:250]}**\n{delivery['body']}"
+        link = delivery.get("link")
+        if isinstance(link, str) and link.startswith(("https://", "http://")):
+            content += "\n" + link
+        if len(content) > 1900:
+            raise PluginError("This notification exceeds Discord message limits.")
+        _send_dm(server["token"], record["discord_id"], content)
+    except GatewayRequestError as exc:
+        return {"success": False, "retryable": exc.code in {"unavailable", "rate_limited"}, "error": "discord_gateway_failed"}
+    except DiscordTemporaryError:
+        return {"success": False, "retryable": True, "error": "discord_temporarily_unavailable"}
+    except (PluginError, KeyError, TypeError, ValueError):
+        return {"success": False, "retryable": False, "error": "discord_account_unavailable"}
+    return {"success": True, "retryable": False}
+
+
 def _register_provider() -> None:
     delay = 1
     while True:
@@ -418,6 +564,7 @@ def _register_provider() -> None:
                     "features": {"critical_supported": False, "multiple_destinations": False},
                 },
             )
+            register_provider(ACCOUNT_PROVIDER_ID, "Discord account DM", "deliver-account", transport="plugin", definition=ACCOUNT_DEFINITION)
             return
         except GatewayRequestError as exc:
             if exc.code != "unavailable":

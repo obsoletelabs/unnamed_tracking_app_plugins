@@ -20,3 +20,5 @@ Provider plugins use these public schemas without importing host internals.
 Notification source/event/provider/layout schemas describe the public API 1.1.2 extension and are exported by the host tools/export_notification_contract.py. Both schemas and packaged consumers are checked by check_host_contract.py against the paired host.
 
 Lifecycle query/page snapshots describe the additive public API 1.1.4 extension. Older notification schemas retain their 1.1.2 identities. The explicit read grant is standalone and not implied by sending/provider permissions.
+
+The provider schema and capability enum include the additive API1.1.6 possession-proof extension. PRIVATE kinds declare verification/sensitive/recovery features, never SECURE trust. Host challenge proof and an independent critical notification_providers.sensitive grant govern handoff. Existing content/destination DTOs retain their API1.1.5 shape.

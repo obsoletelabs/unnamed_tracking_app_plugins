@@ -95,7 +95,7 @@ def main() -> None:
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         schema["x-api-contract-version"] = {
-            "notification-provider-v1": "1.1.5",
+            "notification-provider-v1": "1.1.6",
             "notification-content-v1": "1.1.5",
             "notification-destination-v1": "1.1.5",
             "notification-lifecycle-query-v1": "1.1.4",
@@ -146,7 +146,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):

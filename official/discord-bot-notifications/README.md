@@ -2,9 +2,23 @@
 
 Private direct-message notifications using a dedicated Discord bot.
 
-**Host requirement:** this preview uses the generic plugin-owned notification provider contract in Plugin API 1.1.5. Deploy the paired host notification-provider change (PR #54) before installing this plugin. Older hosts reject provider registration and the plugin will repeatedly restart.
+**Host requirement:** this preview uses the generic plugin-owned notification provider contract in Plugin API 1.1.6. Deploy the paired host destination-verification change (PR #71) before installing this plugin. Older hosts reject provider registration and the plugin will repeatedly restart.
 
-## Setup
+## Per-account destinations
+
+Use **Settings → Administration → Notifications** to configure **Discord account DM** with a dedicated bot token and server ID. These credentials belong to the plugin and are revision-bound separately from legacy native configuration. The token is write-only. This uses the provider's declared server fields, with no Discord-specific host settings.
+
+In **Settings → Account → Notifications**, add one **Discord account DM** destination per exact Discord username in that server. Enrollment resolves a single Discord ID and remains PRIVATE; ordinary notifications work immediately, without a code. Changing the username or server configuration invalidates host proof and queued work. Merely renaming the Discord account does not change its saved target.
+
+For SECURE delivery, separately approve the critical `notification_providers.sensitive` permission, then request and enter the host-generated code from that account's DM. Only the host confirms proof for that exact destination revision. Codes expire after ten minutes. Recovery delivery additionally requires the destination's explicit **Allow recovery messages** choice. This grant exposes verification codes and approved security/recovery content to this plugin; review it accordingly. Without the grant normal PRIVATE delivery still works.
+
+Each attempt sends to exactly one account; missing, retired, changed or differently owned mappings fail instead of broadcasting. Temporary Discord/gateway failures are reported to the host retry queue. Oversized messages fail rather than truncating recovery secrets. The core owns all delivery state.
+
+### Existing bot migration
+
+The existing grouped **Discord Bot DM** provider and its native dashboard/account linking remain working as PRIVATE compatibility routes. Plugin link verification is not host SECURE proof. Existing links and tokens are retained and never automatically promoted or copied to the new provider. Configure the new per-account provider, explicitly activate and verify each desired account, then disable the old grouped provider to avoid receiving duplicate ordinary notices. Removing one new destination erases its plugin target into an opaque revision tombstone and leaves other accounts and legacy links intact. Reinstall requires fresh activation/configuration; old credentials cannot be reclaimed.
+
+## Legacy setup
 
 1. Create a dedicated bot application in the Discord Developer Portal. Keep its bot token private; never paste it into a chat or commit it to a repository.
 2. Invite the bot to the Discord server that contains the users who want to link their accounts. Enable the **Server Members Intent** if Discord requires it for member search.
@@ -38,7 +52,7 @@ The dashboard never displays the bot token. Refreshing the dashboard re-queries 
 
 - The bot token is stored in this plugin's private storage namespace, never returned to the frontend after saving, and can be cleared by an administrator. Treat the plugin's data volume as sensitive and back it up accordingly.
 - Link codes expire after ten minutes and failed verification attempts are capped. The verification code is stored only as a hash.
-- Notifications are private destinations, not secure/recovery destinations. Secure security alerts and recovery messages are intentionally not routed through this provider.
+- The legacy grouped provider remains PRIVATE and cannot receive verification/security/recovery content. The per-account provider becomes SECURE only after independent host proof and requires a separate high-risk handoff grant.
 - The plugin sends only to Discord accounts individually verified and linked by the same host account. Each account can be unlinked independently, and notifications are sent to every account that remains linked. It disables Discord mention parsing in sent messages.
 - The bot needs only the server access required by this integration. Member discovery uses the Discord member list and therefore may require the Server Members Intent. Keep the token dedicated to this integration and rotate it if exposed.
 - Discord API calls use the plugin's declared `network.outbound` capability through the bounded host gateway. The plugin owns the external Discord network calls and credentials.

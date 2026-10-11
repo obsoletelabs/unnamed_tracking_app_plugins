@@ -44,26 +44,35 @@ Sending a notification every time an unchanged event is polled; treating a toast
 as durable delivery; leaking a secret or another user's data in the body; returning
 success after a denied gateway call.
 
-## Protected provider layouts (Plugin API 1.1.2)
+## Plugin-owned providers (API1.1.5)
 
-The maintained `official/discord-notifications` consumer registers
-`official.discord-notifications.webhook` with `transport="discord_webhook"` using
-`sdk.notifications.register_provider`. The renderer returns only a bounded layout,
-for example `{"style":"embed","fields":["title","body","event_at","link"]}`.
-The host selects the approved public/media projection and builds transport content.
-Arbitrary strings, external links, raw embeds and mention overrides are rejected.
+The maintained `official/discord-notifications` consumer registers a PUBLIC webhook
+using `transport="plugin"` and bounded configuration fields. The plugin stores its
+credentials and owns HTTPS delivery through its declared network capability.
+The core selects approved content, applies destination trust and per-webhook consent,
+owns attempts/retries, and rechecks installation/grants/preferences before handoff.
+PUBLIC webhooks cannot receive verification/security/recovery content.
 
-Users enroll encrypted concrete webhooks in the host's Account Notifications.
-The plugin never receives destination credentials, verification proofs, other
-users' addresses or a mutable delivery row. Core owns routing, attempts and retries;
-current grants/installation/revision/preferences are rechecked before send.
-Each webhook stays PUBLIC, even after explicit richer-media consent. Security
-and recovery content is ineligible. The new plugin requests only provider
-registration/delivery, without storage, data-reading or frontend permissions.
+The earlier `discord_webhook` protected-layout transport remains supported for
+compatibility and the Chaos demo. Its host broker accepts approved field layouts
+and keeps credentials outside plugin code. It is not the maintained webhook's
+current transport. Existing credential/consent records are not transferred.
 
-The official provider is signed and published after paired host lifecycle acceptance
-and reviewed promotion. Legacy example credentials are not transferred.
-Standalone consumer tests: `python -m pytest tests/test_discord_notifications.py -q`.
+## Per-account possession proof (API1.1.6)
+
+PRIVATE kinds declare `verification_supported`, `sensitive_supported` and
+`recovery_supported`; declarations never assert SECURE trust. Core issues exact
+destination/revision-bound ten-minute codes and verifies them itself. The independent
+critical `notification_providers.sensitive` grant allows verification and approved
+security/recovery content at handoff. Broad API/source/delivery grants do not imply it.
+Plugins can read this content; explain this explicitly in permission review.
+Recovery additionally requires a verified external destination and explicit user opt-in.
+
+The Discord bot preview declares an independent per-account provider with server and
+username fields. PRIVATE delivery works before proof. Core UUID/revisions map to exactly
+one Discord account, with no broadcast fallback. Its legacy grouped provider/native
+dashboard remain PRIVATE and retain existing links. See the [bot migration guide](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-bot-notifications/README.md).
+The paired host is [PR71](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/71).
 
 ## Scoped lifecycle replay (Plugin API 1.1.4)
 
