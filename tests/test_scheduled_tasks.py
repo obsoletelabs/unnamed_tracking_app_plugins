@@ -46,6 +46,14 @@ def test_schedules_require_explicit_permission_unique_ids_and_no_confirmation():
         validate_scheduled_tasks(manifest, document, (1, 1, 0), {"tasks.background"})
 
 
+def test_personal_schedules_require_api_1_1_11():
+    manifest = {"scheduled_tasks": [{"id": "sync", "action_id": "sync", "scope": "user"}]}
+    document = {"actions": [{"id": "sync", "handler": "plugin:sync"}]}
+    with pytest.raises(ValueError, match="personal scheduled tasks require"):
+        validate_scheduled_tasks(manifest, document, (1, 1, 10), {"tasks.background"})
+    validate_scheduled_tasks(manifest, document, (1, 1, 11), {"tasks.background"})
+
+
 def test_summary_example_uses_only_public_scoped_gateway_and_returns_bounded_feedback(tmp_path):
     shutil.copytree(ROOT / "sdk", tmp_path / "sdk", ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copyfile(ROOT / "examples/ui-api/plugin.py", tmp_path / "plugin.py")
