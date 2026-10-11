@@ -59,9 +59,9 @@ jobs:
             # The v1.1 host is merged; use the verified conformance-tool revision.
             # Explicit overrides remain supported; only open paired PRs shadow main.
             candidate_branch="$COMPANION_BRANCH"
-            # The bot plugin depends on the generic notification-provider host API;
+            # These provider PRs depend on the generic notification-provider host API;
             # its host companion uses a deliberately different branch name.
-            if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ]; then
+            if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ] || [ "$COMPANION_BRANCH" = "fix/discord-webhook-diagnostics" ]; then
               candidate_branch="feat/plugin-owned-notification-providers"
             fi
             if [ "$candidate_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$candidate_branch" >/dev/null; then

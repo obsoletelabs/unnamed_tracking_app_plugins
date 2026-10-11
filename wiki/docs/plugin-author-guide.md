@@ -501,6 +501,6 @@ bytes, so permission review must explain that it receives approved content and i
 own configured secrets. The host never shares SMTP credentials. Failures are safely
 normalized and isolated; core retains global attempt/history/retry state.
 
-The maintained [Discord webhook](../../official/discord-notifications/README.md)
+The maintained [Discord webhook](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-notifications/README.md)
 exercises declared-field configuration; the separately maintained Discord bot
 exercises linked-account enrollment. Historical protected demo renderers still work.
