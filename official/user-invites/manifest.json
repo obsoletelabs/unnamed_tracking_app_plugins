@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.9",
+  "api_contract_version": "1.1.10",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -75,7 +75,7 @@
     }
   ],
   "plugin_id": "official.user-invites",
-  "sdk_version_range": "^1.1.9",
+  "sdk_version_range": "^1.1.10",
   "storage": {
     "quota_mb": 1
   },

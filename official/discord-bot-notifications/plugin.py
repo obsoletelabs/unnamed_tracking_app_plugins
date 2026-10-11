@@ -144,7 +144,7 @@ def _send_dm(token: str, discord_id: str, content: str) -> None:
     if link:
         description = "\n".join(lines[:-1]) + f"\n\n[Open notification]({link})"
     embed = {"title": title[:256], "description": description[:4096], "color": 3430612,
-             "footer": {"text": "Your tracking app Ã‚Â· Notification"}}
+             "footer": {"text": "Your tracking app · Notification"}}
     if link:
         embed["url"] = link
     _discord(token, "POST", f"/channels/{channel_id}/messages", {"embeds": [embed], "allowed_mentions": {"parse": []}})

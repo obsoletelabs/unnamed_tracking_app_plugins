@@ -1,7 +1,7 @@
 # Maintained user invitations
 
 `official.user-invites` is a working administrator integration, separate from the
-synthetic invitation routing demo. It requires Plugin API **1.1.9** and an explicit
+synthetic invitation routing demo. It requires Plugin API **1.1.10** and an explicit
 critical global `auth.user_invites` grant. The plugin uses the existing gateway and
 iframe action bridge; it never imports host source or sends SMTP directly.
 
@@ -10,7 +10,7 @@ iframe action bridge; it never imports host source or sends SMTP directly.
 1. Configure built-in SMTP in the host's notification settings. Sensitive delivery
    requires encrypted transport, except development mode or a local literal-IP relay.
 2. Install the signed **User Invites** package and approve its declared permissions.
-3. Open **Administration â†’ User invitations**, choose a one-hour to seven-day
+3. Open **Administration → User invitations**, choose a one-hour to seven-day
    lifetime (one day by default), and explicitly enable invitations.
 4. Enter an email address and send. The page shows recent delivery/acceptance/expiry
    state and lets the administrator revoke outstanding invitations.
@@ -25,7 +25,7 @@ tokens, passwords, SMTP settings, or existing users' destinations.
 ## Public contract and lifecycle
 
 `auth_flows.user_invites.register` accepts `mode: user_invite`, a name and
-`token_lifetime_seconds` (3600â€“604800). `restore` resumes only a matching already-active
+`token_lifetime_seconds` (3600–604800). `restore` resumes only a matching already-active
 installation. `status`, `issue` (`email`), `list`, `revoke` (`id`) and `unregister`
 require the current administrator/global grant and installation authority. The host
 reserves the auth event type and supplies anonymous availability/acceptance endpoints;

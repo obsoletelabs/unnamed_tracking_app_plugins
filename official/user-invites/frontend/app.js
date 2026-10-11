@@ -32,11 +32,11 @@ async function refresh() {
  el("status").className = "";
  const rows = registered && invitationPage ? (await action("list-invites")).invitations : [];
  el("invitations").replaceChildren();
- if(!rows.length) el("invitations").textContent = registered ? "No recent invitations." : "Enable invitations in Administration â†’ Account security â†’ User invitations before sending.";
+ if(!rows.length) el("invitations").textContent = registered ? "No recent invitations." : "Enable invitations in Administration → Account security → User invitations before sending.";
  for(const row of rows) {
   const article=document.createElement("article"), address=document.createElement("strong"), info=document.createElement("p");
   address.textContent=row.email;
-  info.textContent=`${row.status} Ã‚Â· Delivery: ${row.delivery_status || "unavailable"} Ã‚Â· Expires ${when(row.expires_at)}`;
+  info.textContent=`${row.status} · Delivery: ${row.delivery_status || "unavailable"} · Expires ${when(row.expires_at)}`;
   article.append(address,info);
   if(row.status === "pending") {
    const button=document.createElement("button"); button.type="button"; button.textContent="Revoke invitation";

@@ -159,7 +159,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):

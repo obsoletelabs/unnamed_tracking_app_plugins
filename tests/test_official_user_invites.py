@@ -71,7 +71,7 @@ def test_declared_admin_controls_and_signed_official_identity():
     manifest = json.loads((source / "manifest.json").read_text())
     document = json.loads((source / "ui.json").read_text())
     assert manifest["plugin_id"] == "official.user-invites"
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.9"
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.10"
     assert {item["name"] for item in manifest["capabilities"]} == {"auth.user_invites", "plugin.storage", "frontend.navigation.admin", "frontend.settings", "frontend.placement.settings.admin"}
     assert document["settings_sections"][0]["visibility"]["admin_only"] is True
     assert json.loads((source / "release.json").read_text())["publisher"] == "Unnamed Tracking Official"
