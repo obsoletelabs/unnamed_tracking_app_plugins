@@ -2,43 +2,169 @@
   "api_contract_version": "1.1.6",
   "application_version_range": ">=1.0.0",
   "capabilities": [
-    {"name": "notification_providers.register", "version": 1},
-    {"name": "notification_providers.deliver", "version": 1},
-    {"name": "plugin.storage", "version": 1},
-    {"name": "network.outbound", "version": 1},
-    {"name": "frontend.native", "version": 1},
-    {"name": "frontend.settings", "version": 1},
-    {"name": "frontend.navigation.settings", "version": 1},
-    {"name": "frontend.placement.settings.admin", "version": 1},
-    {"name": "frontend.placement.settings.account", "version": 1},
-    {"name": "notification_providers.sensitive", "version": 1}
+    {
+      "name": "notification_providers.register",
+      "version": 1
+    },
+    {
+      "name": "notification_providers.deliver",
+      "version": 1
+    },
+    {
+      "name": "plugin.storage",
+      "version": 1
+    },
+    {
+      "name": "network.outbound",
+      "version": 1
+    },
+    {
+      "name": "frontend.native",
+      "version": 1
+    },
+    {
+      "name": "frontend.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.navigation.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.placement.settings.admin",
+      "version": 1
+    },
+    {
+      "name": "frontend.placement.settings.account",
+      "version": 1
+    },
+    {
+      "name": "notification_providers.sensitive",
+      "version": 1
+    }
   ],
   "dependencies": [],
   "description": "PRIVATE direct messages with optional host verification, and PUBLIC notifications to administrator-allowed Discord channels.",
   "entrypoint": "plugin:main",
-  "integrity": {"key_id": null, "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "signature": null},
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
   "manifest_version": 1,
   "name": "Discord Bot Notifications",
-  "native_frontend": {"entry": "native/app.js", "styles": ["native/style.css"]},
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css"
+    ]
+  },
   "permissions": [
-    {"capability": {"name": "notification_providers.register", "version": 1}, "rationale": "Register the namespaced Discord direct-message destination contract."},
-    {"capability": {"name": "notification_providers.deliver", "version": 1}, "rationale": "Receive minimized notification delivery payloads and send them only to the verified Discord account linked to the same host user."},
-    {"capability": {"name": "plugin.storage", "version": 1}, "rationale": "Keep the administrator's bot configuration, pending verification challenges and user-to-Discord links inside this plugin's private storage namespace."},
-    {"capability": {"name": "network.outbound", "version": 1}, "rationale": "Call Discord API endpoints for bot validation, guild member lookup, verification DMs and notification delivery."},
-    {"capability": {"name": "frontend.native", "version": 1}, "rationale": "Render account-link and administrator configuration pages using the host-native UI bridge."},
-    {"capability": {"name": "frontend.settings", "version": 1}, "rationale": "Provide account and administrator settings for the Discord bot."},
-    {"capability": {"name": "frontend.navigation.settings", "version": 1}, "rationale": "Expose Discord configuration through host settings navigation."},
-    {"capability": {"name": "frontend.placement.settings.admin", "version": 1}, "rationale": "Place bot token and server configuration in administrator settings."},
-    {"capability": {"name": "frontend.placement.settings.account", "version": 1}, "rationale": "Place verified Discord account linking in account settings."},
-    {"capability": {"name": "notification_providers.sensitive", "version": 1}, "rationale": "Optional high-risk access: receive host-issued verification codes and approved security/recovery secrets for individually verified Discord destinations. Without this separate grant normal PRIVATE notifications still work."}
+    {
+      "capability": {
+        "name": "notification_providers.register",
+        "version": 1
+      },
+      "rationale": "Register the namespaced Discord direct-message destination contract."
+    },
+    {
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      },
+      "rationale": "Receive minimized notification delivery payloads and send them only to the verified Discord account linked to the same host user."
+    },
+    {
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      },
+      "rationale": "Keep the administrator's bot configuration, pending verification challenges and user-to-Discord links inside this plugin's private storage namespace."
+    },
+    {
+      "capability": {
+        "name": "network.outbound",
+        "version": 1
+      },
+      "rationale": "Call Discord API endpoints for bot validation, guild member lookup, verification DMs and notification delivery."
+    },
+    {
+      "capability": {
+        "name": "frontend.native",
+        "version": 1
+      },
+      "rationale": "Render account-link and administrator configuration pages using the host-native UI bridge."
+    },
+    {
+      "capability": {
+        "name": "frontend.settings",
+        "version": 1
+      },
+      "rationale": "Provide account and administrator settings for the Discord bot."
+    },
+    {
+      "capability": {
+        "name": "frontend.navigation.settings",
+        "version": 1
+      },
+      "rationale": "Expose Discord configuration through host settings navigation."
+    },
+    {
+      "capability": {
+        "name": "frontend.placement.settings.admin",
+        "version": 1
+      },
+      "rationale": "Place bot token and server configuration in administrator settings."
+    },
+    {
+      "capability": {
+        "name": "frontend.placement.settings.account",
+        "version": 1
+      },
+      "rationale": "Place verified Discord account linking in account settings."
+    },
+    {
+      "capability": {
+        "name": "notification_providers.sensitive",
+        "version": 1
+      },
+      "rationale": "Optional high-risk access: receive host-issued verification codes and approved security/recovery secrets for individually verified Discord destinations. Without this separate grant normal PRIVATE notifications still work."
+    }
   ],
   "plugin_id": "official.discord-bot-notifications",
   "sdk_version_range": "^1.1.2",
-  "storage": {"quota_mb": 8},
+  "storage": {
+    "quota_mb": 8
+  },
   "ui": {
-    "actions": ["get-config", "save-bot-config", "clear-bot-token", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "configure-destination", "retire-destination", "deliver", "configure-account-destination", "retire-account-destination", "deliver-account", "list-directory", "allow-channels", "channel-choices", "select-channel", "configure-channel-destination", "retire-channel-destination", "deliver-channel"],
+    "actions": [
+      "get-config",
+      "save-bot-config",
+      "clear-bot-token",
+      "link-private",
+      "start-link",
+      "confirm-link",
+      "unlink",
+      "test-dm",
+      "configure-destination",
+      "retire-destination",
+      "deliver",
+      "configure-account-destination",
+      "retire-account-destination",
+      "deliver-account",
+      "list-directory",
+      "allow-channels",
+      "channel-choices",
+      "select-channel",
+      "configure-channel-destination",
+      "retire-channel-destination",
+      "deliver-channel"
+    ],
     "menus": [],
-    "pages": ["admin", "account"],
+    "pages": [
+      "admin",
+      "account"
+    ],
     "settings": []
   },
   "version": "0.1.0"

@@ -5,7 +5,6 @@
     "example.home-widgets",
     "example.theme-palettes",
     "example.shortcut-playground",
-    "official.collectors-archive",
-    "official.discord-bot-notifications"
+    "official.collectors-archive"
   ]
 }
