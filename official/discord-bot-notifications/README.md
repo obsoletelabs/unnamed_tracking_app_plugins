@@ -60,3 +60,5 @@ The dashboard never displays the bot token. Refreshing the dashboard re-queries 
 - User links are scoped by the authenticated host user ID inside plugin storage; the host does not receive the Discord credential or own the Discord account mapping.
 
 The plugin advertises its generic private notification provider, destination kind, privacy level, storage/network requirements and UI actions itself. The host does not need Discord-specific credential handling or delivery code.
+
+The native link page now supports **Link for PRIVATE notifications** without receiving a code. Optional legacy profile proof does not upgrade destination trust. For recovery use the separate **Discord account DM** destination in Account → Notifications, host verification, recovery opt-in and the high-risk delivery grant. The administrator must configure its revision-bound server fields in Admin → Notifications. DMs use native rich cards; Discord does not render email HTML. This independent preview keeps its existing publisher and update policy.

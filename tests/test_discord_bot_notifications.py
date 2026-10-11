@@ -182,12 +182,12 @@ def test_delivery_reports_gateway_permission_errors_without_retrying(monkeypatch
     assert result["error"] == "discord_permission_denied"
 
 
-def test_generic_destination_requires_a_verified_link(monkeypatch):
+def test_generic_destination_requires_a_link_but_not_verification(monkeypatch):
     provider = load()
     user_id = "12345678-1234-5678-1234-567812345678"
     monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: None)
-    with pytest.raises(provider.PluginError, match="Link and verify"):
+    with pytest.raises(provider.PluginError, match="Link at least one"):
         provider.configure_destination({"_plugin_context": {"user_id": user_id}})
 
 
@@ -334,3 +334,38 @@ def test_legacy_single_link_is_read_as_one_account():
     provider = load()
     account = {"discord_id": "123456789012345678", "linked_at": 100}
     assert provider._linked_accounts(account) == [account]
+
+
+def test_private_link_needs_no_verification_code_or_dm(monkeypatch):
+    provider = load()
+    storage, sent = {}, []
+    owner = "11111111-1111-4111-8111-111111111111"
+    monkeypatch.setattr(provider, "_bot_config", lambda: {"token": "secret", "guild_id": "guild"})
+    monkeypatch.setattr(provider, "_member_by_username", lambda *_: {"id": "123456789012345678"})
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: storage.get(key, default))
+    monkeypatch.setattr(provider, "_store", lambda key, value: storage.__setitem__(key, value))
+    monkeypatch.setattr(provider, "_send_dm", lambda *_: sent.append(True))
+    result = provider.link_private({"_plugin_context": {"user_id": owner}, "username": "casey"})
+    assert result["ok"] and "PRIVATE" in result["message"]
+    assert not sent
+    assert storage["links/" + owner]["accounts"][0]["discord_id"] == "123456789012345678"
+    assert not any("pending" in key for key in storage)
+    with pytest.raises(provider.PluginError, match="already linked"):
+        provider.link_private({"_plugin_context": {"user_id": owner}, "username": "casey"})
+
+
+def test_bot_messages_use_native_cards_and_readable_actions(monkeypatch):
+    provider = load()
+    calls = []
+    def discord(token, method, path, body):
+        calls.append(body)
+        return {"id": "channel"}
+    monkeypatch.setattr(provider, "_discord", discord)
+    provider._send_dm("secret", "123456789012345678", "**Reset password**\nUse this action:\nhttps://app.example.test/reset#token=opaque")
+    payload = calls[-1]
+    assert "content" not in payload
+    embed = payload["embeds"][0]
+    assert embed["title"] == "Reset password"
+    assert embed["url"] == "https://app.example.test/reset#token=opaque"
+    assert "[Open notification]" in embed["description"]
+    assert payload["allowed_mentions"] == {"parse": []}

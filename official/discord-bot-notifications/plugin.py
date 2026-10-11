@@ -1,4 +1,4 @@
-"""Official Discord bot DM provider with verified per-user account links."""
+"""Discord bot DM provider with PRIVATE links and host-verified per-account destinations."""
 
 from __future__ import annotations
 
@@ -135,7 +135,19 @@ def _send_dm(token: str, discord_id: str, content: str) -> None:
     channel_id = channel.get("id") if isinstance(channel, dict) else None
     if not isinstance(channel_id, str):
         raise PluginError("Discord could not open a direct message channel.")
-    _discord(token, "POST", f"/channels/{channel_id}/messages", {"content": content[:1900], "allowed_mentions": {"parse": []}})
+    title, description = "Tracking app", content
+    if content.startswith("**") and "**\n" in content:
+        title, description = content[2:].split("**\n", 1)
+    # Discord renders native cards rather than HTML. Never accept raw plugin markup.
+    lines = description.splitlines()
+    link = lines[-1] if lines and lines[-1].startswith(("https://", "http://")) else None
+    if link:
+        description = "\n".join(lines[:-1]) + f"\n\n[Open notification]({link})"
+    embed = {"title": title[:256], "description": description[:4096], "color": 3430612,
+             "footer": {"text": "Your tracking app Ã‚Â· Notification"}}
+    if link:
+        embed["url"] = link
+    _discord(token, "POST", f"/channels/{channel_id}/messages", {"embeds": [embed], "allowed_mentions": {"parse": []}})
 
 
 def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:
@@ -291,6 +303,25 @@ def clear_bot_token(values: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "message": "Bot token and server configuration removed. User links were retained."}
 
 
+def link_private(values: dict[str, Any]) -> dict[str, Any]:
+    """Link an intended recipient without claiming proof or SECURE eligibility."""
+    user_id = _actor(values)
+    config = _bot_config()
+    username = str(values.get("username", "")).strip()
+    if not _USERNAME.fullmatch(username):
+        raise PluginError("Enter your exact Discord username.")
+    member = _member_by_username(config["token"], config["guild_id"], username)
+    if member is None or not _SNOWFLAKE.fullmatch(str(member.get("id", ""))):
+        raise PluginError("That Discord username was not found in the configured server.")
+    accounts = _linked_accounts(_load("links/" + user_id, {}))
+    discord_id = str(member["id"])
+    if any(str(account.get("discord_id")) == discord_id for account in accounts):
+        raise PluginError("That Discord account is already linked.")
+    accounts.append({"discord_id": discord_id, "linked_at": int(time.time())})
+    _save_linked_accounts(user_id, accounts)
+    return {"ok": True, "message": "Discord account linked for PRIVATE notifications. For SECURE recovery, add and verify a Discord account DM in your notification settings."}
+
+
 def start_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values); config = _bot_config(); username = str(values.get("username", "")).strip()
     if not _USERNAME.fullmatch(username):
@@ -339,12 +370,12 @@ def unlink(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def configure_destination(values: dict[str, Any]) -> dict[str, Any]:
-    """Allow host routing only after this user has verified a Discord account."""
+    """Allow PRIVATE host routing after this user has linked an intended Discord recipient."""
     user_id = _actor(values)
     accounts = _linked_accounts(_load("links/" + user_id))
     if not accounts:
-        raise PluginError("Link and verify at least one Discord account before enabling this destination.")
-    return {"ok": True, "message": "Verified Discord account is ready for private notifications."}
+        raise PluginError("Link at least one Discord account before enabling this PRIVATE destination.")
+    return {"ok": True, "message": "Linked Discord account is ready for PRIVATE notifications."}
 
 
 def retire_destination(values: dict[str, Any]) -> dict[str, Any]:
@@ -369,7 +400,7 @@ def test_dm(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def deliver(values: dict[str, Any]) -> dict[str, Any]:
-    """Send only to the verified recipient mapped to the host-supplied user context."""
+    """Send normal PRIVATE notifications to recipients mapped to the host-supplied user context."""
     try:
         user_id = _actor(values); delivery = values.get("delivery")
         if not isinstance(delivery, dict):

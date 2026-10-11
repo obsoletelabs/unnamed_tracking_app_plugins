@@ -4,7 +4,7 @@ export function activate(context) {
   function text(label, value) {
     return h("div", { class: "discord-stat" }, [
       h("span", { class: "discord-stat-label" }, label),
-      h("strong", value === null || value === undefined || value === "" ? "—" : String(value)),
+      h("strong", value === null || value === undefined || value === "" ? "â€”" : String(value)),
     ]);
   }
 
@@ -106,16 +106,16 @@ export function activate(context) {
                 image(bot.avatar_url, bot.username || "Discord bot", "discord-avatar"),
                 h("div", [
                   h("strong", bot.global_name || bot.username || "Discord bot"),
-                  h("span", "@" + (bot.username || "—")),
-                  h("span", { class: "discord-muted" }, "Bot ID: " + (bot.id || "—")),
+                  h("span", "@" + (bot.username || "â€”")),
+                  h("span", { class: "discord-muted" }, "Bot ID: " + (bot.id || "â€”")),
                 ]),
                 badge(serverStatus, serverStatus === "Connected"),
               ]),
               c.bot_error ? h("p", { class: "discord-error" }, c.bot_error) : null,
               h("div", { class: "discord-grid" }, [
                 text("API health", c.health?.api_ok === false ? "Unavailable" : "Healthy"),
-                text("Plugin request", c.health?.request_ms ? c.health.request_ms + " ms" : "—"),
-                text("Browser refresh", c.browser_refresh_ms ? c.browser_refresh_ms + " ms" : "—"),
+                text("Plugin request", c.health?.request_ms ? c.health.request_ms + " ms" : "â€”"),
+                text("Browser refresh", c.browser_refresh_ms ? c.browser_refresh_ms + " ms" : "â€”"),
                 text("Verified bot", bot.verified === true ? "Yes" : bot.verified === false ? "No" : "Unknown"),
               ]),
               bot.invite_url ? h("a", { href: bot.invite_url, target: "_blank", rel: "noopener noreferrer", class: "discord-link" }, "Open Discord bot invite") : null,
@@ -126,7 +126,7 @@ export function activate(context) {
                 image(guild.icon_url, guild.name || "Discord server", "discord-avatar discord-guild-avatar"),
                 h("div", [
                   h("strong", guild.name || "Configured server"),
-                  h("span", "ID: " + (guild.id || "—")),
+                  h("span", "ID: " + (guild.id || "â€”")),
                   guild.description ? h("span", { class: "discord-muted" }, guild.description) : null,
                 ]),
               ]),
@@ -134,14 +134,14 @@ export function activate(context) {
                 text("Members", guild.member_count), text("Online", guild.online_count), text("Verification", guild.verification_level),
                 text("Boost tier", guild.premium_tier), text("Boosts", guild.premium_subscription_count), text("Locale", guild.preferred_locale),
                 text("NSFW level", guild.nsfw_level), text("MFA level", guild.mfa_level), text("Owner ID", guild.owner_id), text("Vanity code", guild.vanity_url_code),
-                text("AFK timeout", guild.afk_timeout ? guild.afk_timeout + " s" : "—"), text("Widget", guild.widget_enabled ? "Enabled" : "Disabled"),
+                text("AFK timeout", guild.afk_timeout ? guild.afk_timeout + " s" : "â€”"), text("Widget", guild.widget_enabled ? "Enabled" : "Disabled"),
                 text("Explicit filter", guild.explicit_content_filter), text("Default notifications", guild.default_message_notifications),
               ]),
               features.length ? h("div", { class: "discord-chips" }, features.map(feature => badge(feature))) : null,
             ]),
             infoCard("Bot membership & permissions", [
               h("div", { class: "discord-grid" }, [
-                text("Nickname", member.nickname), text("Joined server", member.joined_at ? new Date(member.joined_at).toLocaleString() : "—"),
+                text("Nickname", member.nickname), text("Joined server", member.joined_at ? new Date(member.joined_at).toLocaleString() : "â€”"),
                 text("Pending", member.pending ? "Yes" : "No"), text("Role count", member.role_count), text("Permission value", member.permissions),
               ]),
               h("h4", "Roles"),
@@ -152,20 +152,20 @@ export function activate(context) {
           ];
 
           const accounts = Array.isArray(c.accounts) ? c.accounts : [];
-          const accountCards = accounts.map(account => infoCard(account.global_name || account.username || "Verified Discord account", [
+          const accountCards = accounts.map(account => infoCard(account.global_name || account.username || "Linked Discord account", [
             h("div", { class: "discord-identity" }, [
               image(account.avatar_url, account.username || "Discord account", "discord-avatar"),
               h("div", [
                 h("strong", account.global_name || account.username || "Discord account"),
-                h("span", "@" + (account.username || "—")),
-                h("span", { class: "discord-muted" }, "Discord ID: " + (account.discord_id || "—")),
+                h("span", "@" + (account.username || "â€”")),
+                h("span", { class: "discord-muted" }, "Discord ID: " + (account.discord_id || "â€”")),
               ]),
-              badge("Verified", true),
+              badge("PRIVATE", false),
             ]),
             h("div", { class: "discord-grid" }, [
-              text("Linked", account.linked_at ? new Date(account.linked_at * 1000).toLocaleString() : "—"),
+              text("Linked", account.linked_at ? new Date(account.linked_at * 1000).toLocaleString() : "â€”"),
               text("Server nickname", account.server_nickname),
-              text("Joined server", account.server_joined_at ? new Date(account.server_joined_at).toLocaleString() : "—"),
+              text("Joined server", account.server_joined_at ? new Date(account.server_joined_at).toLocaleString() : "â€”"),
               text("Last test DM", account.last_test_at ? new Date(account.last_test_at * 1000).toLocaleString() : "Never"),
               text("Last notification", account.last_delivery_at ? new Date(account.last_delivery_at * 1000).toLocaleString() : "Never"),
             ]),
@@ -178,10 +178,10 @@ export function activate(context) {
 
           return h("section", { class: "discord-bot-settings" }, [
             h("div", { class: "discord-header" }, [
-              h("div", [h("h2", admin ? "Discord bot administration" : "Your Discord connection"), h("p", admin ? "Everything the plugin can safely discover about the configured bot and server." : "A verified Discord account for private notification delivery.")]),
-              h("button", { type: "button", disabled: loading.value || busy.value, onClick: refresh }, loading.value ? "Refreshing…" : "Refresh"),
+              h("div", [h("h2", admin ? "Discord bot administration" : "Your Discord connection"), h("p", admin ? "Everything the plugin can safely discover about the configured bot and server." : "Link accounts for PRIVATE delivery without verification. SECURE recovery uses individually host-verified destinations in Notifications.")]),
+              h("button", { type: "button", disabled: loading.value || busy.value, onClick: refresh }, loading.value ? "Refreshingâ€¦" : "Refresh"),
             ]),
-            loading.value ? h("p", { role: "status" }, "Loading Discord information…") : null,
+            loading.value ? h("p", { role: "status" }, "Loading Discord informationâ€¦") : null,
             error.value ? h("p", { role: "alert", class: "discord-error" }, error.value) : null,
             message.value ? h("p", { role: "status", class: "discord-message" }, message.value) : null,
             ...(admin ? [
@@ -193,14 +193,15 @@ export function activate(context) {
               ]),
               ...(c.configured ? adminCards : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
             ] : [
+              h("a", { href: "/settings?area=account&section=notifications", class: "discord-notification-link" }, "Open notification destinations and SECURE verification"),
               ...accountCards,
               infoCard("Link another Discord account", [
-                h("p", accounts.length ? "Add another Discord account. Notifications routed to Discord will be sent to every account listed above." : "Enter your exact Discord username from the configured server. The bot sends an eight-digit code by DM; only the account that receives the code can be linked."),
+                h("p", accounts.length ? "Add another Discord account. Notifications routed to Discord will be sent to every account listed above." : "Enter your exact Discord username from the configured server. You can link it now for PRIVATE notifications; profile verification below is optional."),
                 field("Discord username", userForm, "username", "text"),
-                h("div", { class: "discord-actions" }, [button("Send verification code", "start-link", () => ({ username: userForm.username }))]),
+                h("div", { class: "discord-actions" }, [button("Link for PRIVATE notifications", "link-private", () => ({ username: userForm.username })), button("Send optional profile verification code", "start-link", () => ({ username: userForm.username }))]),
                 field("Eight-digit verification code", userForm, "code", "text", "one-time-code"),
                 h("div", { class: "discord-actions" }, [button("Verify and link account", "confirm-link", () => ({ code: userForm.code }))]),
-                h("p", { class: "discord-hint" }, "Codes expire after ten minutes and failed verification attempts are limited. Each Discord account must be verified separately."),
+                h("p", { class: "discord-hint" }, "Optional profile codes expire after ten minutes. This legacy grouped destination stays PRIVATE, even with profile proof. For recovery: configure Discord account DM in Notifications, complete the host challenge and enable recovery. The provider also needs the separate high-risk grant."),
               ]),
             ]),
           ]);
