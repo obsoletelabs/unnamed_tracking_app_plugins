@@ -68,7 +68,7 @@ security/recovery content at handoff. Broad API/source/delivery grants do not im
 Plugins can read this content; explain this explicitly in permission review.
 Recovery additionally requires a verified external destination and explicit user opt-in.
 
-The Discord bot preview declares an independent per-account provider with server and
+The maintained Discord bot declares an independent per-account provider with server and
 username fields. PRIVATE delivery works before proof. Core UUID/revisions map to exactly
 one Discord account, with no broadcast fallback. Its legacy grouped provider/native
 dashboard remain PRIVATE and retain existing links. See the [bot migration guide](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-bot-notifications/README.md).
@@ -141,10 +141,10 @@ long to fit is omitted whole with a prompt to open the app.
 
 ### Discord bot release identity
 
-The maintained Discord bot source declares the registered **Unnamed Tracking Official**
-publisher and keeps **manual updates**. The existing signed publication workflow
-controls its first catalogue promotion; a source preview is not an installable signed
-release. Previously independently signed previews require uninstall/fresh installation,
+The maintained Discord bot is published under the registered **Unnamed Tracking Official**
+publisher and keeps **manual updates**. Use its signed package from the
+[catalogue](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/list.json).
+Unsigned branch previews remain separate from published signed releases. Previously independently signed previews require uninstall/fresh installation,
 credential configuration, destination activation and fresh host verification/recovery
 consent. Signing identity changes must not inherit old destination proof. Current
 native configuration requires Plugin API 1.1.10.

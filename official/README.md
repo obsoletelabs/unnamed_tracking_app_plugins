@@ -16,7 +16,7 @@ trust and expiry requirements are tracked in
 [host issue #7](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/7).
 
 [Unnamed Tracking PWA](pwa/README.md) is maintained official functionality,
-currently **0.0.1**, published through the scoped official signing identity.
+published through the scoped official signing identity. See the [catalogue](../list.json) for its current signed version.
 
 [Jellyfin Media Sync](jellyfin-media-sync/README.md) starts at **0.0.1**, an official
 preview under test with the separate ID `official.jellyfin-media-sync`. Its release
@@ -36,11 +36,13 @@ the public host UI runtime, and its personal import preserves legacy identifiers
 artwork, prestige links, evidence, journals and point history without deleting
 server originals. A signed production release requires the official publisher.
 
-[Discord Bot Notifications](discord-bot-notifications/README.md) is an unreleased
-paired preview for private direct messages. It registers a generic plugin-owned
-PRIVATE notification destination and performs Discord API delivery inside the
-plugin. The host supplies routing and privacy policy; it does not own Discord
-credentials or a Discord-specific transport.
+[Discord Bot Notifications](discord-bot-notifications/README.md) is published
+under **Unnamed Tracking Official**, with manual updates. It supports PRIVATE
+per-account direct messages, independently host-verified SECURE recovery destinations
+and PUBLIC administrator-allowed server channels. The plugin owns Discord transport
+and secrets; the host owns routing, disclosure and delivery lifecycle. Previously
+independently signed previews require fresh installation and destination verification.
+See the [catalogue](../list.json) for the current signed package.
 
 
 Maintained password recovery: `official.password-reset` uses host API1.1.7 with explicit administrator activation and verified external recovery destinations. It performs real password recovery through host-owned tokens/account mutation; synthetic notification demos remain separate. See [setup](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/password-reset).

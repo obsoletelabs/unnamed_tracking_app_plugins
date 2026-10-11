@@ -22,8 +22,13 @@ The [Epic Games Library](official/epic-games/README.md) imports a personal game
 library in resumable steps and requires host Plugin API 1.1.3.
 The [Extended Session Manager](official/extended-session-manager/README.md) is
 now official functionality and preserves its existing plugin ID for updates.
-The [PWA](official/pwa/README.md) appearance migration remains unreleased 0.0.2; its production
-release waits for a separate protected official signing identity. Examples remain
+The [PWA](official/pwa/README.md) is published through the registered official
+signing identity; the [catalogue](list.json) records its current signed version.
+The [Discord Bot Notifications](official/discord-bot-notifications/README.md) provider
+is also published under **Unnamed Tracking Official**, retaining manual updates.
+Ordinary PRIVATE DMs work without verification; SECURE recovery requires independent
+host destination proof and explicit consent. Allowed server channels stay PUBLIC.
+Examples remain
 demonstrations, even when their historical publisher text contains Official.
 See [folder-specific signing and environment keys](docs/official-signing.md).
 
