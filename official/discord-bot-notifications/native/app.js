@@ -27,6 +27,12 @@ export function activate(context) {
         const config = ref({});
         const tokenForm = reactive({ token: "", guild_id: "" });
         const userForm = reactive({ username: "", code: "" });
+        const directory = ref(null);
+        const channelChoices = ref([]);
+        const channelSelection = ref("");
+        const allowedChannels = ref([]);
+        const memberSelection = ref("");
+        const memberSearch = ref("");
         let live = true;
         onBeforeUnmount(() => { live = false; });
 
@@ -38,6 +44,12 @@ export function activate(context) {
             const result = await props.host.runAction("get-config");
             if (!live) return;
             config.value = { ...result, browser_refresh_ms: Math.round(performance.now() - started) };
+            if (!admin && result.configured) {
+              const choices = await props.host.runAction("channel-choices");
+              if (!live) return;
+              channelChoices.value = choices.channels || [];
+              channelSelection.value = choices.selected || "";
+            }
             if (admin && !tokenForm.guild_id) tokenForm.guild_id = result.guild_id || "";
           } catch (err) {
             if (live) error.value = err?.message || "Discord settings could not be loaded.";
@@ -59,6 +71,21 @@ export function activate(context) {
             await refresh();
           } catch (err) {
             if (live) error.value = err?.message || "Discord operation failed.";
+          } finally {
+            if (live) busy.value = false;
+          }
+        }
+
+        async function loadDirectory(after = "0") {
+          busy.value = true;
+          error.value = "";
+          try {
+            const result = await props.host.runAction("list-directory", { after });
+            if (!live) return;
+            directory.value = { ...result, users: after === "0" ? result.users : [...(directory.value?.users || []), ...result.users] };
+            allowedChannels.value = result.allowed_channel_ids || [];
+          } catch (err) {
+            if (live) error.value = err?.message || "Discord directory could not be loaded.";
           } finally {
             if (live) busy.value = false;
           }
@@ -151,6 +178,36 @@ export function activate(context) {
             ]),
           ];
 
+          const directoryCard = infoCard("Allowed notification channels and server users", [
+            h("p", "Allow text or announcement channels for PUBLIC notifications. Removing a channel stops its deliveries immediately. Member linking is PRIVATE; only the host can verify a notification destination."),
+            h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value, onClick: () => loadDirectory() }, "Load Discord directory")]),
+            ...(directory.value ? [
+              h("div", { class: "discord-directory" }, directory.value.channels.map(channel => h("label", { class: "discord-channel-choice" }, [
+                h("input", { type: "checkbox", checked: allowedChannels.value.includes(channel.id), disabled: busy.value,
+                  onChange: event => { allowedChannels.value = event.target.checked ? [...allowedChannels.value, channel.id] : allowedChannels.value.filter(id => id !== channel.id); } }),
+                h("span", "#" + channel.name), h("small", channel.id),
+              ]))),
+              h("div", { class: "discord-actions" }, [button("Save allowed channels", "allow-channels", () => ({ channel_ids: allowedChannels.value }))]),
+              h("label", { class: "discord-field" }, [h("span", "Find a server user"), h("input", { value: memberSearch.value, onInput: event => { memberSearch.value = event.target.value; }, placeholder: "Username or display name" })]),
+              h("label", { class: "discord-field" }, [h("span", "Discord member"), h("select", { value: memberSelection.value, disabled: busy.value, onChange: event => { memberSelection.value = event.target.value; } }, [
+                h("option", { value: "" }, "Choose a Discord member"),
+                ...directory.value.users.filter(user => (user.username + " " + user.label).toLowerCase().includes(memberSearch.value.toLowerCase())).map(user => h("option", { value: user.username }, user.label + " (@" + user.username + ") · " + user.id)),
+              ])]),
+              h("p", { class: "discord-hint" }, "Link the selected member to your signed-in app account. This does not verify access or change another app user's destinations."),
+              h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value || !memberSelection.value, onClick: () => perform("link-private", { username: memberSelection.value }) }, "Link selected member to my account")]),
+              directory.value.next_after ? h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value, onClick: () => loadDirectory(directory.value.next_after) }, "Load more server users")]) : null,
+            ] : []),
+          ]);
+          const allowedChannelCard = infoCard("Your allowed notification channels", [
+            h("p", "Choose an administrator-allowed channel, then add a Discord server channel destination in Notifications. Leave its channel ID blank to use this selection. Each destination keeps its chosen channel; use per-type routing to decide what it receives."),
+            h("label", { class: "discord-field" }, [h("span", "Default channel for new destinations"), h("select", { value: channelSelection.value, disabled: busy.value, onChange: event => { channelSelection.value = event.target.value; } }, [
+              h("option", { value: "" }, "Choose an allowed channel"), ...channelChoices.value.map(channel => h("option", { value: channel.id }, "#" + channel.name + " · " + channel.id)),
+            ])]),
+            h("div", { class: "discord-actions" }, [h("button", { type: "button", disabled: busy.value || !channelSelection.value, onClick: () => perform("select-channel", { channel_id: channelSelection.value }) }, "Use this channel for new destinations")]),
+            channelChoices.value.length ? null : h("p", { class: "discord-hint" }, "An administrator has not allowed any channels yet."),
+            h("p", { class: "discord-hint" }, "Channels remain PUBLIC and cannot receive recovery secrets or private/security notifications."),
+          ]);
+
           const accounts = Array.isArray(c.accounts) ? c.accounts : [];
           const accountCards = accounts.map(account => infoCard(account.global_name || account.username || "Linked Discord account", [
             h("div", { class: "discord-identity" }, [
@@ -191,10 +248,11 @@ export function activate(context) {
                 h("div", { class: "discord-actions" }, [button("Validate and save", "save-bot-config", () => ({ token: tokenForm.token, guild_id: tokenForm.guild_id })), button("Clear bot token", "clear-bot-token", () => ({}), true)]),
                 h("p", { class: "discord-hint" }, "The bot must be a member of this server. Member lookup may require the Server Members Intent."),
               ]),
-              ...(c.configured ? adminCards : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
+              ...(c.configured ? [...adminCards, directoryCard] : [h("p", { class: "discord-hint" }, "Configure the bot above to inspect its Discord identity, server, membership, permissions and health.")]),
             ] : [
               h("a", { href: "/settings?area=account&section=notifications", class: "discord-notification-link" }, "Open notification destinations and SECURE verification"),
               ...accountCards,
+              ...(c.configured ? [allowedChannelCard] : []),
               infoCard("Link another Discord account", [
                 h("p", accounts.length ? "Add another Discord account. Notifications routed to Discord will be sent to every account listed above." : "Enter your exact Discord username from the configured server. You can link it now for PRIVATE notifications; profile verification below is optional."),
                 field("Discord username", userForm, "username", "text"),

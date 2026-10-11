@@ -49,9 +49,11 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
         },
     })]
 
-    assert len(calls) == 2
+    assert len(calls) == 3
     assert calls[1][2]["provider_id"] == provider.ACCOUNT_PROVIDER_ID
     assert calls[1][2]["definition"] == provider.ACCOUNT_DEFINITION
+    assert calls[2][2]["provider_id"] == provider.CHANNEL_PROVIDER_ID
+    assert calls[2][2]["definition"] == provider.CHANNEL_DEFINITION
     schema = json.loads((ROOT / "tools/schemas/notification-provider-v1.schema.json").read_bytes())
     for _, _, payload in calls:
         jsonschema.validate(payload, schema)
@@ -367,5 +369,39 @@ def test_bot_messages_use_native_cards_and_readable_actions(monkeypatch):
     embed = payload["embeds"][0]
     assert embed["title"] == "Reset password"
     assert embed["url"] == "https://app.example.test/reset#token=opaque"
-    assert "[Open notification]" in embed["description"]
+    assert "[here]" in embed["description"]
     assert payload["allowed_mentions"] == {"parse": []}
+
+
+def test_recovery_card_hides_repeated_bearer_link_and_separates_safety_note(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    link = "https://app.example.test/reset#token=opaque"
+    provider._send_dm("secret", "123456789012345678",
+        "**Reset your password**\nOpen this link to choose a new password:\n" + link
+        + "\nThis link expires shortly and can be used once. If you did not request it, ignore this message.\n" + link)
+    embed = calls[-1]["embeds"][0]
+    assert embed["url"] == link
+    assert embed["description"].count(link) == 1
+    assert "Click [here](" + link + ") to continue." in embed["description"]
+    assert "\n\nIf you did not request" in embed["description"]
+    assert "\n\nThis link expires" in embed["description"]
+
+
+def test_card_action_escapes_markdown_url_delimiters(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    provider._send_dm("secret", "123456789012345678", "**Release**\nhttps://app.example.test/game/(edition)")
+    assert "[here](https://app.example.test/game/%28edition%29)" in calls[-1]["embeds"][0]["description"]
+
+
+def test_verification_card_emphasizes_code_and_separates_instructions(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    provider._send_dm("secret", "123456789012345678", "**Verify destination**\nYour verification code is 12345678.\nIt expires in ten minutes.")
+    description = calls[-1]["embeds"][0]["description"]
+    assert "**12345678**" in description
+    assert "\n\nIt expires" in description

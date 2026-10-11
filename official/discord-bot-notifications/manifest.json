@@ -14,7 +14,7 @@
     {"name": "notification_providers.sensitive", "version": 1}
   ],
   "dependencies": [],
-  "description": "Private Discord direct-message notifications using an administrator-configured bot and verified user account links.",
+  "description": "PRIVATE direct messages with optional host verification, and PUBLIC notifications to administrator-allowed Discord channels.",
   "entrypoint": "plugin:main",
   "integrity": {"key_id": null, "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "signature": null},
   "manifest_version": 1,
@@ -36,7 +36,7 @@
   "sdk_version_range": "^1.1.2",
   "storage": {"quota_mb": 8},
   "ui": {
-    "actions": ["get-config", "save-bot-config", "clear-bot-token", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "configure-destination", "retire-destination", "deliver", "configure-account-destination", "retire-account-destination", "deliver-account"],
+    "actions": ["get-config", "save-bot-config", "clear-bot-token", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "configure-destination", "retire-destination", "deliver", "configure-account-destination", "retire-account-destination", "deliver-account", "list-directory", "allow-channels", "channel-choices", "select-channel", "configure-channel-destination", "retire-channel-destination", "deliver-channel"],
     "menus": [],
     "pages": ["admin", "account"],
     "settings": []

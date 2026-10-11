@@ -18,12 +18,19 @@
     {"id": "deliver", "label": "Deliver notification to Discord", "handler": "plugin:deliver", "capability": {"name": "notification_providers.deliver", "version": 1}},
     {"id": "configure-account-destination", "label": "Configure per-account Discord destination", "handler": "plugin:configure_account_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
     {"id": "retire-account-destination", "label": "Retire per-account Discord destination", "handler": "plugin:retire_account_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
-    {"id": "deliver-account", "label": "Deliver to one Discord account", "handler": "plugin:deliver_account", "capability": {"name": "notification_providers.deliver", "version": 1}}
+    {"id": "deliver-account", "label": "Deliver to one Discord account", "handler": "plugin:deliver_account", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "list-directory", "label": "Browse Discord channels and users", "handler": "plugin:list_directory", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "allow-channels", "label": "Allow Discord notification channels", "handler": "plugin:allow_channels", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "channel-choices", "label": "Read allowed notification channels", "handler": "plugin:channel_choices", "capability": {"name": "plugin.storage", "version": 1}},
+    {"id": "select-channel", "label": "Select your default notification channel", "handler": "plugin:select_channel", "capability": {"name": "network.outbound", "version": 1}},
+    {"id": "configure-channel-destination", "label": "Configure PUBLIC channel destination", "handler": "plugin:configure_channel_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "retire-channel-destination", "label": "Retire channel destination", "handler": "plugin:retire_channel_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "deliver-channel", "label": "Deliver to a PUBLIC channel", "handler": "plugin:deliver_channel", "capability": {"name": "notification_providers.deliver", "version": 1}}
   ],
   "menus": [],
   "pages": [
-    {"id": "admin", "title": "Discord bot administration", "description": "Configure the bot token and the Discord server used for verified account linking.", "settings": [], "actions": ["get-config", "save-bot-config", "clear-bot-token"], "tables": [], "dialogs": []},
-    {"id": "account", "title": "Discord account linking", "description": "Link PRIVATE recipients now; host verification and recovery controls live in Notifications.", "settings": [], "actions": ["get-config", "link-private", "start-link", "confirm-link", "unlink", "test-dm"], "tables": [], "dialogs": []}
+    {"id": "admin", "title": "Discord bot administration", "description": "Configure the bot token and the Discord server used for verified account linking.", "settings": [], "actions": ["get-config", "save-bot-config", "clear-bot-token", "list-directory", "allow-channels", "link-private"], "tables": [], "dialogs": []},
+    {"id": "account", "title": "Discord account linking", "description": "Link PRIVATE recipients now; host verification and recovery controls live in Notifications.", "settings": [], "actions": ["get-config", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "channel-choices", "select-channel"], "tables": [], "dialogs": []}
   ],
   "tables": [],
   "dialogs": [],
