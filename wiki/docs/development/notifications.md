@@ -114,7 +114,7 @@ API 1.1.10 adds live recovery status and the generic Users action dialog. Authen
 
 ### Discord bot PUBLIC channels and PRIVATE enrollment
 
-The bot now declares a separate PUBLIC channel provider through the generic API. Admin Discord settings provide a channel allowlist and paginated server-member directory; account Discord settings select a default allowed channel for new notification destinations. Add each channel under Account → Notifications, then choose its per-type routes. Text/announcement channels only; View Channel, Send Messages and Embed Links are required. The allowlist and Discord server/type are checked again for every send. Channel membership never grants PRIVATE/SECURE trust. Unverified username enrollment supports normal PRIVATE DMs; recovery needs a concrete host-verified SECURE account destination, explicit recovery opt-in and the high-risk grant.
+The bot now declares a separate PUBLIC channel provider through the generic API. Admin Discord settings provide a channel allowlist and paginated server-member directory; account Discord settings select a default allowed channel for new notification destinations. Add each channel under Account → Notifications, then choose its per-type routes. Text/announcement channels only; View Channel and Send Messages are required; Embed Links enables rich cards, with the text fallback described below. The allowlist and Discord server/type are checked again for every send. Channel membership never grants PRIVATE/SECURE trust. Unverified username enrollment supports normal PRIVATE DMs; recovery needs a concrete host-verified SECURE account destination, explicit recovery opt-in and the high-risk grant.
 
 Online presence and direct profile integration are tracked in [issue #28](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/28).
 
@@ -133,3 +133,8 @@ your password, Accept invitation or Verify destination). It reserves room for a
 complete action rather than truncating its URL. Local previews keep their local
 URL; deployed notifications use the host-resolved notification URL. An action too
 long to fit is omitted whole with a prompt to open the app.
+
+
+![Administrator channel allowlist and member picker (synthetic directory)](../assets/notification-mail-auth/discord-channel-directory-desktop.jpg)
+
+![Account allowed-channel selection (synthetic directory)](../assets/notification-mail-auth/discord-channel-selection-desktop.jpg)
