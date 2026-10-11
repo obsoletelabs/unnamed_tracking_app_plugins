@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.9",
+  "api_contract_version": "1.1.11",
   "application_version_range": ">=0.0.1",
   "capabilities": [
     {
@@ -16,6 +16,10 @@
     },
     {
       "name": "frontend.connections",
+      "version": 1
+    },
+    {
+      "name": "tasks.background",
       "version": 1
     }
   ],
@@ -61,6 +65,13 @@
         "version": 1
       },
       "rationale": "List Epic Games on the Connections page so you can connect, import and disconnect from a popup there."
+    },
+    {
+      "capability": {
+        "name": "tasks.background",
+        "version": 1
+      },
+      "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account\u2019s approved access and resumable import checkpoints."
     }
   ],
   "plugin_id": "official.epic-games",
@@ -75,7 +86,8 @@
       "connect",
       "disconnect",
       "start",
-      "step"
+      "step",
+      "sync"
     ],
     "menus": [],
     "pages": [
@@ -83,5 +95,17 @@
     ],
     "settings": []
   },
-  "version": "0.6.1"
+  "version": "0.7.0",
+  "scheduled_tasks": [
+    {
+      "id": "autosync",
+      "name": "Epic Games autosync",
+      "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
+      "scope": "user",
+      "action_id": "sync",
+      "min_interval_minutes": 5,
+      "max_interval_minutes": 10080,
+      "default_interval_minutes": 1440
+    }
+  ]
 }

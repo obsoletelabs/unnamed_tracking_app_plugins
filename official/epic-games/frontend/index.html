@@ -7,27 +7,26 @@
 </head>
 <body>
 <main>
-  <header><p class="eyebrow">Connected libraries</p><h1>Epic Games</h1><p>Bring your games and recorded playtime into your library. Your notes, ratings and chosen status stay with each game.</p></header>
-  <section aria-labelledby="connection-title">
-    <h2 id="connection-title">Your connection</h2>
-    <p id="account">Checking connection…</p>
+  <section aria-label="Epic account">
+    <p id="account" class="hint" role="status">Checking connection…</p>
+    <button id="disconnect" class="ghost" type="button" hidden>Disconnect Epic</button>
     <div id="connect-panel">
-      <ol><li><button id="signin" type="button">Sign in on Epic Games</button>, or copy the link below and open it in your regular browser.</li><li>Copy the one-time authorization code or the JSON page Epic shows.</li><li>Return to this page, then paste it below and connect.</li></ol>
-      <div class="signin-link"><label for="signin-url">Epic sign-in link</label><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" type="button" disabled>Copy sign-in link</button><p id="copy-status" class="muted" role="status" aria-live="polite"></p></div>
+      <p>Sign in on Epic, copy the one-time code or JSON it shows, then paste it here.</p>
+      <button id="signin" type="button">Sign in on Epic Games</button>
+      <details><summary>Use your regular browser</summary><div class="signin-link"><label for="signin-url">Epic sign-in link</label><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" class="ghost" type="button" disabled>Copy sign-in link</button><p id="copy-status" class="muted" role="status" aria-live="polite"></p></div></details>
       <form id="connect-form"><label for="code">Epic authorization code</label><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" type="button">Connect Epic</button></form>
-      <p class="muted">Sign in on epicgames.com. This page only receives the one-time code. Saved tokens stay in private plugin storage.</p>
+      <p class="muted">You sign in on epicgames.com. Your Epic password is never entered here.</p>
     </div>
-    <button id="disconnect" type="button" hidden>Disconnect Epic</button>
   </section>
-  <section aria-labelledby="import-title">
+  <section id="import-panel" aria-labelledby="import-title" hidden>
     <h2 id="import-title">Import your library</h2>
-    <p>Imports run in small steps. You can pause or close this page, then resume. Games are marked unavailable only after a complete inventory.</p>
-    <div class="toolbar"><button id="import" type="button" disabled>Import games</button><button id="pause" type="button" hidden>Pause after this step</button><button id="restart" type="button" disabled>Start new inventory</button></div>
+    <p>Sync games and recorded playtime. Your notes, ratings and status are preserved. Close this dialog at any time and resume later.</p>
+    <div class="toolbar"><button id="import" type="button" disabled>Import games</button><button id="pause" class="ghost" type="button" hidden>Pause after this step</button><button id="restart" class="ghost" type="button" disabled>Start new inventory</button></div>
     <p id="progress" role="status" aria-live="polite">No import started.</p>
     <dl><div><dt>Inventory entries</dt><dd id="inventory-count">0</dd></div><div><dt>Games saved</dt><dd id="imported">0</dd></div><div><dt>Add-ons skipped</dt><dd id="skipped">0</dd></div><div><dt>Local conflicts</dt><dd id="conflicts">0</dd></div></dl>
-    <p id="warning" class="muted" hidden></p><p id="error" role="alert" hidden></p>
+    <p id="warning" class="muted" hidden></p>
   </section>
-  <p class="muted">Epic's launcher services can change without notice. Catalogue artwork and achievements are outside this import; use the host's game metadata tools for artwork.</p>
+  <p id="error" role="alert" hidden></p>
 </main>
 <script src="./appearance.js"></script><script src="./app.js"></script>
 </body>

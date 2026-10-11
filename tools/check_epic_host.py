@@ -148,7 +148,7 @@ def main():
                 break
             time.sleep(0.1)
         assert (
-            installed["api_contract_version"] == "1.1.3"
+            installed["api_contract_version"] == "1.1.11"
             and installed["status"] == "running"
         )
         assert installed["digest"] == preview["digest"], (
@@ -271,12 +271,36 @@ def main():
             )
             state = action("status", session=second)
             assert not state["connected"]
+            own_jobs = api("GET", "/api/settings/user-jobs", session=second)
+            assert len(own_jobs) == 1 and not own_jobs[0]["enabled"]
+            admin_jobs = api("GET", "/api/settings/user-jobs")
+            assert len(admin_jobs) == 1 and own_jobs[0]["id"] != admin_jobs[0]["id"]
+            api("PUT", "/api/settings/user-jobs/" + admin_jobs[0]["id"],
+                session=second, expected=404, body={"enabled": True})
+            api("GET", "/api/settings/jobs", session=second, expected=403)
             assert api(
                 "GET", "/api/game/get/" + first["id"], session=second, expected=404
             )["detail"]
         checkpoint(
             "Another authenticated user cannot see this connection or imported game."
         )
+        checkpoint("Non-administrators see only their own opt-in autosync and cannot change another user's or server schedules.")
+
+        # Exercise the same checkpoint through the packaged sync action and user task dispatch.
+        action("sync")
+        personal_job = api("GET", "/api/settings/user-jobs")[0]
+        assert not personal_job["enabled"]
+        api("POST", "/api/settings/user-jobs/" + personal_job["id"] + "/run")
+        for _ in range(100):
+            saved_job = api("GET", "/api/settings/user-jobs")[0]
+            if saved_job["last_run_at"] is not None and not saved_job["running"]:
+                break
+            time.sleep(0.1)
+        assert saved_job["last_result"]["completed"] is False
+        assert saved_job["last_result"]["continue_after_seconds"] == 60
+        assert saved_job["last_summary"]
+        complete()
+        checkpoint("Games sync and personal Run now dispatched the real package for the owner, saved a continuation, and preserved imported games.")
 
         fixture(empty=True)
         action("start")

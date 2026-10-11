@@ -1,4 +1,4 @@
-"""Personal Epic library imports through Plugin API 1.1.3."""
+"""Personal Epic library imports and autosync through Plugin API 1.1.11."""
 
 from __future__ import annotations
 
@@ -290,6 +290,25 @@ def step(values):
         state["updated_at"] = int(time.time())
         store("sync/users/" + user, state)
         return public_status(user)
+
+
+@safe_action
+def sync(values):
+    """Run one checkpoint for either the Games menu or a personal host schedule."""
+    current = public_status(actor(values))
+    if not current["connected"]:
+        raise epic.EpicError("Connect your Epic account first.")
+    if current["phase"] in {"idle", "complete"}:
+        start.__wrapped__(values)
+    current = step.__wrapped__(values)
+    completed = current["phase"] == "complete"
+    return {
+        **current,
+        "completed": completed,
+        "summary": f"Epic sync complete: {current['imported']} games saved."
+        if completed else f"Epic sync saved at {current['phase']}. The next step will resume automatically.",
+        **({} if completed else {"continue_after_seconds": 60}),
+    }
 
 
 def main():

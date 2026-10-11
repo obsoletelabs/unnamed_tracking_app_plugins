@@ -5,6 +5,9 @@
   let paused = false;
   const phases = { idle: "No import started.", inventory: "Reading your Epic inventory…", playtime: "Reading recorded playtime…", catalogue: "Looking up game details…", import: "Saving games to your library…", missing: "Checking availability against the complete inventory…", complete: "Import complete." };
   function request(actionId, values = {}) {
+    return hostRequest("plugin.run-action", { actionId, values });
+  }
+  function hostRequest(method, payload) {
     return new Promise((resolve, reject) => {
       const requestId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `epic-${Date.now()}-${Math.random()}`;
       const timer = setTimeout(() => { window.removeEventListener("message", receive); reject(new Error("The host did not respond. Resume to retry the saved step.")); }, 35000);
@@ -16,12 +19,14 @@
         else resolve(result);
       }
       window.addEventListener("message", receive);
-      window.parent.postMessage({ type: "plugin-api-request", requestId, method: "plugin.run-action", payload: { actionId, values } }, "*");
+      window.parent.postMessage({ type: "plugin-api-request", requestId, method, payload }, "*");
     });
   }
   function render() {
     $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
     $("connect-panel").hidden = snapshot.connected;
+    $("import-panel").hidden = !snapshot.connected;
+    $("account").className = snapshot.connected ? "connected" : "hint";
     $("disconnect").hidden = !snapshot.connected;
     $("signin-url").value = snapshot.login_url || "";
     $("copy-signin").disabled = busy || !snapshot.login_url;
@@ -85,5 +90,12 @@
   $("import").onclick = () => perform(async () => importGames(false));
   $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };
-  void perform(async () => { snapshot = await request("status"); });
+  void perform(async () => {
+    snapshot = await request("status");
+    const context = await hostRequest("plugin.context", {});
+    if (snapshot.connected && context.initial_action_id === "sync") {
+      snapshot = await request("sync");
+      if (snapshot.phase !== "complete") await importGames(false);
+    }
+  });
 })();

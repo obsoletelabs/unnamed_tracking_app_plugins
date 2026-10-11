@@ -1,8 +1,13 @@
 {
   "schema_version": 1,
   "publisher": "Unnamed Tracking Official",
-  "tags": ["games", "epic", "imports", "official"],
+  "tags": [
+    "games",
+    "epic",
+    "imports",
+    "official"
+  ],
   "icon": "icon.svg",
   "automatic_update": false,
-  "release_notes": "Epic Games now lives on Settings > Account > Connections: connect, import and disconnect from a popup there instead of a sidebar page. Replaces the main-navigation permission with the low-risk frontend.connections permission and requires host Plugin API 1.1.9. Connection, import and token handling are unchanged."
+  "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11."
 }

@@ -1,0 +1,21 @@
+{
+  "plugin_id": "official.epic-games",
+  "provider_http_fixture": true,
+  "real_host_runtime_database": true,
+  "reduced_isolation_validation": true,
+  "checks": [
+    "Actual unsigned .utp preview and reviewed replacement passed.",
+    "Real worker imported 27 PostgreSQL games from two pages/namespaces; DLC skipped, playtime persisted.",
+    "Repeated imports preserved exact IDs, manual status/title locks, notes/rating and unavailable playtime.",
+    "A real provider HTTP failure retained the checkpoint and availability; resume recovered.",
+    "Another authenticated user cannot see this connection or imported game.",
+    "Non-administrators see only their own opt-in autosync and cannot change another user's or server schedules.",
+    "Games sync and personal Run now dispatched the real package for the owner, saved a continuation, and preserved imported games.",
+    "Complete empty inventory marked existing games unavailable without deletion; a later inventory restored availability.",
+    "Worker stop/start retained the private connection and saved import.",
+    "Disconnect retained imported games and personal state; runtime logs contain no fixture credentials."
+  ],
+  "package_digest": "4da1044cca09d1a47833f7f444b3c0883ba2680f8ce888841aacb6b4a889e027",
+  "api_contract_version": "1.1.11",
+  "status": "passed"
+}
