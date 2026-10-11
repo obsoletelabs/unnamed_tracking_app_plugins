@@ -91,7 +91,7 @@ The signed Notification Chaos Demo exercises the same protected renderer without
 
 ## Maintained password recovery (API 1.1.7)
 
-The maintained `official.password-reset` plugin enables the host's reserved password-reset flow. It is separate from the synthetic routing demo. Installation requires the independent critical global `auth.password_reset` grant; an administrator explicitly activates it from **Administration → Password recovery**. The host supplies the public request/completion form and owns credentials, validation, single-use redemption and account mutations. Anonymous requests never execute arbitrary plugin code.
+The maintained `official.password-reset` plugin enables the host's reserved password-reset flow. It is separate from the synthetic routing demo. Installation requires the independent critical global `auth.password_reset` grant; an administrator explicitly activates it from **Settings → Administration → Account security → Password recovery**. The host supplies the public request/completion form and owns credentials, validation, single-use redemption and account mutations. Anonymous requests never execute arbitrary plugin code.
 
 Configure a SECURE external recovery-capable destination and separately enable recovery delivery. Built-in SMTP stays in the host; plugin transports also need the independent high-risk provider grant. Core preferences/admin routing and final authority checks still apply. No internal inbox or browser push reset secret, raw SMTP fallback or all-user destination query is provided.
 
@@ -102,3 +102,18 @@ Startup uses auth_flows.password_reset.restore to resume only an already-active 
 ## Maintained user invitations (API 1.1.8)
 
 The working `official.user-invites` plugin enables administrator email invitations through host-owned single-use credentials and core SMTP deliveries. Accounts are created only on acceptance. This is separate from the synthetic routing demo. See [setup and public contract](user-invites.md).
+
+## Live authentication settings and rich delivery
+
+API 1.1.10 adds live recovery status and the generic Users action dialog. Authentication configuration uses distinct Settings contributions under Administration → Account security. Discord DMs use native embeds for tests, verification and recovery; SMTP uses the host shared escaped HTML card and plain alternative. PRIVATE native linking does not claim host proof; per-account verification is still required for SECURE delivery.
+
+![Live recovery configuration](../assets/notification-mail-auth/recovery-enabled-desktop.png)
+
+![PRIVATE account linking](../assets/notification-mail-auth/discord-private-link-desktop.png)
+
+
+### Discord bot PUBLIC channels and PRIVATE enrollment
+
+The bot now declares a separate PUBLIC channel provider through the generic API. Admin Discord settings provide a channel allowlist and paginated server-member directory; account Discord settings select a default allowed channel for new notification destinations. Add each channel under Account → Notifications, then choose its per-type routes. Text/announcement channels only; View Channel, Send Messages and Embed Links are required. The allowlist and Discord server/type are checked again for every send. Channel membership never grants PRIVATE/SECURE trust. Unverified username enrollment supports normal PRIVATE DMs; recovery needs a concrete host-verified SECURE account destination, explicit recovery opt-in and the high-risk grant.
+
+Online presence and direct profile integration are tracked in [issue #28](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/28).

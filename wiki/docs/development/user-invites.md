@@ -10,9 +10,9 @@ iframe action bridge; it never imports host source or sends SMTP directly.
 1. Configure built-in SMTP in the host's notification settings. Sensitive delivery
    requires encrypted transport, except development mode or a local literal-IP relay.
 2. Install the signed **User Invites** package and approve its declared permissions.
-3. Open **Administration → User invitations**, choose a one-hour to seven-day
+3. Open **Settings → Administration → Account security → User invitations**, choose a one-hour to seven-day
    lifetime (one day by default), and explicitly enable invitations.
-4. Enter an email address and send. The page shows recent delivery/acceptance/expiry
+4. On **Settings → Administration → Users**, select **Invite user**, enter an email address and send. The dialog shows recent delivery/acceptance/expiry
    state and lets the administrator revoke outstanding invitations.
 5. The recipient opens the expiring link, chooses username/password on the host
    acceptance page, and signs in normally. Opening the link alone creates no account.
@@ -52,8 +52,8 @@ See [notification routing](notifications.md) and the
 
 These captures show the installed plugin iframe only; host navigation is excluded.
 
-![Administrator invitations](../assets/user-invitations/admin-desktop.png)
+![Administrator invitations](../assets/notification-mail-auth/invite-dialog-desktop.png)
 
-![Administrator invitations on mobile](../assets/user-invitations/admin-mobile.png)
+![Administrator invitations on mobile](../assets/notification-mail-auth/invite-dialog-mobile.png)
 
 Configure in Administration → Account security → User invitations; launch **Invite user** on Administration → Users to send/review in a dialog. The settings page shows live activation. The host uses responsive HTML mail plus a plain alternative.

@@ -95,7 +95,7 @@
   "dialogs": [],
   "settings_sections": [
     {
-      "id": "configuration",
+      "id": "user-invitation-settings",
       "label": "User invitations",
       "page_id": "configure",
       "area": "administration",

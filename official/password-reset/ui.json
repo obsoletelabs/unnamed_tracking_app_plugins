@@ -55,7 +55,7 @@
   "dialogs": [],
   "settings_sections": [
     {
-      "id": "configuration",
+      "id": "password-recovery-settings",
       "label": "Password recovery",
       "page_id": "configure",
       "area": "administration",
