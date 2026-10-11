@@ -47,3 +47,11 @@ are omitted from invitation mail.
 
 See [notification routing](notifications.md) and the
 [source and setup](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/user-invites).
+
+## Administrator controls
+
+These captures show the installed plugin iframe only; host navigation is excluded.
+
+![Administrator invitations](../assets/user-invitations/admin-desktop.png)
+
+![Administrator invitations on mobile](../assets/user-invitations/admin-mobile.png)

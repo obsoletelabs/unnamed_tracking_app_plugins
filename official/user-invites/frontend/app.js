@@ -31,7 +31,7 @@ async function refresh() {
  for(const row of rows) {
   const article=document.createElement("article"), address=document.createElement("strong"), info=document.createElement("p");
   address.textContent=row.email;
-  info.textContent=`${row.status} Â· Delivery: ${row.delivery_status || "unavailable"} Â· Expires ${when(row.expires_at)}`;
+  info.textContent=`${row.status} · Delivery: ${row.delivery_status || "unavailable"} · Expires ${when(row.expires_at)}`;
   article.append(address,info);
   if(row.status === "pending") {
    const button=document.createElement("button"); button.type="button"; button.textContent="Revoke invitation";

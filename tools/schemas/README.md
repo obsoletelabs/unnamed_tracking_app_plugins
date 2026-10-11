@@ -25,3 +25,6 @@ The provider schema and capability enum include the additive API1.1.6 possession
 
 
 API1.1.7 adds the independent critical auth.password_reset permission and auth-password-reset-v1 contribution schema, exported by host tools/export_auth_contract.py. The provider/content schemas retain their previous versions. Paired host checks validate this schema and actual packaged consumers.
+
+
+API 1.1.8 adds the independent critical auth.user_invites grant and three bounded invitation contribution/input schemas. The reset schema remains 1.1.7; earlier provider schemas retain their established versions. Paired checks compare exact host exports and actual packaged consumers.
