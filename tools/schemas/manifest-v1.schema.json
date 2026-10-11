@@ -84,6 +84,7 @@
         "frontend.context.media",
         "frontend.context.documents",
         "frontend.settings",
+        "frontend.connections",
         "frontend.placement.sidebar",
         "frontend.placement.settings.admin",
         "frontend.placement.settings.account",

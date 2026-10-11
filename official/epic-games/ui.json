@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.3",
+  "api_contract_version": "1.1.9",
   "plugin_id": "official.epic-games",
   "title": "Epic Games Library",
   "settings": [],
@@ -12,6 +12,7 @@
     {"id": "start", "label": "Start new import", "handler": "plugin:start", "capability": {"name": "games.write", "version": 1}},
     {"id": "step", "label": "Resume import", "handler": "plugin:step", "capability": {"name": "games.write", "version": 1}}
   ],
-  "pages": [{"id": "library", "title": "Epic Games", "description": "Connect and import a personal Epic library. Sign in only on epicgames.com; imported games remain yours after disconnecting.", "actions": ["status", "signin", "connect", "disconnect", "start", "step"], "navigation": {"sidebar": true}}],
+  "pages": [{"id": "library", "title": "Epic Games", "description": "Connect and import a personal Epic library. Sign in only on epicgames.com; imported games remain yours after disconnecting.", "actions": ["status", "signin", "connect", "disconnect", "start", "step"]}],
+  "connections": [{"id": "epic-games", "label": "Epic Games", "description": "Import your Epic library and recorded playtime.", "page_id": "library", "status_action_id": "status", "order": 0}],
   "tables": [], "dialogs": [], "menus": []
 }

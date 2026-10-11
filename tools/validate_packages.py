@@ -335,6 +335,16 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
         required.add(f"frontend.page.replace.{replacement['page']}")
         if replacement["page_id"] not in page_ids:
             raise ValueError("page replacement refers to a missing page")
+    if document.get("connections"):
+        if contract_version < (1, 1, 9):
+            raise ValueError("connection contributions require Plugin API v1.1.9")
+        required.add("frontend.connections")
+        action_ids = {action["id"] for action in document.get("actions", [])}
+        for connection in document["connections"]:
+            if connection["page_id"] not in page_ids:
+                raise ValueError("connection refers to a missing page")
+            if connection.get("status_action_id") not in (None, *action_ids):
+                raise ValueError("connection refers to a missing status action")
     if document.get("shortcuts"):
         required.add("frontend.shortcuts")
         validate_shortcut_targets(document, contract_version)
