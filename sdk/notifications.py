@@ -112,3 +112,20 @@ def poll_lifecycle(cursor: str | None = None, *, limit: int = 100) -> dict[str, 
     return request("notifications.lifecycle.poll", "notifications.lifecycle.read", {
         "cursor": cursor, "limit": limit,
     })
+
+def destination_status(*, provider_id: str | None = None, after: str | None = None, limit: int = 50) -> dict[str, Any]:
+    """Read current actor/current installation status with an independent 1.1.11 grant.
+
+    No destination addresses, configuration, content or credentials are returned.
+    This snapshot is informational: core rechecks routing at actual delivery.
+    Verification and recovery changes remain owner actions in host Notifications.
+    """
+    if type(limit) is not int or not 1 <= limit <= 100:
+        raise ValueError("Destination status limit must be an integer from 1 to 100")
+    if provider_id is not None and (not isinstance(provider_id, str) or not 1 <= len(provider_id) <= 128):
+        raise ValueError("Provider ID must be a bounded string")
+    if after is not None:
+        UUID(after)
+    return request("notification_destinations.status", "notification_destinations.read", {
+        "provider_id": provider_id, "after": after, "limit": limit,
+    })

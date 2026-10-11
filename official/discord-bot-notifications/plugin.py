@@ -13,7 +13,7 @@ from typing import Any
 from urllib.parse import quote, urlsplit
 from uuid import UUID
 
-from sdk.notifications import provider_context, register_provider
+from sdk.notifications import destination_status, provider_context, register_provider
 from sdk.plugin_protocol import GatewayRequestError, request
 
 PLUGIN_ID = "official.discord-bot-notifications"
@@ -292,6 +292,50 @@ def _save_linked_accounts(user_id: str, accounts: list[dict[str, Any]]) -> None:
         _delete("links/" + user_id)
         return
     _store("links/" + user_id, {**accounts[0], "accounts": accounts})
+
+
+def get_destinations(values: dict[str, Any]) -> dict[str, Any]:
+    """Display host proof, never the older optional profile-link verification."""
+    actor = _actor(values)
+    page = destination_status(after=values.get("after"), limit=100)
+    installation = str(UUID(page["installation_id"]))
+    destinations = []
+    for status in page["destinations"]:
+        item = dict(status)
+        destination_id = str(UUID(item["id"]))
+        if item["provider_id"] == ACCOUNT_PROVIDER_ID:
+            key = f"account-dm/destinations/{installation}/{destination_id}"
+        elif item["provider_id"] == CHANNEL_PROVIDER_ID:
+            key = f"channel/destinations/{installation}/{destination_id}"
+        else:
+            key = None
+        record = _load(key, {}) if key else {}
+        # Local identity labels are plugin-owned; a stale mapping must not be
+        # attached to host proof for another revision or actor.
+        if (isinstance(record, dict) and not record.get("retired")
+                and record.get("user_id") == actor and record.get("revision") == item["revision"]):
+            item.update({key: record[key] for key in ("username", "discord_id", "channel_id") if key in record})
+        destinations.append(item)
+    return {"destinations": destinations, "next_after": page.get("next_after")}
+
+
+def list_servers(values: dict[str, Any]) -> dict[str, Any]:
+    """Administrator-only, bounded bot membership discovery; never echo credentials."""
+    _actor(values, admin=True)
+    token = values.get("token")
+    if token is None or token == "":
+        token = _bot_config()["token"]
+    if not isinstance(token, str) or not token.strip() or len(token) > 512:
+        raise PluginError("Enter a valid bot token or configure it first.")
+    after = values.get("after", "0")
+    if after != "0" and (not isinstance(after, str) or not _SNOWFLAKE.fullmatch(after)):
+        raise PluginError("The server-list cursor is invalid.")
+    response = _discord(token.strip(), "GET", f"/users/@me/guilds?limit=100&after={after}")
+    if not isinstance(response, list):
+        raise PluginError("Discord did not return the bot server list.")
+    servers = [{"id": item["id"], "name": str(item.get("name", item["id"]))[:100]}
+               for item in response if isinstance(item, dict) and _SNOWFLAKE.fullmatch(str(item.get("id", "")))]
+    return {"servers": servers, "next_after": servers[-1]["id"] if len(response) == 100 and servers else None}
 
 
 def get_config(values: dict[str, Any]) -> dict[str, Any]:

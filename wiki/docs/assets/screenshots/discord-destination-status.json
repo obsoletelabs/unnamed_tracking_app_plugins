@@ -1,0 +1,31 @@
+{
+  "kind": "authenticated-real-host",
+  "captured_at": "2026-10-11",
+  "host_revision": "aa2644c30545b41dd3565b9ef73dcacd1dadc579",
+  "plugin_revision": "be793bfd1b880872269167ed58ab12b08fe2f383",
+  "plugin_id": "official.discord-bot-notifications",
+  "signing_identity": "integration-disposable",
+  "external_transport": "synthetic Discord responses; real signed install/runtime/gateway",
+  "captures": [
+    {
+      "filename": "discord-host-destination-status.jpg",
+      "description": "Signed installed bot displays host SECURE and PRIVATE destination trust independently, with recovery readiness and focused control links.",
+      "sha256": "1f276f9028acb80c36852e16739317c426afad21f725ba5f850e2cfb92a10441"
+    },
+    {
+      "filename": "discord-server-search.jpg",
+      "description": "Administrator discovers and searches joined servers; choosing a server updates the manual ID field without saving credentials.",
+      "sha256": "36e21c6b93029f9e96dd4b9eb07daef797634b13ad9dbe2c5bb219c86049ca4b"
+    },
+    {
+      "filename": "discord-directory-search.jpg",
+      "description": "Administrator searches channels by name and members by ID; hidden selections are retained.",
+      "sha256": "822e97b8a8f0f9d11c60b1aef98398b97d3dccb7dfc43d61d100e62f3c3d848e"
+    },
+    {
+      "filename": "discord-host-destination-status-mobile.jpg",
+      "description": "Phone-width installed bot settings show actual destination status without horizontal overflow.",
+      "sha256": "c3ce027a319e4cea8479642abf4ee7532f02a9bdea14d17bbf82bfe4b7d774de"
+    }
+  ]
+}

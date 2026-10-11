@@ -54,6 +54,7 @@
         "notification_sources.register",
         "notifications.sensitive",
         "notifications.lifecycle.read",
+        "notification_destinations.read",
         "notifications",
         "notification_providers",
         "notification_providers.register",

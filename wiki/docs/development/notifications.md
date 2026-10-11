@@ -148,3 +148,37 @@ Unsigned branch previews remain separate from published signed releases. Previou
 credential configuration, destination activation and fresh host verification/recovery
 consent. Signing identity changes must not inherit old destination proof. Current
 native configuration requires Plugin API 1.1.10.
+
+
+## Current destination status (API 1.1.11)
+
+Request the independent `notification_destinations.read` permission and use
+`sdk.notifications.destination_status(provider_id=None, after=None, limit=50)`.
+It calls `notification_destinations.status`; limits are 1–100. The host supplies the
+current authenticated user and installation, which the caller cannot replace. The page
+returns that installation ID, own destination IDs/provider IDs/kind/revision, effective
+host trust, active/enabled and provider/verification status, recovery opt-in and readiness,
+plus a nullable UUID `next_after`. No addresses, display labels, configuration, credentials,
+proof challenges or content are exposed. Other users, installations and providers remain
+inaccessible. Registration/delivery/full-API/lifecycle grants do not imply this read grant.
+
+`recovery_status` is one of `unsupported`, `provider_unavailable`, `destination_disabled`,
+`verification_required`, `sensitive_permission_required`, `recovery_not_allowed`,
+`routing_disabled`, `eligible`. Eligible means the destination route is ready; a real
+auth-flow plugin must still be active and the host rechecks policy when dispatching.
+This read method cannot verify or mutate recovery preferences.
+
+Native plugin pages can link to focused owner controls using
+`/settings?area=account&section=notifications&notification_destination=<UUID>`.
+For a provider's setup, use `notification_provider=<provider-id>`; administrator links
+use `area=administration`. Reuse host verification/recovery actions; never treat local
+profile proof as host destination proof. The maintained Discord bot demonstrates actual
+PRIVATE/SECURE status, recovery readiness and separate compatibility profile links.
+
+### Installed Discord settings example
+
+The bot separates actual host destinations from compatibility profile links. Joined-server discovery and channel/member search reuse the existing administrator directory actions. A filtered list retains the current selection; changes still require explicit save. Screenshots use a disposable signed installation and synthetic Discord responses.
+
+![Host-authoritative destination status in the installed bot](../assets/screenshots/discord-host-destination-status.jpg)
+
+![Searchable bot server selection](../assets/screenshots/discord-server-search.jpg)

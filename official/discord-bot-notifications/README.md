@@ -2,7 +2,7 @@
 
 PRIVATE direct messages, optional host-verified SECURE recovery, and PUBLIC channel notifications using a dedicated Discord bot.
 
-**Host requirement:** use a host with Plugin API 1.1.10 for the current generic provider and native configuration UI. Older hosts may reject registration or lack the required settings integrations. The source declares the existing provider contract; transport and secrets remain plugin-owned.
+**Host requirement:** use a host with Plugin API 1.1.11 for the current generic provider and native configuration UI. Older hosts may reject registration or lack the required settings integrations. The updated source requires the independent destination-status read permission; transport and secrets remain plugin-owned.
 
 ## Per-account destinations
 
@@ -67,7 +67,7 @@ The dashboard never displays the bot token. Refreshing the dashboard re-queries 
 - The bot token is stored in this plugin's private storage namespace, never returned to the frontend after saving, and can be cleared by an administrator. Treat the plugin's data volume as sensitive and back it up accordingly.
 - Link codes expire after ten minutes and failed verification attempts are capped. The verification code is stored only as a hash.
 - The legacy grouped provider remains PRIVATE and cannot receive verification/security/recovery content. The per-account provider becomes SECURE only after independent host proof and requires a separate high-risk handoff grant.
-- The plugin sends DMs only to accounts linked by the same host account; PRIVATE enrollment does not require verification. Each account can be unlinked independently, and notifications are sent to every account that remains linked. It disables Discord mention parsing in sent messages.
+- The plugin sends DMs only to accounts linked by the same host account; PRIVATE enrollment does not require verification. Each per-account destination delivers only to its configured account. The legacy grouped provider broadcasts only to its remaining compatibility profile links. It disables Discord mention parsing in sent messages.
 - The bot needs only the server access required by this integration. Member discovery uses the Discord member list and therefore may require the Server Members Intent. Keep the token dedicated to this integration and rotate it if exposed.
 - Discord API calls use the plugin's declared `network.outbound` capability through the bounded host gateway. The plugin owns the external Discord network calls and credentials.
 - Notification bodies are bounded before sending and the bot does not interpret notification text as mentions.
@@ -85,3 +85,40 @@ your password, Accept invitation or Verify destination). It reserves room for a
 complete action rather than truncating its URL. Local previews keep their local
 URL; deployed notifications use the host-resolved notification URL. An action too
 long to fit is omitted whole with a prompt to open the app.
+
+## Trust, recovery and searchable selection
+
+The account page reads actual destination trust from the host through the separate
+`notification_destinations.read` permission (API 1.1.11). It shows PRIVATE and SECURE
+destinations separately, with current password-reset routing readiness. Existing profile
+links are collapsed as **Compatibility profile links**; their optional profile verification
+does not make a notification destination SECURE. No destination addresses, host secrets,
+challenge codes, notification content or other providers' destinations are returned by
+this read API. Local Discord labels are added only from this plugin's matching actor and
+destination revision. Failed refresh clears old trust badges.
+
+Use **Verify DM and configure recovery** for the exact host destination. Complete its
+host challenge, then enable **Allow recovery messages**. The separate sensitive-content
+permission must be granted, and the administrator must enable the password-reset plugin.
+The card explains missing proof, opt-in, permission, availability or routing. A verified
+destination can still have recovery disabled. PUBLIC channels never receive reset secrets.
+Host verification and recovery controls retain authority; this plugin cannot promote trust.
+
+Administrators can use **Find bot servers**, search by name or ID, select the bot's server
+or enter an ID manually. Discovery uses the entered write-only token or the stored native
+compatibility token, and returns at most 100 servers per request, with explicit pagination.
+It uses Discord's [Get Current User Guilds](https://docs.discord.com/developers/resources/user#get-current-user-guilds)
+endpoint; large bot sharding is outside this single-server integration. Selecting a server
+does not save until **Validate and save**. This section configures the directory and legacy
+grouped provider; links open the separately revision-bound DM/channel provider settings in
+Administration → Notifications. Changing those server settings retires previous destinations
+and requires explicit reconfiguration and new host proof.
+
+Channel allowlists, allowed user channels, members and destination/account cards support
+name/ID search. Member search covers loaded pages; **Load more server users** expands the
+directory. Bulk matching channel selection preserves hidden choices until an explicit save.
+User channels remain administrator-allowed PUBLIC targets. Each existing destination keeps
+its own target; selecting a default channel only affects future enrollment.
+
+Version 0.1.1 is a manual update requiring API 1.1.11 and permission review. Earlier packages
+and signing history remain immutable. Install/update the host before updating the bot.

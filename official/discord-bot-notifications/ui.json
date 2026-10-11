@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.6",
+  "api_contract_version": "1.1.11",
   "plugin_id": "official.discord-bot-notifications",
   "title": "Discord Bot Notifications",
   "settings": [],
@@ -25,12 +25,14 @@
     {"id": "select-channel", "label": "Select your default notification channel", "handler": "plugin:select_channel", "capability": {"name": "network.outbound", "version": 1}},
     {"id": "configure-channel-destination", "label": "Configure PUBLIC channel destination", "handler": "plugin:configure_channel_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
     {"id": "retire-channel-destination", "label": "Retire channel destination", "handler": "plugin:retire_channel_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
-    {"id": "deliver-channel", "label": "Deliver to a PUBLIC channel", "handler": "plugin:deliver_channel", "capability": {"name": "notification_providers.deliver", "version": 1}}
+    {"id": "deliver-channel", "label": "Deliver to a PUBLIC channel", "handler": "plugin:deliver_channel", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "get-destinations", "label": "Read own host destination status", "handler": "plugin:get_destinations", "capability": {"name": "notification_destinations.read", "version": 1}},
+    {"id": "list-servers", "label": "Find servers joined by this bot", "handler": "plugin:list_servers", "capability": {"name": "network.outbound", "version": 1}}
   ],
   "menus": [],
   "pages": [
-    {"id": "admin", "title": "Discord bot administration", "description": "Configure the bot token and the Discord server used for verified account linking.", "settings": [], "actions": ["get-config", "save-bot-config", "clear-bot-token", "list-directory", "allow-channels", "link-private"], "tables": [], "dialogs": []},
-    {"id": "account", "title": "Discord account linking", "description": "Link PRIVATE recipients now; host verification and recovery controls live in Notifications.", "settings": [], "actions": ["get-config", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "channel-choices", "select-channel"], "tables": [], "dialogs": []}
+    {"id": "admin", "title": "Discord bot administration", "description": "Find the bot server, allow PUBLIC channels and inspect configuration.", "settings": [], "actions": ["get-config", "save-bot-config", "clear-bot-token", "list-directory", "allow-channels", "link-private", "get-destinations", "list-servers"], "tables": [], "dialogs": []},
+    {"id": "account", "title": "Discord account linking", "description": "Actual PRIVATE/SECURE destination status, recovery readiness and host-owned verification controls.", "settings": [], "actions": ["get-config", "link-private", "start-link", "confirm-link", "unlink", "test-dm", "channel-choices", "select-channel", "get-destinations"], "tables": [], "dialogs": []}
   ],
   "tables": [],
   "dialogs": [],
