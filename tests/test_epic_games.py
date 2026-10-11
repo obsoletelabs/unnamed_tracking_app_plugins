@@ -172,7 +172,7 @@ def test_sandbox_assets_are_inlined_and_scripts_follow_the_form():
 def test_epic_is_a_connection_not_a_sidebar_page():
     manifest = json.loads((SOURCE / "manifest.json").read_text())
     document = json.loads((SOURCE / "ui.json").read_text())
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.9"
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.11"
     capabilities = {item["name"] for item in manifest["capabilities"]}
     assert "frontend.connections" in capabilities
     assert "frontend.navigation.main" not in capabilities
@@ -184,6 +184,25 @@ def test_epic_is_a_connection_not_a_sidebar_page():
     # The status action is the one the host runs to show Connected / Not connected.
     assert connection["status_action_id"] == "status"
     assert actions["status"]["capability"]["name"] == "plugin.storage"
+    assert connection["sync_action_id"] == "sync"
+    assert manifest["scheduled_tasks"][0]["scope"] == "user"
+    assert manifest["scheduled_tasks"][0]["action_id"] == "sync"
+
+
+def test_menu_and_autosync_share_bounded_resumable_steps_and_do_not_touch_other_users(service):
+    service.plugin.connect(context(authorization_code=CODE))
+    assert service.plugin.sync(context())["phase"] == "playtime"
+    assert service.plugin.sync(context())["phase"] == "catalogue"
+    for _ in range(20):
+        result = service.plugin.sync(context())
+        if result["completed"]:
+            break
+        assert result["continue_after_seconds"] == 60
+    assert result["completed"] and result["imported"] == 1
+    assert "continue_after_seconds" not in result
+    assert service.plugin.sync(context())["phase"] == "playtime"
+    assert service.plugin.sync(context(OTHER))["ok"] is False
+    assert not any(OTHER in key for key in service.storage)
 
 
 def test_status_reports_only_connected_flag_and_account_name(service):

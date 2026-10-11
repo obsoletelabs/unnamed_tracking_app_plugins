@@ -1,8 +1,8 @@
 # Epic Games Library
 
 The official `official.epic-games` plugin keeps Epic connection and import behavior
-outside the core app. It requires the host's additive **Plugin API 1.1.9**
-`games.import` and `connections` contracts. Its sandboxed page offers personal sign-in, imports,
+outside the core app. It requires the host's additive **Plugin API 1.1.11**
+connection sync and personal schedule contracts. Its sandboxed page offers personal sign-in, imports,
 pause/resume and disconnect through declared actions.
 
 Sign in on Epic's own site and submit its one-time code. Use **Copy sign-in link**
@@ -36,8 +36,25 @@ Epic Games is listed on **Settings > Account > Connections** through the
 `connections` contribution, whose `status` action reports whether the account is
 connected. **Connect** and **Manage** open the page above in a popup, so there is
 no sidebar entry. Permissions are `games.write`, `network.outbound`,
-`plugin.storage` and `frontend.connections`. There are no host source imports, direct database
-connections, native frontend permission or automatic background requests.
+`plugin.storage`, `frontend.connections` and `tasks.background`. There are no host source imports,
+direct database connections or native frontend permission. Automatic sync starts off.
+
+The popup uses Steam's host dialog width and shared appearance, with import controls
+shown after connection. Games → Sync / import exposes **Sync Epic Games** through
+the declared connection sync action. Account → Background tasks offers an independent
+personal autosync schedule. It advances bounded saved steps and resumes incomplete
+work after one minute while enabled, then returns to the chosen interval. The same
+actor-scoped lease protects foreground and scheduled imports from overlap.
+
+The following captures show version 0.7.0 installed in a disposable host. The
+connection view uses a local provider HTTP fixture; it does not claim live Epic
+sign-in.
+
+![Connection dialog using the host's shared appearance](../assets/plugin-integrated-ui/after-epic.png)
+
+![Games sync menu](../assets/plugin-integrated-ui/after-games-sync-menu.png)
+
+![Personal autosync schedule](../assets/plugin-integrated-ui/after-background-tasks.png)
 
 See the [plugin README](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/epic-games/README.md)
 for build/install instructions, limitations and protocol references. Branch CI

@@ -46,7 +46,7 @@ def test_discovery_rejects_layout_drift(tmp_path, defect):
         discover_plugins(tmp_path)
 
 
-@pytest.mark.parametrize("defect", ["ungranted", "missing-page", "missing-action", "old-contract"])
+@pytest.mark.parametrize("defect", ["ungranted", "missing-page", "missing-action", "missing-sync", "old-contract"])
 def test_connection_contract_is_checked_in_source(defect):
     from tools.distribution import canonical_json, collect_payload
     from tools.validate_packages import validate_current_contract
@@ -73,9 +73,34 @@ def test_connection_contract_is_checked_in_source(defect):
         document["connections"][0]["page_id"] = "missing"
     elif defect == "missing-action":
         document["connections"][0]["status_action_id"] = "missing"
+    elif defect == "missing-sync":
+        document["connections"][0]["sync_action_id"] = "missing"
     else:
         manifest = {**manifest, "api_contract_version": "1.1.8"}
         document["api_contract_version"] = "1.1.8"
+    files["ui.json"] = json.dumps(document).encode()
+    with pytest.raises(ValueError):
+        validate_current_contract(manifest, files)
+
+
+@pytest.mark.parametrize("defect", ["ungranted", "missing-page", "old-contract"])
+def test_integrated_administration_slots_require_the_public_contract(defect):
+    from tools.distribution import canonical_json, collect_payload
+    from tools.validate_packages import validate_current_contract
+
+    source, manifest = next(
+        (s, m) for s, m in discover_plugins(ROOT) if m["plugin_id"] == "official.user-invites"
+    )
+    files, metadata = collect_payload(ROOT, source, manifest)
+    files["distribution.json"] = canonical_json({**metadata, "version": manifest["version"], "automatic_update": False})
+    validate_current_contract(manifest, files)
+    document = json.loads(files["ui.json"])
+    if defect == "ungranted":
+        manifest["permissions"] = [item for item in manifest["permissions"] if item["capability"]["name"] != "frontend.settings"]
+    elif defect == "missing-page":
+        document["extensions"][1]["page_id"] = "missing"
+    else:
+        manifest["api_contract_version"] = document["api_contract_version"] = "1.1.10"
     files["ui.json"] = json.dumps(document).encode()
     with pytest.raises(ValueError):
         validate_current_contract(manifest, files)

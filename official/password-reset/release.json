@@ -8,5 +8,5 @@
   ],
   "automatic_update": false,
   "icon": "icon.svg",
-  "release_notes": "Functional host-mediated password recovery with single-use links, SECURE external routing, session revocation and retained API keys. Requires host API1.1.7 and explicit administrator activation."
+  "release_notes": "Password recovery settings now appear on Password policy with separate save, enable and disable controls and readable expiry units. Requires host API1.1.11. Existing sign-in recovery, secure routing, single-use links and session revocation remain unchanged."
 }

@@ -20,17 +20,19 @@ let browser;
 before(async () => { browser = await chromium.launch({ args: ["--no-sandbox"] }); });
 after(async () => { await browser?.close(); });
 
-async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixture=1") {
-  await page.evaluate(({ markup, signinUrl }) => {
+async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixture=1", menuSync = false) {
+  await page.evaluate(({ markup, signinUrl, menuSync }) => {
     const iframe = document.querySelector("iframe");
     window.actions = [];
     window.addEventListener("message", event => {
       if (event.source !== iframe.contentWindow || event.data?.type !== "plugin-api-request") return;
       const { payload, requestId } = event.data;
       let result = {};
+      if (event.data.method === "plugin.context") result = { initial_action_id: menuSync ? "sync" : "" };
       if (event.data.method === "plugin.run-action") {
         window.actions.push({ action: payload.actionId, code: payload.values.authorization_code });
-        if (payload.actionId === "status") result = { connected: false, phase: "idle", login_url: signinUrl };
+        if (payload.actionId === "status") result = { connected: menuSync, display_name: "Fixture player", phase: "idle", login_url: signinUrl };
+        else if (menuSync && ["sync", "step"].includes(payload.actionId)) result = { connected: true, display_name: "Fixture player", phase: payload.actionId === "sync" && menuSync !== "complete" ? "playtime" : "complete", imported: 1 };
         else if (payload.actionId === "signin") {
           result = { redirect_url: signinUrl };
           window.setTimeout(() => window.location.assign(signinUrl), 0);
@@ -40,7 +42,7 @@ async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixtu
       event.source.postMessage({ type: "plugin-api-response", requestId, result }, "*");
     });
     iframe.srcdoc = markup;
-  }, { markup: html, signinUrl });
+  }, { markup: html, signinUrl, menuSync });
 }
 
 test("opaque sandbox connects through clicks and Enter, clearing codes and showing safe errors", async () => {
@@ -52,6 +54,7 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
     await mount(page);
     const frame = page.frameLocator("iframe");
     await frame.getByText("Connect your Epic account to start.", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#import-panel").isVisible(), false);
     await frame.getByLabel("Epic authorization code").fill("invalid");
     await frame.getByRole("button", { name: "Connect Epic", exact: true }).click();
     await frame.getByText("Paste a valid one-time code.", { exact: true }).waitFor();
@@ -59,12 +62,36 @@ test("opaque sandbox connects through clicks and Enter, clearing codes and showi
     await frame.getByLabel("Epic authorization code").fill("b".repeat(32));
     await frame.getByLabel("Epic authorization code").press("Enter");
     await frame.getByText("Connected as Fixture player.", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#import-panel").isVisible(), true);
     assert.equal(await frame.getByLabel("Epic authorization code").inputValue(), "");
     assert.equal(await frame.locator("#error").isVisible(), false);
     assert.deepEqual(await page.evaluate(() => window.actions.filter(item => item.action === "connect")), [
       { action: "connect", code: "invalid" }, { action: "connect", code: "b".repeat(32) },
     ]);
     assert.deepEqual(errors, []);
+  } finally { await page.close(); }
+});
+
+test("a Games-menu sync opens the connected view and continues the existing import flow", async () => {
+  const page = await browser.newPage();
+  try {
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
+    await mount(page, "https://www.epicgames.com/id/login?fixture=1", true);
+    const frame = page.frameLocator("iframe");
+    await frame.getByText("Import complete.", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#imported").innerText(), "1");
+    assert.deepEqual(await page.evaluate(() => window.actions.map(item => item.action)), ["status", "sync", "step"]);
+    assert.equal(await frame.locator("#connect-panel").isVisible(), false);
+  } finally { await page.close(); }
+});
+
+test("a completed menu sync does not immediately start a second import", async () => {
+  const page = await browser.newPage();
+  try {
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
+    await mount(page, "https://www.epicgames.com/id/login?fixture=1", "complete");
+    await page.frameLocator("iframe").getByText("Import complete.", { exact: true }).waitFor();
+    assert.deepEqual(await page.evaluate(() => window.actions.map(item => item.action)), ["status", "sync"]);
   } finally { await page.close(); }
 });
 
@@ -94,6 +121,7 @@ test("copying the sign-in link retains the page and offers manual copying in an 
       await page.setContent('<iframe title="Epic" sandbox="allow-scripts" style="width:100%;height:1000px;border:0"></iframe>');
       await mount(page, signinUrl);
       const frame = page.frameLocator("iframe");
+      await frame.getByText("Use your regular browser", { exact: true }).click();
       await frame.getByRole("button", { name: "Copy sign-in link" }).click();
       await frame.getByText("Copy the selected link using your browser's Copy command, then paste it into your regular browser.", { exact: true }).waitFor();
       assert.equal(await frame.getByLabel("Epic sign-in link").inputValue(), signinUrl);

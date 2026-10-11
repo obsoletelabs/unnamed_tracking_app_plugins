@@ -271,6 +271,143 @@
         "security"
       ],
       "version": "1.0.1"
+    },
+    {
+      "automatic_update": false,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+        "source_committed_at": "2026-10-11T20:17:54+08:00",
+        "source_digest": "952fdfd05ee9c247b0053e0b6533e0c324b32767ec0826768adc240c3c0bee0c",
+        "source_path": "official/user-invites",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "ab0efa81204db903a7c95c5a1cc6800516e1112bd881c202b32703e8078e14e2"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.11",
+        "application_version_range": ">=1.0.0",
+        "capabilities": [
+          {
+            "name": "auth.user_invites",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.admin",
+            "version": 1
+          },
+          {
+            "name": "frontend.settings",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Administrator email invitations with expiring single-use acceptance and account creation only after confirmation.",
+        "entrypoint": "plugin:main",
+        "frontend": {
+          "entry": "frontend/index.html",
+          "inline_assets": true
+        },
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+          "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
+        },
+        "manifest_version": 1,
+        "name": "User Invites",
+        "permissions": [
+          {
+            "capability": {
+              "name": "auth.user_invites",
+              "version": 1
+            },
+            "rationale": "Enable administrator-issued email invitations and normal account creation on single-use host acceptance. This plugin can see its own pending invitation email/status records, but cannot read passwords, tokens, SMTP credentials or grant administrator privileges."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Remember explicit activation and invitation lifetime only; no invitation credentials are stored by the plugin."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.admin",
+              "version": 1
+            },
+            "rationale": "Show the administrator-only invitation controls."
+          },
+          {
+            "capability": {
+              "name": "frontend.settings",
+              "version": 1
+            },
+            "rationale": "Expose administrator-only authentication configuration in plugin Settings."
+          }
+        ],
+        "plugin_id": "official.user-invites",
+        "sdk_version_range": "^1.1.10",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "status",
+            "enable",
+            "disable",
+            "issue",
+            "list-invites",
+            "revoke",
+            "save"
+          ],
+          "menus": [],
+          "pages": [
+            "configure",
+            "invite"
+          ],
+          "settings": []
+        },
+        "version": "1.1.0"
+      },
+      "package": {
+        "filename": "official.user-invites-1.1.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 15710
+      },
+      "package_sha256": "f9460090f79148865d87ec1b47faea8a8d682c3824fbacc592a9f2f4a24729a8",
+      "plugin_id": "official.user-invites",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# User Invites\n\nMaintained official administrator email-invite integration for host Plugin API **1.1.11**.\n\nConfigure built-in SMTP in Administration > Notifications. Install this plugin and explicitly approve `auth.user_invites`. Open Administration > Users: User invitations appears below the user controls, and Invite user sits beside Create user. Save settings separately from enabling or disabling invitations. Choose expiry using minutes, hours, days or weeks, within the existing one-hour to one-week bounds (one day by default). Send to the intended recipient email address; do not create an account first.\n\nEmail settings include a From display name, subject, heading, welcome message, personal/generic/no greeting, button wording, card/simple layout, accent color and footer. The optional recipient name supplies the personal greeting. A live preview shows the wording and appearance. All content is plain text and escaped by the host. The configured SMTP sender address and host acceptance URL remain authoritative. Wording changes affect future invitations and preserve existing links; lifetime changes and disabling retain credential invalidation behavior. Disabling preserves saved settings. Installation alone does not enable invitations.\n\nThe host queues a PRIVATE bootstrap email through the existing notification dispatcher. It uses the configured public app URL, falling back to the issuing administrator's signed-in app address. An allowed secure SMTP transport is required; explicit local-IP/development plaintext exceptions follow the built-in policy. Routing restrictions still apply. The destination exists only for that invitation and cannot receive ordinary or security notices.\n\nThe invitee opens the emailed link and chooses a username/password. Opening the link does not consume it. POST acceptance creates an active normal account, never an administrator, and requires normal sign-in afterward. The email address cannot be changed by the acceptance payload. Possession of the invite does not create a verified notification destination automatically.\n\nThe administrator page lists the current installation's last 100 invites, expiry and delivery state, and can revoke outstanding links. Sending another invite to the same address retires the earlier link. Requests are bounded to 100 per administrator/day and five per recipient/day, with a global 1,000-row pending capacity. Expired pre-account records are cleaned after a day. Disabling, uninstalling or revoking the grant invalidates old links; reinstall requires explicit activation.\n\nThe plugin owns activation and its admin UI. It uses only the public gateway and receives its own invitation email/status records. The host owns tokens, account/password validation, creation, SMTP credentials and delivery retries. Passwords and bearer links never pass through plugin code. Existing registered emails are rejected to the administrator.\n\nThis is a usable flow, separate from the synthetic `example.user-invite-notification-demo` routing demonstration.\n\nConfigure activation/lifetime under Settings → Administration → Account security → User invitations. On Administration → Users, **Invite user** opens the plugin dialog to send and review invitations. Requires API1.1.10 and reviewed administrative/settings grants. The host renders invitation mail as HTML plus text.\n",
+      "release_notes": "Integrated Users-page settings and Invite user button beside Create user. Separate save/enable/disable controls, expiry units and customizable email wording, sender display name, greeting and appearance. Requires host API1.1.11; the host retains SMTP, credential and account ownership.",
+      "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+        "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
+      },
+      "tags": [
+        "official",
+        "notifications",
+        "security"
+      ],
+      "version": "1.1.0"
     }
   ],
   "version": 1

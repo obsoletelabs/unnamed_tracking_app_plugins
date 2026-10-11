@@ -27797,11 +27797,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "468a4b7c2489457a915f6f9e7f774d74dd5c4708",
-        "source_committed_at": "2026-10-11T17:31:11+08:00",
-        "source_digest": "2f6383f33880c0e4f59de25d2829de0408434c3174b8857700f15567bc9ff28a",
+        "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+        "source_committed_at": "2026-10-11T20:17:54+08:00",
+        "source_digest": "283deef947f86012be4215339aaf2cc5975ba0ee4b60e008a9e6c5448005f18c",
         "source_path": "official/epic-games",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -27818,6 +27818,10 @@
         },
         {
           "name": "frontend.connections",
+          "version": 1
+        },
+        {
+          "name": "tasks.background",
           "version": 1
         }
       ],
@@ -27842,7 +27846,7 @@
         "downloadable"
       ],
       "manifest": {
-        "api_contract_version": "1.1.9",
+        "api_contract_version": "1.1.11",
         "application_version_range": ">=0.0.1",
         "capabilities": [
           {
@@ -27860,6 +27864,10 @@
           {
             "name": "frontend.connections",
             "version": 1
+          },
+          {
+            "name": "tasks.background",
+            "version": 1
           }
         ],
         "dependencies": [],
@@ -27871,8 +27879,8 @@
         },
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "d01b8dd0f3b5d9196cb4bfcb0357b0cdd51261a715d641d8eb4cbbd9d3cc26b8",
-          "signature": "v2:rYk4+scAwCaxzrJYMkq66WVKlVECGZiSkUz/pi4RfOVV8KTnb+0taDxOMwoEhFmdxh35jtDcinPROh4cYLiHAA=="
+          "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
+          "signature": "v2:pMLRomTT7JUA9FP/FCSvCu5qMeuBkrKom3fAjruJyQjg8NR8BeQG26MsCB0LN0ZyAqfEp8gVoiQH7IvzIyCCCg=="
         },
         "manifest_version": 1,
         "name": "Epic Games Library",
@@ -27904,9 +27912,28 @@
               "version": 1
             },
             "rationale": "List Epic Games on the Connections page so you can connect, import and disconnect from a popup there."
+          },
+          {
+            "capability": {
+              "name": "tasks.background",
+              "version": 1
+            },
+            "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account’s approved access and resumable import checkpoints."
           }
         ],
         "plugin_id": "official.epic-games",
+        "scheduled_tasks": [
+          {
+            "action_id": "sync",
+            "default_interval_minutes": 1440,
+            "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
+            "id": "autosync",
+            "max_interval_minutes": 10080,
+            "min_interval_minutes": 5,
+            "name": "Epic Games autosync",
+            "scope": "user"
+          }
+        ],
         "sdk_version_range": "^1.1.1",
         "storage": {
           "quota_mb": 16
@@ -27918,7 +27945,8 @@
             "connect",
             "disconnect",
             "start",
-            "step"
+            "step",
+            "sync"
           ],
           "menus": [],
           "pages": [
@@ -27926,15 +27954,15 @@
           ],
           "settings": []
         },
-        "version": "0.6.1"
+        "version": "0.7.0"
       },
       "name": "Epic Games Library",
       "package": {
-        "filename": "official.epic-games-0.6.1.utp",
+        "filename": "official.epic-games-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 19421
+        "size_bytes": 20566
       },
-      "package_sha256": "faa76fa7be885e8e3c0b34617cf72abda35f8229fbbac8dd642838248bdc8563",
+      "package_sha256": "5ea1081f5e585045e6088a76654c0dfaaf1be2b0d1c61263c760127a25f9cae0",
       "permissions": [
         {
           "capability": {
@@ -27963,12 +27991,19 @@
             "version": 1
           },
           "rationale": "List Epic Games on the Connections page so you can connect, import and disconnect from a popup there."
+        },
+        {
+          "capability": {
+            "name": "tasks.background",
+            "version": 1
+          },
+          "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account’s approved access and resumable import checkpoints."
         }
       ],
       "plugin_id": "official.epic-games",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.9**. Requires a host\nthat implements `games.import` and the `connections` UI contribution (host\nPlugin API 1.1.9). Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.9. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nUse **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and navigates the host tab;\nthe sandboxed plugin does not open a popup itself. After signing in, use browser\nBack to return to the plugin page, then paste the one-time authorization code,\nJSON page or redirect URL into the password field. No popup permission is needed.\nThe host opens the declared Epic sign-in destination outside the sandbox. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace; a missing catalogue response retains the batch\nfor retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n",
-      "release_notes": "Epic Games now lives on Settings > Account > Connections: connect, import and disconnect from a popup there instead of a sidebar page. Replaces the main-navigation permission with the low-risk frontend.connections permission and requires host Plugin API 1.1.9. Connection, import and token handling are unchanged.",
+      "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.11**. Requires a host\nthat implements `games.import`, connection sync actions and personal scheduled\ntasks. Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nThe popup uses the host's appearance and spacing, with an account summary and\nimport controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and navigates the host tab;\nthe sandboxed plugin does not open a popup itself. After signing in, use browser\nBack to return to the plugin page, then paste the one-time authorization code,\nJSON page or redirect URL into the password field. No popup permission is needed.\nThe host opens the declared Epic sign-in destination outside the sandbox. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nThe popup follows Steam's host dialog sizing and shared appearance. Disconnected\naccounts show sign-in controls; import controls appear after connecting.\nOn Games, **Sync / import → Sync Epic Games** starts or resumes the same\nimport flow. The menu does not add a second connection page.\n\nFor automatic imports, open **Account → Background tasks → Epic Games autosync**.\nApprove the declared `tasks.background` access and enable your own schedule; it\nstarts off and normally runs daily. Intervals can range from 5 minutes to 1 week.\nEach run advances one bounded checkpoint; incomplete work requests the next step\nafter 60 seconds, even with the page closed. Completion restores your chosen interval.\nDisabling autosync stops queued steps. Manual and automatic imports share the same\nper-user lease, tokens, checkpoint and preservation rules; another user's schedule\ncannot adopt your Epic account or change your library.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace; a missing catalogue response retains the batch\nfor retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n",
+      "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11.",
       "releases": [
         {
           "automatic_update": false,
@@ -29613,14 +29648,175 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.6.1.utp",
           "version": "0.6.1"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+            "source_committed_at": "2026-10-11T20:17:54+08:00",
+            "source_digest": "283deef947f86012be4215339aaf2cc5975ba0ee4b60e008a9e6c5448005f18c",
+            "source_path": "official/epic-games",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8ae273cee46093c738e16ceca8687ea120b1289dc64e502aa4f27f0342db2d7"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.11",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "games.write",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "frontend.connections",
+                "version": 1
+              },
+              {
+                "name": "tasks.background",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Connect a personal Epic account from Settings > Account > Connections and import its games with resumable inventory, catalogue and playtime steps.",
+            "entrypoint": "plugin:main",
+            "frontend": {
+              "entry": "frontend/index.html",
+              "inline_assets": true
+            },
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
+              "signature": "v2:pMLRomTT7JUA9FP/FCSvCu5qMeuBkrKom3fAjruJyQjg8NR8BeQG26MsCB0LN0ZyAqfEp8gVoiQH7IvzIyCCCg=="
+            },
+            "manifest_version": 1,
+            "name": "Epic Games Library",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "games.write",
+                  "version": 1
+                },
+                "rationale": "Import games into the authenticated user's library and update provider metadata, playtime and availability while preserving personal state."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Exchange the user's Epic authorization code and contact Epic's account, library and catalogue services through the bounded host network gateway."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Keep each user's rotating Epic tokens private and save resumable inventory/import checkpoints inside this plugin's storage."
+              },
+              {
+                "capability": {
+                  "name": "frontend.connections",
+                  "version": 1
+                },
+                "rationale": "List Epic Games on the Connections page so you can connect, import and disconnect from a popup there."
+              },
+              {
+                "capability": {
+                  "name": "tasks.background",
+                  "version": 1
+                },
+                "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account’s approved access and resumable import checkpoints."
+              }
+            ],
+            "plugin_id": "official.epic-games",
+            "scheduled_tasks": [
+              {
+                "action_id": "sync",
+                "default_interval_minutes": 1440,
+                "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
+                "id": "autosync",
+                "max_interval_minutes": 10080,
+                "min_interval_minutes": 5,
+                "name": "Epic Games autosync",
+                "scope": "user"
+              }
+            ],
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 16
+            },
+            "ui": {
+              "actions": [
+                "status",
+                "signin",
+                "connect",
+                "disconnect",
+                "start",
+                "step",
+                "sync"
+              ],
+              "menus": [],
+              "pages": [
+                "library"
+              ],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.epic-games-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 20566
+          },
+          "package_sha256": "5ea1081f5e585045e6088a76654c0dfaaf1be2b0d1c61263c760127a25f9cae0",
+          "plugin_id": "official.epic-games",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.11**. Requires a host\nthat implements `games.import`, connection sync actions and personal scheduled\ntasks. Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nThe popup uses the host's appearance and spacing, with an account summary and\nimport controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and navigates the host tab;\nthe sandboxed plugin does not open a popup itself. After signing in, use browser\nBack to return to the plugin page, then paste the one-time authorization code,\nJSON page or redirect URL into the password field. No popup permission is needed.\nThe host opens the declared Epic sign-in destination outside the sandbox. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nThe popup follows Steam's host dialog sizing and shared appearance. Disconnected\naccounts show sign-in controls; import controls appear after connecting.\nOn Games, **Sync / import → Sync Epic Games** starts or resumes the same\nimport flow. The menu does not add a second connection page.\n\nFor automatic imports, open **Account → Background tasks → Epic Games autosync**.\nApprove the declared `tasks.background` access and enable your own schedule; it\nstarts off and normally runs daily. Intervals can range from 5 minutes to 1 week.\nEach run advances one bounded checkpoint; incomplete work requests the next step\nafter 60 seconds, even with the page closed. Completion restores your chosen interval.\nDisabling autosync stops queued steps. Manual and automatic imports share the same\nper-user lease, tokens, checkpoint and preservation rules; another user's schedule\ncannot adopt your Epic account or change your library.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace; a missing catalogue response retains the batch\nfor retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n",
+          "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11.",
+          "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
+            "signature": "v2:pMLRomTT7JUA9FP/FCSvCu5qMeuBkrKom3fAjruJyQjg8NR8BeQG26MsCB0LN0ZyAqfEp8gVoiQH7IvzIyCCCg=="
+          },
+          "tags": [
+            "games",
+            "epic",
+            "imports",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "d01b8dd0f3b5d9196cb4bfcb0357b0cdd51261a715d641d8eb4cbbd9d3cc26b8",
+      "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "d01b8dd0f3b5d9196cb4bfcb0357b0cdd51261a715d641d8eb4cbbd9d3cc26b8",
-        "signature": "v2:rYk4+scAwCaxzrJYMkq66WVKlVECGZiSkUz/pi4RfOVV8KTnb+0taDxOMwoEhFmdxh35jtDcinPROh4cYLiHAA=="
+        "sha256": "53139e40df7e34bca24dfd6b71050ef0dcf3c45d82b0583c028c8a18a37b4975",
+        "signature": "v2:pMLRomTT7JUA9FP/FCSvCu5qMeuBkrKom3fAjruJyQjg8NR8BeQG26MsCB0LN0ZyAqfEp8gVoiQH7IvzIyCCCg=="
       },
       "source": {
         "lifecycle": "source",
@@ -29633,8 +29829,8 @@
         "imports",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.6.1.utp",
-      "version": "0.6.1"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": "^1.0.0",
@@ -46438,11 +46634,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "468a4b7c2489457a915f6f9e7f774d74dd5c4708",
-        "source_committed_at": "2026-10-11T17:31:11+08:00",
-        "source_digest": "094368d564837f9395420b998e0aba4335ae6a69e7e57a49e91421d007ce18aa",
+        "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+        "source_committed_at": "2026-10-11T20:17:54+08:00",
+        "source_digest": "b6cc0667674163d826b2fbb0005fadf396d3f81db4942c3fdea22c0df2c92a62",
         "source_path": "official/password-reset",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -46455,10 +46651,6 @@
         },
         {
           "name": "frontend.settings",
-          "version": 1
-        },
-        {
-          "name": "frontend.placement.settings.admin",
           "version": 1
         }
       ],
@@ -46483,7 +46675,7 @@
         "downloadable"
       ],
       "manifest": {
-        "api_contract_version": "1.1.10",
+        "api_contract_version": "1.1.11",
         "application_version_range": ">=1.0.0",
         "capabilities": [
           {
@@ -46497,10 +46689,6 @@
           {
             "name": "frontend.settings",
             "version": 1
-          },
-          {
-            "name": "frontend.placement.settings.admin",
-            "version": 1
           }
         ],
         "dependencies": [],
@@ -46512,8 +46700,8 @@
         },
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "81f9535a7c623a4b816392bd704d776b7a79ff52db290463b8f82ec51cf37567",
-          "signature": "v2:meZKFw7dQUr3UijRQUphCoIi+VXcz065YQGtuqnFp9mGOC4HPRYeBF5FeMR7Vjt7HUdhPP5dTTtE09DPI8OdAA=="
+          "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
+          "signature": "v2:A5cryQyxT7g9XY8GrY75h2526dVXKKFTo1grYrBCBkbHIUiyO30K20SckwDspV/SG5XVpD6Xhloj42VyTUAjCA=="
         },
         "manifest_version": 1,
         "name": "Password Reset",
@@ -46538,13 +46726,6 @@
               "version": 1
             },
             "rationale": "Expose administrator-only authentication configuration in plugin Settings."
-          },
-          {
-            "capability": {
-              "name": "frontend.placement.settings.admin",
-              "version": 1
-            },
-            "rationale": "Place authentication configuration in the Administration settings area."
           }
         ],
         "plugin_id": "official.password-reset",
@@ -46556,7 +46737,8 @@
           "actions": [
             "status",
             "enable",
-            "disable"
+            "disable",
+            "save"
           ],
           "menus": [],
           "pages": [
@@ -46564,15 +46746,15 @@
           ],
           "settings": []
         },
-        "version": "1.1.1"
+        "version": "1.2.0"
       },
       "name": "Password Reset",
       "package": {
-        "filename": "official.password-reset-1.1.1.utp",
+        "filename": "official.password-reset-1.2.0.utp",
         "format": "utp-v1",
-        "size_bytes": 11676
+        "size_bytes": 13170
       },
-      "package_sha256": "2b78df1ce6a5635d8c0386412f8c116ce14d625c51660f3533963f88eead4a5a",
+      "package_sha256": "01a1d9418d250e031cc5fd737d5b17e4319595f2e117d32f983cb28d05347964",
       "permissions": [
         {
           "capability": {
@@ -46594,19 +46776,12 @@
             "version": 1
           },
           "rationale": "Expose administrator-only authentication configuration in plugin Settings."
-        },
-        {
-          "capability": {
-            "name": "frontend.placement.settings.admin",
-            "version": 1
-          },
-          "rationale": "Place authentication configuration in the Administration settings area."
         }
       ],
       "plugin_id": "official.password-reset",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Password Reset\n\nMaintained optional password recovery integration for host Plugin API 1.1.7. This is a functional account flow; the synthetic example remains a separate demonstration.\n\n## Setup\n\nInstall the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password recovery**, choose a link lifetime (600–3600 seconds, default 1200), and click **Enable or save recovery**. Disable invalidates outstanding links; installation alone does not enable public recovery.\n\nEach user must configure an external notification destination, verify it and separately enable recovery delivery. SMTP is built into the host. A plugin destination must declare verification/security/recovery support and hold the independent high-risk provider grant. The authenticated inbox and browser push cannot carry recovery links. Normal routing preferences and administrator restrictions apply; there is no direct SMTP bypass.\n\n## Use\n\nThe sign-in page shows **Forgot your password?** when this contribution is active. Request with your app username or configured app email. The acknowledgement is the same for unknown, disabled, SSO and ineligible accounts. Open the delivered link, choose a password satisfying the server policy and confirm. All browser sessions are revoked; **API keys remain active**. Sign in normally afterward.\n\nLinks expire, are single-use and are bound to the current account/password/email, installation and configuration revision. Opening a link never consumes it. Bearer material uses a URL fragment and is removed from the displayed address. Disabling/uninstalling or withdrawing the grant blocks pending delivery/redemption; reinstall cannot reclaim old links.\n\nThe host stores encrypted delivery material only until consumption/expiry and never puts it in inbox content or lifecycle audit. This plugin stores only its activation/lifetime configuration and never receives reset tokens, passwords, SMTP credentials or account rows.\n\n## Testing\n\nRun `pytest tests/test_official_password_reset.py` and the paired host recovery suite. Actual signed-package installation and the host request/link/redemption workflow are required before release. Temporary SMTP capture is suitable for local acceptance; no production SMTP account is required.\n\nStartup uses auth_flows.password_reset.restore to resume only an already-active matching installation and definition. Withdrawal or reinstallation requires explicit activation; regranting permission cannot revive an old reset credential.\n\nConfiguration is under Settings → Administration → Account security → Password recovery. The page shows live **Account recovery enabled/disabled** from the host. Saved preferences do not imply availability. Requires API1.1.10 and explicit settings placement grants. All SMTP mail now uses the host shared HTML design with a plain alternative.\n",
-      "release_notes": "Functional host-mediated password recovery with single-use links, SECURE external routing, session revocation and retained API keys. Requires host API1.1.7 and explicit administrator activation.",
+      "readme": "# Password Reset\n\nMaintained optional password recovery integration for host Plugin API 1.1.11. This is a functional account flow; the synthetic example remains a separate demonstration.\n\n## Setup\n\nInstall the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password policy** and find Password recovery below the policy controls. Choose expiry in minutes or hours (10–60 minutes, default 20). **Save settings**, **Enable** and **Disable** are separate controls. Saving disabled settings does not enable recovery; disabling preserves the saved lifetime and invalidates outstanding links. Installation alone does not enable public recovery. The sign-in request and completion flow is unchanged.\n\nEach user must configure an external notification destination, verify it and separately enable recovery delivery. SMTP is built into the host. A plugin destination must declare verification/security/recovery support and hold the independent high-risk provider grant. The authenticated inbox and browser push cannot carry recovery links. Normal routing preferences and administrator restrictions apply; there is no direct SMTP bypass.\n\n## Use\n\nThe sign-in page shows **Forgot your password?** when this contribution is active. Request with your app username or configured app email. The acknowledgement is the same for unknown, disabled, SSO and ineligible accounts. Open the delivered link, choose a password satisfying the server policy and confirm. All browser sessions are revoked; **API keys remain active**. Sign in normally afterward.\n\nLinks expire, are single-use and are bound to the current account/password/email, installation and configuration revision. Opening a link never consumes it. Bearer material uses a URL fragment and is removed from the displayed address. Disabling/uninstalling or withdrawing the grant blocks pending delivery/redemption; reinstall cannot reclaim old links.\n\nThe host stores encrypted delivery material only until consumption/expiry and never puts it in inbox content or lifecycle audit. This plugin stores only its activation/lifetime configuration and never receives reset tokens, passwords, SMTP credentials or account rows.\n\n## Testing\n\nRun `pytest tests/test_official_password_reset.py` and the paired host recovery suite. Actual signed-package installation and the host request/link/redemption workflow are required before release. Temporary SMTP capture is suitable for local acceptance; no production SMTP account is required.\n\nStartup uses auth_flows.password_reset.restore to resume only an already-active matching installation and definition. Withdrawal or reinstallation requires explicit activation; regranting permission cannot revive an old reset credential.\n\nConfiguration is under Settings → Administration → Account security → Password recovery. The page shows live **Account recovery enabled/disabled** from the host. Saved preferences do not imply availability. Requires API1.1.10 and explicit settings placement grants. All SMTP mail now uses the host shared HTML design with a plain alternative.\n",
+      "release_notes": "Password recovery settings now appear on Password policy with separate save, enable and disable controls and readable expiry units. Requires host API1.1.11. Existing sign-in recovery, secure routing, single-use links and session revocation remain unchanged.",
       "releases": [
         {
           "automatic_update": false,
@@ -47000,14 +47175,137 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.password-reset-1.1.1.utp",
           "version": "1.1.1"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+            "source_committed_at": "2026-10-11T20:17:54+08:00",
+            "source_digest": "b6cc0667674163d826b2fbb0005fadf396d3f81db4942c3fdea22c0df2c92a62",
+            "source_path": "official/password-reset",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "cc2414be216316a53e3770886699529d408ca5365c480f4a405d9015a5d0231a"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.11",
+            "application_version_range": ">=1.0.0",
+            "capabilities": [
+              {
+                "name": "auth.password_reset",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "frontend.settings",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Host-mediated, single-use password recovery through verified external notification destinations.",
+            "entrypoint": "plugin:main",
+            "frontend": {
+              "entry": "frontend/index.html",
+              "inline_assets": true
+            },
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
+              "signature": "v2:A5cryQyxT7g9XY8GrY75h2526dVXKKFTo1grYrBCBkbHIUiyO30K20SckwDspV/SG5XVpD6Xhloj42VyTUAjCA=="
+            },
+            "manifest_version": 1,
+            "name": "Password Reset",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "auth.password_reset",
+                  "version": 1
+                },
+                "rationale": "Enable administrator-configured host-mediated password recovery for local accounts. The host owns tokens, password changes and session revocation; this plugin cannot read credentials or bypass destination trust."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Remember whether this installation enables recovery and its configured token lifetime. No reset credentials are stored by this plugin."
+              },
+              {
+                "capability": {
+                  "name": "frontend.settings",
+                  "version": 1
+                },
+                "rationale": "Expose administrator-only authentication configuration in plugin Settings."
+              }
+            ],
+            "plugin_id": "official.password-reset",
+            "sdk_version_range": "^1.1.10",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "status",
+                "enable",
+                "disable",
+                "save"
+              ],
+              "menus": [],
+              "pages": [
+                "configure"
+              ],
+              "settings": []
+            },
+            "version": "1.2.0"
+          },
+          "package": {
+            "filename": "official.password-reset-1.2.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 13170
+          },
+          "package_sha256": "01a1d9418d250e031cc5fd737d5b17e4319595f2e117d32f983cb28d05347964",
+          "plugin_id": "official.password-reset",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Password Reset\n\nMaintained optional password recovery integration for host Plugin API 1.1.11. This is a functional account flow; the synthetic example remains a separate demonstration.\n\n## Setup\n\nInstall the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password policy** and find Password recovery below the policy controls. Choose expiry in minutes or hours (10–60 minutes, default 20). **Save settings**, **Enable** and **Disable** are separate controls. Saving disabled settings does not enable recovery; disabling preserves the saved lifetime and invalidates outstanding links. Installation alone does not enable public recovery. The sign-in request and completion flow is unchanged.\n\nEach user must configure an external notification destination, verify it and separately enable recovery delivery. SMTP is built into the host. A plugin destination must declare verification/security/recovery support and hold the independent high-risk provider grant. The authenticated inbox and browser push cannot carry recovery links. Normal routing preferences and administrator restrictions apply; there is no direct SMTP bypass.\n\n## Use\n\nThe sign-in page shows **Forgot your password?** when this contribution is active. Request with your app username or configured app email. The acknowledgement is the same for unknown, disabled, SSO and ineligible accounts. Open the delivered link, choose a password satisfying the server policy and confirm. All browser sessions are revoked; **API keys remain active**. Sign in normally afterward.\n\nLinks expire, are single-use and are bound to the current account/password/email, installation and configuration revision. Opening a link never consumes it. Bearer material uses a URL fragment and is removed from the displayed address. Disabling/uninstalling or withdrawing the grant blocks pending delivery/redemption; reinstall cannot reclaim old links.\n\nThe host stores encrypted delivery material only until consumption/expiry and never puts it in inbox content or lifecycle audit. This plugin stores only its activation/lifetime configuration and never receives reset tokens, passwords, SMTP credentials or account rows.\n\n## Testing\n\nRun `pytest tests/test_official_password_reset.py` and the paired host recovery suite. Actual signed-package installation and the host request/link/redemption workflow are required before release. Temporary SMTP capture is suitable for local acceptance; no production SMTP account is required.\n\nStartup uses auth_flows.password_reset.restore to resume only an already-active matching installation and definition. Withdrawal or reinstallation requires explicit activation; regranting permission cannot revive an old reset credential.\n\nConfiguration is under Settings → Administration → Account security → Password recovery. The page shows live **Account recovery enabled/disabled** from the host. Saved preferences do not imply availability. Requires API1.1.10 and explicit settings placement grants. All SMTP mail now uses the host shared HTML design with a plain alternative.\n",
+          "release_notes": "Password recovery settings now appear on Password policy with separate save, enable and disable controls and readable expiry units. Requires host API1.1.11. Existing sign-in recovery, secure routing, single-use links and session revocation remain unchanged.",
+          "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
+            "signature": "v2:A5cryQyxT7g9XY8GrY75h2526dVXKKFTo1grYrBCBkbHIUiyO30K20SckwDspV/SG5XVpD6Xhloj42VyTUAjCA=="
+          },
+          "tags": [
+            "official",
+            "notifications",
+            "security"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.password-reset-1.2.0.utp",
+          "version": "1.2.0"
         }
       ],
       "sdk_version_range": "^1.1.10",
-      "sha256": "81f9535a7c623a4b816392bd704d776b7a79ff52db290463b8f82ec51cf37567",
+      "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "81f9535a7c623a4b816392bd704d776b7a79ff52db290463b8f82ec51cf37567",
-        "signature": "v2:meZKFw7dQUr3UijRQUphCoIi+VXcz065YQGtuqnFp9mGOC4HPRYeBF5FeMR7Vjt7HUdhPP5dTTtE09DPI8OdAA=="
+        "sha256": "eaf371fa354317f18c8b653853f8f4b54246ebe887b794b8affdcd4254d9d8c2",
+        "signature": "v2:A5cryQyxT7g9XY8GrY75h2526dVXKKFTo1grYrBCBkbHIUiyO30K20SckwDspV/SG5XVpD6Xhloj42VyTUAjCA=="
       },
       "source": {
         "lifecycle": "source",
@@ -47019,8 +47317,8 @@
         "notifications",
         "security"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.password-reset-1.1.1.utp",
-      "version": "1.1.1"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.password-reset-1.2.0.utp",
+      "version": "1.2.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -48160,11 +48458,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "468a4b7c2489457a915f6f9e7f774d74dd5c4708",
-        "source_committed_at": "2026-10-11T17:31:11+08:00",
-        "source_digest": "7ec7cc043577a0c7a43328efbb863adfdef20d590dbec60fe876241bd38f479c",
+        "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+        "source_committed_at": "2026-10-11T20:17:54+08:00",
+        "source_digest": "952fdfd05ee9c247b0053e0b6533e0c324b32767ec0826768adc240c3c0bee0c",
         "source_path": "official/user-invites",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -48181,10 +48479,6 @@
         },
         {
           "name": "frontend.settings",
-          "version": 1
-        },
-        {
-          "name": "frontend.placement.settings.admin",
           "version": 1
         }
       ],
@@ -48209,7 +48503,7 @@
         "downloadable"
       ],
       "manifest": {
-        "api_contract_version": "1.1.10",
+        "api_contract_version": "1.1.11",
         "application_version_range": ">=1.0.0",
         "capabilities": [
           {
@@ -48227,10 +48521,6 @@
           {
             "name": "frontend.settings",
             "version": 1
-          },
-          {
-            "name": "frontend.placement.settings.admin",
-            "version": 1
           }
         ],
         "dependencies": [],
@@ -48242,8 +48532,8 @@
         },
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "18487a055f5cfe84da3785a2494363c9b98b0a9160d20de7dcf72b92a449a4a0",
-          "signature": "v2:pZWBRJHRsj0RZ8jxti15X71yUUcr1c77w4pFoEXMq0XddLufBNmX1H54A8qXdpLvQs/FmHKkWehdysdw0Q73Cg=="
+          "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+          "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
         },
         "manifest_version": 1,
         "name": "User Invites",
@@ -48275,13 +48565,6 @@
               "version": 1
             },
             "rationale": "Expose administrator-only authentication configuration in plugin Settings."
-          },
-          {
-            "capability": {
-              "name": "frontend.placement.settings.admin",
-              "version": 1
-            },
-            "rationale": "Place authentication configuration in the Administration settings area."
           }
         ],
         "plugin_id": "official.user-invites",
@@ -48296,7 +48579,8 @@
             "disable",
             "issue",
             "list-invites",
-            "revoke"
+            "revoke",
+            "save"
           ],
           "menus": [],
           "pages": [
@@ -48305,15 +48589,15 @@
           ],
           "settings": []
         },
-        "version": "1.0.1"
+        "version": "1.1.0"
       },
       "name": "User Invites",
       "package": {
-        "filename": "official.user-invites-1.0.1.utp",
+        "filename": "official.user-invites-1.1.0.utp",
         "format": "utp-v1",
-        "size_bytes": 12242
+        "size_bytes": 15710
       },
-      "package_sha256": "a2ca1f2f905b0ece5ae0f5948be69130b3916c572f0d1282bc069c6fbd02fcae",
+      "package_sha256": "f9460090f79148865d87ec1b47faea8a8d682c3824fbacc592a9f2f4a24729a8",
       "permissions": [
         {
           "capability": {
@@ -48342,19 +48626,12 @@
             "version": 1
           },
           "rationale": "Expose administrator-only authentication configuration in plugin Settings."
-        },
-        {
-          "capability": {
-            "name": "frontend.placement.settings.admin",
-            "version": 1
-          },
-          "rationale": "Place authentication configuration in the Administration settings area."
         }
       ],
       "plugin_id": "official.user-invites",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# User Invites\n\nMaintained official administrator email-invite integration for host Plugin API **1.1.8**.\n\nConfigure built-in SMTP in Administration > Notifications. Install this plugin, explicitly approve `auth.user_invites` and enable invitations under Settings > Administration > Account security > User invitations. Choose a link lifetime between one hour and seven days (one day by default). Use Invite user on Administration > Users to send to the intended recipient email address; do not create an account first.\n\nThe host queues a PRIVATE bootstrap email through the existing notification dispatcher. It uses the configured public app URL, falling back to the issuing administrator's signed-in app address. An allowed secure SMTP transport is required; explicit local-IP/development plaintext exceptions follow the built-in policy. Routing restrictions still apply. The destination exists only for that invitation and cannot receive ordinary or security notices.\n\nThe invitee opens the emailed link and chooses a username/password. Opening the link does not consume it. POST acceptance creates an active normal account, never an administrator, and requires normal sign-in afterward. The email address cannot be changed by the acceptance payload. Possession of the invite does not create a verified notification destination automatically.\n\nThe administrator page lists the current installation's last 100 invites, expiry and delivery state, and can revoke outstanding links. Sending another invite to the same address retires the earlier link. Requests are bounded to 100 per administrator/day and five per recipient/day, with a global 1,000-row pending capacity. Expired pre-account records are cleaned after a day. Disabling, uninstalling or revoking the grant invalidates old links; reinstall requires explicit activation.\n\nThe plugin owns activation and its admin UI. It uses only the public gateway and receives its own invitation email/status records. The host owns tokens, account/password validation, creation, SMTP credentials and delivery retries. Passwords and bearer links never pass through plugin code. Existing registered emails are rejected to the administrator.\n\nThis is a usable flow, separate from the synthetic `example.user-invite-notification-demo` routing demonstration.\n\nConfigure activation/lifetime under Settings → Administration → Account security → User invitations. On Administration → Users, **Invite user** opens the plugin dialog to send and review invitations. Requires API1.1.10 and reviewed administrative/settings grants. The host renders invitation mail as HTML plus text.\n",
-      "release_notes": "Functional administrator email invitations. Host API1.1.8 creates normal accounts only on single-use acceptance; SMTP and invitation credentials stay in the host.",
+      "readme": "# User Invites\n\nMaintained official administrator email-invite integration for host Plugin API **1.1.11**.\n\nConfigure built-in SMTP in Administration > Notifications. Install this plugin and explicitly approve `auth.user_invites`. Open Administration > Users: User invitations appears below the user controls, and Invite user sits beside Create user. Save settings separately from enabling or disabling invitations. Choose expiry using minutes, hours, days or weeks, within the existing one-hour to one-week bounds (one day by default). Send to the intended recipient email address; do not create an account first.\n\nEmail settings include a From display name, subject, heading, welcome message, personal/generic/no greeting, button wording, card/simple layout, accent color and footer. The optional recipient name supplies the personal greeting. A live preview shows the wording and appearance. All content is plain text and escaped by the host. The configured SMTP sender address and host acceptance URL remain authoritative. Wording changes affect future invitations and preserve existing links; lifetime changes and disabling retain credential invalidation behavior. Disabling preserves saved settings. Installation alone does not enable invitations.\n\nThe host queues a PRIVATE bootstrap email through the existing notification dispatcher. It uses the configured public app URL, falling back to the issuing administrator's signed-in app address. An allowed secure SMTP transport is required; explicit local-IP/development plaintext exceptions follow the built-in policy. Routing restrictions still apply. The destination exists only for that invitation and cannot receive ordinary or security notices.\n\nThe invitee opens the emailed link and chooses a username/password. Opening the link does not consume it. POST acceptance creates an active normal account, never an administrator, and requires normal sign-in afterward. The email address cannot be changed by the acceptance payload. Possession of the invite does not create a verified notification destination automatically.\n\nThe administrator page lists the current installation's last 100 invites, expiry and delivery state, and can revoke outstanding links. Sending another invite to the same address retires the earlier link. Requests are bounded to 100 per administrator/day and five per recipient/day, with a global 1,000-row pending capacity. Expired pre-account records are cleaned after a day. Disabling, uninstalling or revoking the grant invalidates old links; reinstall requires explicit activation.\n\nThe plugin owns activation and its admin UI. It uses only the public gateway and receives its own invitation email/status records. The host owns tokens, account/password validation, creation, SMTP credentials and delivery retries. Passwords and bearer links never pass through plugin code. Existing registered emails are rejected to the administrator.\n\nThis is a usable flow, separate from the synthetic `example.user-invite-notification-demo` routing demonstration.\n\nConfigure activation/lifetime under Settings → Administration → Account security → User invitations. On Administration → Users, **Invite user** opens the plugin dialog to send and review invitations. Requires API1.1.10 and reviewed administrative/settings grants. The host renders invitation mail as HTML plus text.\n",
+      "release_notes": "Integrated Users-page settings and Invite user button beside Create user. Separate save/enable/disable controls, expiry units and customizable email wording, sender display name, greeting and appearance. Requires host API1.1.11; the host retains SMTP, credential and account ownership.",
       "releases": [
         {
           "automatic_update": false,
@@ -48628,14 +48905,152 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.user-invites-1.0.1.utp",
           "version": "1.0.1"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "c19a0b3e7d5d885ceeac85565254e931653c6775",
+            "source_committed_at": "2026-10-11T20:17:54+08:00",
+            "source_digest": "952fdfd05ee9c247b0053e0b6533e0c324b32767ec0826768adc240c3c0bee0c",
+            "source_path": "official/user-invites",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "ab0efa81204db903a7c95c5a1cc6800516e1112bd881c202b32703e8078e14e2"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.11",
+            "application_version_range": ">=1.0.0",
+            "capabilities": [
+              {
+                "name": "auth.user_invites",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.admin",
+                "version": 1
+              },
+              {
+                "name": "frontend.settings",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Administrator email invitations with expiring single-use acceptance and account creation only after confirmation.",
+            "entrypoint": "plugin:main",
+            "frontend": {
+              "entry": "frontend/index.html",
+              "inline_assets": true
+            },
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+              "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
+            },
+            "manifest_version": 1,
+            "name": "User Invites",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "auth.user_invites",
+                  "version": 1
+                },
+                "rationale": "Enable administrator-issued email invitations and normal account creation on single-use host acceptance. This plugin can see its own pending invitation email/status records, but cannot read passwords, tokens, SMTP credentials or grant administrator privileges."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Remember explicit activation and invitation lifetime only; no invitation credentials are stored by the plugin."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.admin",
+                  "version": 1
+                },
+                "rationale": "Show the administrator-only invitation controls."
+              },
+              {
+                "capability": {
+                  "name": "frontend.settings",
+                  "version": 1
+                },
+                "rationale": "Expose administrator-only authentication configuration in plugin Settings."
+              }
+            ],
+            "plugin_id": "official.user-invites",
+            "sdk_version_range": "^1.1.10",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "status",
+                "enable",
+                "disable",
+                "issue",
+                "list-invites",
+                "revoke",
+                "save"
+              ],
+              "menus": [],
+              "pages": [
+                "configure",
+                "invite"
+              ],
+              "settings": []
+            },
+            "version": "1.1.0"
+          },
+          "package": {
+            "filename": "official.user-invites-1.1.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 15710
+          },
+          "package_sha256": "f9460090f79148865d87ec1b47faea8a8d682c3824fbacc592a9f2f4a24729a8",
+          "plugin_id": "official.user-invites",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# User Invites\n\nMaintained official administrator email-invite integration for host Plugin API **1.1.11**.\n\nConfigure built-in SMTP in Administration > Notifications. Install this plugin and explicitly approve `auth.user_invites`. Open Administration > Users: User invitations appears below the user controls, and Invite user sits beside Create user. Save settings separately from enabling or disabling invitations. Choose expiry using minutes, hours, days or weeks, within the existing one-hour to one-week bounds (one day by default). Send to the intended recipient email address; do not create an account first.\n\nEmail settings include a From display name, subject, heading, welcome message, personal/generic/no greeting, button wording, card/simple layout, accent color and footer. The optional recipient name supplies the personal greeting. A live preview shows the wording and appearance. All content is plain text and escaped by the host. The configured SMTP sender address and host acceptance URL remain authoritative. Wording changes affect future invitations and preserve existing links; lifetime changes and disabling retain credential invalidation behavior. Disabling preserves saved settings. Installation alone does not enable invitations.\n\nThe host queues a PRIVATE bootstrap email through the existing notification dispatcher. It uses the configured public app URL, falling back to the issuing administrator's signed-in app address. An allowed secure SMTP transport is required; explicit local-IP/development plaintext exceptions follow the built-in policy. Routing restrictions still apply. The destination exists only for that invitation and cannot receive ordinary or security notices.\n\nThe invitee opens the emailed link and chooses a username/password. Opening the link does not consume it. POST acceptance creates an active normal account, never an administrator, and requires normal sign-in afterward. The email address cannot be changed by the acceptance payload. Possession of the invite does not create a verified notification destination automatically.\n\nThe administrator page lists the current installation's last 100 invites, expiry and delivery state, and can revoke outstanding links. Sending another invite to the same address retires the earlier link. Requests are bounded to 100 per administrator/day and five per recipient/day, with a global 1,000-row pending capacity. Expired pre-account records are cleaned after a day. Disabling, uninstalling or revoking the grant invalidates old links; reinstall requires explicit activation.\n\nThe plugin owns activation and its admin UI. It uses only the public gateway and receives its own invitation email/status records. The host owns tokens, account/password validation, creation, SMTP credentials and delivery retries. Passwords and bearer links never pass through plugin code. Existing registered emails are rejected to the administrator.\n\nThis is a usable flow, separate from the synthetic `example.user-invite-notification-demo` routing demonstration.\n\nConfigure activation/lifetime under Settings → Administration → Account security → User invitations. On Administration → Users, **Invite user** opens the plugin dialog to send and review invitations. Requires API1.1.10 and reviewed administrative/settings grants. The host renders invitation mail as HTML plus text.\n",
+          "release_notes": "Integrated Users-page settings and Invite user button beside Create user. Separate save/enable/disable controls, expiry units and customizable email wording, sender display name, greeting and appearance. Requires host API1.1.11; the host retains SMTP, credential and account ownership.",
+          "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+            "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
+          },
+          "tags": [
+            "official",
+            "notifications",
+            "security"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.user-invites-1.1.0.utp",
+          "version": "1.1.0"
         }
       ],
       "sdk_version_range": "^1.1.10",
-      "sha256": "18487a055f5cfe84da3785a2494363c9b98b0a9160d20de7dcf72b92a449a4a0",
+      "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "18487a055f5cfe84da3785a2494363c9b98b0a9160d20de7dcf72b92a449a4a0",
-        "signature": "v2:pZWBRJHRsj0RZ8jxti15X71yUUcr1c77w4pFoEXMq0XddLufBNmX1H54A8qXdpLvQs/FmHKkWehdysdw0Q73Cg=="
+        "sha256": "e680c36635a5033f77fa0207109d6eb23a3186ef63ce8437bc33809eb083fa79",
+        "signature": "v2:DeQKsV6FtVOjNAmZ5bfkDi6xqI5Ehq74cQU7h/f484Gg2y9ql7baS6rPgHUhxiIx0cUSVNRSu7QfZ/vmV0GlBA=="
       },
       "source": {
         "lifecycle": "source",
@@ -48647,8 +49062,8 @@
         "notifications",
         "security"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.user-invites-1.0.1.utp",
-      "version": "1.0.1"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.user-invites-1.1.0.utp",
+      "version": "1.1.0"
     }
   ],
   "version": 1

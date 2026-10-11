@@ -1,8 +1,10 @@
 # User Invites
 
-Maintained official administrator email-invite integration for host Plugin API **1.1.8**.
+Maintained official administrator email-invite integration for host Plugin API **1.1.11**.
 
-Configure built-in SMTP in Administration > Notifications. Install this plugin, explicitly approve `auth.user_invites` and enable invitations under Settings > Administration > Account security > User invitations. Choose a link lifetime between one hour and seven days (one day by default). Use Invite user on Administration > Users to send to the intended recipient email address; do not create an account first.
+Configure built-in SMTP in Administration > Notifications. Install this plugin and explicitly approve `auth.user_invites`. Open Administration > Users: User invitations appears below the user controls, and Invite user sits beside Create user. Save settings separately from enabling or disabling invitations. Choose expiry using minutes, hours, days or weeks, within the existing one-hour to one-week bounds (one day by default). Send to the intended recipient email address; do not create an account first.
+
+Email settings include a From display name, subject, heading, welcome message, personal/generic/no greeting, button wording, card/simple layout, accent color and footer. The optional recipient name supplies the personal greeting. A live preview shows the wording and appearance. All content is plain text and escaped by the host. The configured SMTP sender address and host acceptance URL remain authoritative. Wording changes affect future invitations and preserve existing links; lifetime changes and disabling retain credential invalidation behavior. Disabling preserves saved settings. Installation alone does not enable invitations.
 
 The host queues a PRIVATE bootstrap email through the existing notification dispatcher. It uses the configured public app URL, falling back to the issuing administrator's signed-in app address. An allowed secure SMTP transport is required; explicit local-IP/development plaintext exceptions follow the built-in policy. Routing restrictions still apply. The destination exists only for that invitation and cannot receive ordinary or security notices.
 

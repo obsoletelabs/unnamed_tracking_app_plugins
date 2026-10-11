@@ -1,10 +1,10 @@
 # Password Reset
 
-Maintained optional password recovery integration for host Plugin API 1.1.7. This is a functional account flow; the synthetic example remains a separate demonstration.
+Maintained optional password recovery integration for host Plugin API 1.1.11. This is a functional account flow; the synthetic example remains a separate demonstration.
 
 ## Setup
 
-Install the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password recovery**, choose a link lifetime (600–3600 seconds, default 1200), and click **Enable or save recovery**. Disable invalidates outstanding links; installation alone does not enable public recovery.
+Install the signed official package and explicitly grant the critical **auth.password_reset** permission globally. Open **Administration → Password policy** and find Password recovery below the policy controls. Choose expiry in minutes or hours (10–60 minutes, default 20). **Save settings**, **Enable** and **Disable** are separate controls. Saving disabled settings does not enable recovery; disabling preserves the saved lifetime and invalidates outstanding links. Installation alone does not enable public recovery. The sign-in request and completion flow is unchanged.
 
 Each user must configure an external notification destination, verify it and separately enable recovery delivery. SMTP is built into the host. A plugin destination must declare verification/security/recovery support and hold the independent high-risk provider grant. The authenticated inbox and browser push cannot carry recovery links. Normal routing preferences and administrator restrictions apply; there is no direct SMTP bypass.
 

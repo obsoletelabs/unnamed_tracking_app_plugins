@@ -124,7 +124,7 @@ def main() -> None:
                         ("auth-user-invite-identity-v1", UserInviteIdentity)):
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-        schema["x-api-contract-version"] = "1.1.8"
+        schema["x-api-contract-version"] = "1.1.8" if name == "auth-user-invite-identity-v1" else "1.1.11"
         assert schema == json.loads((root / "tools/schemas" / (name + ".schema.json")).read_bytes()), name
     from src.plugin_api import NotificationDestinationStatusQuery, NotificationDestinationStatusPage
     for name, model in (("notification-destination-status-query-v1", NotificationDestinationStatusQuery),
