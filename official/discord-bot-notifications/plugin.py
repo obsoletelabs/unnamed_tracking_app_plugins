@@ -1,4 +1,4 @@
-"""Official Discord bot DM provider with verified per-user account links."""
+"""Discord bot DM provider with PRIVATE links and host-verified per-account destinations."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import secrets
 import sys
 import time
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 from sdk.notifications import provider_context, register_provider
@@ -26,6 +26,10 @@ _LINK_TTL = 600
 
 class PluginError(ValueError):
     """Safe user-facing plugin action failure."""
+
+
+class DiscordForbiddenError(PluginError):
+    """A definite HTTP 403 rejection; no message was accepted by Discord."""
 
 
 class DiscordTemporaryError(PluginError):
@@ -93,7 +97,7 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
         if status == 401:
             raise PluginError("Discord rejected the bot token. Check that it is the current bot token.")
         if status == 403:
-            raise PluginError("Discord denied access. Check the bot's server membership and permissions.")
+            raise DiscordForbiddenError("Discord denied access. Check the bot's server membership and permissions.")
         if status == 404:
             raise PluginError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
         if status == 429:
@@ -135,7 +139,68 @@ def _send_dm(token: str, discord_id: str, content: str) -> None:
     channel_id = channel.get("id") if isinstance(channel, dict) else None
     if not isinstance(channel_id, str):
         raise PluginError("Discord could not open a direct message channel.")
-    _discord(token, "POST", f"/channels/{channel_id}/messages", {"content": content[:1900], "allowed_mentions": {"parse": []}})
+    _send_channel(token, channel_id, content)
+
+
+def _send_channel(token: str, channel_id: str, content: str) -> None:
+    title, description = "Tracking app", content
+    if content.startswith("**") and "**\n" in content:
+        title, description = content[2:].split("**\n", 1)
+    # Keep bearer URLs in a short action, including links inside recovery instructions.
+    lines = description.splitlines()
+    link = None
+    paragraphs = []
+    for line in lines:
+        candidate = line.strip()
+        try:
+            parsed = urlsplit(candidate)
+            is_link = (parsed.scheme in {"http", "https"} and parsed.hostname
+                       and not parsed.username and not any(char.isspace() for char in candidate))
+        except ValueError:
+            is_link = False
+        if is_link:
+            if link is None:
+                link = candidate
+                # Escape Markdown delimiters without changing the URL's decoded target.
+                target = quote(link, safe=":/?#[]@!$&'*+,;=%")
+                paragraphs.append(f"Click [here]({target}) to continue.")
+            elif candidate != link:
+                paragraphs.append(line)
+        elif candidate:
+            paragraphs.append(line)
+    description = "\n\n".join(paragraphs)
+    description = description.replace(". If you did not request", ".\n\nIf you did not request")
+    description = re.sub(r"(?<=code is )([0-9]{8})(?![0-9])", r"**\1**", description)
+    embed = {"title": title[:256], "description": description[:4096], "color": 3430612,
+             "footer": {"text": "Your tracking app · Notification"}}
+    if link:
+        embed["url"] = link
+    path = f"/channels/{channel_id}/messages"
+    try:
+        _discord(token, "POST", path, {"embeds": [embed], "allowed_mentions": {"parse": []}})
+    except DiscordForbiddenError:
+        # The gateway intentionally redacts remote error bodies. A 403 may be
+        # missing Embed Links or broader access: try text once on the same target.
+        # Suppress automatic URL embeds too; never retry an ambiguous acceptance.
+        label = "View notification"
+        if "reset" in title.casefold() and "password" in title.casefold():
+            label = "Reset your password"
+        elif "invit" in title.casefold():
+            label = "Accept invitation"
+        elif "verif" in title.casefold():
+            label = "Verify destination"
+        action = ""
+        if link:
+            target = quote(link, safe=":/?#[]@!$&'*+,;=%")
+            description = description.replace(f"Click [here]({target}) to continue.", "")
+            action = f"\n\n[{label}]({target})"
+            if len(action) > 1700:
+                action = "\n\nOpen your tracking app to use this notification's link."
+        heading = f"**{title[:256]}**\n\n"
+        text = heading + description[:2000 - len(heading) - len(action)].rstrip() + action
+        _discord(token, "POST", path, {
+            "content": text, "flags": 4, "allowed_mentions": {"parse": []},
+        })
 
 
 def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:
@@ -291,6 +356,25 @@ def clear_bot_token(values: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "message": "Bot token and server configuration removed. User links were retained."}
 
 
+def link_private(values: dict[str, Any]) -> dict[str, Any]:
+    """Link an intended recipient without claiming proof or SECURE eligibility."""
+    user_id = _actor(values)
+    config = _bot_config()
+    username = str(values.get("username", "")).strip()
+    if not _USERNAME.fullmatch(username):
+        raise PluginError("Enter your exact Discord username.")
+    member = _member_by_username(config["token"], config["guild_id"], username)
+    if member is None or not _SNOWFLAKE.fullmatch(str(member.get("id", ""))):
+        raise PluginError("That Discord username was not found in the configured server.")
+    accounts = _linked_accounts(_load("links/" + user_id, {}))
+    discord_id = str(member["id"])
+    if any(str(account.get("discord_id")) == discord_id for account in accounts):
+        raise PluginError("That Discord account is already linked.")
+    accounts.append({"discord_id": discord_id, "linked_at": int(time.time())})
+    _save_linked_accounts(user_id, accounts)
+    return {"ok": True, "message": "Discord account linked for PRIVATE notifications. For SECURE recovery, add and verify a Discord account DM in your notification settings."}
+
+
 def start_link(values: dict[str, Any]) -> dict[str, Any]:
     user_id = _actor(values); config = _bot_config(); username = str(values.get("username", "")).strip()
     if not _USERNAME.fullmatch(username):
@@ -339,12 +423,12 @@ def unlink(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def configure_destination(values: dict[str, Any]) -> dict[str, Any]:
-    """Allow host routing only after this user has verified a Discord account."""
+    """Allow PRIVATE host routing after this user has linked an intended Discord recipient."""
     user_id = _actor(values)
     accounts = _linked_accounts(_load("links/" + user_id))
     if not accounts:
-        raise PluginError("Link and verify at least one Discord account before enabling this destination.")
-    return {"ok": True, "message": "Verified Discord account is ready for private notifications."}
+        raise PluginError("Link at least one Discord account before enabling this PRIVATE destination.")
+    return {"ok": True, "message": "Linked Discord account is ready for PRIVATE notifications."}
 
 
 def retire_destination(values: dict[str, Any]) -> dict[str, Any]:
@@ -369,7 +453,7 @@ def test_dm(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def deliver(values: dict[str, Any]) -> dict[str, Any]:
-    """Send only to the verified recipient mapped to the host-supplied user context."""
+    """Send normal PRIVATE notifications to recipients mapped to the host-supplied user context."""
     try:
         user_id = _actor(values); delivery = values.get("delivery")
         if not isinstance(delivery, dict):
@@ -540,6 +624,202 @@ def deliver_account(values: dict[str, Any]) -> dict[str, Any]:
     return {"success": True, "retryable": False}
 
 
+
+# Server channels are PUBLIC even when Discord restricts membership.
+CHANNEL_PROVIDER_ID = PLUGIN_ID + ".channel"
+CHANNEL_DEFINITION = {
+    "destinations": [{"kind": "discord_bot_channel", "label": "Discord server channel", "privacy": "PUBLIC",
+        "fields": [{"id": "channel_id", "label": "Discord channel ID", "type": "text",
+            "description": "Choose an allowed default channel in Discord account settings, or enter its ID here. Channels receive PUBLIC announcements only.",
+            "validation": {"max_length": 20}}]}],
+    "server_fields": ACCOUNT_DEFINITION["server_fields"],
+    "configure_action": "configure-channel-destination", "retire_action": "retire-channel-destination",
+    "test_action": "deliver-channel", "features": {"multiple_destinations": True, "critical_supported": False},
+}
+
+
+def _channel_context(values: dict[str, Any], operation: str) -> dict[str, Any]:
+    try:
+        context = provider_context(values, operation=operation, provider_id=CHANNEL_PROVIDER_ID)
+        if context["scope"] == "destination" and context["destination"]["kind"] != "discord_bot_channel":
+            raise ValueError("Wrong destination kind")
+        return context
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PluginError("A core-authorized Discord channel destination is required.") from exc
+
+
+def _channel_server_key(context: dict[str, Any]) -> str:
+    return "channel/server/" + context["installation_id"]
+
+
+def _channel_key(context: dict[str, Any]) -> str:
+    return f"channel/destinations/{context['installation_id']}/{context['destination']['id']}"
+
+
+def _channel_server(context: dict[str, Any]) -> dict[str, Any]:
+    server = _account_record(_channel_server_key(context))
+    if not server or server.get("retired") or not server.get("token") or not server.get("guild_id"):
+        raise PluginError("Configure the channel provider in administrator notification settings first.")
+    return server
+
+
+def _allowed_channels(guild_id: str) -> list[dict[str, str]]:
+    records = _load("channel-policy/" + guild_id, [])
+    if not isinstance(records, list):
+        raise PluginError("The channel allowlist is damaged; ask an administrator to save it again.")
+    return [item for item in records if isinstance(item, dict) and _SNOWFLAKE.fullmatch(str(item.get("id", "")))]
+
+
+def _check_channel(token: str, guild_id: str, channel_id: str) -> dict[str, Any]:
+    if not isinstance(channel_id, str) or not _SNOWFLAKE.fullmatch(channel_id):
+        raise PluginError("Enter a valid Discord channel ID.")
+    if channel_id not in {item["id"] for item in _allowed_channels(guild_id)}:
+        raise PluginError("An administrator must allow this channel first.")
+    channel = _discord(token, "GET", "/channels/" + channel_id)
+    if (not isinstance(channel, dict) or channel.get("id") != channel_id
+            or channel.get("guild_id") != guild_id or channel.get("type") not in (0, 5)):
+        raise PluginError("Choose a text or announcement channel in the configured server.")
+    return channel
+
+
+def list_directory(values: dict[str, Any]) -> dict[str, Any]:
+    """Administrator-only Discord directory; never expose the bot token or host accounts."""
+    _actor(values, admin=True)
+    config = _bot_config()
+    after = values.get("after", "0")
+    if after != "0" and (not isinstance(after, str) or not _SNOWFLAKE.fullmatch(after)):
+        raise PluginError("The member-list cursor is invalid.")
+    channels = _discord(config["token"], "GET", f"/guilds/{config['guild_id']}/channels")
+    members = _discord(config["token"], "GET", f"/guilds/{config['guild_id']}/members?limit=1000&after={after}")
+    if not isinstance(channels, list) or not isinstance(members, list):
+        raise PluginError("Discord did not return the server directory.")
+    users = []
+    for member in members:
+        user = member.get("user", {}) if isinstance(member, dict) else {}
+        if _SNOWFLAKE.fullmatch(str(user.get("id", ""))) and isinstance(user.get("username"), str):
+            users.append({"id": user["id"], "username": user["username"], "label": member.get("nick") or user.get("global_name") or user["username"]})
+    return {"channels": [{"id": item["id"], "name": str(item.get("name", item["id"]))[:100]} for item in channels
+                if isinstance(item, dict) and item.get("type") in (0, 5) and _SNOWFLAKE.fullmatch(str(item.get("id", "")))],
+            "users": users, "next_after": users[-1]["id"] if len(members) == 1000 and users else None,
+            "allowed_channel_ids": [item["id"] for item in _allowed_channels(config["guild_id"])]}
+
+
+def allow_channels(values: dict[str, Any]) -> dict[str, Any]:
+    _actor(values, admin=True)
+    config = _bot_config()
+    ids = values.get("channel_ids")
+    if (not isinstance(ids, list) or len(ids) > 500 or len(set(str(item) for item in ids)) != len(ids)
+            or any(not isinstance(item, str) or not _SNOWFLAKE.fullmatch(item) for item in ids)):
+        raise PluginError("Choose valid unique channel IDs.")
+    channels = _discord(config["token"], "GET", f"/guilds/{config['guild_id']}/channels")
+    if not isinstance(channels, list):
+        raise PluginError("Discord did not return the server channel list.")
+    found = {item["id"]: item for item in channels if isinstance(item, dict) and item.get("type") in (0, 5)
+             and isinstance(item.get("id"), str)}
+    if any(channel_id not in found for channel_id in ids):
+        raise PluginError("Choose text or announcement channels from the configured server.")
+    _store("channel-policy/" + config["guild_id"], [{"id": channel_id, "name": str(found[channel_id].get("name", channel_id))[:100]} for channel_id in ids])
+    return {"message": "Allowed channels saved. Removed channels stop receiving deliveries immediately."}
+
+
+def channel_choices(values: dict[str, Any]) -> dict[str, Any]:
+    actor = _actor(values)
+    config = _bot_config()
+    return {"channels": _allowed_channels(config["guild_id"]), "selected": _load("channel-selection/" + actor, {}).get(config["guild_id"], "")}
+
+
+def select_channel(values: dict[str, Any]) -> dict[str, Any]:
+    actor = _actor(values)
+    config = _bot_config()
+    channel_id = values.get("channel_id")
+    _check_channel(config["token"], config["guild_id"], channel_id)
+    selections = _load("channel-selection/" + actor, {})
+    selections[config["guild_id"]] = channel_id
+    _store("channel-selection/" + actor, selections)
+    return {"message": "Default channel selected. Add a Discord server channel destination in Notifications, then choose its notification types. Existing destinations keep their own target."}
+
+
+def configure_channel_destination(values: dict[str, Any]) -> dict[str, Any]:
+    context = _channel_context(values, "configure")
+    actor = _actor(values, admin=context["scope"] == "server")
+    configuration = values.get("configuration")
+    if not isinstance(configuration, dict):
+        raise PluginError("Discord configuration fields are required.")
+    if context["scope"] == "server":
+        if set(configuration) - {"token", "guild_id"}:
+            raise PluginError("Unsupported Discord server configuration fields.")
+        current = _account_record(_channel_server_key(context))
+        if current and current["revision"] >= context["revision"]:
+            raise PluginError("This server configuration is stale.")
+        token = configuration.get("token", current.get("token") if current else None)
+        guild_id = configuration.get("guild_id", current.get("guild_id") if current else None)
+        if not isinstance(token, str) or not token.strip() or not isinstance(guild_id, str) or not _SNOWFLAKE.fullmatch(guild_id):
+            raise PluginError("Enter a bot token and valid Discord server ID.")
+        _bot_snapshot(token.strip(), guild_id)
+        _store(_channel_server_key(context), {"revision": context["revision"], "token": token.strip(), "guild_id": guild_id})
+        return {"configured": True}
+    if set(configuration) - {"channel_id"}:
+        raise PluginError("Unsupported Discord channel configuration fields.")
+    server = _channel_server(context)
+    current = _account_record(_channel_key(context))
+    revision = context["destination"]["revision"]
+    if current and (current["revision"] >= revision or current.get("retired") or current.get("user_id") != actor):
+        raise PluginError("This channel configuration is stale or retired.")
+    channel_id = configuration.get("channel_id") or (current.get("channel_id") if current else None)
+    if not channel_id:
+        channel_id = _load("channel-selection/" + actor, {}).get(server["guild_id"])
+    _check_channel(server["token"], server["guild_id"], channel_id)
+    _store(_channel_key(context), {"revision": revision, "server_revision": server["revision"], "user_id": actor, "channel_id": channel_id})
+    return {"configured": True}
+
+
+def retire_channel_destination(values: dict[str, Any]) -> dict[str, Any]:
+    context = _channel_context(values, "retire")
+    actor = _actor(values)
+    current = _account_record(_channel_key(context))
+    if current and (current["revision"] > context["destination"]["revision"] or current.get("user_id", actor) != actor):
+        raise PluginError("This retirement is stale or belongs to another user.")
+    _store(_channel_key(context), {"revision": context["destination"]["revision"], "retired": True})
+    return {"retired": True}
+
+
+def deliver_channel(values: dict[str, Any]) -> dict[str, Any]:
+    try:
+        context = _channel_context(values, "deliver")
+        actor = _actor(values)
+        record = _account_record(_channel_key(context))
+        server = _channel_server(context)
+        if (not record or record.get("retired") or record["revision"] != context["destination"]["revision"]
+                or record.get("user_id") != actor or record.get("server_revision") != server["revision"]
+                or context["server_revision"] != server["revision"]):
+            raise PluginError("This configured channel revision is unavailable.")
+        delivery = values.get("delivery")
+        if (not isinstance(delivery, dict) or not isinstance(delivery.get("title"), str)
+                or not isinstance(delivery.get("body"), str) or delivery.get("purpose", "notification") not in {"notification", "test"}):
+            raise PluginError("Only ordinary public notifications can use a channel.")
+        _check_channel(server["token"], server["guild_id"], record["channel_id"])
+        content = f"**{delivery['title'][:250]}**\n{delivery['body']}"
+        link = delivery.get("link")
+        if isinstance(link, str) and link.startswith(("https://", "http://")):
+            content += "\n" + link
+        if len(content) > 1900:
+            raise PluginError("This notification exceeds Discord message limits.")
+        _send_channel(server["token"], record["channel_id"], content)
+    except GatewayRequestError as exc:
+        print("Discord channel gateway failure: " + exc.code, file=sys.stderr, flush=True)
+        return {"success": False, "retryable": exc.code in {"unavailable", "rate_limited"}, "error": "discord_gateway_failed"}
+    except DiscordTemporaryError:
+        return {"success": False, "retryable": True, "error": "discord_temporarily_unavailable"}
+    except PluginError as exc:
+        # These local errors contain only static diagnostics, never token or API bodies.
+        print("Discord channel delivery rejected: " + str(exc), file=sys.stderr, flush=True)
+        return {"success": False, "retryable": False, "error": "discord_channel_unavailable"}
+    except (KeyError, TypeError, ValueError) as exc:
+        print("Discord channel configuration error: " + type(exc).__name__, file=sys.stderr, flush=True)
+        return {"success": False, "retryable": False, "error": "discord_channel_unavailable"}
+    return {"success": True, "retryable": False}
+
+
 def _register_provider() -> None:
     delay = 1
     while True:
@@ -565,6 +845,7 @@ def _register_provider() -> None:
                 },
             )
             register_provider(ACCOUNT_PROVIDER_ID, "Discord account DM", "deliver-account", transport="plugin", definition=ACCOUNT_DEFINITION)
+            register_provider(CHANNEL_PROVIDER_ID, "Discord server channel", "deliver-channel", transport="plugin", definition=CHANNEL_DEFINITION)
             return
         except GatewayRequestError as exc:
             if exc.code != "unavailable":

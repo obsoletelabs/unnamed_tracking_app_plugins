@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.8",
+  "api_contract_version": "1.1.10",
   "plugin_id": "official.user-invites",
   "title": "User Invites",
   "settings": [],
@@ -64,14 +64,23 @@
   ],
   "pages": [
     {
-      "id": "manage",
+      "id": "configure",
       "title": "User invitations",
-      "description": "Invite by email; an account is created only on acceptance.",
       "settings": [],
       "actions": [
         "status",
         "enable",
-        "disable",
+        "disable"
+      ],
+      "tables": [],
+      "dialogs": []
+    },
+    {
+      "id": "invite",
+      "title": "Invite user",
+      "settings": [],
+      "actions": [
+        "status",
         "issue",
         "list-invites",
         "revoke"
@@ -80,18 +89,27 @@
       "dialogs": []
     }
   ],
-  "navigation": [
+  "navigation": [],
+  "menus": [],
+  "tables": [],
+  "dialogs": [],
+  "settings_sections": [
     {
-      "id": "invitations",
-      "location": "administration",
+      "id": "user-invitation-settings",
       "label": "User invitations",
-      "page_id": "manage",
+      "page_id": "configure",
+      "area": "administration",
+      "group": "Account security",
       "visibility": {
         "admin_only": true
       }
     }
   ],
-  "menus": [],
-  "tables": [],
-  "dialogs": []
+  "extensions": [
+    {
+      "id": "invite-user",
+      "slot": "administration.users.actions",
+      "page_id": "invite"
+    }
+  ]
 }

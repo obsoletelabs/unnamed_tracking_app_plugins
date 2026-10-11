@@ -71,7 +71,13 @@ def test_declared_admin_controls_and_signed_official_identity():
     manifest = json.loads((source / "manifest.json").read_text())
     document = json.loads((source / "ui.json").read_text())
     assert manifest["plugin_id"] == "official.password-reset"
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.7"
-    assert {item["name"] for item in manifest["capabilities"]} == {"auth.password_reset", "plugin.storage", "frontend.navigation.admin", "plugin.settings"}
-    assert document["navigation"][0]["visibility"]["admin_only"] is True
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.10"
+    assert {item["name"] for item in manifest["capabilities"]} == {"auth.password_reset", "plugin.storage", "frontend.settings", "frontend.placement.settings.admin"}
+    assert document["settings_sections"][0]["visibility"]["admin_only"] is True
     assert json.loads((source / "release.json").read_text())["publisher"] == "Unnamed Tracking Official"
+
+def test_status_asks_the_host_instead_of_trusting_saved_activation(plugin):
+    module, calls, storage = plugin
+    storage[module.KEY] = json.dumps({"enabled": True})
+    assert module.status({"include_tokens": True}) == {"registered": False}
+    assert calls == [("auth_flows.password_reset.status", "auth.password_reset", {})]

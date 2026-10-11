@@ -15,6 +15,11 @@ def definition(values):
     return {"mode": "password_reset", "name": "Password Reset", "token_lifetime_seconds": int(lifetime)}
 
 
+def status(values):
+    del values
+    return request("auth_flows.password_reset.status", "auth.password_reset", {})
+
+
 def enable(values):
     flow = definition(values)
     result = request("auth_flows.password_reset.register", "auth.password_reset", flow)

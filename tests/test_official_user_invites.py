@@ -71,9 +71,9 @@ def test_declared_admin_controls_and_signed_official_identity():
     manifest = json.loads((source / "manifest.json").read_text())
     document = json.loads((source / "ui.json").read_text())
     assert manifest["plugin_id"] == "official.user-invites"
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.8"
-    assert {item["name"] for item in manifest["capabilities"]} == {"auth.user_invites", "plugin.storage", "frontend.navigation.admin"}
-    assert document["navigation"][0]["visibility"]["admin_only"] is True
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.10"
+    assert {item["name"] for item in manifest["capabilities"]} == {"auth.user_invites", "plugin.storage", "frontend.navigation.admin", "frontend.settings", "frontend.placement.settings.admin"}
+    assert document["settings_sections"][0]["visibility"]["admin_only"] is True
     assert json.loads((source / "release.json").read_text())["publisher"] == "Unnamed Tracking Official"
 
 
@@ -109,3 +109,12 @@ def test_sandbox_controls_use_bridge_instead_of_blocked_native_form_navigation()
     script = (source / "app.js").read_text()
     assert 'type="submit"' not in html
     assert "form.reportValidity()" in script and "event.preventDefault()" in script
+
+def test_invite_action_is_a_user_admin_dialog_and_configuration_is_separate():
+    source = Path(__file__).parents[1] / "official/user-invites"
+    document = json.loads((source / "ui.json").read_text())
+    assert document["extensions"] == [{"id": "invite-user", "slot": "administration.users.actions", "page_id": "invite"}]
+    assert document["settings_sections"][0]["page_id"] == "configure"
+    assert not document["navigation"]
+    page = next(p for p in document["pages"] if p["id"] == "invite")
+    assert "enable" not in page["actions"]

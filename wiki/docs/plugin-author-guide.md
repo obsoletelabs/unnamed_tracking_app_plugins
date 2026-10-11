@@ -413,8 +413,8 @@ Each new release records source digest/commit/path/time, version-bump reason,
 package format/size, manifest, hashes, signing, README, tags, policy and release
 notes. `source_committed_at` is the source commit time, **not** an invented
 publication timestamp. New preview records are `built`; signed publication
-snapshots are `published`. Recorded stages describe source â†’ validated â†’ built â†’
-catalogued â†’ published â†’ downloadable; actual remote publication occurs when CI
+snapshots are `published`. Recorded stages describe source → validated → built →
+catalogued → published → downloadable; actual remote publication occurs when CI
 commits/pushes that complete snapshot or uploads its release assets.
 
 Automatic-update permission belongs to one release. `automatic_update: null`
@@ -504,3 +504,12 @@ normalized and isolated; core retains global attempt/history/retry state.
 The maintained [Discord webhook](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-notifications/README.md)
 exercises declared-field configuration; the separately maintained Discord bot
 exercises linked-account enrollment. Historical protected demo renderers still work.
+
+
+API1.1.10 adds `administration.users.actions`: a page title becomes an Admin/Users
+button opening a host dialog, guarded by `frontend.navigation.admin`. Dedicated
+plugin Settings/dialogs can use the existing sandboxed frontend; its `page` query
+parameter selects presentation only. Account security settings use the existing
+`frontend.settings` and `frontend.placement.settings.admin` grants. The recovery
+contribution reads live `auth_flows.password_reset.status` rather than trusting
+saved activation. Host PR85 supplies this additive contract.

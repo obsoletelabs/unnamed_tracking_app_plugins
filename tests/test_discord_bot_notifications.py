@@ -49,9 +49,11 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
         },
     })]
 
-    assert len(calls) == 2
+    assert len(calls) == 3
     assert calls[1][2]["provider_id"] == provider.ACCOUNT_PROVIDER_ID
     assert calls[1][2]["definition"] == provider.ACCOUNT_DEFINITION
+    assert calls[2][2]["provider_id"] == provider.CHANNEL_PROVIDER_ID
+    assert calls[2][2]["definition"] == provider.CHANNEL_DEFINITION
     schema = json.loads((ROOT / "tools/schemas/notification-provider-v1.schema.json").read_bytes())
     for _, _, payload in calls:
         jsonschema.validate(payload, schema)
@@ -182,12 +184,12 @@ def test_delivery_reports_gateway_permission_errors_without_retrying(monkeypatch
     assert result["error"] == "discord_permission_denied"
 
 
-def test_generic_destination_requires_a_verified_link(monkeypatch):
+def test_generic_destination_requires_a_link_but_not_verification(monkeypatch):
     provider = load()
     user_id = "12345678-1234-5678-1234-567812345678"
     monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
     monkeypatch.setattr(provider, "_load", lambda key, default=None: None)
-    with pytest.raises(provider.PluginError, match="Link and verify"):
+    with pytest.raises(provider.PluginError, match="Link at least one"):
         provider.configure_destination({"_plugin_context": {"user_id": user_id}})
 
 
@@ -334,3 +336,72 @@ def test_legacy_single_link_is_read_as_one_account():
     provider = load()
     account = {"discord_id": "123456789012345678", "linked_at": 100}
     assert provider._linked_accounts(account) == [account]
+
+
+def test_private_link_needs_no_verification_code_or_dm(monkeypatch):
+    provider = load()
+    storage, sent = {}, []
+    owner = "11111111-1111-4111-8111-111111111111"
+    monkeypatch.setattr(provider, "_bot_config", lambda: {"token": "secret", "guild_id": "guild"})
+    monkeypatch.setattr(provider, "_member_by_username", lambda *_: {"id": "123456789012345678"})
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: storage.get(key, default))
+    monkeypatch.setattr(provider, "_store", lambda key, value: storage.__setitem__(key, value))
+    monkeypatch.setattr(provider, "_send_dm", lambda *_: sent.append(True))
+    result = provider.link_private({"_plugin_context": {"user_id": owner}, "username": "casey"})
+    assert result["ok"] and "PRIVATE" in result["message"]
+    assert not sent
+    assert storage["links/" + owner]["accounts"][0]["discord_id"] == "123456789012345678"
+    assert not any("pending" in key for key in storage)
+    with pytest.raises(provider.PluginError, match="already linked"):
+        provider.link_private({"_plugin_context": {"user_id": owner}, "username": "casey"})
+
+
+def test_bot_messages_use_native_cards_and_readable_actions(monkeypatch):
+    provider = load()
+    calls = []
+    def discord(token, method, path, body):
+        calls.append(body)
+        return {"id": "channel"}
+    monkeypatch.setattr(provider, "_discord", discord)
+    provider._send_dm("secret", "123456789012345678", "**Reset password**\nUse this action:\nhttps://app.example.test/reset#token=opaque")
+    payload = calls[-1]
+    assert "content" not in payload
+    embed = payload["embeds"][0]
+    assert embed["title"] == "Reset password"
+    assert embed["url"] == "https://app.example.test/reset#token=opaque"
+    assert "[here]" in embed["description"]
+    assert payload["allowed_mentions"] == {"parse": []}
+
+
+def test_recovery_card_hides_repeated_bearer_link_and_separates_safety_note(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    link = "https://app.example.test/reset#token=opaque"
+    provider._send_dm("secret", "123456789012345678",
+        "**Reset your password**\nOpen this link to choose a new password:\n" + link
+        + "\nThis link expires shortly and can be used once. If you did not request it, ignore this message.\n" + link)
+    embed = calls[-1]["embeds"][0]
+    assert embed["url"] == link
+    assert embed["description"].count(link) == 1
+    assert "Click [here](" + link + ") to continue." in embed["description"]
+    assert "\n\nIf you did not request" in embed["description"]
+    assert "\n\nThis link expires" in embed["description"]
+
+
+def test_card_action_escapes_markdown_url_delimiters(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    provider._send_dm("secret", "123456789012345678", "**Release**\nhttps://app.example.test/game/(edition)")
+    assert "[here](https://app.example.test/game/%28edition%29)" in calls[-1]["embeds"][0]["description"]
+
+
+def test_verification_card_emphasizes_code_and_separates_instructions(monkeypatch):
+    provider = load()
+    calls = []
+    monkeypatch.setattr(provider, "_discord", lambda token, method, path, body: calls.append(body) or {"id": "channel"})
+    provider._send_dm("secret", "123456789012345678", "**Verify destination**\nYour verification code is 12345678.\nIt expires in ten minutes.")
+    description = calls[-1]["embeds"][0]["description"]
+    assert "**12345678**" in description
+    assert "\n\nIt expires" in description

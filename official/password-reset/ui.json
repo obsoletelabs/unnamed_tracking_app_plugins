@@ -1,29 +1,19 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.7",
+  "api_contract_version": "1.1.10",
   "plugin_id": "official.password-reset",
   "title": "Password Reset",
-  "settings": [
-    {
-      "id": "recovery",
-      "title": "Account recovery",
-      "description": "Recovery requires a verified external destination with recovery enabled. API keys remain active after a reset.",
-      "fields": [
-        {
-          "id": "token_lifetime_seconds",
-          "label": "Link lifetime (seconds)",
-          "type": "number",
-          "default": 1200,
-          "required": true,
-          "validation": {
-            "minimum": 600,
-            "maximum": 3600
-          }
-        }
-      ]
-    }
-  ],
+  "settings": [],
   "actions": [
+    {
+      "id": "status",
+      "label": "Recovery status",
+      "handler": "plugin:status",
+      "capability": {
+        "name": "auth.password_reset",
+        "version": 1
+      }
+    },
     {
       "id": "enable",
       "label": "Enable or save recovery",
@@ -49,10 +39,9 @@
       "id": "configure",
       "title": "Password recovery",
       "description": "Enable the sign-in recovery flow. The host creates reset links, checks routing, changes passwords and signs out sessions. This plugin never receives passwords or reset tokens.",
-      "settings": [
-        "recovery"
-      ],
+      "settings": [],
       "actions": [
+        "status",
         "enable",
         "disable"
       ],
@@ -60,18 +49,20 @@
       "dialogs": []
     }
   ],
-  "navigation": [
+  "navigation": [],
+  "menus": [],
+  "tables": [],
+  "dialogs": [],
+  "settings_sections": [
     {
-      "id": "recovery",
-      "location": "administration",
+      "id": "password-recovery-settings",
       "label": "Password recovery",
       "page_id": "configure",
+      "area": "administration",
+      "group": "Account security",
       "visibility": {
         "admin_only": true
       }
     }
-  ],
-  "menus": [],
-  "tables": [],
-  "dialogs": []
+  ]
 }

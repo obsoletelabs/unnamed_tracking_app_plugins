@@ -109,7 +109,8 @@
         "game.documents.actions",
         "media.detail.after-header",
         "app.global",
-        "home.replace"
+        "home.replace",
+        "administration.users.actions"
       ],
       "title": "HostExtensionSlot",
       "type": "string"
@@ -1923,5 +1924,5 @@
   "title": "PluginUiDocument",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.8"
+  "x-api-contract-version": "1.1.10"
 }
