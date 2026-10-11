@@ -1368,6 +1368,177 @@
         "official"
       ],
       "version": "0.6.1"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
+        "source_committed_at": "2026-10-11T20:46:45+08:00",
+        "source_digest": "a927eb98e0b69780b0ebd71b637fceb59b8c3a1636ccf407f77616e5e7880114",
+        "source_path": "official/metadata-tmdb",
+        "version_bump": "patch"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.media",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
+          "signature": "v2:5/MO+N5KDW5Sb446Kf5kWv/j+4xYDJXhlmwlZ75stMSL7qO+/drByRPZNYaz2peOu70fTv/i4uNUNgFHC4L1Ag=="
+        },
+        "manifest_version": 1,
+        "name": "TMDB Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.media",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-tmdb",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "media",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.6.2"
+      },
+      "package": {
+        "filename": "official.metadata-tmdb-0.6.2.utp",
+        "format": "utp-v1",
+        "size_bytes": 9554
+      },
+      "package_sha256": "3c2fd7dfa01ed29a2123de9c81e709a4fcc235504f014f8b210d4ca6bc2c2e55",
+      "plugin_id": "official.metadata-tmdb",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# TMDB Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
+        "signature": "v2:5/MO+N5KDW5Sb446Kf5kWv/j+4xYDJXhlmwlZ75stMSL7qO+/drByRPZNYaz2peOu70fTv/i4uNUNgFHC4L1Ag=="
+      },
+      "tags": [
+        "metadata",
+        "tmdb",
+        "official"
+      ],
+      "version": "0.6.2"
     }
   ],
   "version": 1

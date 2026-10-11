@@ -1368,6 +1368,177 @@
         "official"
       ],
       "version": "0.6.1"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
+        "source_committed_at": "2026-10-11T20:46:45+08:00",
+        "source_digest": "72eca7851b535fcec12dee6f65c004db1c6017cab80a2b0b55eb7f0f92137daf",
+        "source_path": "official/metadata-tvdb",
+        "version_bump": "patch"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.media",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
+          "signature": "v2:hE5RgxbmMHsi7O09EdYGGAlV4O5WgwTHbeNnmsM1Nbjl5qmR3QQQDRc3fsGLI/MivgHj2RAIXuQ5C8L7WxYLAg=="
+        },
+        "manifest_version": 1,
+        "name": "TVDB Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.media",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-tvdb",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "media",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.6.2"
+      },
+      "package": {
+        "filename": "official.metadata-tvdb-0.6.2.utp",
+        "format": "utp-v1",
+        "size_bytes": 8884
+      },
+      "package_sha256": "7b0be2b1f37e012fc2d2a5781011ac167d07ccb6d1d4381c57d8adea5d86a547",
+      "plugin_id": "official.metadata-tvdb",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# TVDB Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
+        "signature": "v2:hE5RgxbmMHsi7O09EdYGGAlV4O5WgwTHbeNnmsM1Nbjl5qmR3QQQDRc3fsGLI/MivgHj2RAIXuQ5C8L7WxYLAg=="
+      },
+      "tags": [
+        "metadata",
+        "tvdb",
+        "official"
+      ],
+      "version": "0.6.2"
     }
   ],
   "version": 1
