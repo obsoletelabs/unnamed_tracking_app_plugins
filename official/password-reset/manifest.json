@@ -1,13 +1,6 @@
 {
-  "manifest_version": 1,
-  "plugin_id": "official.password-reset",
-  "name": "Password Reset",
-  "version": "1.0.0",
   "api_contract_version": "1.1.7",
-  "sdk_version_range": "^1.1.7",
   "application_version_range": ">=1.0.0",
-  "entrypoint": "plugin:main",
-  "description": "Host-mediated, single-use password recovery through verified external notification destinations.",
   "capabilities": [
     {
       "name": "auth.password_reset",
@@ -22,10 +15,20 @@
       "version": 1
     },
     {
-      "version": 1,
-      "name": "plugin.settings"
+      "name": "plugin.settings",
+      "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Host-mediated, single-use password recovery through verified external notification destinations.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "Password Reset",
   "permissions": [
     {
       "capability": {
@@ -50,32 +53,29 @@
     },
     {
       "capability": {
-        "version": 1,
-        "name": "plugin.settings"
+        "name": "plugin.settings",
+        "version": 1
       },
       "rationale": "Render and save the administrator configuration field using existing plugin settings controls."
     }
   ],
-  "dependencies": [],
+  "plugin_id": "official.password-reset",
+  "sdk_version_range": "^1.1.7",
   "storage": {
     "quota_mb": 1
   },
-  "integrity": {
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "key_id": null,
-    "signature": null
-  },
   "ui": {
+    "actions": [
+      "enable",
+      "disable"
+    ],
+    "menus": [],
     "pages": [
       "configure"
     ],
     "settings": [
       "recovery"
-    ],
-    "actions": [
-      "enable",
-      "disable"
-    ],
-    "menus": []
-  }
+    ]
+  },
+  "version": "1.0.0"
 }
