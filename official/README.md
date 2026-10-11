@@ -44,3 +44,6 @@ credentials or a Discord-specific transport.
 
 
 Maintained password recovery: `official.password-reset` uses host API1.1.7 with explicit administrator activation and verified external recovery destinations. It performs real password recovery through host-owned tokens/account mutation; synthetic notification demos remain separate. See [setup](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/password-reset).
+
+
+Maintained user invitations: official.user-invites uses host API 1.1.8 with explicit administrator activation and built-in SMTP. Accounts are created only by single-use acceptance on the host. See [setup](user-invites/README.md).

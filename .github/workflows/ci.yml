@@ -101,6 +101,8 @@ jobs:
               candidate_branch="feat/plugin-owned-notification-providers"
             elif [ "$COMPANION_BRANCH" = "feat/plugin-destination-verification" ]; then
               candidate_branch="feat/plugin-notification-verification"
+            elif [ "$COMPANION_BRANCH" = "feat/official-user-invites" ]; then
+              candidate_branch="feat/plugin-user-invites"
             elif [ "$COMPANION_BRANCH" = "feat/official-password-reset" ]; then
               candidate_branch="feat/plugin-password-reset"
             fi

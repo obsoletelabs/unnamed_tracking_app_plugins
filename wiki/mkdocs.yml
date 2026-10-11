@@ -46,6 +46,7 @@ nav:
       - Events: development/events.md
       - Background tasks: development/background-tasks.md
       - Notifications: development/notifications.md
+      - Maintained user invitations: development/user-invites.md
       - Integration recipe: development/events-tasks.md
       - Plugin-owned UI and pages: development/ui.md
       - Native frontend: development/native.md

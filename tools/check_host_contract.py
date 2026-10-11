@@ -118,6 +118,14 @@ def main() -> None:
     auth_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
     auth_schema["x-api-contract-version"] = "1.1.7"
     assert auth_schema == json.loads((root / "tools/schemas/auth-password-reset-v1.schema.json").read_bytes())
+    from src.plugin_api.auth_contracts import UserInviteFlowDefinition, UserInviteIssue, UserInviteIdentity
+    for name, model in (("auth-user-invite-v1", UserInviteFlowDefinition),
+                        ("auth-user-invite-issue-v1", UserInviteIssue),
+                        ("auth-user-invite-identity-v1", UserInviteIdentity)):
+        schema = model.model_json_schema()
+        schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+        schema["x-api-contract-version"] = "1.1.8"
+        assert schema == json.loads((root / "tools/schemas" / (name + ".schema.json")).read_bytes()), name
     catalogue = json.loads((args.distribution_root / "list.json").read_text(encoding="utf-8"))
     # Evaluate the actual public catalogue entry model without loading database
     # configuration or the API server. Additional distribution fields remain
@@ -151,7 +159,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):
@@ -199,3 +207,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

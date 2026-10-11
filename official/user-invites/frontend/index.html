@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>User invitations</title><link rel="stylesheet" href="./appearance.css"><link rel="stylesheet" href="./style.css"><script src="./appearance.js" defer></script></head>
+<body><main><h1>User invitations</h1><p>Invite someone by email. Their normal account is created only when they accept the link.</p>
+<p id="status" role="status">Loading invitation status…</p>
+<form id="configuration"><label>Link lifetime (seconds)<input id="lifetime" type="number" min="3600" max="604800" value="86400" required></label><div class="buttons"><button id="enable" type="button" disabled>Enable or save invitations</button><button id="disable" type="button">Disable invitations</button></div></form>
+<form id="send"><label>Invite email address<input id="email" type="email" maxlength="254" autocomplete="off" required></label><button id="issue" type="button" disabled>Send invitation</button></form>
+<section aria-label="Recent invitations"><h2>Recent invitations</h2><p>Delivery state is tracked separately from acceptance.</p><button id="refresh" type="button">Refresh status</button><div id="invitations"></div></section></main><script src="./app.js"></script></body></html>

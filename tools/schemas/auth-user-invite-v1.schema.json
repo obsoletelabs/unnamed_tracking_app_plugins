@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "const": "user_invite",
+      "title": "Mode",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "token_lifetime_seconds": {
+      "default": 86400,
+      "maximum": 604800,
+      "minimum": 3600,
+      "title": "Token Lifetime Seconds",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "mode",
+    "name"
+  ],
+  "title": "UserInviteFlowDefinition",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.8"
+}
