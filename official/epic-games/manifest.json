@@ -71,10 +71,22 @@
         "name": "tasks.background",
         "version": 1
       },
-      "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account\u2019s approved access and resumable import checkpoints."
+      "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account’s approved access and resumable import checkpoints."
     }
   ],
   "plugin_id": "official.epic-games",
+  "scheduled_tasks": [
+    {
+      "action_id": "sync",
+      "default_interval_minutes": 1440,
+      "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
+      "id": "autosync",
+      "max_interval_minutes": 10080,
+      "min_interval_minutes": 5,
+      "name": "Epic Games autosync",
+      "scope": "user"
+    }
+  ],
   "sdk_version_range": "^1.1.1",
   "storage": {
     "quota_mb": 16
@@ -95,17 +107,5 @@
     ],
     "settings": []
   },
-  "version": "0.7.0",
-  "scheduled_tasks": [
-    {
-      "id": "autosync",
-      "name": "Epic Games autosync",
-      "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
-      "scope": "user",
-      "action_id": "sync",
-      "min_interval_minutes": 5,
-      "max_interval_minutes": 10080,
-      "default_interval_minutes": 1440
-    }
-  ]
+  "version": "0.7.0"
 }
