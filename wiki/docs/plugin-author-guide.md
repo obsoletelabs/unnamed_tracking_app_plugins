@@ -504,3 +504,12 @@ normalized and isolated; core retains global attempt/history/retry state.
 The maintained [Discord webhook](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/discord-notifications/README.md)
 exercises declared-field configuration; the separately maintained Discord bot
 exercises linked-account enrollment. Historical protected demo renderers still work.
+
+
+API1.1.9 adds `administration.users.actions`: a page title becomes an Admin/Users
+button opening a host dialog, guarded by `frontend.navigation.admin`. Dedicated
+plugin Settings/dialogs can use the existing sandboxed frontend; its `page` query
+parameter selects presentation only. Account security settings use the existing
+`frontend.settings` and `frontend.placement.settings.admin` grants. The recovery
+contribution reads live `auth_flows.password_reset.status` rather than trusting
+saved activation. Host PR85 supplies this additive contract.

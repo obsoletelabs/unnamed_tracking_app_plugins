@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.8",
+  "api_contract_version": "1.1.9",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -12,6 +12,14 @@
     },
     {
       "name": "frontend.navigation.admin",
+      "version": 1
+    },
+    {
+      "name": "frontend.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.placement.settings.admin",
       "version": 1
     }
   ],
@@ -50,10 +58,24 @@
         "version": 1
       },
       "rationale": "Show the administrator-only invitation controls."
+    },
+    {
+      "capability": {
+        "name": "frontend.settings",
+        "version": 1
+      },
+      "rationale": "Expose administrator-only authentication configuration in plugin Settings."
+    },
+    {
+      "capability": {
+        "name": "frontend.placement.settings.admin",
+        "version": 1
+      },
+      "rationale": "Place authentication configuration in the Administration settings area."
     }
   ],
   "plugin_id": "official.user-invites",
-  "sdk_version_range": "^1.1.8",
+  "sdk_version_range": "^1.1.9",
   "storage": {
     "quota_mb": 1
   },
@@ -68,7 +90,8 @@
     ],
     "menus": [],
     "pages": [
-      "manage"
+      "configure",
+      "invite"
     ],
     "settings": []
   },

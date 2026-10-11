@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.7",
+  "api_contract_version": "1.1.9",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -11,11 +11,11 @@
       "version": 1
     },
     {
-      "name": "frontend.navigation.admin",
+      "name": "frontend.settings",
       "version": 1
     },
     {
-      "name": "plugin.settings",
+      "name": "frontend.placement.settings.admin",
       "version": 1
     }
   ],
@@ -46,26 +46,27 @@
     },
     {
       "capability": {
-        "name": "frontend.navigation.admin",
+        "name": "frontend.settings",
         "version": 1
       },
-      "rationale": "Show the administrator-only password recovery configuration entry."
+      "rationale": "Expose administrator-only authentication configuration in plugin Settings."
     },
     {
       "capability": {
-        "name": "plugin.settings",
+        "name": "frontend.placement.settings.admin",
         "version": 1
       },
-      "rationale": "Render and save the administrator configuration field using existing plugin settings controls."
+      "rationale": "Place authentication configuration in the Administration settings area."
     }
   ],
   "plugin_id": "official.password-reset",
-  "sdk_version_range": "^1.1.7",
+  "sdk_version_range": "^1.1.9",
   "storage": {
     "quota_mb": 1
   },
   "ui": {
     "actions": [
+      "status",
       "enable",
       "disable"
     ],
@@ -73,9 +74,11 @@
     "pages": [
       "configure"
     ],
-    "settings": [
-      "recovery"
-    ]
+    "settings": []
   },
-  "version": "1.1.0"
+  "version": "1.1.0",
+  "frontend": {
+    "entry": "frontend/index.html",
+    "inline_assets": true
+  }
 }

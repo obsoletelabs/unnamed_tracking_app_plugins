@@ -1,5 +1,10 @@
 const el = id => document.getElementById(id);
 let registered = false;
+const invitationPage=new URLSearchParams(window.location.search).get("page")==="invite";
+el("configuration").hidden=invitationPage;
+el("send").hidden=!invitationPage;
+document.querySelector("section").hidden=!invitationPage;
+if(invitationPage) document.querySelector("h1").textContent="Invite user";
 function request(method, payload = {}) {
  return new Promise((resolve, reject) => {
   const requestId = crypto.randomUUID();
@@ -25,13 +30,13 @@ async function refresh() {
  el("disable").disabled = !registered;
  el("status").textContent = registered ? "Invitations enabled" : "Invitations disabled";
  el("status").className = "";
- const rows = registered ? (await action("list-invites")).invitations : [];
+ const rows = registered && invitationPage ? (await action("list-invites")).invitations : [];
  el("invitations").replaceChildren();
- if(!rows.length) el("invitations").textContent = registered ? "No recent invitations." : "Enable invitations to send and review this installation's invites.";
+ if(!rows.length) el("invitations").textContent = registered ? "No recent invitations." : "Enable invitations in Administration â†’ Account security â†’ User invitations before sending.";
  for(const row of rows) {
   const article=document.createElement("article"), address=document.createElement("strong"), info=document.createElement("p");
   address.textContent=row.email;
-  info.textContent=`${row.status} · Delivery: ${row.delivery_status || "unavailable"} · Expires ${when(row.expires_at)}`;
+  info.textContent=`${row.status} Ã‚Â· Delivery: ${row.delivery_status || "unavailable"} Ã‚Â· Expires ${when(row.expires_at)}`;
   article.append(address,info);
   if(row.status === "pending") {
    const button=document.createElement("button"); button.type="button"; button.textContent="Revoke invitation";

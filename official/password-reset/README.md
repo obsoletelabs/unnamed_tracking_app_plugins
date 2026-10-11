@@ -21,3 +21,5 @@ The host stores encrypted delivery material only until consumption/expiry and ne
 Run `pytest tests/test_official_password_reset.py` and the paired host recovery suite. Actual signed-package installation and the host request/link/redemption workflow are required before release. Temporary SMTP capture is suitable for local acceptance; no production SMTP account is required.
 
 Startup uses auth_flows.password_reset.restore to resume only an already-active matching installation and definition. Withdrawal or reinstallation requires explicit activation; regranting permission cannot revive an old reset credential.
+
+Configuration is under Settings → Administration → Account security → Password recovery. The page shows live **Account recovery enabled/disabled** from the host. Saved preferences do not imply availability. Requires API1.1.9 and explicit settings placement grants. All SMTP mail now uses the host shared HTML design with a plain alternative.

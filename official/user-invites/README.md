@@ -13,3 +13,5 @@ The administrator page lists the current installation's last 100 invites, expiry
 The plugin owns activation and its admin UI. It uses only the public gateway and receives its own invitation email/status records. The host owns tokens, account/password validation, creation, SMTP credentials and delivery retries. Passwords and bearer links never pass through plugin code. Existing registered emails are rejected to the administrator.
 
 This is a usable flow, separate from the synthetic `example.user-invite-notification-demo` routing demonstration.
+
+Configure activation/lifetime under Settings → Administration → Account security → User invitations. On Administration → Users, **Invite user** opens the plugin dialog to send and review invitations. Requires API1.1.9 and reviewed administrative/settings grants. The host renders invitation mail as HTML plus text.
