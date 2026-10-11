@@ -1,0 +1,102 @@
+"""The maintained contribution uses only public host auth primitives."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+
+
+@pytest.fixture
+def plugin(monkeypatch):
+    path = Path(__file__).parents[1] / "official/user-invites/plugin.py"
+    spec = importlib.util.spec_from_file_location("official_invites", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    calls, storage = [], {}
+    def gateway(method, capability, payload):
+        calls.append((method, capability, payload))
+        if method == "storage.put":
+            storage[payload["key"]] = payload["value"]
+        if method == "storage.get":
+            return {"value": storage.get(payload["key"])}
+        return {"registered": method.endswith("register") and not method.endswith("unregister")}
+    monkeypatch.setattr(module, "request", gateway)
+    return module, calls, storage
+
+
+def test_enable_has_no_credentials_account_queries_or_direct_notification_sender(plugin):
+    module, calls, storage = plugin
+    assert module.enable({"token_lifetime_seconds": 7200}) == {"registered": True}
+    assert calls[0] == ("auth_flows.user_invites.register", "auth.user_invites", {"mode": "user_invite", "name": "User Invites", "token_lifetime_seconds": 7200})
+    assert json.loads(storage[module.KEY])["enabled"] is True
+    assert {capability for _, capability, _ in calls} == {"auth.user_invites", "plugin.storage"}
+
+
+@pytest.mark.parametrize("lifetime", [True, "86400", 86400.5, 3599, 604801, None])
+def test_host_lifetime_bounds_are_validated_without_sending_invalid_requests(plugin, lifetime):
+    module, calls, _ = plugin
+    with pytest.raises(ValueError):
+        module.enable({"token_lifetime_seconds": lifetime})
+    assert not calls
+
+
+def test_installation_starts_disabled_and_explicit_activation_survives_restart(plugin):
+    module, calls, _ = plugin
+    module.restore_configuration()
+    assert all(method != "auth_flows.user_invites.register" for method, _, _ in calls)
+    module.enable({})
+    calls.clear()
+    module.restore_configuration()
+    assert calls[-1][0] == "auth_flows.user_invites.restore"
+    module.disable({})
+    assert calls[-2] == ("auth_flows.user_invites.unregister", "auth.user_invites", {})
+    calls.clear()
+    module.restore_configuration()
+    assert all(method != "auth_flows.user_invites.register" for method, _, _ in calls)
+
+
+def test_failed_host_activation_does_not_persist_enabled_configuration(plugin, monkeypatch):
+    module, _, storage = plugin
+    def reject(method, capability, payload):
+        raise PermissionError("Missing administrator authority")
+    monkeypatch.setattr(module, "request", reject)
+    with pytest.raises(PermissionError):
+        module.enable({})
+    assert not storage
+
+
+def test_declared_admin_controls_and_signed_official_identity():
+    source = Path(__file__).parents[1] / "official/user-invites"
+    manifest = json.loads((source / "manifest.json").read_text())
+    document = json.loads((source / "ui.json").read_text())
+    assert manifest["plugin_id"] == "official.user-invites"
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.8"
+    assert {item["name"] for item in manifest["capabilities"]} == {"auth.user_invites", "plugin.storage", "frontend.navigation.admin"}
+    assert document["navigation"][0]["visibility"]["admin_only"] is True
+    assert json.loads((source / "release.json").read_text())["publisher"] == "Unnamed Tracking Official"
+
+
+def test_admin_actions_forward_only_scoped_inputs(plugin):
+    module, calls, _ = plugin
+    module.issue({"email": "recipient@example.test", "is_admin": True, "smtp_password": "unrelated"})
+    module.list_invites({"user_id": "someone-else"})
+    module.status({"include_tokens": True})
+    module.revoke({"id": "invite-id", "token": "must-not-forward"})
+    assert calls == [
+        ("auth_flows.user_invites.issue", "auth.user_invites", {"email": "recipient@example.test"}),
+        ("auth_flows.user_invites.list", "auth.user_invites", {}),
+        ("auth_flows.user_invites.status", "auth.user_invites", {}),
+        ("auth_flows.user_invites.revoke", "auth.user_invites", {"id": "invite-id"}),
+    ]
+
+
+def test_plugin_owned_admin_ui_uses_public_bridge_and_safe_text_rendering():
+    source = Path(__file__).parents[1] / "official/user-invites"
+    manifest = json.loads((source / "manifest.json").read_text())
+    assert manifest["frontend"]["entry"] == "frontend/index.html"
+    script = (source / "frontend/app.js").read_text()
+    assert "plugin.run-action" in script and "textContent" in script
+    assert "fetch(" not in script and "innerHTML" not in script
+
+

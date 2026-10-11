@@ -49,3 +49,7 @@ installed legacy packages during migration.
 ## Notification Chaos Demo
 
 The signed [Notification Chaos Demo](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/notification-chaos-provider) uses protected Discord transport with reversed approved fields, persistent first-render failure, repeated failure and invalid-layout modes. It is deliberately unreliable, requests no credential/network access and is independent of the official provider. Unit/package tests and the real reference-worker lifecycle harness cover it. Core owns delivery history, retries and routing; no production feature depends on the demo.
+
+## Maintained user invitations (API 1.1.8)
+
+The working `official.user-invites` plugin enables administrator email invitations through host-owned single-use credentials and core SMTP deliveries. Accounts are created only on acceptance. This is separate from the synthetic routing demo. See [setup and public contract](../development/user-invites.md).

@@ -30,6 +30,7 @@
         "notification_providers.deliver",
         "notification_providers.sensitive",
         "auth.password_reset",
+        "auth.user_invites",
         "metadata_providers.register",
         "metadata_providers.search",
         "metadata_providers.metadata",
@@ -1836,5 +1837,6 @@
   ],
   "title": "PluginUiDocument",
   "type": "object",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.8"
 }

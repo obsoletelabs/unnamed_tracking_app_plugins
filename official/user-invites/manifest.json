@@ -1,0 +1,75 @@
+{
+  "manifest_version": 1,
+  "plugin_id": "official.user-invites",
+  "name": "User Invites",
+  "version": "1.0.0",
+  "api_contract_version": "1.1.8",
+  "sdk_version_range": "^1.1.8",
+  "application_version_range": ">=1.0.0",
+  "entrypoint": "plugin:main",
+  "description": "Administrator email invitations with expiring single-use acceptance and account creation only after confirmation.",
+  "capabilities": [
+    {
+      "name": "auth.user_invites",
+      "version": 1
+    },
+    {
+      "name": "plugin.storage",
+      "version": 1
+    },
+    {
+      "name": "frontend.navigation.admin",
+      "version": 1
+    }
+  ],
+  "permissions": [
+    {
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      },
+      "rationale": "Enable administrator-issued email invitations and normal account creation on single-use host acceptance. This plugin can see its own pending invitation email/status records, but cannot read passwords, tokens, SMTP credentials or grant administrator privileges."
+    },
+    {
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      },
+      "rationale": "Remember explicit activation and invitation lifetime only; no invitation credentials are stored by the plugin."
+    },
+    {
+      "capability": {
+        "name": "frontend.navigation.admin",
+        "version": 1
+      },
+      "rationale": "Show the administrator-only invitation controls."
+    }
+  ],
+  "dependencies": [],
+  "storage": {
+    "quota_mb": 1
+  },
+  "integrity": {
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "key_id": null,
+    "signature": null
+  },
+  "ui": {
+    "pages": [
+      "manage"
+    ],
+    "settings": [],
+    "actions": [
+      "status",
+      "enable",
+      "disable",
+      "issue",
+      "list-invites",
+      "revoke"
+    ],
+    "menus": []
+  },
+  "frontend": {
+    "entry": "frontend/index.html"
+  }
+}

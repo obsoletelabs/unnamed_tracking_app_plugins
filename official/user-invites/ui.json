@@ -1,0 +1,97 @@
+{
+  "schema_version": "v1",
+  "api_contract_version": "1.1.8",
+  "plugin_id": "official.user-invites",
+  "title": "User Invites",
+  "settings": [],
+  "actions": [
+    {
+      "id": "status",
+      "label": "Invitation status",
+      "handler": "plugin:status",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      }
+    },
+    {
+      "id": "enable",
+      "label": "Enable or save invitations",
+      "handler": "plugin:enable",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      }
+    },
+    {
+      "id": "disable",
+      "label": "Disable invitations",
+      "handler": "plugin:disable",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      },
+      "confirmation": "Disable invitations and invalidate all outstanding links?"
+    },
+    {
+      "id": "issue",
+      "label": "Send invitation",
+      "handler": "plugin:issue",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      }
+    },
+    {
+      "id": "list-invites",
+      "label": "List invitations",
+      "handler": "plugin:list_invites",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      }
+    },
+    {
+      "id": "revoke",
+      "label": "Revoke invitation",
+      "handler": "plugin:revoke",
+      "capability": {
+        "name": "auth.user_invites",
+        "version": 1
+      },
+      "confirmation": "Revoke this invitation and cancel any pending delivery?"
+    }
+  ],
+  "pages": [
+    {
+      "id": "manage",
+      "title": "User invitations",
+      "description": "Invite by email; an account is created only on acceptance.",
+      "settings": [],
+      "actions": [
+        "status",
+        "enable",
+        "disable",
+        "issue",
+        "list-invites",
+        "revoke"
+      ],
+      "tables": [],
+      "dialogs": []
+    }
+  ],
+  "navigation": [
+    {
+      "id": "invitations",
+      "location": "administration",
+      "label": "User invitations",
+      "page_id": "manage",
+      "visibility": {
+        "admin_only": true
+      }
+    }
+  ],
+  "menus": [],
+  "tables": [],
+  "dialogs": []
+}

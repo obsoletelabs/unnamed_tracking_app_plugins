@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "official",
+    "notifications",
+    "security"
+  ],
+  "automatic_update": false,
+  "icon": "icon.svg",
+  "release_notes": "Functional administrator email invitations. Host API1.1.8 creates normal accounts only on single-use acceptance; SMTP and invitation credentials stay in the host."
+}

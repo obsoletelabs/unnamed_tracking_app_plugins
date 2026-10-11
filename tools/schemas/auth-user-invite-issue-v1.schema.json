@@ -1,0 +1,18 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "maxLength": 254,
+      "minLength": 3,
+      "title": "Email",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "title": "UserInviteIssue",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.8"
+}
