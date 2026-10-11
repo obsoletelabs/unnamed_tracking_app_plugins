@@ -9,5 +9,5 @@
   ],
   "icon": "pwa/pwa-icon.svg",
   "automatic_update": true,
-  "release_notes": "Bundle additive public SDK contract 1.1.4. Reviewed mobile 0.0.4 assets, permissions and private-data caching policy remain unchanged."
+  "release_notes": "Bundle additive public SDK 1.1.5 provider context support. PWA lifecycle, assets, grants and private-data caching policy are unchanged."
 }

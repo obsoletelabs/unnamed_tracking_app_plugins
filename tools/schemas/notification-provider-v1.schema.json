@@ -2,6 +2,7 @@
   "$defs": {
     "NotificationDestinationDeclaration": {
       "additionalProperties": false,
+      "description": "Enrollment choices; independent core proof determines concrete endpoint trust.",
       "properties": {
         "kind": {
           "maxLength": 32,
@@ -40,11 +41,11 @@
         "label"
       ],
       "title": "NotificationDestinationDeclaration",
-      "type": "object",
-      "description": "Enrollment choices; independent core proof determines concrete endpoint trust."
+      "type": "object"
     },
     "NotificationProviderDefinition": {
       "additionalProperties": false,
+      "description": "Generic plugin-owned configuration and operations, without credential values.",
       "properties": {
         "destinations": {
           "items": {
@@ -103,11 +104,11 @@
         "retire_action"
       ],
       "title": "NotificationProviderDefinition",
-      "type": "object",
-      "description": "Generic plugin-owned configuration and operations, without credential values."
+      "type": "object"
     },
     "NotificationProviderFeatures": {
       "additionalProperties": false,
+      "description": "Supported delivery behavior; declarations never confer grants or verification.",
       "properties": {
         "critical_supported": {
           "default": false,
@@ -127,11 +128,11 @@
         }
       },
       "title": "NotificationProviderFeatures",
-      "type": "object",
-      "description": "Supported delivery behavior; declarations never confer grants or verification."
+      "type": "object"
     },
     "UiField": {
       "additionalProperties": false,
+      "description": "One declarative settings value; secrets are write-only at the host boundary.",
       "properties": {
         "id": {
           "maxLength": 128,
@@ -218,10 +219,10 @@
         "type"
       ],
       "title": "UiField",
-      "type": "object",
-      "description": "One declarative settings value; secrets are write-only at the host boundary."
+      "type": "object"
     },
     "UiFieldType": {
+      "description": "Native field controls supported by the v1 renderer.",
       "enum": [
         "text",
         "textarea",
@@ -232,11 +233,11 @@
         "multiselect"
       ],
       "title": "UiFieldType",
-      "type": "string",
-      "description": "Native field controls supported by the v1 renderer."
+      "type": "string"
     },
     "UiOption": {
       "additionalProperties": false,
+      "description": "A non-executable option rendered by a select control.",
       "properties": {
         "value": {
           "maxLength": 256,
@@ -256,11 +257,11 @@
         "label"
       ],
       "title": "UiOption",
-      "type": "object",
-      "description": "A non-executable option rendered by a select control."
+      "type": "object"
     },
     "UiValidation": {
       "additionalProperties": false,
+      "description": "Safe client/server validation constraints for a declarative field.",
       "properties": {
         "pattern": {
           "anyOf": [
@@ -329,11 +330,11 @@
         }
       },
       "title": "UiValidation",
-      "type": "object",
-      "description": "Safe client/server validation constraints for a declarative field."
+      "type": "object"
     }
   },
   "additionalProperties": false,
+  "description": "Versioned registration preserving existing transports and adding generic plugin delivery.",
   "properties": {
     "provider_id": {
       "maxLength": 128,
@@ -385,6 +386,5 @@
   "title": "NotificationProviderRegistration",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.5",
-  "description": "Versioned registration preserving existing transports and adding generic plugin delivery."
+  "x-api-contract-version": "1.1.5"
 }

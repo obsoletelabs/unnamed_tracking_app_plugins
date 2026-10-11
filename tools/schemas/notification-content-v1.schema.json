@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "description": "Approved projection, not the canonical notification or user/entity records.",
+  "properties": {
+    "notification_id": {
+      "format": "uuid",
+      "title": "Notification Id",
+      "type": "string"
+    },
+    "event_type": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Event Type",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "body": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+    },
+    "event_at": {
+      "minimum": 0,
+      "title": "Event At",
+      "type": "integer"
+    },
+    "urgency": {
+      "default": "normal",
+      "enum": [
+        "normal",
+        "critical"
+      ],
+      "title": "Urgency",
+      "type": "string"
+    },
+    "link": {
+      "anyOf": [
+        {
+          "maxLength": 2048,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Link"
+    }
+  },
+  "required": [
+    "notification_id",
+    "event_type",
+    "title",
+    "body",
+    "event_at"
+  ],
+  "title": "PluginNotificationContent",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.5"
+}
