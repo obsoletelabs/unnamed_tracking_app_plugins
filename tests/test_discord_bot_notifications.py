@@ -40,7 +40,7 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
 
     monkeypatch.setattr(notifications, "request", fake_request)
     provider._register_provider()
-    assert calls == [("notification_providers.register", "notification_providers.register", {
+    assert calls[:1] == [("notification_providers.register", "notification_providers.register", {
         "provider_id": "official.discord-bot-notifications.dm", "name": "Discord Bot DM", "action_id": "deliver",
         "transport": "plugin", "definition": {
             "destinations": [{"kind": "discord_bot_dm", "label": "Discord Bot DM", "privacy": "PRIVATE", "fields": []}],
@@ -48,6 +48,13 @@ def test_provider_registers_as_generic_private_plugin_destination(monkeypatch):
             "features": {"critical_supported": False, "multiple_destinations": False},
         },
     })]
+
+    assert len(calls) == 2
+    assert calls[1][2]["provider_id"] == provider.ACCOUNT_PROVIDER_ID
+    assert calls[1][2]["definition"] == provider.ACCOUNT_DEFINITION
+    schema = json.loads((ROOT / "tools/schemas/notification-provider-v1.schema.json").read_bytes())
+    for _, _, payload in calls:
+        jsonschema.validate(payload, schema)
 
 
 def test_link_code_must_be_verified_before_identity_is_saved(monkeypatch):

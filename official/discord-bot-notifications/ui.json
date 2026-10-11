@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.5",
+  "api_contract_version": "1.1.6",
   "plugin_id": "official.discord-bot-notifications",
   "title": "Discord Bot Notifications",
   "settings": [],
@@ -14,7 +14,10 @@
     {"id": "test-dm", "label": "Send a test Discord DM", "handler": "plugin:test_dm", "capability": {"name": "network.outbound", "version": 1}},
     {"id": "configure-destination", "label": "Enable Discord notifications", "handler": "plugin:configure_destination", "capability": {"name": "plugin.storage", "version": 1}},
     {"id": "retire-destination", "label": "Retire Discord notification destination", "handler": "plugin:retire_destination", "capability": {"name": "plugin.storage", "version": 1}, "confirmation": "Retire this destination and unlink the Discord account?"},
-    {"id": "deliver", "label": "Deliver notification to Discord", "handler": "plugin:deliver", "capability": {"name": "notification_providers.deliver", "version": 1}}
+    {"id": "deliver", "label": "Deliver notification to Discord", "handler": "plugin:deliver", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "configure-account-destination", "label": "Configure per-account Discord destination", "handler": "plugin:configure_account_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "retire-account-destination", "label": "Retire per-account Discord destination", "handler": "plugin:retire_account_destination", "capability": {"name": "notification_providers.deliver", "version": 1}},
+    {"id": "deliver-account", "label": "Deliver to one Discord account", "handler": "plugin:deliver_account", "capability": {"name": "notification_providers.deliver", "version": 1}}
   ],
   "menus": [],
   "pages": [

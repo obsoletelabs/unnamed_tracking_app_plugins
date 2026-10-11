@@ -50,10 +50,15 @@
         "sessions.revoke",
         "sessions.admin",
         "notifications.send",
+        "notifications.emit",
+        "notification_sources.register",
+        "notifications.sensitive",
+        "notifications.lifecycle.read",
         "notifications",
         "notification_providers",
         "notification_providers.register",
         "notification_providers.deliver",
+        "notification_providers.sensitive",
         "metadata_providers.register",
         "metadata_providers.search",
         "metadata_providers.metadata",
@@ -98,11 +103,7 @@
         "backend.routes.plugin",
         "backend.routes.host",
         "network.outbound",
-        "api.full",
-        "notifications.emit",
-        "notification_sources.register",
-        "notifications.sensitive",
-        "notifications.lifecycle.read"
+        "api.full"
       ],
       "title": "Capability",
       "type": "string"
@@ -684,5 +685,7 @@
     "integrity"
   ],
   "title": "PluginManifest",
-  "type": "object"
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-api-contract-version": "1.1.6"
 }
