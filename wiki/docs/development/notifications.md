@@ -174,3 +174,11 @@ For a provider's setup, use `notification_provider=<provider-id>`; administrator
 use `area=administration`. Reuse host verification/recovery actions; never treat local
 profile proof as host destination proof. The maintained Discord bot demonstrates actual
 PRIVATE/SECURE status, recovery readiness and separate compatibility profile links.
+
+### Installed Discord settings example
+
+The bot separates actual host destinations from compatibility profile links. Joined-server discovery and channel/member search reuse the existing administrator directory actions. A filtered list retains the current selection; changes still require explicit save. Screenshots use a disposable signed installation and synthetic Discord responses.
+
+![Host-authoritative destination status in the installed bot](../assets/screenshots/discord-host-destination-status.jpg)
+
+![Searchable bot server selection](../assets/screenshots/discord-server-search.jpg)
