@@ -1,33 +1,44 @@
-# Discord Notifications
+# Discord Webhook Notifications
 
-Maintained official provider for owner-specific Discord webhooks using the generic
-plugin-owned notification provider contract. This is a new identity,
-`official.discord-notifications`; legacy example credentials/consent are never moved.
+Maintained Discord webhook delivery through the generic Plugin API 1.1.5 provider contract.
+Deploy the paired host provider/settings change before installing this release.
 
-Install the package and grant `notification_providers.register` and
-`notification_providers.deliver`, plus the plugin's declared storage, outbound
-network and settings capabilities. Enable the plugin, then open the plugin-owned
-Discord Webhook settings page under **Account → Settings**. Enter a webhook URL,
-save it, and use **Send test** to verify the destination.
+## Setup
 
-The webhook URL is stored in the plugin's private storage namespace and is never
-sent to the host notification coordinator. The host stores only generic routing
-metadata and an opaque configuration reference. The plugin performs the Discord
-HTTP request itself through its declared `network.outbound` capability.
+1. Install the plugin and approve its provider, storage and outbound-network grants.
+2. Open the host's notification settings and enable Discord Webhook for your account.
+3. Add a destination using the generated configuration form. Enter a label and an
+   ordinary Discord text-channel webhook URL. Multiple destinations are supported.
+4. Choose notification types and use **Send test notification** to exercise the
+   configured credentials through the core dispatcher.
 
-Each webhook is PUBLIC. The notification coordinator therefore supplies only the
-public projection allowed for that destination. Explicit destination preferences
-do not promote trust or permit account details, watch history, ratings, security
-messages or recovery tokens.
+Webhooks remain PUBLIC. Default media announcements contain public release facts.
+Each destination revision can separately opt into the richer followed-media
+projection; this does not permit account identifiers, watch history, ratings or
+security content. Critical urgency is not supported by this provider.
 
-The plugin validates HTTPS Discord webhook URLs, disables Discord mention parsing,
-keeps credentials out of notification payloads and maps bounded network failures
-to the host's normal retry/result contract. The provider advertises its destination
-kind, privacy level, capabilities and settings UI; no Discord-specific transport or
-credential handling is required in the host application.
+## Configuration and delivery
 
-Test: `python -m pytest tests/test_discord_notifications.py -q`.
-Build: `python tools/build_packages.py` (isolated preview packages).
-Actual host/runtime lifecycle acceptance is separate from unit tests. No external
-webhook credentials are bundled. This source is initially an explicit catalogue
-preview pending paired acceptance and reviewed signed promotion.
+The plugin declares its fields, destination kind and features; the host renders
+them with shared controls. The plugin validates and stores its own webhook tokens
+under opaque installation/destination IDs and revisions. Credentials are never
+returned to forms, action results, lifecycle records or host notification rows.
+Editing retains an omitted saved URL, invalidates pending work and clears previous
+media consent. Removal deletes the URL and retains only a revision tombstone.
+
+Only exact HTTPS discord.com/discordapp.com webhook paths are accepted, without
+userinfo, alternate ports, query parameters or fragments. The plugin uses its own
+bounded network grant and renders only core-approved content with mentions disabled.
+Empty successful Discord responses are accepted; rate limits and server/network
+failures are retryable, while invalid/revoked webhook responses fail permanently.
+Core owns delivery state, leases, retries, preferences and routing checks.
+
+## Migration and testing
+
+This release requires explicit enrollment. Historical protected webhook secrets
+are not transferred to plugin storage, and automatic update is disabled for this
+transition. Old packages remain immutable and notification history is retained.
+
+Standalone source and generated-package tests cover field validation, installation
+separation, revision races, secret removal, malformed URLs, approved content and
+HTTP failure handling. No production Discord credential is required by those tests.

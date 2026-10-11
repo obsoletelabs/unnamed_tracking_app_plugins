@@ -4,6 +4,7 @@ import importlib.util
 import json
 import zipfile
 from pathlib import Path
+from uuid import uuid4
 
 import jsonschema
 import pytest
@@ -43,10 +44,8 @@ def test_registration_declares_plugin_owned_public_destination(monkeypatch):
             "provider_id": ID + ".webhook",
             "name": "Discord Webhook",
             "action_id": "deliver",
-            "destination_kind": "discord_webhook",
-            "privacy": "PUBLIC",
-            "channel_context": "external",
-            "transport": "plugin_public",
+            "transport": "plugin",
+            "definition": provider.DEFINITION,
         },
     )
     jsonschema.validate(
@@ -68,20 +67,24 @@ def test_registration_does_not_hide_permanent_failure(monkeypatch, code):
         provider._register_provider()
 
 
-def test_webhook_storage_is_user_scoped_and_validates_discord_urls(monkeypatch):
+def test_webhook_storage_is_core_destination_scoped_and_validates_discord_urls(monkeypatch):
     provider = load()
-    values = {"_plugin_context": {"user_id": "1234"}, "url": "https://discord.com/api/webhooks/123/token"}
+    installation, destination = str(uuid4()), str(uuid4())
+    context = {"operation": "configure", "scope": "destination", "provider_id": ID + ".webhook",
+               "installation_id": installation,
+               "destination": {"id": destination, "revision": 1, "kind": "discord_webhook"}}
+    values = {"_notification_context": context, "configuration": {"url": "https://discord.com/api/webhooks/123/token"}}
     stored = []
     monkeypatch.setattr(provider, "request", lambda method, capability, payload: stored.append((method, capability, payload)) or {"ok": True})
-    assert provider.save_webhook(values)["ok"]
-    assert stored[-1][2]["key"] == "webhooks/1234"
+    assert provider.configure(values) == {"configured": True}
+    assert stored[-1][2]["key"] == f"webhooks/{installation}/{destination}"
     assert "discord.com/api/webhooks/123/token" in stored[-1][2]["value"]
 
     with pytest.raises(provider.PluginError):
-        provider.save_webhook({"_plugin_context": {"user_id": "1234"}, "url": "https://example.com/webhook"})
+        provider.configure({"_notification_context": context, "configuration": {"url": "https://example.com/webhook"}})
 
 
-def test_package_contains_plugin_owned_configuration_and_frontend(current_packages):
+def test_package_contains_plugin_owned_configuration_without_redundant_frontend(current_packages):
     with zipfile.ZipFile(current_packages[ID]) as archive:
         manifest = json.loads(archive.read("manifest.json"))
         assert {cap["name"] for cap in manifest["capabilities"]} >= {
@@ -91,5 +94,5 @@ def test_package_contains_plugin_owned_configuration_and_frontend(current_packag
             "network.outbound",
         }
         assert manifest.get("storage")
-        assert manifest.get("frontend")
-        assert "payload/frontend/index.html" in archive.namelist()
+        assert not manifest.get("frontend")
+        assert not any("frontend/" in name for name in archive.namelist())
