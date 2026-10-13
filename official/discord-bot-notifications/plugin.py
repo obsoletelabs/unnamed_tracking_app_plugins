@@ -910,12 +910,19 @@ def save_activity_oauth(values: dict[str, Any]) -> dict[str, Any]:
     config = _bot_config()
     application_id = str(values.get("application_id", ""))
     client_secret = str(values.get("client_secret", "")).strip()
+    allow_private = values.get("allow_private_channels", False)
+    if type(allow_private) is not bool:
+        raise PluginError("Choose whether private-channel Activities are allowed.")
+    previous = _load("secrets/activity-oauth", {})
+    if not client_secret and previous.get("application_id") == application_id:
+        client_secret = previous.get("client_secret", "")
     if not _SNOWFLAKE.fullmatch(application_id) or not 16 <= len(client_secret) <= 256:
         raise PluginError("Enter the Discord application ID and OAuth client secret.")
     bot = _discord(config["token"], "GET", "/users/@me")
     if not isinstance(bot, dict) or bot.get("id") != application_id:
         raise PluginError("The Activity must use the same application as this configured bot.")
-    _store("secrets/activity-oauth", {"application_id": application_id, "client_secret": client_secret})
+    _store("secrets/activity-oauth", {"application_id": application_id, "client_secret": client_secret,
+                                     "allow_private_channels": allow_private})
     return {"configured": True, "application_id": application_id}
 
 
@@ -923,6 +930,7 @@ def activity_config(_values: dict[str, Any]) -> dict[str, Any]:
     config = _load("secrets/activity-oauth", {})
     bot = _load("secrets/bot-config", {})
     return {"application_id": config.get("application_id"),
+            "allow_private_channels": config.get("allow_private_channels") is True,
             "configured": bool(config.get("client_secret") and bot.get("token"))}
 
 
@@ -936,9 +944,20 @@ def _activity_membership(subject: str, room: str) -> dict:
     instance = _discord(config["token"], "GET",
                         f"/applications/{application_id}/activity-instances/{quote(room, safe='')}")
     if (not isinstance(instance, dict) or instance.get("application_id") != application_id
-            or instance.get("instance_id") != room or subject not in instance.get("users", [])
-            or instance.get("location", {}).get("guild_id") != config["guild_id"]):
-        raise PluginError("Join this bot's Activity in its configured server first.")
+            or instance.get("instance_id") != room or not isinstance(instance.get("users"), list)
+            or subject not in instance["users"]):
+        raise PluginError("Join this exact Discord Activity instance first.")
+    location = instance.get("location")
+    if not isinstance(location, dict) or not _SNOWFLAKE.fullmatch(str(location.get("channel_id", ""))):
+        raise PluginError("Discord returned no valid Activity channel.")
+    if location.get("kind") == "gc":
+        if location.get("guild_id") != config["guild_id"]:
+            raise PluginError("Join this bot's Activity in its configured server first.")
+    elif location.get("kind") == "pc" and not location.get("guild_id"):
+        if oauth.get("allow_private_channels") is not True:
+            raise PluginError("The operator has not enabled Activities in DMs and group DMs.")
+    else:
+        raise PluginError("This Discord Activity location is not supported.")
     return {"verified": True, "subject": subject, "room": room}
 
 

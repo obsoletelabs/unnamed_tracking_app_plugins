@@ -26,7 +26,7 @@ export function activate(context) {
         const message = ref("");
         const config = ref({});
         const tokenForm = reactive({ token: "", guild_id: "" });
-        const activityForm = reactive({ application_id: "", client_secret: "" });
+        const activityForm = reactive({ application_id: "", client_secret: "", allow_private_channels: false });
         const activityConfig = ref({});
         const userForm = reactive({ username: "", code: "" });
         const directory = ref(null);
@@ -66,6 +66,7 @@ export function activate(context) {
             if (admin) {
               activityConfig.value = await props.host.runAction("activity-config");
               activityForm.application_id = activityConfig.value.application_id || "";
+              activityForm.allow_private_channels = activityConfig.value.allow_private_channels === true;
             }
             await loadDestinations();
             if (!admin && result.configured) {
@@ -197,6 +198,8 @@ export function activate(context) {
               h("p", { role: "status" }, activityConfig.value.configured ? "Activity OAuth configured" : "Activity OAuth needs configuration"),
               h("label", ["Application ID", h("input", { value: activityForm.application_id, onInput: event => activityForm.application_id = event.target.value, autocomplete: "off" })]),
               h("label", ["OAuth client secret", h("input", { type: "password", value: activityForm.client_secret, onInput: event => activityForm.client_secret = event.target.value, autocomplete: "new-password" })]),
+              h("p", "Leave the secret blank to keep the saved secret for this application."),
+              h("label", [h("input", { type: "checkbox", checked: activityForm.allow_private_channels, onChange: event => activityForm.allow_private_channels = event.target.checked }), " Allow Activities in DMs and group DMs"]),
               h("div", { class: "discord-actions" }, [button("Save Activity OAuth", "save-activity-oauth", () => ({ ...activityForm }))]),
             ]),
             infoCard("Connection", [
