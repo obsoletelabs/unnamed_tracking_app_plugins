@@ -15,6 +15,15 @@ network sockets, bot token or OAuth client secret of its own.
 - A shortlist of up to three games, one vote per participant, personal vetoes,
   selection and rerolls. Ties use a random draw among tied eligible games.
 - Imported cover artwork where available, readable fallbacks, eligibility reasons.
+- Public Steam cover fallback and title details with Steam/own tracking-page links.
+- Verified Discord avatars and circular participant thumbnails.
+- Saved group-play presets from connected libraries, with manual confirmation for
+  unknown multiplayer counts; entry-specific genres reset after adding a game.
+- Room-host matching settings, personal undo-veto controls, and spectators for
+  participants with no games. Host transfer requires a separate confirmation.
+- Native Discord invitation controls and optional verified DM/group-DM rooms.
+- Automatic owned multiplayer contributions; unknown player limits still need
+  confirmation, and stored group-play presets work without repeated entry.
 - Own-account tracking changes and explicitly local achievement reports when the
   participant grants the appropriate write scopes.
 - Responsive layout, keyboard controls and reduced-motion support.
@@ -48,10 +57,46 @@ self-reported, not provider verification; title matches need edition confirmatio
 7. Launch from the Discord App Launcher in the bot's configured server. Connect
    an instance or add manual games, confirm compatibility, then shortlist and vote.
 
+For private-channel rooms, explicitly enable **Allow Activities in DMs and group
+DMs** in the bot's Activity settings. Discord must also allow user installation
+and private-channel launch for your application/testers. The adapter validates
+Discord's `pc` location and connected user list; enabling DMs does not allow
+Activities in other guilds. See the complete
+[operator/player setup guide](../../wiki/docs/examples/discord-game-night.md).
+
 Public sessions are separate external principals, not host accounts. Credentials
 for connected instances remain encrypted in the host broker, and never enter this
 plugin or the browser. Removing a source connection forgets its broker credential;
 revoke it in the source instance's Connected apps to invalidate the grant there too.
+
+Users may explicitly choose **Until revoked** instead of timed access. Remembered
+links belong to the verified Discord identity and are reused on reconnect while
+their credentials remain valid. The first connection always needs consent; a
+Discord username or display name alone never links an application account.
+
+For an older source without the delegation API, the Activity operator can enable
+**Allow unsafe legacy API-key connections** in Integration access. The participant
+must select legacy mode and acknowledge the broad key. The host encrypts it and
+uses only fixed identity/library GET requests. Legacy connections cannot write
+tracking or achievements and do not expose imported artwork; public Steam cover
+fallback still applies. Disconnect the connection and revoke the key on the old
+instance when finished. Legacy clients do not require upgrading the old instance.
+
+Source administrators may optionally allow consent requests from any HTTPS origin.
+Library connections request only identity and game reads by default. Participants
+can choose optional progress access before connecting; the source still presents
+tracking and achievement writes unchecked for explicit approval. Unused history,
+media and custom-list capabilities are not requested by Game Night.
+This registers requesters without individual origin setup; it never approves a
+user's data. Individually disabled origins stay blocked. Central Activity hosting
+can connect independent source instances through this same broker and consent
+boundary. Operator approval, personal rules and personal vetoes remain distinct.
+
+Game titles use normalized case, spacing and punctuation by default. Steam IDs
+are optional; edition ambiguity still requires human confirmation. Platform
+aliases and empty-library spectators can be configured by the current room host.
+Unknown multiplayer information remains unknown until the participant confirms
+player counts. Store metadata is informational and cannot override personal rules.
 
 ## Build and test
 

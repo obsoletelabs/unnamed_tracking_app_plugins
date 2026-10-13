@@ -22,8 +22,8 @@ def game_key(game: dict, matching: dict | None = None) -> str:
     if steam and not matching.get("title_fallback", True):
         return "steam:" + str(steam)
     title = re.sub(r"\s+", " ", str(game.get("title", "")).strip()).casefold()
-    if not title or len(title) > 200:
-        raise SessionError("Enter a game title of at most 200 characters.")
+    if not title or len(title) > 500:
+        raise SessionError("Use a game title of at most 500 characters.")
     if matching.get("title_fallback", True):
         title = "".join(char for char in unicodedata.normalize("NFKC", title) if char.isalnum())
     if not title:
@@ -54,8 +54,9 @@ def manual_game(value: Any) -> dict:
         "owned", "crossplay", "provider_ids",
     }:
         raise SessionError("Use the supported manual-game fields.")
-    if not isinstance(value.get("title"), str) or not value["title"].strip():
-        raise SessionError("A manual game needs a title.")
+    if (not isinstance(value.get("title"), str) or not value["title"].strip()
+            or len(value["title"].strip()) > 200):
+        raise SessionError("A manual game needs a title of at most 200 characters.")
     platform = value.get("platform")
     minimum, maximum = value.get("min_players"), value.get("max_players")
     if (not isinstance(platform, str) or not 1 <= len(platform) <= 80
@@ -107,10 +108,31 @@ def preferences(value: Any) -> dict:
     return result
 
 
+def detected_multiplayer(game: dict) -> bool:
+    labels = [label for field in ("features", "tags")
+              if isinstance(game.get(field), list) for label in game[field]]
+    return any(isinstance(label, str) and re.search(
+        r"multiplayer|coop|onlinepvp|lanpvp|mmo", re.sub(r"[^a-z0-9]", "", label.casefold())
+    ) for label in labels)
+
+
+def automatic_game(game: dict) -> bool:
+    return game.get("owned") is True and (
+        detected_multiplayer(game) or isinstance(game.get("play_compatibility"), dict)
+    )
+
+
+def has_games(person: dict) -> bool:
+    return bool(person["manual"]) or any(automatic_game(game) for game in person["library"])
+
+
 def _contributions(person: dict, matching: dict) -> dict[str, dict]:
     result = {}
+    manual_keys = {game_key(game, matching) for game in person["manual"]}
     for game in person["library"]:
         key = game_key(game, matching)
+        if not automatic_game(game) and key not in manual_keys:
+            continue
         saved = game.get("play_compatibility")
         compatibility = None
         if (isinstance(saved, dict) and isinstance(game.get("platform"), str)
@@ -136,7 +158,7 @@ def _contributions(person: dict, matching: dict) -> dict[str, dict]:
 def evaluate(room: dict, *, now: int) -> dict:
     matching = room.get("matching", {"title_fallback": True, "platform_aliases": True, "skip_empty": True})
     people = {pid: person for pid, person in room["participants"].items() if person["active"]
-              and (not matching["skip_empty"] or person["library"] or person["manual"])}
+              and (not matching["skip_empty"] or has_games(person))}
     count = len(people)
     contributions = {pid: _contributions(person, matching) for pid, person in people.items()}
     keys = sorted({key for games in contributions.values() for key in games})
@@ -229,8 +251,8 @@ def _public(room: dict, actor_id: str, now: int) -> dict:
             "participants": [{"id": pid, "display_name": person["display_name"],
                               "avatar_path": person.get("avatar_path"),
                               "active": person["active"], "connected": person["connected"],
-                              "last_seen_at": person["last_seen_at"], "ready": bool(person["manual"] or person["library"]),
-                              "spectating": room["matching"]["skip_empty"] and not person["manual"] and not person["library"],
+                              "last_seen_at": person["last_seen_at"], "ready": has_games(person),
+                              "spectating": room["matching"]["skip_empty"] and not has_games(person),
                               "vote_cast": person["vote"] is not None}
                              for pid, person in room["participants"].items()],
             "me": {**room["participants"][actor_id], "id": actor_id},

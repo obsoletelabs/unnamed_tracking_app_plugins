@@ -11,10 +11,10 @@
   },
   "devDependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",
-    "@vue/compiler-sfc": "3.5.41",
+    "@vue/compiler-sfc": "3.5.44",
     "esbuild": "0.28.1",
     "pdf-lib": "1.17.1",
     "playwright": "1.62.1",
-    "vue": "3.5.41"
+    "vue": "3.5.44"
   }
 }

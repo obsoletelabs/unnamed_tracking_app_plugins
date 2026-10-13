@@ -10,3 +10,6 @@ export function multiplayer(game) {
   if (labels.some(value => value === "singleplayer")) return false;
   return null;
 }
+export function connectionScopes(includeProgress = false) {
+  return ["profile.read", "games.read", ...(includeProgress ? ["achievements.read", "tracking.write", "achievements.write"] : [])];
+}

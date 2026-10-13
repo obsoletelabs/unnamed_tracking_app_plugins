@@ -97,6 +97,57 @@ def test_imported_ownership_needs_compatibility_and_live_source():
     assert not result["pool"]["eligible"]
 
 
+def test_saved_group_details_are_used_without_changing_live_access_checks():
+    library = [{"id": "g1", "title": "Together", "owned": True, "source_id": "source",
+                "platform": "Windows", "tags": ["Co-op"], "source_state": "connected",
+                "play_compatibility": {"min_players": 1, "max_players": 4,
+                                       "duration_minutes": 45, "crossplay": False}}]
+    ctx = context(library=library, source_states={"source": "connected"}, connected=True)
+    state, result = engine.transition(None, {}, ctx, now=1000)
+    assert result["pool"]["eligible"][0]["access"][0]["compatibility"] == "self_reported"
+    state, result = engine.transition(state, {}, context(connected=True, library=library,
+        source_states={"source": "revoked"}), now=1001)
+    assert not result["pool"]["eligible"]
+
+
+def test_owned_multiplayer_is_automatic_but_unknown_player_limits_are_not_invented():
+    library = [{"id": "g1", "title": "Together", "owned": True, "source_id": "source",
+                "platform": "PC", "tags": [], "features": ["Online Co-op"],
+                "source_state": "connected"}]
+    ctx = context(library=library, source_states={"source": "connected"}, connected=True)
+    state, result = engine.transition(None, {}, ctx, now=1000)
+    assert len(result["pool"]["excluded"]) == 1
+    assert "player count" in result["pool"]["excluded"][0]["excluded_reasons"][0]
+    assert not result["participants"][0]["spectating"]
+    assert not result["me"]["manual"]
+    state, result = engine.transition(state, {"operation": "manual", "game": game()}, ctx, now=1001)
+    assert result["pool"]["eligible"]
+
+
+def test_only_singleplayer_or_wishlist_imports_do_not_block_the_group():
+    state, _ = add()
+    library = [{"id": "g1", "title": "Single", "owned": True, "source_id": "source",
+                "features": ["Single-player"], "tags": [], "source_state": "connected"},
+               {"id": "g2", "title": "Wishlist", "owned": False, "source_id": "source",
+                "features": ["Multi-player"], "tags": [], "source_state": "connected"}]
+    _, result = engine.transition(state, {}, context("two", library=library,
+        source_states={"source": "connected"}, connected=True), now=1001)
+    assert len(result["pool"]["eligible"]) == 1
+    assert next(person for person in result["participants"] if person["id"] == "two")["spectating"]
+
+
+def test_source_titles_and_missing_metadata_do_not_break_automatic_imports():
+    library = [{"id": "g1", "title": "Long title " * 30, "owned": True,
+                "source_id": "source", "platform": "PC", "tags": None,
+                "features": ["Online Co-op"], "source_state": "connected"}]
+    _, result = engine.transition(None, {}, context(library=library,
+        source_states={"source": "connected"}, connected=True), now=1000)
+    assert len(result["pool"]["excluded"]) == 1
+    assert not result["participants"][0]["spectating"]
+    with pytest.raises(engine.SessionError, match="200 characters"):
+        engine.manual_game(game(title="x" * 201))
+
+
 @pytest.mark.parametrize("changes,rule", [({"max_players": 1}, "player-count"),
     ({"platform": "PlayStation"}, "Cross-platform"), ({"duration_minutes": None}, "session length")])
 def test_player_platform_and_unknown_time_exclusions(changes, rule):
