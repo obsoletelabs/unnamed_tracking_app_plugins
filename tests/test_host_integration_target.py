@@ -21,6 +21,11 @@ VERIFIED_RUNTIME_REF = "main"
         ("", "feature/example", "feature/example", False, "main"),
         ("pinned-host-sha", "main", "main", False, "pinned-host-sha"),
         ("main", "main", "main", False, "main"),
+        ("", "feat/discord-social-activity", "feat/plugin-discord-activity-host", True,
+         "feat/plugin-discord-activity-host"),
+        ("", "feat/discord-social-activity", "feat/plugin-discord-activity-host", False, "main"),
+        ("pinned-host-sha", "feat/discord-social-activity", "feat/plugin-discord-activity-host", True,
+         "pinned-host-sha"),
     ],
 )
 @pytest.mark.parametrize(
