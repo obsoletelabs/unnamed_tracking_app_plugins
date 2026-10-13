@@ -107,7 +107,9 @@
         "backend.routes.plugin",
         "backend.routes.host",
         "network.outbound",
-        "api.full"
+        "api.full",
+        "integrations.public_app",
+        "integrations.identity_provider"
       ],
       "title": "Capability",
       "type": "string"
@@ -299,6 +301,37 @@
       "title": "PluginFrontendDeclaration",
       "type": "object"
     },
+    "PluginIdentityProviderDeclaration": {
+      "additionalProperties": false,
+      "description": "Explicit trusted adapter actions; no arbitrary provider action forwarding.",
+      "properties": {
+        "config_action_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Config Action Id",
+          "type": "string"
+        },
+        "authenticate_action_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Authenticate Action Id",
+          "type": "string"
+        },
+        "revalidate_action_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Revalidate Action Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_action_id",
+        "authenticate_action_id",
+        "revalidate_action_id"
+      ],
+      "title": "PluginIdentityProviderDeclaration",
+      "type": "object"
+    },
     "PluginNativeFrontendDeclaration": {
       "additionalProperties": false,
       "description": "Privileged host-native Vue/JavaScript/CSS bundle declaration.\n\nMerely declaring this bundle never grants native execution. The host only\nserves and activates it for an enabled installation with frontend.native.",
@@ -323,6 +356,37 @@
         "entry"
       ],
       "title": "PluginNativeFrontendDeclaration",
+      "type": "object"
+    },
+    "PluginPublicAppDeclaration": {
+      "additionalProperties": false,
+      "description": "Public assets and one action executed as a separate external principal.",
+      "properties": {
+        "entry": {
+          "maxLength": 255,
+          "pattern": "^frontend/[A-Za-z0-9_./-]+\\.html$",
+          "title": "Entry",
+          "type": "string"
+        },
+        "action_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "identity_provider_plugin_id": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Identity Provider Plugin Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry",
+        "action_id",
+        "identity_provider_plugin_id"
+      ],
+      "title": "PluginPublicAppDeclaration",
       "type": "object"
     },
     "PluginPwaDeclaration": {
@@ -686,6 +750,28 @@
       "maxItems": 32,
       "title": "Scheduled Tasks",
       "type": "array"
+    },
+    "public_app": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PluginPublicAppDeclaration"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "identity_provider": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PluginIdentityProviderDeclaration"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [
@@ -698,7 +784,5 @@
     "integrity"
   ],
   "title": "PluginManifest",
-  "type": "object",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.11"
+  "type": "object"
 }

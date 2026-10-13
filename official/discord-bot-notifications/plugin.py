@@ -10,7 +10,7 @@ import secrets
 import sys
 import time
 from typing import Any
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urlencode, urlsplit
 from uuid import UUID
 
 from sdk.notifications import destination_status, provider_context, register_provider
@@ -19,6 +19,7 @@ from sdk.plugin_protocol import GatewayRequestError, request
 PLUGIN_ID = "official.discord-bot-notifications"
 PROVIDER_ID = PLUGIN_ID + ".dm"
 DISCORD_API = "https://discord.com/api/v10"
+DISCORD_USER_AGENT = "UnnamedTrackingDiscordBot (https://github.com/obsoletelabs/unnamed_tracking_app, 1.0)"
 _USERNAME = re.compile(r"^[a-z0-9._]{2,32}$")
 _SNOWFLAKE = re.compile(r"^[0-9]{17,20}$")
 _LINK_TTL = 600
@@ -81,7 +82,7 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
         "headers": {
             "Authorization": f"Bot {token}",
             "Content-Type": "application/json",
-            "User-Agent": "UnnamedTrackingDiscordBot (https://github.com/obsoletelabs/unnamed_tracking_app, 1.0)",
+            "User-Agent": DISCORD_USER_AGENT,
         },
     }
     if body is not None:
@@ -901,6 +902,83 @@ def main() -> None:
     _register_provider()
     while True:
         time.sleep(3600)
+
+
+def save_activity_oauth(values: dict[str, Any]) -> dict[str, Any]:
+    """Reuse this bot's identity while keeping OAuth configuration plugin-owned."""
+    _actor(values, admin=True)
+    config = _bot_config()
+    application_id = str(values.get("application_id", ""))
+    client_secret = str(values.get("client_secret", "")).strip()
+    if not _SNOWFLAKE.fullmatch(application_id) or not 16 <= len(client_secret) <= 256:
+        raise PluginError("Enter the Discord application ID and OAuth client secret.")
+    bot = _discord(config["token"], "GET", "/users/@me")
+    if not isinstance(bot, dict) or bot.get("id") != application_id:
+        raise PluginError("The Activity must use the same application as this configured bot.")
+    _store("secrets/activity-oauth", {"application_id": application_id, "client_secret": client_secret})
+    return {"configured": True, "application_id": application_id}
+
+
+def activity_config(_values: dict[str, Any]) -> dict[str, Any]:
+    config = _load("secrets/activity-oauth", {})
+    bot = _load("secrets/bot-config", {})
+    return {"application_id": config.get("application_id"),
+            "configured": bool(config.get("client_secret") and bot.get("token"))}
+
+
+def _activity_membership(subject: str, room: str) -> dict:
+    config, oauth = _bot_config(), _load("secrets/activity-oauth", {})
+    application_id = oauth.get("application_id")
+    if (not isinstance(subject, str) or not _SNOWFLAKE.fullmatch(subject)
+            or not isinstance(room, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,255}", room)
+            or not isinstance(application_id, str) or not _SNOWFLAKE.fullmatch(application_id)):
+        raise PluginError("Invalid Activity identity or room.")
+    instance = _discord(config["token"], "GET",
+                        f"/applications/{application_id}/activity-instances/{quote(room, safe='')}")
+    if (not isinstance(instance, dict) or instance.get("application_id") != application_id
+            or instance.get("instance_id") != room or subject not in instance.get("users", [])
+            or instance.get("location", {}).get("guild_id") != config["guild_id"]):
+        raise PluginError("Join this bot's Activity in its configured server first.")
+    return {"verified": True, "subject": subject, "room": room}
+
+
+def authenticate_activity(values: dict[str, Any]) -> dict[str, Any]:
+    """OAuth identity and bot-verified membership; client-supplied names are never proof."""
+    proof = values.get("proof", {})
+    if not isinstance(proof, dict) or set(proof) != {"code", "instance_id"}:
+        raise PluginError("The Activity must provide its OAuth authorization code and instance ID.")
+    code = proof.get("code")
+    if not isinstance(code, str) or not 1 <= len(code) <= 2048:
+        raise PluginError("Invalid Discord authorization code.")
+    oauth = _load("secrets/activity-oauth", {})
+    if not oauth.get("client_secret"):
+        raise PluginError("Configure Activity OAuth in the bot's administrator settings first.")
+    response = request("network.request", "network.outbound", {
+        "url": DISCORD_API + "/oauth2/token", "method": "POST",
+        "headers": {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": DISCORD_USER_AGENT},
+        "text_body": urlencode({"client_id": oauth["application_id"],
+                                "client_secret": oauth["client_secret"],
+                                "grant_type": "authorization_code", "code": code}),
+    })
+    data = response.get("data", {})
+    token = data.get("access_token") if isinstance(data, dict) else None
+    if response.get("status") != 200 or not isinstance(token, str) or not token:
+        raise PluginError("Discord sign-in failed. Close and relaunch the Activity to retry.")
+    identity = request("network.request", "network.outbound", {
+        "url": DISCORD_API + "/users/@me", "method": "GET",
+        "headers": {"Authorization": "Bearer " + token, "User-Agent": DISCORD_USER_AGENT},
+    })
+    user = identity.get("data", {})
+    if identity.get("status") != 200 or not isinstance(user, dict):
+        raise PluginError("Discord could not verify your identity.")
+    result = _activity_membership(user.get("id"), proof.get("instance_id"))
+    return {**result, "display_name": str(user.get("global_name") or user.get("username") or "Participant")[:100],
+            "avatar_url": _avatar_url(user) or f"https://cdn.discordapp.com/embed/avatars/{(int(user['id']) >> 22) % 6}.png",
+            "sdk_authentication": {"access_token": token}}
+
+
+def revalidate_activity(values: dict[str, Any]) -> dict[str, Any]:
+    return _activity_membership(values.get("subject"), values.get("room"))
 
 
 if __name__ == "__main__":

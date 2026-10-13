@@ -181,6 +181,8 @@ def collect_payload(
     )
     validate_metadata(metadata)
     files = {"sdk/plugin_protocol.py": source_bytes(root / "sdk/plugin_protocol.py")}
+    if manifest.get("public_app"):
+        files["sdk/public_apps.py"] = source_bytes(root / "sdk/public_apps.py")
     if any(capability["name"].startswith("metadata_providers.")
            for capability in manifest.get("capabilities", [])):
         files["sdk/metadata_provider.py"] = source_bytes(root / "sdk/metadata_provider.py")
