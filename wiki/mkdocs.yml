@@ -81,6 +81,7 @@ nav:
   - Troubleshooting: troubleshooting/index.md
   - Examples and Screenshots:
       - Working examples: examples/index.md
+      - Game Night and Discord Bot Setup: examples/discord-game-night.md
       - Jellyfin Media Sync: examples/jellyfin.md
       - Epic Games Library: examples/epic-games.md
       - Epic package validation: examples/epic-games-validation.md
