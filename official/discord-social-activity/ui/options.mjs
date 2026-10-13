@@ -13,3 +13,10 @@ export function multiplayer(game) {
 export function connectionScopes(includeProgress = false) {
   return ["profile.read", "games.read", ...(includeProgress ? ["achievements.read", "tracking.write", "achievements.write"] : [])];
 }
+export function trackingChange(tracking) {
+  const change = {status: tracking.status};
+  if (tracking.edit_completion_date) {
+    change.completion_date = tracking.completion_date ? Math.floor(new Date(tracking.completion_date).getTime() / 1000) : null;
+  }
+  return change;
+}

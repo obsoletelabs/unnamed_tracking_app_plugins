@@ -3,7 +3,7 @@ import { computed, onMounted, onBeforeUnmount, reactive, ref, watch, nextTick } 
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 import GenrePicker from "./GenrePicker.vue";
 import GameInfoDialog from "./GameInfoDialog.vue";
-import { platforms, genres, currencies, combinedChoices, multiplayer, connectionScopes } from "./options.mjs";
+import { platforms, genres, currencies, combinedChoices, multiplayer, connectionScopes, trackingChange } from "./options.mjs";
 
 const pluginId = "official.discord-social-activity";
 const base = `/api/public-apps/${pluginId}`;
@@ -29,7 +29,7 @@ const manual = reactive({ title: "", platform: "PC", min_players: 1, max_players
   duration_minutes: null, genres: [], owned: true, crossplay: false, steam: "" });
 const rules = reactive({ platform: "Any", max_minutes: null, budget: 0, currency: "USD",
   minimum_discount: 0, allow_purchase: false, owned_only: true, genres: [], avoid_genres: [] });
-const tracking = reactive({ source_id: "", game_id: "", status: "PLAYING", completion_date: "" });
+const tracking = reactive({ source_id: "", game_id: "", status: "PLAYING", completion_date: "", edit_completion_date: false });
 const achievements = ref(null), achievementName = ref(""), writeConfirmed = ref(false);
 let sdk, timer, polling = false, destroyed = false;
 const me = computed(() => room.value?.me);
@@ -45,6 +45,15 @@ const visibleGames = computed(() => games.value.slice((gamePage.value - 1) * 6, 
 const visibleLibrary = computed(() => library.value.slice((libraryPage.value - 1) * 15, libraryPage.value * 15));
 const writableSource = computed(() => sources.value.find(source => source.id === tracking.source_id));
 const writableGames = computed(() => (me.value?.library || []).filter(game => game.source_id === tracking.source_id));
+watch(() => [tracking.source_id, tracking.game_id], () => {
+  writeConfirmed.value = false;
+  achievements.value = null;
+  achievementName.value = "";
+  tracking.edit_completion_date = false;
+  const game = writableGames.value.find(item => item.id === tracking.game_id);
+  tracking.status = game?.status || "PLAYING";
+  tracking.completion_date = game?.completion_date ? new Date(game.completion_date * 1000).toISOString().slice(0, 10) : "";
+});
 const modes = [{ id: "strict", name: "Strict", description: "Everyone owns it" },
   { id: "balanced", name: "Balanced", description: "Shared favorites first" },
   { id: "discovery", name: "Discovery", description: "Try something different" }];
@@ -172,7 +181,7 @@ async function updateTracking() {
   if (!writeConfirmed.value) return;
   busy.value = true; error.value = "";
   try { await api(`/sources/${tracking.source_id}/games/${tracking.game_id}/tracking`, "PATCH",
-    { status: tracking.status, completion_date: tracking.completion_date ? Math.floor(new Date(tracking.completion_date).getTime() / 1000) : null });
+    trackingChange(tracking));
     message.value = "Your tracking fields were updated."; writeConfirmed.value = false; }
   catch (err) { error.value = err.message; } finally { busy.value = false; }
 }
@@ -184,7 +193,7 @@ async function reportAchievement(imported) {
       unlocked: !Boolean(imported.local_report?.unlocked ?? imported.unlocked) }
       : { provider: "manual", name: achievementName.value, unlocked: true });
     message.value = "Local self-report saved. Provider-synced evidence stays separate.";
-    achievementName.value = ""; await loadAchievements(); }
+    achievementName.value = ""; writeConfirmed.value = false; await loadAchievements(); }
   catch (err) { error.value = err.message; } finally { busy.value = false; }
 }
 async function tick() {
@@ -276,7 +285,7 @@ onBeforeUnmount(() => { destroyed = true; clearInterval(timer);
         <section v-if="tab === 'connections'" class="two-column"><div class="panel"><div class="eyebrow">BRING YOUR OWN INSTANCE</div><h2>Connect your tracking app</h2><p>Sign in on your instance and approve only the access you want. Your password stays there. Write access starts unchecked.</p><form @submit.prevent="connect"><label>Your instance's HTTPS origin<input v-model="origin" type="url" required placeholder="https://your-tracker.example" /></label><label class="check"><input v-model="legacyMode" type="checkbox" /> Unsafe legacy API key · Older app versions</label><template v-if="legacyMode"><p class="fine">This key may grant unrestricted access to your account, including administration if you are an admin. The Activity operator stores it encrypted and uses it only for identity and library reads. Revoke it in your instance to end access.</p><label>Legacy API key<input v-model="legacyKey" type="password" autocomplete="off" required placeholder="utk_…" /></label><label class="check"><input v-model="legacyAcknowledged" type="checkbox" required /> I understand this key has broader access than scoped consent</label></template><label v-if="!legacyMode" class="check"><input v-model="includeProgress" type="checkbox" /> Request optional tracking and achievement access</label><p v-if="!legacyMode" class="fine">Library matching only requests identity and game reads. Progress access adds achievement reads and optional writes, reviewed again on your instance.</p><button class="primary" :disabled="busy || (legacyMode && !legacyAcknowledged)">{{ legacyMode ? 'Connect legacy library' : 'Review access on my instance →' }}</button></form><div v-if="consent" class="consent"><strong>{{ consent.state === 'pending' ? 'Your consent is waiting' : 'Connection ' + consent.state }}</strong><p>{{ consent.origin }}</p><button v-if="consent.state === 'pending'" class="secondary" @click="openConsent">Open consent in browser</button><p class="fine">Approve under your own account. Return here when you’re done.</p></div></div>
           <div class="panel"><h2>Your connections</h2><article v-for="source in sources" :key="source.id" class="source"><strong>{{ source.origin }}</strong><span class="pill">{{ source.state }}</span><p>{{ source.game_count }} games · {{ source.expires_at === null ? 'Until revoked' : 'Expires ' + new Date(source.expires_at * 1000).toLocaleString() }}<span v-if="source.credential_kind === 'legacy_api_key'"> · Unsafe legacy key · Library reads only</span></p><p class="fine">{{ source.scopes.join(' · ') }}</p><button class="secondary" :disabled="busy" @click="refreshSource(source)">Refresh library</button> <button class="quiet" :disabled="busy" @click="disconnectSource(source)">Disconnect</button></article><p v-if="!sources.length">You haven't connected an instance yet. Guest games still work when enabled by the owner.</p><p class="fine">An offline or revoked connection cannot prove current access. Guest data expires under the owner’s retention policy.</p></div></section>
         <section v-if="tab === 'tracking'" class="panel rules"><div class="eyebrow">YOUR PROGRESS, WITH YOUR APPROVAL</div><h2>Update your tracking</h2><p>These actions apply only to your own connected account. Provider achievement evidence remains separate from local self-reports.</p><label>Instance<select v-model="tracking.source_id" @change="tracking.game_id = ''; achievements = null"><option value="">Choose a connection</option><option v-for="source in sources" :value="source.id" :key="source.id">{{ source.origin }}</option></select></label><label>Game<select v-model="tracking.game_id" @change="achievements = null"><option value="">Choose your game</option><option v-for="game in writableGames" :value="game.id" :key="game.id">{{ game.title }}</option></select></label>
-          <template v-if="tracking.game_id"><label class="check"><input v-model="writeConfirmed" type="checkbox" /> I approve these changes to my own tracking account</label><div class="fields"><label>Status<select v-model="tracking.status"><option v-for="item in ['BACKLOG','PLAYING','PLAYED','BEATEN','MASTERED','ON_HOLD','DROPPED','WISHLIST']" :key="item">{{ item }}</option></select></label><label>Completion date<input v-model="tracking.completion_date" type="date" /></label></div><button class="primary" :disabled="busy || !writeConfirmed || !writableSource?.scopes.includes('tracking.write')" @click="updateTracking">Update my tracking</button><p v-if="!writableSource?.scopes.includes('tracking.write')" class="fine">Tracking writes need fresh consent on your instance.</p><hr /><button class="secondary" :disabled="busy || !writableSource?.scopes.includes('achievements.read')" @click="loadAchievements">Load achievements</button><div v-if="achievements"><article v-for="achievement in achievements.achievements" :key="achievement.id" class="achievement"><div><strong>{{ achievement.name }}</strong><small>Provider-synced: {{ achievement.unlocked ? 'Unlocked' : 'Locked' }} · Local report: {{ achievement.local_report ? achievement.local_report.unlocked ? 'Unlocked' : 'Locked' : 'None' }}</small></div><button class="secondary" :disabled="busy || !writeConfirmed || !writableSource?.scopes.includes('achievements.write')" @click="reportAchievement(achievement)">Toggle local report</button></article><label>Manual achievement<input v-model="achievementName" maxlength="500" placeholder="Describe your achievement" /></label><button class="secondary" :disabled="busy || !writeConfirmed || !achievementName || !writableSource?.scopes.includes('achievements.write')" @click="reportAchievement(null)">Save manual self-report</button><p class="fine">Local reports are self-reported, never provider-verified.</p></div></template></section>
+          <template v-if="tracking.game_id"><label class="check"><input v-model="writeConfirmed" type="checkbox" /> I approve these changes to my own tracking account</label><div class="fields"><label>Status<select v-model="tracking.status"><option v-for="item in ['BACKLOG','PLAYING','PLAYED','BEATEN','MASTERED','ON_HOLD','DROPPED','WISHLIST']" :key="item">{{ item }}</option></select></label><label class="check"><input v-model="tracking.edit_completion_date" type="checkbox" /> Change completion date</label><label v-if="tracking.edit_completion_date">Completion date<input v-model="tracking.completion_date" type="date" /><small>Leave blank to clear the date.</small></label></div><button class="primary" :disabled="busy || !writeConfirmed || !writableSource?.scopes.includes('tracking.write')" @click="updateTracking">Update my tracking</button><p v-if="!writableSource?.scopes.includes('tracking.write')" class="fine">Tracking writes need fresh consent on your instance.</p><hr /><button class="secondary" :disabled="busy || !writableSource?.scopes.includes('achievements.read')" @click="loadAchievements">Load achievements</button><div v-if="achievements"><article v-for="achievement in achievements.achievements" :key="achievement.id" class="achievement"><div><strong>{{ achievement.name }}</strong><small>Provider-synced: {{ achievement.unlocked ? 'Unlocked' : 'Locked' }} · Local report: {{ achievement.local_report ? achievement.local_report.unlocked ? 'Unlocked' : 'Locked' : 'None' }}</small></div><button class="secondary" :disabled="busy || !writeConfirmed || !writableSource?.scopes.includes('achievements.write')" @click="reportAchievement(achievement)">Toggle local report</button></article><article v-for="report in achievements.local_reports.filter(item => item.provider === 'manual')" :key="report.id" class="achievement"><strong>{{ report.name }}</strong><small>Manual self-report · {{ report.unlocked ? 'Unlocked' : 'Locked' }}</small></article><p v-if="!achievements.complete" class="fine">Showing the first page. Open your tracking app to view the remaining achievements.</p><label>Manual achievement<input v-model="achievementName" maxlength="500" placeholder="Describe your achievement" /></label><button class="secondary" :disabled="busy || !writeConfirmed || !achievementName || !writableSource?.scopes.includes('achievements.write')" @click="reportAchievement(null)">Save manual self-report</button><p class="fine">Local reports are self-reported, never provider-verified.</p></div></template></section>
       </template>
     </main><footer><span>UNNAMED TRACKING / GAME NIGHT</span><span>Everyone gets a say.</span></footer>
   </div>

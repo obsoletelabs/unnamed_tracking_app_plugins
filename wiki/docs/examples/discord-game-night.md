@@ -245,6 +245,11 @@ In **Tracking**, choose your connection and game, review the proposed change and
 confirm it. Read-only or legacy connections cannot perform these actions. A local
 edit to a synced achievement is explicitly self-reported and stored separately
 from provider evidence. It is not a Steam unlock or provider verification.
+Changing the connection or game clears the approval checkbox. A status update
+preserves the completion date unless you select **Change completion date**;
+leaving the date blank after selecting that option explicitly clears it. Manual
+self-reports appear separately. This preview shows the first achievement page;
+use your tracking app to inspect further pages.
 
 ## Troubleshooting
 
