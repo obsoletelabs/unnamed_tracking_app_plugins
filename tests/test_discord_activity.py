@@ -124,6 +124,139 @@ def test_owned_multiplayer_is_automatic_but_unknown_player_limits_are_not_invent
     assert result["pool"]["eligible"]
 
 
+def multiplayer_context(actor="one", **changes):
+    library = [{"id": "g1", "title": "Together", "owned": True, "source_id": "source",
+                "platform": "PC", "features": ["Online Co-op"], "tags": [],
+                "source_state": "connected", "provider_ids": {"steam": "123"}}]
+    return context(actor, library=library, source_states={"source": "connected"},
+                   connected=True, **changes)
+
+
+def test_one_participant_can_confirm_player_limits_for_every_owner():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    state, before = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    assert before["pool"]["excluded"][0]["needs_player_limits"]
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 2, "max_players": 4}, multiplayer_context("two"), now=1002)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["player_limits"]["confirmed_by"] == "two"
+    assert len(candidate["access"]) == 2
+    assert not state["participants"]["one"]["manual"]
+    state, result = engine.transition(state, {}, multiplayer_context(), now=1003)
+    assert result["pool"]["eligible"]
+    state, result = engine.transition(state, {"operation": "veto", "key": "title:together"},
+                                      multiplayer_context(), now=1004)
+    assert not result["pool"]["eligible"]
+
+
+def test_existing_manual_confirmation_supplies_missing_limits_but_not_personal_rules():
+    state, _ = add()
+    state, result = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    assert result["pool"]["eligible"]
+    state, result = engine.transition(state, {"operation": "preferences", "preferences": {
+        "max_minutes": 30}}, multiplayer_context("two"), now=1002)
+    assert not result["pool"]["eligible"]
+    assert "session length" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
+
+
+@pytest.mark.parametrize("minimum,maximum", [(True, 4), (0, 4), (4, 2), (1, 33), (1, None)])
+def test_shared_limits_validate_counts(minimum, maximum):
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    with pytest.raises(engine.SessionError, match="player range"):
+        engine.transition(state, {"operation": "player-limits", "key": "title:together",
+            "min_players": minimum, "max_players": maximum}, multiplayer_context(), now=1001)
+
+
+def test_shared_limits_cannot_invent_games_or_restore_revoked_ownership():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    with pytest.raises(engine.SessionError, match="room"):
+        engine.transition(state, {"operation": "player-limits", "key": "title:absent",
+            "min_players": 1, "max_players": 4}, multiplayer_context(), now=1001)
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 4}, multiplayer_context(), now=1002)
+    ctx = multiplayer_context()
+    ctx["source_states"] = {"source": "revoked"}
+    _, result = engine.transition(state, {}, ctx, now=1003)
+    assert not result["pool"]["eligible"]
+    assert "access unavailable" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
+
+
+def test_shared_limits_survive_matching_changes_and_still_check_platforms():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 4}, multiplayer_context(), now=1001)
+    state, result = engine.transition(state, {"operation": "matching", "matching": {
+        "title_fallback": False, "platform_aliases": True, "skip_empty": True}},
+        multiplayer_context(), now=1002)
+    assert result["pool"]["eligible"][0]["key"] == "steam:123"
+    other = multiplayer_context("two")
+    other["library"][0]["platform"] = "PlayStation 5"
+    _, result = engine.transition(state, {}, other, now=1003)
+    assert not result["pool"]["eligible"]
+    assert "Cross-platform" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
+
+
+def test_shared_counts_still_exclude_large_groups_and_nonowners():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    state, _ = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 1}, multiplayer_context(), now=1002)
+    assert not result["pool"]["eligible"]
+    assert "player-count rule" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
+    other = multiplayer_context("two")
+    other["library"][0]["owned"] = False
+    other["library"].append({**other["library"][0], "id": "other", "title": "Other", "owned": True})
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 4}, other, now=1003)
+    assert not result["pool"]["eligible"]
+    together = next(game for game in result["pool"]["excluded"] if game["key"] == "title:together")
+    assert "access unavailable" in " ".join(together["excluded_reasons"])
+
+
+def test_missing_platform_can_be_confirmed_inline_for_only_the_current_participant():
+    first, second = multiplayer_context(), multiplayer_context("two")
+    first["library"][0]["platform"] = None
+    second["library"][0]["platform"] = None
+    state, _ = engine.transition(None, {}, first, now=1000)
+    state, _ = engine.transition(state, {}, second, now=1001)
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 2, "max_players": 4, "platform": "PC", "participant_id": "two"}, first, now=1002)
+    candidate = result["pool"]["excluded"][0]
+    assert candidate["missing_platforms"] == ["two"]
+    assert candidate["player_limits"]["confirmed_by"] == "one"
+    assert not state["participants"]["two"].get("platform_overrides")
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 2, "max_players": 4, "platform": "Windows"}, second, now=1003)
+    assert len(result["pool"]["eligible"][0]["access"]) == 2
+    assert result["pool"]["eligible"][0]["player_limits"]["confirmed_by"] == "one"
+    state, result = engine.transition(state, {}, first, now=1004)
+    assert result["pool"]["eligible"]
+    state, _ = engine.transition(state, {"operation": "leave"}, first, now=1005)
+    assert state["participants"]["one"]["platform_overrides"] == []
+    assert first["library"][0]["platform"] is None
+
+
+def test_saved_player_counts_do_not_need_reentry_when_only_the_platform_is_missing():
+    ctx = multiplayer_context()
+    ctx["library"][0].update(platform=None, play_compatibility={
+        "min_players": 1, "max_players": 4, "duration_minutes": 45, "crossplay": False})
+    state, result = engine.transition(None, {}, ctx, now=1000)
+    candidate = result["pool"]["excluded"][0]
+    assert not candidate["needs_player_limits"]
+    assert candidate["missing_platforms"] == ["one"]
+    _, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 4, "platform": "PC"}, ctx, now=1001)
+    assert result["pool"]["eligible"]
+
+
+@pytest.mark.parametrize("platform", ["", " ", "x" * 81, True, []])
+def test_invalid_inline_platform_is_rejected(platform):
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    with pytest.raises(engine.SessionError, match="platform"):
+        engine.transition(state, {"operation": "player-limits", "key": "title:together",
+            "min_players": 1, "max_players": 4, "platform": platform}, multiplayer_context(), now=1001)
+
+
 def test_only_singleplayer_or_wishlist_imports_do_not_block_the_group():
     state, _ = add()
     library = [{"id": "g1", "title": "Single", "owned": True, "source_id": "source",

@@ -22,8 +22,10 @@ network sockets, bot token or OAuth client secret of its own.
 - Room-host matching settings, personal undo-veto controls, and spectators for
   participants with no games. Host transfer requires a separate confirmation.
 - Native Discord invitation controls and optional verified DM/group-DM rooms.
-- Automatic owned multiplayer contributions; unknown player limits still need
-  confirmation, and stored group-play presets work without repeated entry.
+- Automatic owned multiplayer contributions; one participant can supply missing
+  player limits for the room directly from the exclusion list. Saved/manual
+  limits also supply missing counts without repeated entry. Personal access,
+  known platform-specific limits, rules and crossplay consent remain separate.
 - Own-account tracking changes and explicitly local achievement reports when the
   participant grants the appropriate write scopes.
 - Responsive layout, keyboard controls and reduced-motion support.
@@ -95,8 +97,8 @@ boundary. Operator approval, personal rules and personal vetoes remain distinct.
 Game titles use normalized case, spacing and punctuation by default. Steam IDs
 are optional; edition ambiguity still requires human confirmation. Platform
 aliases and empty-library spectators can be configured by the current room host.
-Unknown multiplayer information remains unknown until the participant confirms
-player counts. Store metadata is informational and cannot override personal rules.
+Unknown player limits need one room confirmation; they are never invented.
+Store metadata is informational and cannot override personal rules.
 
 ## Build and test
 

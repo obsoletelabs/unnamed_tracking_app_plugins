@@ -124,7 +124,7 @@ Discord.
 
 ## 5. Launch and invite people
 
-Open the configured server's text channel or voice/Stage Activity surface, find
+Open the configured server's text channel or voice Activity surface, find
 the application in Discord's App Launcher and launch it. Accept Discord's private
 app test notice if applicable. Discord sign-in identifies the participant and the
 bot verifies membership in that exact Activity instance. A tracking account is
@@ -140,6 +140,11 @@ dialog. Choose recipients and send from Discord yourself; opening the dialog doe
 not automatically message anyone. Channel access and private-app tester rules
 still apply. If this control is unavailable in a particular Discord surface, use
 Discord's own Activity invite/join controls.
+
+Discord currently disables Activity launching in the tested Stage channel: its
+launcher shows **You cannot launch an activity here**. Use a text channel, voice
+channel or supported DM surface instead; the plugin cannot override Discord's
+disabled launch control. Joining a Stage audience does not start an Activity.
 
 ### DMs and group DMs
 
@@ -220,9 +225,23 @@ filters to browse the rest of your connected library or add a guest entry.
 Multiplayer labels come from available features/tags;
 missing information is not proof of support. Saved group-play details on a source
 game supply player counts and session length without re-entering them. If limits
-are unknown, choose the game and confirm its required platform/player range;
-genres, duration and Steam ID remain optional. Unknown limits are not silently
-treated as verified. Guest ownership and compatibility are labeled self-reported.
+are unknown, expand **Why games are excluded** on **Game night**, choose
+**Confirm player limits**, enter the minimum and maximum, then choose
+**Save limits for everyone**. Any one participant can supply missing counts for
+the whole room; existing saved/manual counts also supply missing limits for other
+owners. The game becomes eligible as soon as everyone has access and meets their
+own rules. Counts persist for this room until its retention expiry, including
+reconnects and matching-setting changes. They do not edit anyone's source library.
+Known platform-specific limits are still respected, and ownership, platform,
+crossplay consent, time/genre rules and vetoes are checked separately for each
+person. If your import has no platform, the same inline form asks for **Your
+platform**, or choose **Confirm your platform** once room counts are known. This
+changes only your own room entry. Use **My games** for extra compatibility
+details when needed. Genres, duration and Steam ID remain optional. Unknown limits are
+not silently treated as verified. Guest ownership and compatibility are labeled
+self-reported.
+
+![Two players in a DM with one participant's shared player-count confirmation](../images/discord-game-night-shared-limits.jpg)
 
 **My rules** controls your platform, genres, time and ownership/purchase consent.
 The host chooses Strict, Balanced or Discovery and can change room matching

@@ -44,7 +44,7 @@ def fresh_room(context: dict, now: int) -> dict:
     return {"revision": 0, "host_id": context["actor_id"], "created_at": now,
             "expires_at": now + context["retention_hours"] * 3600,
             "mode": "strict", "participants": {}, "shortlist": [], "selected": None,
-            "history": [], "round": 0, "phase": "lobby",
+            "history": [], "round": 0, "phase": "lobby", "player_limits": [],
             "matching": {"title_fallback": True, "platform_aliases": True, "skip_empty": True}}
 
 
@@ -128,18 +128,22 @@ def has_games(person: dict) -> bool:
 
 def _contributions(person: dict, matching: dict) -> dict[str, dict]:
     result = {}
+    platforms = {game_key(item, matching): item["platform"]
+                 for item in person.get("platform_overrides", [])}
     manual_keys = {game_key(game, matching) for game in person["manual"]}
     for game in person["library"]:
         key = game_key(game, matching)
         if not automatic_game(game) and key not in manual_keys:
             continue
         saved = game.get("play_compatibility")
+        platform = platforms.get(key) or game.get("platform")
         compatibility = None
-        if (isinstance(saved, dict) and isinstance(game.get("platform"), str)
+        if (isinstance(saved, dict)
                 and type(saved.get("min_players")) is int and type(saved.get("max_players")) is int
                 and 1 <= saved["min_players"] <= saved["max_players"] <= 32):
-            compatibility = {**saved, "platform": game["platform"], "genres": game.get("tags", [])}
-        result[key] = {**game, "key": key, "owned": game.get("owned") is True,
+            compatibility = {**saved, "platform": platform, "genres": game.get("tags") or []}
+        result[key] = {**game, "platform": platform,
+                       "key": key, "owned": game.get("owned") is True,
                        "compatibility": compatibility,
                        "available": game.get("source_state") == "connected"}
     for game in person["manual"]:
@@ -161,12 +165,24 @@ def evaluate(room: dict, *, now: int) -> dict:
               and (not matching["skip_empty"] or has_games(person))}
     count = len(people)
     contributions = {pid: _contributions(person, matching) for pid, person in people.items()}
+    shared_limits = {game_key(item, matching): item for item in room.get("player_limits", [])}
     keys = sorted({key for games in contributions.values() for key in games})
     eligible, excluded = [], []
     for key in keys:
         variants = [games[key] for games in contributions.values() if key in games]
         display = variants[0]
+        limits = shared_limits.get(key)
+        if limits is None:
+            # Existing saved/manual knowledge can supply missing counts for other owners.
+            # Ownership, platform/crossplay and personal rules remain participant-specific.
+            limits = next(({"min_players": games[key]["compatibility"]["min_players"],
+                            "max_players": games[key]["compatibility"]["max_players"],
+                            "confirmed_by": pid}
+                           for pid, games in contributions.items()
+                           if key in games and games[key].get("compatibility")), None)
         reasons, access, owners, score = [], [], 0, 0
+        missing_platforms = [pid for pid, games in contributions.items()
+                             if key in games and not games[key].get("platform")]
         platforms, crossplay = set(), True
         for pid, person in people.items():
             game = contributions[pid].get(key)
@@ -187,10 +203,19 @@ def evaluate(room: dict, *, now: int) -> dict:
                     reasons.append(f"{label}: ownership or purchase-consent rule")
                     continue
             compatibility = game.get("compatibility")
-            if not compatibility:
-                reasons.append(f"{label}: confirm group compatibility and player count")
+            if compatibility is None and limits is not None:
+                compatibility = {"min_players": limits["min_players"],
+                                 "max_players": limits["max_players"],
+                                 "platform": game.get("platform"),
+                                 "genres": game.get("tags") or [],
+                                 "duration_minutes": None, "crossplay": False}
+            if compatibility is None:
+                reasons.append("Confirm supported player count once for this room")
                 continue
             platform = compatibility["platform"]
+            if not platform:
+                reasons.append(f"{label}: confirm your platform")
+                continue
             platforms.add(platform_key(platform, aliases=matching["platform_aliases"]))
             crossplay = crossplay and compatibility.get("crossplay", False)
             if pref["platform"] != "Any" and platform_key(pref["platform"], aliases=matching["platform_aliases"]) != platform_key(platform, aliases=matching["platform_aliases"]):
@@ -221,12 +246,17 @@ def evaluate(room: dict, *, now: int) -> dict:
             reasons.append("Discovery needs at least one confirmed owner")
         purchase_required = any(item["purchase_required"] for item in access)
         candidate = {"key": key, "title": display["title"], "access": access,
+                     "needs_player_limits": limits is None,
+                     "missing_platforms": missing_platforms,
+                     "player_limits": {field: limits[field] for field in (
+                         "min_players", "max_players", "confirmed_by")} if limits else None,
                      "provider_ids": display.get("provider_ids", {}),
                      "score": score + owners, "reasons": ["Everyone owns it or consented to considering a purchase" if purchase_required else "Everyone has access",
                      "Price unknown; price filters are paused" if purchase_required else "No purchase required",
                      "Player count confirmed", "Personal hard rules satisfied"], "excluded_reasons": reasons,
                      "price_status": "unavailable" if purchase_required else "not_required", "evaluated_at": now,
                      "match_provenance": "provider_id" if key.startswith("steam:") else "title_match"}
+        candidate["excluded_reasons"] = list(dict.fromkeys(reasons))
         if not reasons:
             eligible.append(candidate)
         else:
@@ -315,6 +345,42 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
         person["vote"] = None
     elif operation == "remove-manual":
         person["manual"] = [game for game in person["manual"] if game["key"] != values.get("key")]
+    elif operation == "player-limits":
+        minimum, maximum = values.get("min_players"), values.get("max_players")
+        if (type(minimum) is not int or type(maximum) is not int
+                or not 1 <= minimum <= maximum <= 32):
+            raise SessionError("Confirm a supported player range from 1 to 32.")
+        pool = evaluate(room, now=now)
+        candidate = next((game for game in pool["eligible"] + pool["excluded"]
+                          if game["key"] == values.get("key")), None)
+        if candidate is None:
+            raise SessionError("Choose a game already present in this room.")
+        platform = values.get("platform")
+        if platform is not None:
+            if not isinstance(platform, str) or not 1 <= len(platform.strip()) <= 80:
+                raise SessionError("Choose a valid platform for your own game.")
+            if candidate["key"] not in _contributions(person, room["matching"]):
+                raise SessionError("Confirm a platform only for your own game.")
+            platforms = [item for item in person.get("platform_overrides", [])
+                         if game_key(item, room["matching"]) != candidate["key"]]
+            if len(platforms) >= 500:
+                raise SessionError("This room has reached your saved platform capacity.")
+            platforms.append({"title": candidate["title"],
+                              "provider_ids": candidate["provider_ids"],
+                              "platform": platform.strip()})
+            person["platform_overrides"] = platforms
+        limits = [item for item in room.get("player_limits", [])
+                  if game_key(item, room["matching"]) != candidate["key"]]
+        if len(limits) >= 500:
+            raise SessionError("This room has reached its saved player-limit capacity.")
+        previous = candidate["player_limits"]
+        same_counts = (previous is not None and previous["min_players"] == minimum
+                       and previous["max_players"] == maximum)
+        limits.append({"title": candidate["title"], "provider_ids": candidate["provider_ids"],
+                       "min_players": minimum, "max_players": maximum,
+                       "confirmed_by": previous["confirmed_by"] if same_counts else actor_id,
+                       "confirmed_at": now})
+        room["player_limits"] = limits
     elif operation == "mode":
         if values.get("mode") not in {"strict", "balanced", "discovery"}:
             raise SessionError("Choose strict, balanced or discovery.")
@@ -384,6 +450,7 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
     elif operation == "leave":
         person["active"] = False
         person["library"], person["manual"], person["vetoes"], person["vote"] = [], [], [], None
+        person["platform_overrides"] = []
     elif operation == "transfer":
         target = values.get("participant_id")
         if values.get("confirmed") is not True:
