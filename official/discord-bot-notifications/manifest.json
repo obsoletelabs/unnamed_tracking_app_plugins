@@ -54,6 +54,11 @@
   "dependencies": [],
   "description": "PRIVATE direct messages with optional host verification, and PUBLIC notifications to administrator-allowed Discord channels.",
   "entrypoint": "plugin:main",
+  "identity_provider": {
+    "authenticate_action_id": "authenticate-activity",
+    "config_action_id": "activity-config",
+    "revalidate_action_id": "revalidate-activity"
+  },
   "integrity": {
     "key_id": null,
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
@@ -195,10 +200,5 @@
     ],
     "settings": []
   },
-  "version": "0.1.1",
-  "identity_provider": {
-    "authenticate_action_id": "authenticate-activity",
-    "revalidate_action_id": "revalidate-activity",
-    "config_action_id": "activity-config"
-  }
+  "version": "0.2.0"
 }
