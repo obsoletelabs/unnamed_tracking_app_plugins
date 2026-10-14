@@ -115,7 +115,8 @@ def test_owned_multiplayer_is_automatic_but_unknown_player_limits_are_not_invent
                 "platform": "PC", "tags": [], "features": ["Online Co-op"],
                 "source_state": "connected"}]
     ctx = context(library=library, source_states={"source": "connected"}, connected=True)
-    state, result = engine.transition(None, {}, ctx, now=1000)
+    state, result = engine.transition(None, {"operation": "matching", "matching": {
+        **engine.MATCHING_DEFAULTS, "small_multiplayer": False}}, ctx, now=1000)
     assert len(result["pool"]["excluded"]) == 1
     assert "player count" in result["pool"]["excluded"][0]["excluded_reasons"][0]
     assert not result["participants"][0]["spectating"]
@@ -135,7 +136,7 @@ def multiplayer_context(actor="one", **changes):
 def test_one_participant_can_confirm_player_limits_for_every_owner():
     state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
     state, before = engine.transition(state, {}, multiplayer_context("two"), now=1001)
-    assert before["pool"]["excluded"][0]["needs_player_limits"]
+    assert before["pool"]["eligible"][0]["needs_player_limits"]
     state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
         "min_players": 2, "max_players": 4}, multiplayer_context("two"), now=1002)
     candidate = result["pool"]["eligible"][0]
@@ -217,6 +218,8 @@ def test_missing_platform_can_be_confirmed_inline_for_only_the_current_participa
     first, second = multiplayer_context(), multiplayer_context("two")
     first["library"][0]["platform"] = None
     second["library"][0]["platform"] = None
+    first["library"][0]["provider_ids"] = {}
+    second["library"][0]["provider_ids"] = {}
     state, _ = engine.transition(None, {}, first, now=1000)
     state, _ = engine.transition(state, {}, second, now=1001)
     state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
@@ -238,6 +241,7 @@ def test_missing_platform_can_be_confirmed_inline_for_only_the_current_participa
 
 def test_saved_player_counts_do_not_need_reentry_when_only_the_platform_is_missing():
     ctx = multiplayer_context()
+    ctx["library"][0]["provider_ids"] = {}
     ctx["library"][0].update(platform=None, play_compatibility={
         "min_players": 1, "max_players": 4, "duration_minutes": 45, "crossplay": False})
     state, result = engine.transition(None, {}, ctx, now=1000)
@@ -275,7 +279,8 @@ def test_source_titles_and_missing_metadata_do_not_break_automatic_imports():
                 "features": ["Online Co-op"], "source_state": "connected"}]
     _, result = engine.transition(None, {}, context(library=library,
         source_states={"source": "connected"}, connected=True), now=1000)
-    assert len(result["pool"]["excluded"]) == 1
+    assert len(result["pool"]["eligible"]) == 1
+    assert result["pool"]["eligible"][0]["player_limits"] is None
     assert not result["participants"][0]["spectating"]
     with pytest.raises(engine.SessionError, match="200 characters"):
         engine.manual_game(game(title="x" * 201))
@@ -365,3 +370,69 @@ def test_only_host_changes_matching_and_veto_survives_key_change():
     state, result = engine.transition(state, {"operation": "matching", "matching": options}, context(), now=1002)
     assert not result["pool"]["eligible"]
     assert state["participants"]["two"]["vetoes"] == ["steam:123"]
+
+
+def test_two_player_multiplayer_is_eligible_without_inventing_limits():
+    first, second = multiplayer_context(), multiplayer_context("two")
+    first["library"][0]["platform"] = None
+    second["library"][0]["platform"] = None
+    state, _ = engine.transition(None, {}, first, now=1000)
+    state, result = engine.transition(state, {}, second, now=1001)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["player_limits"] is None
+    assert candidate["needs_player_limits"] and not candidate["requires_player_limits"]
+    assert all(person["platform"] == "PC" for person in candidate["access"])
+    assert all(person["platform_provenance"] == "inferred_steam" for person in candidate["access"])
+    assert all(person["compatibility"] == "detected_multiplayer" for person in candidate["access"])
+    assert "unknown" in " ".join(candidate["reasons"])
+    state, result = engine.transition(state, {}, multiplayer_context("three"), now=1002)
+    assert not result["pool"]["eligible"]
+    assert result["pool"]["excluded"][0]["requires_player_limits"]
+
+
+def test_small_group_policy_never_overrides_known_limits_or_platforms():
+    state, _ = add(max_players=1)
+    state, result = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    assert not result["pool"]["eligible"]
+    first = multiplayer_context()
+    first["library"][0]["platform"] = "PlayStation 5"
+    _, result = engine.transition(None, {}, first, now=1000)
+    assert result["pool"]["eligible"][0]["access"][0]["platform"] == "PlayStation 5"
+
+
+def test_host_can_disable_both_inferences():
+    ctx = multiplayer_context()
+    ctx["library"][0]["platform"] = None
+    _, result = engine.transition(None, {"operation": "matching", "matching": {
+        **engine.MATCHING_DEFAULTS, "small_multiplayer": False, "steam_platform": False}}, ctx, now=1000)
+    assert not result["pool"]["eligible"]
+
+
+def test_bulk_group_approval_needs_no_metadata_and_expires_when_party_size_changes():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    state, _ = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    state, _ = engine.transition(state, {}, multiplayer_context("three"), now=1002)
+    state, result = engine.transition(state, {"operation": "approve-group", "keys": ["title:together"]}, multiplayer_context("two"), now=1003)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["player_limits"] is None
+    assert candidate["group_approval"] == {"players": 3, "confirmed_by": "two"}
+    state, result = engine.transition(state, {}, multiplayer_context("four"), now=1004)
+    assert not result["pool"]["eligible"]
+    state, _ = add(max_players=1)
+    state, _ = engine.transition(state, {}, multiplayer_context("two"), now=1001)
+    _, result = engine.transition(state, {"operation": "approve-group", "keys": ["title:together"]}, multiplayer_context(), now=1002)
+    assert not result["pool"]["eligible"]
+
+
+@pytest.mark.parametrize("keys", [[], ["title:absent"], ["title:together", "title:together"], [True]])
+def test_bulk_group_approval_rejects_invalid_targets(keys):
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    with pytest.raises(engine.SessionError):
+        engine.transition(state, {"operation": "approve-group", "keys": keys}, multiplayer_context(), now=1001)
+
+
+def test_multiplayer_marker_without_limits_is_a_labeled_small_group_signal():
+    ctx = multiplayer_context()
+    ctx["library"][0].update(features=[], play_compatibility={"min_players": None, "max_players": None, "crossplay": False})
+    _, result = engine.transition(None, {}, ctx, now=1000)
+    assert result["pool"]["eligible"][0]["player_limits"] is None

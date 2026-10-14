@@ -26,6 +26,8 @@ network sockets, bot token or OAuth client secret of its own.
   player limits for the room directly from the exclusion list. Saved/manual
   limits also supply missing counts without repeated entry. Personal access,
   known platform-specific limits, rules and crossplay consent remain separate.
+- Native library bulk multiplayer presets and optional cross-instance saves under
+  separate `compatibility.write` consent, with per-game failure results.
 - Own-account tracking changes and explicitly local achievement reports when the
   participant grants the appropriate write scopes.
 - Responsive layout, keyboard controls and reduced-motion support.
@@ -80,7 +82,7 @@ For an older source without the delegation API, the Activity operator can enable
 **Allow unsafe legacy API-key connections** in Integration access. The participant
 must select legacy mode and acknowledge the broad key. The host encrypts it and
 uses only fixed identity/library GET requests. Legacy connections cannot write
-tracking or achievements and do not expose imported artwork; public Steam cover
+tracking, achievements or multiplayer settings and do not expose imported artwork; public Steam cover
 fallback still applies. Disconnect the connection and revoke the key on the old
 instance when finished. Legacy clients do not require upgrading the old instance.
 
@@ -97,7 +99,7 @@ boundary. Operator approval, personal rules and personal vetoes remain distinct.
 Game titles use normalized case, spacing and punctuation by default. Steam IDs
 are optional; edition ambiguity still requires human confirmation. Platform
 aliases and empty-library spectators can be configured by the current room host.
-Unknown player limits need one room confirmation; they are never invented.
+For one or two players, detected multiplayer is accepted with unknown limits. Larger groups can approve games without extra details for the current player count, or set known limits once. Known constraints still win. Steam app IDs infer PC only when the platform is blank. Both shortcuts are configurable by the room host.
 Store metadata is informational and cannot override personal rules.
 
 ## Build and test
@@ -118,3 +120,5 @@ The Activity stores bounded room inputs/votes using public storage CAS. Rooms
 expire under the host retention policy; its background worker clears expired
 rooms. There is no persistent Discord Gateway connection, custom chat command or
 notification delivery in the Activity. Those remain the bot's responsibilities.
+
+The [architecture and acceptance matrix](../../wiki/docs/architecture/discord-game-night.md) links the implementation to the open issues and distinguishes verified behavior from release follow-ups.

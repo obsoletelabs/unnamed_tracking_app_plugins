@@ -10,8 +10,14 @@ export function multiplayer(game) {
   if (labels.some(value => value === "singleplayer")) return false;
   return null;
 }
-export function connectionScopes(includeProgress = false) {
-  return ["profile.read", "games.read", ...(includeProgress ? ["achievements.read", "tracking.write", "achievements.write"] : [])];
+export function connectionScopes(includeProgress = false, includeCompatibility = false) {
+  return ["profile.read", "games.read", ...(includeProgress ? ["achievements.read", "tracking.write", "achievements.write"] : []), ...(includeCompatibility ? ["compatibility.write"] : [])];
+}
+export function gamePlatform(game, inferSteam = true) {
+  return game.platform || (inferSteam && /^\d{1,12}$/.test(String(game.provider_ids?.steam || "")) ? "PC" : "");
+}
+export function readableScope(scope) {
+  return ({"profile.read":"Account identity", "games.read":"Library", "achievements.read":"Achievements", "tracking.write":"Tracking changes", "achievements.write":"Local achievement reports", "compatibility.write":"Multiplayer settings"})[scope] || scope;
 }
 export function trackingChange(tracking) {
   const change = {status: tracking.status};
