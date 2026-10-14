@@ -992,6 +992,7 @@ def authenticate_activity(values: dict[str, Any]) -> dict[str, Any]:
         raise PluginError("Discord could not verify your identity.")
     result = _activity_membership(user.get("id"), proof.get("instance_id"))
     return {**result, "display_name": str(user.get("global_name") or user.get("username") or "Participant")[:100],
+            "account_name": str(user.get("username") or "Participant")[:100],
             "avatar_url": _avatar_url(user) or f"https://cdn.discordapp.com/embed/avatars/{(int(user['id']) >> 22) % 6}.png",
             "sdk_authentication": {"access_token": token}}
 

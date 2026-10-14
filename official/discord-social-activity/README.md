@@ -104,6 +104,17 @@ Store metadata is informational and cannot override personal rules.
 
 ## Build and test
 
+Administrators can use **Game Night participants** in Administration to inspect
+saved names/IDs and source states, unlink connections, or purge participant/all
+local Activity data with confirmation. Updating requires reviewing the separate
+`integrations.public_app.admin` and native admin-page permissions. Host enforcement
+checks the administrator and exact installation; public participants cannot use
+this API. Room cleanup clears cached results as well as participant inputs.
+Source libraries and upstream grants are not deleted. Guest/room retention can
+be set to365 days; valid remembered source grants have their own lifetime.
+Connected apps shows the external account label; older remote grants need fresh
+consent. Retroactive account merging is a separate follow-up.
+
 ```sh
 npm install
 npm run build:activity

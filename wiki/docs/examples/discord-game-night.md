@@ -313,6 +313,47 @@ use your tracking app to inspect further pages.
 
 ## Troubleshooting
 
+### Guests, retention and saved participants
+
+Everyone signs in through Discord. **Guest** means there is no active connected
+tracking library; it does not mean anonymous, and it does not create a tracking
+account. Guests can add self-reported games only when the operator enables them.
+An offline/revoked source is not proof of current access. Linked users' source
+grants have their own expiry, including explicitly approved Until revoked access.
+
+In **Administration → Integration access**, guest/room retention can be set from
+1 to 8760 hours (365 days). New rooms use the configured duration. Existing rooms
+keep their original expiry; expired data is not resurrected. Remembered valid
+source connections may outlive a room, so disconnect/revoke those separately.
+
+After updating Game Night, review its new `integrations.public_app.admin` and
+native administrator-page permissions. Open **Administration → Game Night
+participants** to see saved Discord names/IDs, source origins and connection
+states. Older identities receive their verified username on the next Discord
+sign-in. Source **Connected apps** also shows the external account label for new
+consent requests, or an exact matching local broker connection; older remote
+grants need reconnection to supply the label. Names are descriptive, never proof
+for linking accounts; the stable account ID distinguishes people with similar names.
+
+**Unlink this connection** forgets its broker credential and signs the participant
+out. **Unlink all connections** does the same for that participant's sources.
+Manual guest games remain. **Purge participant data** additionally removes their
+identity, inputs, votes and room confirmations; affected cached shortlists and
+shared history are cleared. Other participants' personal inputs remain.
+**Purge all Activity data** removes all local saved identities/connections and
+rooms. These actions require an explicit confirmation. They do not delete source
+tracking libraries or revoke upstream grants; use that source's Connected apps
+for revocation. An administrator can retry cleanup after an interrupted purge.
+
+![Saved Game Night participants in native administration](../images/game-night-admin-participants.jpg)
+
+Retroactive account merging/reassignment needs explicit identity proof and
+conflict rules and is tracked in [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45). For now, reconnect under the intended
+source account. Matching display names never merges accounts.
+
+Further multiplayer metadata and cross-instance bulk refinements are deferred to
+[#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46).
+
 | Symptom | Check |
 | --- | --- |
 | `discordsays.com refused to connect` | Root mapping, HTTPS reachability, frame headers and Content Security Policy |

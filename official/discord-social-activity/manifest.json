@@ -33,6 +33,26 @@
     {
       "version": 1,
       "name": "plugin.storage"
+    },
+    {
+      "name": "integrations.public_app.admin",
+      "version": 1
+    },
+    {
+      "name": "frontend.native",
+      "version": 1
+    },
+    {
+      "name": "frontend.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.navigation.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.placement.settings.admin",
+      "version": 1
     }
   ],
   "entrypoint": "plugin:main",
@@ -45,10 +65,14 @@
   "ui": {
     "menus": [],
     "actions": [
-      "session"
+      "session",
+      "admin-list",
+      "admin-manage"
     ],
     "settings": [],
-    "pages": []
+    "pages": [
+      "admin"
+    ]
   },
   "permissions": [
     {
@@ -64,6 +88,47 @@
         "version": 1,
         "name": "plugin.storage"
       }
+    },
+    {
+      "capability": {
+        "name": "integrations.public_app.admin",
+        "version": 1
+      },
+      "rationale": "Allow administrators to inspect and forget this installation's saved external participants and source connections."
+    },
+    {
+      "capability": {
+        "name": "frontend.native",
+        "version": 1
+      },
+      "rationale": "Render the administrator participant-management page through the native bridge."
+    },
+    {
+      "capability": {
+        "name": "frontend.settings",
+        "version": 1
+      },
+      "rationale": "Provide Game Night administration settings."
+    },
+    {
+      "capability": {
+        "name": "frontend.navigation.settings",
+        "version": 1
+      },
+      "rationale": "Expose the Game Night participant settings page."
+    },
+    {
+      "capability": {
+        "name": "frontend.placement.settings.admin",
+        "version": 1
+      },
+      "rationale": "Place participant management in Administration."
     }
-  ]
+  ],
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css"
+    ]
+  }
 }

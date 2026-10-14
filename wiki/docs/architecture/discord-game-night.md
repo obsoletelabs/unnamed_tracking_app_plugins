@@ -1,7 +1,7 @@
 # Game Night architecture and acceptance
 
-This describes the development preview on `feat/discord-social-activity` and the
-coordinated host branch `feat/plugin-discord-activity-host`, as of 14 October 2026.
+This describes the Game Night development preview and coordinated Plugin API
+1.1.12 host support, as of 14 October 2026.
 It records the implemented design and remaining checks; it is not a claim that
 every item in the umbrella issue is released. Start with the
 [operator and player guide](../examples/discord-game-night.md) for setup.
@@ -17,6 +17,7 @@ every item in the umbrella issue is released. Start with the
 | Encrypted connections, live source checks and minimized libraries | Host `src/backend/src/features/public_app_sources.py`, `legacy_integrations.py`, `delegated_library.py` | Host broker; credentials never enter Activity code |
 | Safe HTTPS and artwork | Host `src/backend/src/plugin_api/outbound.py`, `src/features/public_catalogue.py` | Bounded requests, redirect/private-address protections |
 | Native multiplayer editing | Host `src/frontend/src/components/game/GamePlayFields.vue`, `GamePlayPanel.vue`, `components/BulkEditModal.vue` | General library feature, not Discord-specific |
+| Saved participant administration | Activity `native/`, `privacy.py`; host `src/backend/src/features/public_app_admin.py` | Explicit admin grant, installation scope, credential-free summaries; plugin scrubs its own rooms |
 
 The host's [public-app contract and route matrix](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/feat/plugin-discord-activity-host/wiki/docs/development/plugin-public-apps.md)
 lists the exact delegated operations and ordinary/admin API rejection behavior.
@@ -114,13 +115,17 @@ Steam-to-PC inference are labeled and can be disabled by the host. Explicit
 platforms and known limits win. Current-group approval expires logically when
 player count changes; it does not manufacture a reusable min/max range.
 
-Room retention follows the operator's guest retention policy (1–720 hours).
+Room retention follows the operator's guest retention policy (1–8760 hours,
+up to 365 days; changes apply to new rooms).
 The plugin prunes expired room records; host cleanup handles expired actors and
 sessions. An explicitly approved Until revoked source connection can outlive a
 room and be reused by the same verified identity. Disconnect removes the broker
 copy; source-side revoke invalidates the grant. The engine has a leave/clear
-operation, but a dedicated guest-data deletion UI and account claiming are not
-part of this preview.
+operation. The native administrator plugin page lists saved participants and
+supports source unlink, participant purge and installation-wide purge, with a
+separate critical permission and explicit confirmation. Self-service guest-data
+deletion/profile controls remain in #39; verified retroactive linking is tracked
+in [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45).
 
 ## Launch contexts and deployment
 
@@ -151,12 +156,12 @@ Discord's launch restrictions.
 
 | Issue | Implemented / covered by the paired PRs | Remaining |
 | --- | --- | --- |
-| [Host #119](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/119) | Generic delegated boundary, scopes, public sessions, broker, rejection/ownership tests, native consent UI | Merge review; whole ordinary-route audit beyond the integration matrix |
+| [Host #119](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/119) | Generic delegated boundary, scopes, public sessions, broker, rejection/ownership tests, native consent UI | Whole ordinary-route audit beyond the integration matrix |
 | [Host #120](https://github.com/obsoletelabs/unnamed_tracking_app_2/issues/120) | Platform-neutral contracts and UI | Non-Discord reference client/integration |
 | [Plugin #28](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/28) | Existing bot extended for verified Activity identity; notifications preserved | Persistent online presence / notification profile linking remain separate |
 | [#33](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/33) | Multiplayer Activity MVP implementation | Umbrella also includes later community/federation work; keep open |
-| [#34](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/34) | Repository map, architecture/sequence/state diagrams, context and flow matrices here | Final reviewer acceptance of discovery findings |
-| [#35](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/35) | Identity/roles, scopes, retention, isolation and concurrency contracts | Guest deletion UI; account claiming is future work |
+| [#34](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/34) | Repository map, architecture/sequence/state diagrams, context and flow matrices here | Discovery deliverables complete |
+| [#35](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/35) | Identity/roles, scopes, retention, isolation, concurrency and administrator purge contracts | Self-service deletion/profile in #39; account linking in #45 |
 | [#36](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/36) | Independent shell, onboarding, guest/linked labels, reconnect and configuration | Full lifecycle acceptance on deployed installation |
 | [#37](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/37) | Independent sources, provenance/access freshness, saved presets, reads and consented writes | Live independent-source outage test |
 | [#38](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/38) | Three selection modes, personal hard rules, explainable exclusions/vetoes | Custom owner thresholds; pricing intentionally paused |
@@ -165,8 +170,10 @@ Discord's launch restrictions.
 | [#41](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/41) | No persistent community product in MVP | Follow-up |
 | [#42](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/42) | Independent source consent is not federation | Follow-up |
 | [#43](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/43) | Public boundaries support future work | Follow-up extension contracts remain |
+| [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45) | Administrator unlink/purge available | Verified retroactive account linking and conflict handling |
+| [#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46) | Optional presets, bulk editor, labeled inference and group approval | Deferred metadata and cross-instance bulk refinements |
 
 Implementation PRs: [host #121](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/121)
 and [plugins #44](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/pull/44).
-Both are development drafts. Trusted signing/catalogue publication and the
+Trusted signing/catalogue publication and the
 remaining live acceptance checks are release gates, not completed features.

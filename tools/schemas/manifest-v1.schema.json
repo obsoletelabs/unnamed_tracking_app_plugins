@@ -109,7 +109,8 @@
         "network.outbound",
         "api.full",
         "integrations.public_app",
-        "integrations.identity_provider"
+        "integrations.identity_provider",
+        "integrations.public_app.admin"
       ],
       "title": "Capability",
       "type": "string"
