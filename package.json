@@ -5,13 +5,16 @@
     "test": "node --test tests/*.browser.test.cjs",
     "check": "node --check examples/scoped-document-viewer/frontend/app.js && node --check examples/scoped-document-viewer/frontend/office.js",
     "build:native": "node tools/build_native_frontends.mjs",
-    "check:native": "node tools/build_native_frontends.mjs --check"
+    "check:native": "node tools/build_native_frontends.mjs --check",
+    "build:activity": "node tools/build_activity_frontend.mjs",
+    "check:activity": "node tools/build_activity_frontend.mjs --check"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "3.5.41",
+    "@discord/embedded-app-sdk": "^2.5.0",
+    "@vue/compiler-sfc": "3.5.44",
     "esbuild": "0.28.1",
     "pdf-lib": "1.17.1",
     "playwright": "1.62.1",
-    "vue": "3.5.41"
+    "vue": "3.5.44"
   }
 }

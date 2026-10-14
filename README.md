@@ -52,6 +52,12 @@ and `npm run build:native` after editing its UI; CI checks the committed bundle.
 
 ## Create your first plugin
 
+The [Game Night setup guide](wiki/docs/examples/discord-game-night.md) walks
+operators and players through the Discord bot, Activity URL mappings, scoped or
+legacy library connections, personal rules and troubleshooting. The separate
+[Game Night plugin](official/discord-social-activity/README.md) is an API 1.1.12
+development preview with its identity adapter in Discord Bot Notifications.
+
 Start with the executable [first-plugin tutorial](wiki/docs/getting-started/first-plugin.md),
 then use the [developer manual](wiki/docs/index.md) and [complete API reference](wiki/docs/plugin-author-guide.md).
 The tutorial creates a minimal manifest, Python entrypoint/action and page,

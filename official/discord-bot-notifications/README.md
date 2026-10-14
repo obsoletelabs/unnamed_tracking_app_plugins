@@ -122,3 +122,34 @@ its own target; selecting a default channel only affects future enrollment.
 
 Version 0.1.1 is a manual update requiring API 1.1.11 and permission review. Earlier packages
 and signing history remain immutable. Install/update the host before updating the bot.
+
+## Activity identity adapter (0.1.2 preview)
+
+The separate Game Night Activity requires the API 1.1.12 host and this updated
+adapter. Existing notification links and destinations keep their behavior. The
+Activity does not inherit their notification or recovery authority.
+
+Grant `integrations.identity_provider` explicitly and configure **Discord Activity
+sign-in** on the administrator page with the bot's application ID and OAuth2
+client secret. The bot token and OAuth client secret are different credentials;
+both remain in write-only private plugin storage. The configured bot must belong
+to that application. A saved client secret is never returned to the UI.
+
+The adapter exchanges the SDK authorization code, reads the OAuth user's verified
+identity, and checks their membership in the same Discord Activity instance and
+configured guild. Revalidation repeats the membership check. A claimed user or
+room supplied by the browser cannot replace this proof. Verified avatar URLs
+include Discord's default-avatar fallback; the host retrieves raster images
+through its bounded image transport.
+
+Configure root and `/api` Activity URL mappings as described in the
+[Game Night README](../discord-social-activity/README.md). Each operator currently
+uses their own application. This preview does not create a persistent Gateway
+connection or change the existing bot notification delivery implementation.
+
+Operators can explicitly allow **Activities in DMs and group DMs** in Activity
+sign-in settings (default off). The verified Activity location must be Discord's
+private-channel kind, with a valid channel and exact connected member. Guild
+rooms remain restricted to the configured server. Saving this policy can retain
+the existing secret by leaving its field blank for the same application ID.
+Private Activity participation is separate from notification DM enrollment.

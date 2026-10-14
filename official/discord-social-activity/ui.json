@@ -1,0 +1,71 @@
+{
+  "actions": [
+    {
+      "handler": "plugin:session_action",
+      "id": "session",
+      "label": "Game-night session",
+      "capability": {
+        "version": 1,
+        "name": "integrations.public_app"
+      }
+    },
+    {
+      "id": "admin-list",
+      "label": "List saved participants",
+      "handler": "plugin:admin_list",
+      "capability": {
+        "name": "integrations.public_app.admin",
+        "version": 1
+      }
+    },
+    {
+      "id": "admin-manage",
+      "label": "Manage saved participant data",
+      "handler": "plugin:admin_manage",
+      "capability": {
+        "name": "integrations.public_app.admin",
+        "version": 1
+      }
+    }
+  ],
+  "pages": [
+    {
+      "id": "admin",
+      "title": "Game Night participants",
+      "actions": [
+        "admin-list",
+        "admin-manage"
+      ]
+    }
+  ],
+  "menus": [],
+  "api_contract_version": "1.1.12",
+  "plugin_id": "official.discord-social-activity",
+  "settings": [],
+  "title": "Game Night",
+  "settings_sections": [
+    {
+      "id": "game-night-admin",
+      "label": "Game Night participants",
+      "page_id": "admin",
+      "area": "administration",
+      "group": "Server management",
+      "order": 76,
+      "visibility": {
+        "admin_only": true
+      }
+    }
+  ],
+  "navigation": [
+    {
+      "id": "game-night-admin-nav",
+      "location": "settings.sidebar",
+      "label": "Game Night participants",
+      "settings_section_id": "game-night-admin",
+      "order": 76,
+      "visibility": {
+        "admin_only": true
+      }
+    }
+  ]
+}

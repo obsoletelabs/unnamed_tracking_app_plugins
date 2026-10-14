@@ -77,7 +77,10 @@
         "backend.routes.plugin",
         "backend.routes.host",
         "network.outbound",
-        "api.full"
+        "api.full",
+        "integrations.public_app",
+        "integrations.identity_provider",
+        "integrations.public_app.admin"
       ],
       "title": "Capability",
       "type": "string"

@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.11",
+  "api_contract_version": "1.1.12",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -44,6 +44,10 @@
     },
     {
       "name": "notification_destinations.read",
+      "version": 1
+    },
+    {
+      "name": "integrations.identity_provider",
       "version": 1
     }
   ],
@@ -140,6 +144,13 @@
         "version": 1
       },
       "rationale": "Read only the current user and installation destination IDs, host trust and recovery status to show accurate verification and password-reset eligibility; no addresses or host secrets."
+    },
+    {
+      "capability": {
+        "name": "integrations.identity_provider",
+        "version": 1
+      },
+      "rationale": "Verify Discord OAuth identities and live Activity membership for the separate public app, using this bot configuration."
     }
   ],
   "plugin_id": "official.discord-bot-notifications",
@@ -171,7 +182,11 @@
       "retire-channel-destination",
       "deliver-channel",
       "get-destinations",
-      "list-servers"
+      "list-servers",
+      "save-activity-oauth",
+      "activity-config",
+      "authenticate-activity",
+      "revalidate-activity"
     ],
     "menus": [],
     "pages": [
@@ -180,5 +195,10 @@
     ],
     "settings": []
   },
-  "version": "0.1.1"
+  "version": "0.1.1",
+  "identity_provider": {
+    "authenticate_action_id": "authenticate-activity",
+    "revalidate_action_id": "revalidate-activity",
+    "config_action_id": "activity-config"
+  }
 }

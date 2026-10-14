@@ -26,6 +26,8 @@ export function activate(context) {
         const message = ref("");
         const config = ref({});
         const tokenForm = reactive({ token: "", guild_id: "" });
+        const activityForm = reactive({ application_id: "", client_secret: "", allow_private_channels: false });
+        const activityConfig = ref({});
         const userForm = reactive({ username: "", code: "" });
         const directory = ref(null);
         const channelChoices = ref([]);
@@ -61,6 +63,11 @@ export function activate(context) {
             const result = await props.host.runAction("get-config");
             if (!live) return;
             config.value = { ...result, browser_refresh_ms: Math.round(performance.now() - started) };
+            if (admin) {
+              activityConfig.value = await props.host.runAction("activity-config");
+              activityForm.application_id = activityConfig.value.application_id || "";
+              activityForm.allow_private_channels = activityConfig.value.allow_private_channels === true;
+            }
             await loadDestinations();
             if (!admin && result.configured) {
               const choices = await props.host.runAction("channel-choices");
@@ -85,6 +92,7 @@ export function activate(context) {
             if (!live || result.cancelled) return;
             message.value = result.message || "Done.";
             tokenForm.token = "";
+            activityForm.client_secret = "";
             userForm.code = "";
             await refresh();
           } catch (err) {
@@ -185,6 +193,15 @@ export function activate(context) {
           const serverStatus = c.health?.api_ok === false ? "Unavailable" : c.configured ? "Connected" : "Not configured";
 
           const adminCards = [
+            infoCard("Discord Activity sign-in", [
+              h("p", "Game Night uses this bot to verify Discord identities and active room membership. Notification destinations keep their own configuration."),
+              h("p", { role: "status" }, activityConfig.value.configured ? "Activity OAuth configured" : "Activity OAuth needs configuration"),
+              h("label", ["Application ID", h("input", { value: activityForm.application_id, onInput: event => activityForm.application_id = event.target.value, autocomplete: "off" })]),
+              h("label", ["OAuth client secret", h("input", { type: "password", value: activityForm.client_secret, onInput: event => activityForm.client_secret = event.target.value, autocomplete: "new-password" })]),
+              h("p", "Leave the secret blank to keep the saved secret for this application."),
+              h("label", [h("input", { type: "checkbox", checked: activityForm.allow_private_channels, onChange: event => activityForm.allow_private_channels = event.target.checked }), " Allow Activities in DMs and group DMs"]),
+              h("div", { class: "discord-actions" }, [button("Save Activity OAuth", "save-activity-oauth", () => ({ ...activityForm }))]),
+            ]),
             infoCard("Connection", [
               h("div", { class: "discord-identity" }, [
                 image(bot.avatar_url, bot.username || "Discord bot", "discord-avatar"),

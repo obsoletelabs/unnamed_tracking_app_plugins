@@ -32,6 +32,7 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - run: npm ci
       - run: npm run check:native
+      - run: npm run check:activity
       - run: python -m tools.build_unsigned_previews
       - uses: actions/upload-artifact@v7
         with:
@@ -59,6 +60,7 @@ jobs:
       - run: python -m pip install --upgrade pip -r requirements-dev.txt
       - run: npm ci
       - run: npm run check:native
+      - run: npm run check:activity
       - run: python tools/check_source_layout.py
       - name: Validate documentation and repository references
         run: python tools/check_docs.py
@@ -69,6 +71,7 @@ jobs:
       - run: node --test tests/frontend_appearance.test.mjs
       - run: node --test tests/shortcut_playground.test.mjs
       - run: node --test tests/jellyfin_official_ui.test.mjs
+      - run: node --test tests/discord_activity_options.test.mjs
       - run: node --check official/extended-session-manager/frontend/app.js
       - run: pytest
       - run: python tools/build_packages.py
@@ -109,6 +112,8 @@ jobs:
               candidate_branch="feat/plugin-destination-status"
             elif [ "$COMPANION_BRANCH" = "fix/notification-provider-upgrades" ]; then
               candidate_branch="fix/notification-mail-and-auth-controls"
+            elif [ "$COMPANION_BRANCH" = "feat/discord-social-activity" ]; then
+              candidate_branch="feat/plugin-discord-activity-host"
             fi
             if [ "$candidate_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$candidate_branch" >/dev/null; then
               encoded_branch="$(printf '%s' "$candidate_branch" | jq -sRr @uri)"

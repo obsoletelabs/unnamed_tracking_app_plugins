@@ -1,0 +1,134 @@
+{
+  "public_app": {
+    "identity_provider_plugin_id": "official.discord-bot-notifications",
+    "action_id": "session",
+    "entry": "frontend/index.html"
+  },
+  "storage": {
+    "quota_mb": 32
+  },
+  "integrity": {
+    "signature": null,
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "dependencies": [
+    {
+      "optional": false,
+      "version_range": ">=0.1.2",
+      "plugin_id": "official.discord-bot-notifications"
+    }
+  ],
+  "frontend": {
+    "entry": "frontend/index.html"
+  },
+  "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
+  "name": "Game Night",
+  "manifest_version": 1,
+  "capabilities": [
+    {
+      "version": 1,
+      "name": "integrations.public_app"
+    },
+    {
+      "version": 1,
+      "name": "plugin.storage"
+    },
+    {
+      "name": "integrations.public_app.admin",
+      "version": 1
+    },
+    {
+      "name": "frontend.native",
+      "version": 1
+    },
+    {
+      "name": "frontend.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.navigation.settings",
+      "version": 1
+    },
+    {
+      "name": "frontend.placement.settings.admin",
+      "version": 1
+    }
+  ],
+  "entrypoint": "plugin:main",
+  "plugin_id": "official.discord-social-activity",
+  "sdk_version_range": "^1.1.12",
+  "automatic_update": false,
+  "application_version_range": ">=1.0.0",
+  "api_contract_version": "1.1.12",
+  "version": "0.0.1",
+  "ui": {
+    "menus": [],
+    "actions": [
+      "session",
+      "admin-list",
+      "admin-manage"
+    ],
+    "settings": [],
+    "pages": [
+      "admin"
+    ]
+  },
+  "permissions": [
+    {
+      "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions.",
+      "capability": {
+        "version": 1,
+        "name": "integrations.public_app"
+      }
+    },
+    {
+      "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry.",
+      "capability": {
+        "version": 1,
+        "name": "plugin.storage"
+      }
+    },
+    {
+      "capability": {
+        "name": "integrations.public_app.admin",
+        "version": 1
+      },
+      "rationale": "Allow administrators to inspect and forget this installation's saved external participants and source connections."
+    },
+    {
+      "capability": {
+        "name": "frontend.native",
+        "version": 1
+      },
+      "rationale": "Render the administrator participant-management page through the native bridge."
+    },
+    {
+      "capability": {
+        "name": "frontend.settings",
+        "version": 1
+      },
+      "rationale": "Provide Game Night administration settings."
+    },
+    {
+      "capability": {
+        "name": "frontend.navigation.settings",
+        "version": 1
+      },
+      "rationale": "Expose the Game Night participant settings page."
+    },
+    {
+      "capability": {
+        "name": "frontend.placement.settings.admin",
+        "version": 1
+      },
+      "rationale": "Place participant management in Administration."
+    }
+  ],
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css"
+    ]
+  }
+}
