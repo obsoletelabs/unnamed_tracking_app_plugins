@@ -13,6 +13,18 @@ Back up your instance before testing a development host branch. Existing
 notification destinations do not need to be recreated for an ordinary update
 under the same publisher and installation identity.
 
+## Joining a game night
+
+If someone already hosts Game Night, you do **not** need your own Discord bot.
+Launch or join their Activity, open **Connections**, and connect your tracking
+instance. Approve the request in that instance's browser window, then return and
+refresh your library. You can also add games manually if the operator allows guests.
+
+For one or two players, detected multiplayer is enough when no known limits
+conflict. Larger groups can approve games under **Game night → Needs attention**.
+Set personal restrictions in **My rules**, then shortlist, vote and choose.
+Only operators need sections 1–5 below. Players can start at section 6.
+
 ## 1. What the operator needs
 
 - An Unnamed Tracking host with API 1.1.12, working plugin runtime and HTTPS public
@@ -212,7 +224,7 @@ origin and an API key created on that source, and acknowledges the broad key.
 
 Legacy keys may have much broader account authority than the Activity needs.
 The host encrypts the key, uses only identity/library reads and never returns it
-to plugin code. Legacy connections cannot update tracking or achievements.
+to plugin code. Legacy connections cannot update tracking, achievements or saved multiplayer settings.
 Imported artwork may be unavailable; public Steam cover fallback is separate.
 Disconnect to remove the broker copy and revoke the key on the old source when
 finished. The old instance does not need a new plugin runtime for this read mode.
@@ -220,26 +232,55 @@ finished. The old instance does not need a new plugin runtime for this read mode
 ## 8. Choose games and keep control of your rules
 
 Owned games detected as multiplayer are included automatically after library
-refresh. **My games** defaults to those owned multiplayer entries; untick its
-filters to browse the rest of your connected library or add a guest entry.
-Multiplayer labels come from available features/tags;
-missing information is not proof of support. Saved group-play details on a source
-game supply player counts and session length without re-entering them. If limits
-are unknown, expand **Why games are excluded** on **Game night**, choose
-**Confirm player limits**, enter the minimum and maximum, then choose
-**Save limits for everyone**. Any one participant can supply missing counts for
-the whole room; existing saved/manual counts also supply missing limits for other
-owners. The game becomes eligible as soon as everyone has access and meets their
-own rules. Counts persist for this room until its retention expiry, including
-reconnects and matching-setting changes. They do not edit anyone's source library.
-Known platform-specific limits are still respected, and ownership, platform,
-crossplay consent, time/genre rules and vetoes are checked separately for each
-person. If your import has no platform, the same inline form asks for **Your
-platform**, or choose **Confirm your platform** once room counts are known. This
-changes only your own room entry. Use **My games** for extra compatibility
-details when needed. Genres, duration and Steam ID remain optional. Unknown limits are
-not silently treated as verified. Guest ownership and compatibility are labeled
-self-reported.
+refresh. **My games** defaults to owned multiplayer entries; untick its filters
+to browse the rest of your library. Detection uses available features/tags and
+saved multiplayer markers. It is an inference, not provider verification.
+
+For **one or two active players**, detected multiplayer is valid without entering
+exact limits. For larger groups, open **Game night → Needs attention** and choose
+**Approve for N players**, or select several games and approve them together.
+One person can approve for the current group without supplying extra metadata.
+That approval must be renewed if the number of players changes. Known saved or
+manually reported limits remain authoritative and cannot be bypassed by approval.
+
+![Two players with automatically eligible multiplayer games](../images/discord-game-night-automatic.jpg)
+
+Choose **Set known player limits** to enter a reusable minimum and maximum once
+for the room. Common ranges are available as buttons. These room details survive
+reconnects until room retention expiry; they do not write anyone's source library.
+If your platform is missing, the form asks only for your own platform. A valid
+Steam app ID infers **PC** when the platform is blank; an explicit platform wins.
+The host can disable small-group acceptance or Steam inference in room settings.
+Steam inference does not prove Windows/Mac/Linux support or crossplay.
+
+Ownership, platform, crossplay, session length, personal rules and vetoes still
+apply independently. People without games spectate without blocking by default.
+Guest ownership, room approvals and manually entered compatibility are self-reported.
+
+### Save multiplayer details in the tracking app
+
+On a game's **Overview**, choose **Edit multiplayer settings**. Tick **Playable
+with others** and save without extra data, or enable known limits and set both
+minimum and maximum. Duration and crossplay are optional. You can also use the
+ordinary game's Edit form. To update several games in one instance, select them
+in the library, open **Bulk Edit**, opt into **Apply multiplayer settings**, and
+review the replacement. Unchecked fields are untouched; leaving the playable
+marker unchecked explicitly clears saved multiplayer details.
+
+### Save selected games across linked instances
+
+In **Connections**, select **Request optional multiplayer settings access** and
+connect/reconnect each current source. Approve **Save your games' multiplayer
+settings** on its consent page. Existing grants never gain this permission
+automatically. It is separate from progress access and uses `compatibility.write`.
+
+In **My games**, select entries across pages and instances (up to 100). Choose
+**Edit selected multiplayer settings**, set a preset or clear it, expand the
+target review, and confirm the selected game records. A preset replaces those
+games' multiplayer details only. All selected sources must be connected and
+grant the new scope. Legacy keys remain read-only. Each game saves independently;
+the results list reports successes and source failures. Refresh the affected
+connections afterward. A failed source does not roll back successful saves.
 
 ![Two players in a DM with one participant's shared player-count confirmation](../images/discord-game-night-shared-limits.jpg)
 
@@ -279,7 +320,8 @@ use your tracking app to inspect further pages.
 | Room membership could not be verified | Join this exact instance; confirm configured server or permitted private-channel location |
 | Legacy connections disabled | Activity host's Integration access policy, then Save instance policy |
 | Owner must approve an origin | Approve the Activity host's actual HTTPS origin on the source, or enable its optional open requester policy |
-| Connected but no eligible games | Ownership/wishlist status, player counts, hard rules, source state and other participants' vetoes |
+| Connected but no eligible games | Expand Needs attention; check ownership, group approval, hard rules, source state and other participants' vetoes |
+| Bulk multiplayer Save disabled | Every selected source must grant compatibility.write; reconnect with multiplayer settings access and approve it |
 | Images unavailable | Public metadata may be absent or ambiguous; imported legacy artwork is not supported; readable fallback remains |
 | Source offline/revoked | Check the source's reachability and Connected apps grant/key, then refresh or reconnect |
 | Old UI after an update | Leave/reload/relaunch Discord so it fetches the versioned frontend assets |
@@ -290,3 +332,5 @@ For operators, read the [installation guide](../lifecycle/install.md) and
 [Activity guide](https://docs.discord.com/developers/activities/overview) describes
 current app visibility/testing requirements; launch availability depends on your
 Discord application settings as well as the installed plugin.
+
+See the [implementation and acceptance matrix](../architecture/discord-game-night.md) for the repository boundaries, current issue coverage and remaining release checks.
