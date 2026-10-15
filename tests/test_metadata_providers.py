@@ -27,7 +27,9 @@ def test_official_provider_registration_matches_exported_public_contract(source,
     schema = json.loads((ROOT / "tools/schemas/metadata-registration-v1.schema.json").read_text())
     jsonschema.validate(module.DECLARATION, schema)
     manifest = json.loads((source.parent / "manifest.json").read_text())
-    assert manifest["api_contract_version"] == "1.1.1"
+    assert manifest["api_contract_version"] == (
+        "1.1.13" if source.parent.name == "metadata-hltb" else "1.1.1"
+    )
     for action in module.DECLARATION["operations"].values():
         assert callable(getattr(module, action))
 
@@ -84,6 +86,17 @@ def test_interactive_does_not_retry_but_background_can_retry(monkeypatch):
     with pytest.raises(sdk.ProviderFailure):
         sdk.ProviderHttp({"policy": "background"}, "provider")("https://example.test")
     assert len(calls) == 4 and sleeps == [1, 2]
+
+
+def test_token_rejection_is_returned_to_the_provider_without_background_retries(monkeypatch):
+    calls = []
+    def rejected(*args, **kwargs):
+        calls.append(1)
+        raise sdk.ProviderFailure("unavailable", status=403)
+    monkeypatch.setattr(sdk, "network", rejected)
+    with pytest.raises(sdk.ProviderFailure) as caught:
+        sdk.ProviderHttp({"policy": "background"}, "provider")("https://example.test")
+    assert caught.value.status == 403 and calls == [1]
 
 
 

@@ -59,6 +59,7 @@ def main() -> None:
         MetadataProviderRegistration, MetadataProviderRequest, ProviderResponse,
     )
     from src.plugin_api.contracts import (
+        PLUGIN_API_CONTRACT_VERSION,
         Capability,
         PluginDependency,
         PluginManifest,
@@ -76,7 +77,7 @@ def main() -> None:
                         ("metadata-response-v1", ProviderResponse)):
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-        schema["x-api-contract-version"] = "1.1.1"
+        schema["x-api-contract-version"] = PLUGIN_API_CONTRACT_VERSION
         assert schema == json.loads((root / "tools/schemas" / f"{name}.schema.json").read_bytes()), name
     from src.plugin_api import (
         NotificationTypeRegistration, NotificationEventEmission,
@@ -166,7 +167,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12", "1.1.13"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):

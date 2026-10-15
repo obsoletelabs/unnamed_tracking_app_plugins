@@ -73,6 +73,30 @@ values mediated by the host. A background worker does not reserve future slots
 ahead of interactive work. Provider failures retain classifications without
 remote error bodies, URLs or secrets.
 
+### Completion estimates and HLTB (API 1.1.13)
+
+The updated HLTB source targets API 1.1.13. Its optional metadata fields add
+`time_to_beat_extras_hours`, `time_to_beat_completionist_hours` and
+`time_to_beat_all_hours` alongside existing Main story `time_to_beat_hours`.
+The three additions are finite, nonnegative hour values up to 99,999.9. Earlier
+Main-story-only payloads remain valid. Schema snapshots match the host's public
+models; no host imports or persistence logic are included in the SDK/plugin.
+
+HLTB obtains a public initialization token and sends it as `X-Auth-Token`, with
+the supported browser headers. One search 403 triggers one fresh initialization
+and retry. SDK background HTTP retries do not retry 403, leaving renewal to the
+provider. Other transient failures retain existing bounded retries and pacing.
+No response-cookie API, wider permissions or persisted search tokens are needed.
+The existing health action uses the same flow. Missing/invalid categories are
+omitted, and ambiguous title matches remain unresolved unless an HLTB ID is known.
+The host independently applies native IGDB values only where other completion
+estimate sources supply no useful figure.
+
+The source depends on [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).
+Direct token/search verification on 15 October 2026 succeeded for Portal; historical
+live observations below describe the older implementation. Development previews
+and final signed publication retain the normal package integrity and trust workflow.
+
 ## Validation and limitations
 
 Contract/unit fixtures verify mapping and failure behavior; they do not establish
@@ -111,7 +135,8 @@ The seven former core preview sources were transferred to the host at the user
 request. Their episode regressions moved to the host core suite. This repository
 retains nine optional providers: GOG, GiantBomb, RetroAchievements, ScreenScraper,
 HowLongToBeat, Kitsu, Jikan, TMDB and TVDB. No private host imports or embedded
-host runtime were added here. Plugin API 1.1.1 remains unchanged.
+host runtime were added here. That transfer kept Plugin API 1.1.1; the later
+completion-estimate additions above target API 1.1.13.
 
 After the transfer, the isolated host was verified with **zero installed plugins**
 and its plugin runtime stopped. Native Steam search, TVmaze search/details/artwork,
