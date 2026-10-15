@@ -1431,6 +1431,165 @@
         "official"
       ],
       "version": "0.6.2"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "aacb40ed61b4e4d9c79cc8bbb6ff4bf1a379e899f39b7bc95f2e85072ff3e8aa",
+        "source_path": "official/metadata-retroachievements",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+          "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
+        },
+        "manifest_version": 1,
+        "name": "RetroAchievements Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-retroachievements",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.7.0"
+      },
+      "package": {
+        "filename": "official.metadata-retroachievements-0.7.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 8421
+      },
+      "package_sha256": "4d0304fa727767b4100f75f0d057f7acdee7afa5ded5cdccc9d4b15d5cfe3359",
+      "plugin_id": "official.metadata-retroachievements",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+        "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
+      },
+      "tags": [
+        "metadata",
+        "retroachievements",
+        "official"
+      ],
+      "version": "0.7.0"
     }
   ],
   "version": 1

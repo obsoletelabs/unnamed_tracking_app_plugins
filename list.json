@@ -36078,11 +36078,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "be76405d5e40410b091fc9a9cb3355bb9366f7c36d6bcae70d41255616199c69",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "9b90235eddf9d19946fded9f0a02a9b9b05e47ae5c361623f68c1b8a8514e2f8",
         "source_path": "official/metadata-giantbomb",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -36172,8 +36172,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "2d5c20ae678d7035c23c18748510c6aa72feaf68e039fd3569565e67f75825ec",
-          "signature": "v2:zx7uB0Cn1fQzhvcSAgF+dxmFRwxFkrCpmEIi3Tb1JI/X7gMqYbgrU7i4s8wh7pan29qd4RqmiVv4EaHeGXs6Ag=="
+          "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
+          "signature": "v2:o8VATmQJ2y00kQ27Houoe7lqt7yM3/FYWS+CAQZ2cAfSG1DtiLgSXmuwSSvNSzE25RBPlbSNVw4VgaVAhjDoAA=="
         },
         "manifest_version": 1,
         "name": "GiantBomb Metadata Provider",
@@ -36243,15 +36243,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "GiantBomb Metadata Provider",
       "package": {
-        "filename": "official.metadata-giantbomb-0.6.2.utp",
+        "filename": "official.metadata-giantbomb-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8330
+        "size_bytes": 8420
       },
-      "package_sha256": "86e9eb618744aead1428a3a2ad77f249dd63f794580a0bc2c539886ad6d7f659",
+      "package_sha256": "904fd46c46357d17f22c89a9d79563a0b007d8ed6512fd3dd4e08edf09fd0026",
       "permissions": [
         {
           "capability": {
@@ -37747,14 +37747,174 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-giantbomb-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "9b90235eddf9d19946fded9f0a02a9b9b05e47ae5c361623f68c1b8a8514e2f8",
+            "source_path": "official/metadata-giantbomb",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
+              "signature": "v2:o8VATmQJ2y00kQ27Houoe7lqt7yM3/FYWS+CAQZ2cAfSG1DtiLgSXmuwSSvNSzE25RBPlbSNVw4VgaVAhjDoAA=="
+            },
+            "manifest_version": 1,
+            "name": "GiantBomb Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-giantbomb",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-giantbomb-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8420
+          },
+          "package_sha256": "904fd46c46357d17f22c89a9d79563a0b007d8ed6512fd3dd4e08edf09fd0026",
+          "plugin_id": "official.metadata-giantbomb",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# GiantBomb Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
+            "signature": "v2:o8VATmQJ2y00kQ27Houoe7lqt7yM3/FYWS+CAQZ2cAfSG1DtiLgSXmuwSSvNSzE25RBPlbSNVw4VgaVAhjDoAA=="
+          },
+          "tags": [
+            "metadata",
+            "giantbomb",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-giantbomb-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "2d5c20ae678d7035c23c18748510c6aa72feaf68e039fd3569565e67f75825ec",
+      "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "2d5c20ae678d7035c23c18748510c6aa72feaf68e039fd3569565e67f75825ec",
-        "signature": "v2:zx7uB0Cn1fQzhvcSAgF+dxmFRwxFkrCpmEIi3Tb1JI/X7gMqYbgrU7i4s8wh7pan29qd4RqmiVv4EaHeGXs6Ag=="
+        "sha256": "cb09af2eecd880b5fa241a8b90cc29511d9c8f321961a867c3d72354637ffa94",
+        "signature": "v2:o8VATmQJ2y00kQ27Houoe7lqt7yM3/FYWS+CAQZ2cAfSG1DtiLgSXmuwSSvNSzE25RBPlbSNVw4VgaVAhjDoAA=="
       },
       "source": {
         "lifecycle": "source",
@@ -37766,8 +37926,8 @@
         "giantbomb",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-giantbomb-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-giantbomb-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -37776,11 +37936,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "4280c91d0ce1c1155b7a49dff5e4a9a8ac265514754b29857dfc55febb4e4898",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "cd91cc16df32a5ee9be0e0f4d88d625a3dc09f12149f0117ee27c9eaad2fa305",
         "source_path": "official/metadata-gog",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -37862,8 +38022,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "13a2be2dc331ecee9c6497b4397009106ac9a4e418eda75d3726ca11ad898f80",
-          "signature": "v2:+WTLbiCX8eYYiPTJzzKtmjUhZ9Gd+cSOh9eFT3HNzXv3QxwbofQZMM2rtAE+uwJZLORorceBHw+DubTBcai2BA=="
+          "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
+          "signature": "v2:PaPNc8Y8WELGdxP1JKL/EtjcGYqaCjxfGTdlhGph+Vp73huSu+goUDb//te+U+jCqw5cLikSvgeXVCXe3F11Aw=="
         },
         "manifest_version": 1,
         "name": "GOG Metadata Provider",
@@ -37926,15 +38086,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "GOG Metadata Provider",
       "package": {
-        "filename": "official.metadata-gog-0.6.2.utp",
+        "filename": "official.metadata-gog-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8050
+        "size_bytes": 8134
       },
-      "package_sha256": "8072088c5178b2e89780f48600a3ba4cce0057cc4f69cea0bbee549539011e61",
+      "package_sha256": "f4e1f1be334be22923a789a2e128174bd9d79b0fb6633bd27c4a1ed9581a996b",
       "permissions": [
         {
           "capability": {
@@ -39324,14 +39484,163 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-gog-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "cd91cc16df32a5ee9be0e0f4d88d625a3dc09f12149f0117ee27c9eaad2fa305",
+            "source_path": "official/metadata-gog",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
+              "signature": "v2:PaPNc8Y8WELGdxP1JKL/EtjcGYqaCjxfGTdlhGph+Vp73huSu+goUDb//te+U+jCqw5cLikSvgeXVCXe3F11Aw=="
+            },
+            "manifest_version": 1,
+            "name": "GOG Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-gog",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-gog-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8134
+          },
+          "package_sha256": "f4e1f1be334be22923a789a2e128174bd9d79b0fb6633bd27c4a1ed9581a996b",
+          "plugin_id": "official.metadata-gog",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# GOG Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
+            "signature": "v2:PaPNc8Y8WELGdxP1JKL/EtjcGYqaCjxfGTdlhGph+Vp73huSu+goUDb//te+U+jCqw5cLikSvgeXVCXe3F11Aw=="
+          },
+          "tags": [
+            "metadata",
+            "gog",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-gog-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "13a2be2dc331ecee9c6497b4397009106ac9a4e418eda75d3726ca11ad898f80",
+      "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "13a2be2dc331ecee9c6497b4397009106ac9a4e418eda75d3726ca11ad898f80",
-        "signature": "v2:+WTLbiCX8eYYiPTJzzKtmjUhZ9Gd+cSOh9eFT3HNzXv3QxwbofQZMM2rtAE+uwJZLORorceBHw+DubTBcai2BA=="
+        "sha256": "5b7be5ffcc7817227ef038f8e0f79b7270c4a3fa68fef82c5deab858b66e24c8",
+        "signature": "v2:PaPNc8Y8WELGdxP1JKL/EtjcGYqaCjxfGTdlhGph+Vp73huSu+goUDb//te+U+jCqw5cLikSvgeXVCXe3F11Aw=="
       },
       "source": {
         "lifecycle": "source",
@@ -39343,8 +39652,8 @@
         "gog",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-gog-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-gog-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -39353,11 +39662,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "31c9fa8503e09b7966d0b6b5bfb33394fa762c6a2d2e24fbad6f3d3989d0c377",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "2540e65575b16f1679835834cb2de474089a1a65af93edb1bf6552077ea67b77",
         "source_path": "official/metadata-hltb",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -39402,7 +39711,7 @@
         "downloadable"
       ],
       "manifest": {
-        "api_contract_version": "1.1.1",
+        "api_contract_version": "1.1.13",
         "application_version_range": ">=0.0.1",
         "capabilities": [
           {
@@ -39431,8 +39740,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "09f0a0c2b7a7538662879664725c736d17e79ff46122f53c6cc7a7832db0f00b",
-          "signature": "v2:YT59QjfL8JrrZnR9XJfwPvJ/1uXmQM0ONpmuGazBzNAtkmrToOhA7dZudgidCcJTfkrRTsVj6gWGJHuuRT3qAQ=="
+          "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
+          "signature": "v2:X1fxY+QtSzzEBrqF/+EVoBZqKr69O6GhVtq7ppUJxomgv/iuOYh9S8+D7i0Jgtc/qQ4dH0Vo1KIpSIIr8YrWCQ=="
         },
         "manifest_version": 1,
         "name": "HowLongToBeat Metadata Provider",
@@ -39487,15 +39796,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "HowLongToBeat Metadata Provider",
       "package": {
-        "filename": "official.metadata-hltb-0.6.2.utp",
+        "filename": "official.metadata-hltb-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8045
+        "size_bytes": 9485
       },
-      "package_sha256": "c43ec8883084c8097f5e4f82208ee5f23c5aec47c93bd30101bf0de5238a4f48",
+      "package_sha256": "d155ef9faf379033dfde6f371bdd2fd58b26468721ed68dbfc2c3710fd449a7f",
       "permissions": [
         {
           "capability": {
@@ -39535,7 +39844,7 @@
       ],
       "plugin_id": "official.metadata-hltb",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# HowLongToBeat Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n",
       "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
       "releases": [
         {
@@ -40770,14 +41079,151 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "2540e65575b16f1679835834cb2de474089a1a65af93edb1bf6552077ea67b77",
+            "source_path": "official/metadata-hltb",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.13",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
+              "signature": "v2:X1fxY+QtSzzEBrqF/+EVoBZqKr69O6GhVtq7ppUJxomgv/iuOYh9S8+D7i0Jgtc/qQ4dH0Vo1KIpSIIr8YrWCQ=="
+            },
+            "manifest_version": 1,
+            "name": "HowLongToBeat Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-hltb",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-hltb-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 9485
+          },
+          "package_sha256": "d155ef9faf379033dfde6f371bdd2fd58b26468721ed68dbfc2c3710fd449a7f",
+          "plugin_id": "official.metadata-hltb",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
+            "signature": "v2:X1fxY+QtSzzEBrqF/+EVoBZqKr69O6GhVtq7ppUJxomgv/iuOYh9S8+D7i0Jgtc/qQ4dH0Vo1KIpSIIr8YrWCQ=="
+          },
+          "tags": [
+            "metadata",
+            "hltb",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "09f0a0c2b7a7538662879664725c736d17e79ff46122f53c6cc7a7832db0f00b",
+      "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "09f0a0c2b7a7538662879664725c736d17e79ff46122f53c6cc7a7832db0f00b",
-        "signature": "v2:YT59QjfL8JrrZnR9XJfwPvJ/1uXmQM0ONpmuGazBzNAtkmrToOhA7dZudgidCcJTfkrRTsVj6gWGJHuuRT3qAQ=="
+        "sha256": "2330ed296d85c6eabc78c22188f13b41c4d9cf04fe2b78f8992ee4992f10fb08",
+        "signature": "v2:X1fxY+QtSzzEBrqF/+EVoBZqKr69O6GhVtq7ppUJxomgv/iuOYh9S8+D7i0Jgtc/qQ4dH0Vo1KIpSIIr8YrWCQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -40789,8 +41235,8 @@
         "hltb",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -40799,11 +41245,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "d87f19e69764bb516d187daad0de1b045e6dbf59b9ef7da5dc2fa4d5a2da5eb1",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "7f25ed70d8d37fe1c6eb4299f95e00aec9590238513b14b7f9e2ddb577269fea",
         "source_path": "official/metadata-jikan",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -40893,8 +41339,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "533b29c5838510cba1da4d67cae61e87762d2e8579920f00b38ade1775be197b",
-          "signature": "v2:+Hd2fUHr8BIFozriifxocU+CSsVMhqq0x+Fnj7G/wOdxUZW6mDwxTRXTq5ig5LDBDoWzdXaewnBlsY0HdKnDAA=="
+          "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
+          "signature": "v2:W+CSPWb1UOROUMRu1wNmJ6q1rsn1Hpfz272TJhk9TLDZTDfJYIQf4r4mN9ZfD920CE6kBmDMc7m7uyEFwcu6DA=="
         },
         "manifest_version": 1,
         "name": "MyAnimeList Metadata Provider",
@@ -40965,15 +41411,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "MyAnimeList Metadata Provider",
       "package": {
-        "filename": "official.metadata-jikan-0.6.2.utp",
+        "filename": "official.metadata-jikan-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8659
+        "size_bytes": 8747
       },
-      "package_sha256": "4a7a7a7b33c4ce59d785e1f0e0fc5f3526a45ad6f92403ce12032ca0e76d79af",
+      "package_sha256": "f73feaf35800ad23764e81aa4948bca6acb1ab7fedd802bd495a2d147d47c43e",
       "permissions": [
         {
           "capability": {
@@ -42478,14 +42924,175 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-jikan-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "7f25ed70d8d37fe1c6eb4299f95e00aec9590238513b14b7f9e2ddb577269fea",
+            "source_path": "official/metadata-jikan",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
+              "signature": "v2:W+CSPWb1UOROUMRu1wNmJ6q1rsn1Hpfz272TJhk9TLDZTDfJYIQf4r4mN9ZfD920CE6kBmDMc7m7uyEFwcu6DA=="
+            },
+            "manifest_version": 1,
+            "name": "MyAnimeList Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-jikan",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-jikan-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8747
+          },
+          "package_sha256": "f73feaf35800ad23764e81aa4948bca6acb1ab7fedd802bd495a2d147d47c43e",
+          "plugin_id": "official.metadata-jikan",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# MyAnimeList Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
+            "signature": "v2:W+CSPWb1UOROUMRu1wNmJ6q1rsn1Hpfz272TJhk9TLDZTDfJYIQf4r4mN9ZfD920CE6kBmDMc7m7uyEFwcu6DA=="
+          },
+          "tags": [
+            "metadata",
+            "jikan",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-jikan-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "533b29c5838510cba1da4d67cae61e87762d2e8579920f00b38ade1775be197b",
+      "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "533b29c5838510cba1da4d67cae61e87762d2e8579920f00b38ade1775be197b",
-        "signature": "v2:+Hd2fUHr8BIFozriifxocU+CSsVMhqq0x+Fnj7G/wOdxUZW6mDwxTRXTq5ig5LDBDoWzdXaewnBlsY0HdKnDAA=="
+        "sha256": "59e2e9bfb8e296ccadca0488b2c8133770f72295b09d6bf6c6546c746e8b1e7e",
+        "signature": "v2:W+CSPWb1UOROUMRu1wNmJ6q1rsn1Hpfz272TJhk9TLDZTDfJYIQf4r4mN9ZfD920CE6kBmDMc7m7uyEFwcu6DA=="
       },
       "source": {
         "lifecycle": "source",
@@ -42497,8 +43104,8 @@
         "jikan",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-jikan-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-jikan-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -42507,11 +43114,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "34196ae6e726b3ecf7f3b311950208daea29b17e554e1b92fbf636ef4d5763a3",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "0d12c551393f483913238d354acfbc61a65ce45d467d852719c8ebd2cf67d76f",
         "source_path": "official/metadata-kitsu",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -42601,8 +43208,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "73272d14a80f9a6afeb7825cd2c92a7b16837bf8e0ebe9248cd3f234bf451c9e",
-          "signature": "v2:3w9mnLl9BvLPU/S88wYDdvr2Mc2nYj8lM1qSJOw47YZ3yC5JyD5jX46K0+FtF9/dKPEjAc9egm97e/JMc4gtAg=="
+          "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
+          "signature": "v2:rJV0no71/bfrn/YSNcUpp6M1iP2oTN380IhK2GsNv5UFbt+OlESkWeRJkTN54ROQcwN3RGRsDTmPxN8E++2uAw=="
         },
         "manifest_version": 1,
         "name": "Kitsu Metadata Provider",
@@ -42673,15 +43280,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "Kitsu Metadata Provider",
       "package": {
-        "filename": "official.metadata-kitsu-0.6.2.utp",
+        "filename": "official.metadata-kitsu-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8600
+        "size_bytes": 8689
       },
-      "package_sha256": "c948887d19c5dea2f5f74bd9d6fded409d087f0e6188358a473367c0b12d16ba",
+      "package_sha256": "386dc307b014cf83e714e752c6f48782b674fa8bce3d2ab62e07a81fa4995ef6",
       "permissions": [
         {
           "capability": {
@@ -44186,14 +44793,175 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-kitsu-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "0d12c551393f483913238d354acfbc61a65ce45d467d852719c8ebd2cf67d76f",
+            "source_path": "official/metadata-kitsu",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
+              "signature": "v2:rJV0no71/bfrn/YSNcUpp6M1iP2oTN380IhK2GsNv5UFbt+OlESkWeRJkTN54ROQcwN3RGRsDTmPxN8E++2uAw=="
+            },
+            "manifest_version": 1,
+            "name": "Kitsu Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-kitsu",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-kitsu-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8689
+          },
+          "package_sha256": "386dc307b014cf83e714e752c6f48782b674fa8bce3d2ab62e07a81fa4995ef6",
+          "plugin_id": "official.metadata-kitsu",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Kitsu Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
+            "signature": "v2:rJV0no71/bfrn/YSNcUpp6M1iP2oTN380IhK2GsNv5UFbt+OlESkWeRJkTN54ROQcwN3RGRsDTmPxN8E++2uAw=="
+          },
+          "tags": [
+            "metadata",
+            "kitsu",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-kitsu-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "73272d14a80f9a6afeb7825cd2c92a7b16837bf8e0ebe9248cd3f234bf451c9e",
+      "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "73272d14a80f9a6afeb7825cd2c92a7b16837bf8e0ebe9248cd3f234bf451c9e",
-        "signature": "v2:3w9mnLl9BvLPU/S88wYDdvr2Mc2nYj8lM1qSJOw47YZ3yC5JyD5jX46K0+FtF9/dKPEjAc9egm97e/JMc4gtAg=="
+        "sha256": "21a35ace7dbc55ea34654dad427c68980b0d613b1e604274b9becba8f157ea76",
+        "signature": "v2:rJV0no71/bfrn/YSNcUpp6M1iP2oTN380IhK2GsNv5UFbt+OlESkWeRJkTN54ROQcwN3RGRsDTmPxN8E++2uAw=="
       },
       "source": {
         "lifecycle": "source",
@@ -44205,8 +44973,8 @@
         "kitsu",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-kitsu-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-kitsu-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -44215,11 +44983,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "331367441257a6c24d7f73906356514c207ec1ecc1fa257b2be5af75d8aaa2b2",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "aacb40ed61b4e4d9c79cc8bbb6ff4bf1a379e899f39b7bc95f2e85072ff3e8aa",
         "source_path": "official/metadata-retroachievements",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -44309,8 +45077,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "9ab1169bda52f465afad2393e534f5871b0d636111d7040183d9d2dd3574fbe1",
-          "signature": "v2:itzAjQNcqbDIGVDHivLq2bI/nFqXBtWluG0BSYqyqgFZJ+7qx1kct8iiBW6O25jWpdQCvfkcCQIesWT1zl56Cw=="
+          "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+          "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
         },
         "manifest_version": 1,
         "name": "RetroAchievements Metadata Provider",
@@ -44380,15 +45148,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "RetroAchievements Metadata Provider",
       "package": {
-        "filename": "official.metadata-retroachievements-0.6.2.utp",
+        "filename": "official.metadata-retroachievements-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8340
+        "size_bytes": 8421
       },
-      "package_sha256": "7e1cdc86fee110178ffc99296cd1c4459a3785e6ff373b20bfbb56a7ab13ad12",
+      "package_sha256": "4d0304fa727767b4100f75f0d057f7acdee7afa5ded5cdccc9d4b15d5cfe3359",
       "permissions": [
         {
           "capability": {
@@ -45884,14 +46652,174 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "aacb40ed61b4e4d9c79cc8bbb6ff4bf1a379e899f39b7bc95f2e85072ff3e8aa",
+            "source_path": "official/metadata-retroachievements",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+              "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
+            },
+            "manifest_version": 1,
+            "name": "RetroAchievements Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-retroachievements",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-retroachievements-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8421
+          },
+          "package_sha256": "4d0304fa727767b4100f75f0d057f7acdee7afa5ded5cdccc9d4b15d5cfe3359",
+          "plugin_id": "official.metadata-retroachievements",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+            "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
+          },
+          "tags": [
+            "metadata",
+            "retroachievements",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "9ab1169bda52f465afad2393e534f5871b0d636111d7040183d9d2dd3574fbe1",
+      "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "9ab1169bda52f465afad2393e534f5871b0d636111d7040183d9d2dd3574fbe1",
-        "signature": "v2:itzAjQNcqbDIGVDHivLq2bI/nFqXBtWluG0BSYqyqgFZJ+7qx1kct8iiBW6O25jWpdQCvfkcCQIesWT1zl56Cw=="
+        "sha256": "f4d92558c61fe3798304be87889fefd38c59bbbfdbcee5f033ddb4a89fa024d9",
+        "signature": "v2:Jrv7p50mAW7dOnnYv7KeXmxXV+jicwP5WEbIb9VH3tLPHoPgnv/esIzfkalqZkata59lLZbu1vGZzZZfVav1BA=="
       },
       "source": {
         "lifecycle": "source",
@@ -45903,8 +46831,8 @@
         "retroachievements",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -45913,11 +46841,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "2d3597bba470ff23d6bcd4bf9a24ae75aeb57c28c4f0364a47fe93b9b25aedc1",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "4b551ada0fdd27a892f0443ccfb3e30965cc34a72d215f5f0fbb8aa061d7fade",
         "source_path": "official/metadata-screenscraper",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -45999,8 +46927,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "6e9095522da68934eccab714fdab31d0615c895da887d821b1ecdd05fa97af13",
-          "signature": "v2:IaopCVzW5kA8vC5WEs6JAxJTfx6v+3WzvyVENs5hTklyHtN6TAR/1RfbccXi5EWzwD/75GcnYHjgrsEUrf1KCg=="
+          "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
+          "signature": "v2:tvW/ncT0VhZqO+qMnHwT0Px3CTD9mzcdmgGGbopyL1mAxnl0eCtcAn0P7SXED/EoSo587g6i6L45YnnUYWoyAw=="
         },
         "manifest_version": 1,
         "name": "ScreenScraper Metadata Provider",
@@ -46062,15 +46990,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "ScreenScraper Metadata Provider",
       "package": {
-        "filename": "official.metadata-screenscraper-0.6.2.utp",
+        "filename": "official.metadata-screenscraper-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8140
+        "size_bytes": 8226
       },
-      "package_sha256": "93df29f29b38d8b65e97bd2db109340676aca5db312444c173ccddad1bbd025c",
+      "package_sha256": "815851877466d27d6a9b19a64a35e07f4b943c36b90aef56019bf1985f4cb98c",
       "permissions": [
         {
           "capability": {
@@ -47451,14 +48379,162 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-screenscraper-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "4b551ada0fdd27a892f0443ccfb3e30965cc34a72d215f5f0fbb8aa061d7fade",
+            "source_path": "official/metadata-screenscraper",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
+              "signature": "v2:tvW/ncT0VhZqO+qMnHwT0Px3CTD9mzcdmgGGbopyL1mAxnl0eCtcAn0P7SXED/EoSo587g6i6L45YnnUYWoyAw=="
+            },
+            "manifest_version": 1,
+            "name": "ScreenScraper Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-screenscraper",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-screenscraper-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8226
+          },
+          "package_sha256": "815851877466d27d6a9b19a64a35e07f4b943c36b90aef56019bf1985f4cb98c",
+          "plugin_id": "official.metadata-screenscraper",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# ScreenScraper Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three; artwork is requested only after selection. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
+            "signature": "v2:tvW/ncT0VhZqO+qMnHwT0Px3CTD9mzcdmgGGbopyL1mAxnl0eCtcAn0P7SXED/EoSo587g6i6L45YnnUYWoyAw=="
+          },
+          "tags": [
+            "metadata",
+            "screenscraper",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-screenscraper-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "6e9095522da68934eccab714fdab31d0615c895da887d821b1ecdd05fa97af13",
+      "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "6e9095522da68934eccab714fdab31d0615c895da887d821b1ecdd05fa97af13",
-        "signature": "v2:IaopCVzW5kA8vC5WEs6JAxJTfx6v+3WzvyVENs5hTklyHtN6TAR/1RfbccXi5EWzwD/75GcnYHjgrsEUrf1KCg=="
+        "sha256": "480e3ec5effb944cc6f08646b537b654eb19223cd606dd7bb1689ef661cea48a",
+        "signature": "v2:tvW/ncT0VhZqO+qMnHwT0Px3CTD9mzcdmgGGbopyL1mAxnl0eCtcAn0P7SXED/EoSo587g6i6L45YnnUYWoyAw=="
       },
       "source": {
         "lifecycle": "source",
@@ -47470,8 +48546,8 @@
         "screenscraper",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-screenscraper-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-screenscraper-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -47480,11 +48556,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "a927eb98e0b69780b0ebd71b637fceb59b8c3a1636ccf407f77616e5e7880114",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "07f0eba3d818fcd70d2bcf2494544209a583e55eb8d3f854c59da6a428f2ac84",
         "source_path": "official/metadata-tmdb",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -47582,8 +48658,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
-          "signature": "v2:5/MO+N5KDW5Sb446Kf5kWv/j+4xYDJXhlmwlZ75stMSL7qO+/drByRPZNYaz2peOu70fTv/i4uNUNgFHC4L1Ag=="
+          "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
+          "signature": "v2:ch8gJmMeiaZSyeAsr+7zNzCgJkhZXMFz5qgJHxDrqSgwG5W01ACKnn6dN0CyAqUaDF2OBpi6HCcNi3ZWKmwSBg=="
         },
         "manifest_version": 1,
         "name": "TMDB Metadata Provider",
@@ -47661,15 +48737,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "TMDB Metadata Provider",
       "package": {
-        "filename": "official.metadata-tmdb-0.6.2.utp",
+        "filename": "official.metadata-tmdb-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 9554
+        "size_bytes": 9636
       },
-      "package_sha256": "3c2fd7dfa01ed29a2123de9c81e709a4fcc235504f014f8b210d4ca6bc2c2e55",
+      "package_sha256": "cc8dc603ab90fd8b3459094166591d5fc039983963b146554e4fb25d9b871ac1",
       "permissions": [
         {
           "capability": {
@@ -49280,14 +50356,186 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tmdb-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "07f0eba3d818fcd70d2bcf2494544209a583e55eb8d3f854c59da6a428f2ac84",
+            "source_path": "official/metadata-tmdb",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
+              "signature": "v2:ch8gJmMeiaZSyeAsr+7zNzCgJkhZXMFz5qgJHxDrqSgwG5W01ACKnn6dN0CyAqUaDF2OBpi6HCcNi3ZWKmwSBg=="
+            },
+            "manifest_version": 1,
+            "name": "TMDB Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-tmdb",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-tmdb-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 9636
+          },
+          "package_sha256": "cc8dc603ab90fd8b3459094166591d5fc039983963b146554e4fb25d9b871ac1",
+          "plugin_id": "official.metadata-tmdb",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# TMDB Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
+            "signature": "v2:ch8gJmMeiaZSyeAsr+7zNzCgJkhZXMFz5qgJHxDrqSgwG5W01ACKnn6dN0CyAqUaDF2OBpi6HCcNi3ZWKmwSBg=="
+          },
+          "tags": [
+            "metadata",
+            "tmdb",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tmdb-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
+      "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "21805a6ef2c495f61006c3eb3a6ea7004fab19e838ed2a9fa6a7197e3369f39d",
-        "signature": "v2:5/MO+N5KDW5Sb446Kf5kWv/j+4xYDJXhlmwlZ75stMSL7qO+/drByRPZNYaz2peOu70fTv/i4uNUNgFHC4L1Ag=="
+        "sha256": "e8cffc8be7ca37a2fa46b9511ad138597dab5123e6b604123be7512600745b9b",
+        "signature": "v2:ch8gJmMeiaZSyeAsr+7zNzCgJkhZXMFz5qgJHxDrqSgwG5W01ACKnn6dN0CyAqUaDF2OBpi6HCcNi3ZWKmwSBg=="
       },
       "source": {
         "lifecycle": "source",
@@ -49299,8 +50547,8 @@
         "tmdb",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tmdb-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tmdb-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -49309,11 +50557,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "13aa04391a520d715944465ce029c8f8115cda07",
-        "source_committed_at": "2026-10-11T20:46:45+08:00",
-        "source_digest": "72eca7851b535fcec12dee6f65c004db1c6017cab80a2b0b55eb7f0f92137daf",
+        "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+        "source_committed_at": "2026-10-15T13:07:42+08:00",
+        "source_digest": "7053c2c1e2a7734a0f817c5691838afc6c212b11d10e0179953a4570f46be5c6",
         "source_path": "official/metadata-tvdb",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -49411,8 +50659,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
-          "signature": "v2:hE5RgxbmMHsi7O09EdYGGAlV4O5WgwTHbeNnmsM1Nbjl5qmR3QQQDRc3fsGLI/MivgHj2RAIXuQ5C8L7WxYLAg=="
+          "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
+          "signature": "v2:DqyuQoKqRUz6DJuQhy3ASyz788pKtZWY6G1fYCzv0wODQJEmFr5sQuFVueNkb805F86GA6ONLUyBGY1KLMtHCQ=="
         },
         "manifest_version": 1,
         "name": "TVDB Metadata Provider",
@@ -49490,15 +50738,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "name": "TVDB Metadata Provider",
       "package": {
-        "filename": "official.metadata-tvdb-0.6.2.utp",
+        "filename": "official.metadata-tvdb-0.7.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8884
+        "size_bytes": 8975
       },
-      "package_sha256": "7b0be2b1f37e012fc2d2a5781011ac167d07ccb6d1d4381c57d8adea5d86a547",
+      "package_sha256": "be22357f11a43816e4f0e3cedfaa8bd552f03caeea5136bcaf621afcaaa6319b",
       "permissions": [
         {
           "capability": {
@@ -51109,14 +52357,186 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tvdb-0.6.2.utp",
           "version": "0.6.2"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "0b6961fd9c7190ad7953179fd2d5727818e80a6c",
+            "source_committed_at": "2026-10-15T13:07:42+08:00",
+            "source_digest": "7053c2c1e2a7734a0f817c5691838afc6c212b11d10e0179953a4570f46be5c6",
+            "source_path": "official/metadata-tvdb",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Provider capabilities for progressive search, metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
+              "signature": "v2:DqyuQoKqRUz6DJuQhy3ASyz788pKtZWY6G1fYCzv0wODQJEmFr5sQuFVueNkb805F86GA6ONLUyBGY1KLMtHCQ=="
+            },
+            "manifest_version": 1,
+            "name": "TVDB Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations through permission-checked requests, scoped configuration and atomic provider-owned pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-tvdb",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.7.0"
+          },
+          "package": {
+            "filename": "official.metadata-tvdb-0.7.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 8975
+          },
+          "package_sha256": "be22357f11a43816e4f0e3cedfaa8bd552f03caeea5136bcaf621afcaaa6319b",
+          "plugin_id": "official.metadata-tvdb",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# TVDB Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant its declared permissions. Credentials are configured in the host-rendered provider settings and use the declared system or personal scope. Saved secrets stay hidden.\n\nSearch returns identities independently of metadata and artwork. Metadata is requested for the current top three; artwork starts after selection. Background refresh uses the same metadata contract for episodes, airing and relationships with its own bounded retry policy.\n\nBuild unsigned previews with `python tools/build_packages.py`. Preview installation requires explicit consent; signed releases use the existing publication workflow.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
+            "signature": "v2:DqyuQoKqRUz6DJuQhy3ASyz788pKtZWY6G1fYCzv0wODQJEmFr5sQuFVueNkb805F86GA6ONLUyBGY1KLMtHCQ=="
+          },
+          "tags": [
+            "metadata",
+            "tvdb",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tvdb-0.7.0.utp",
+          "version": "0.7.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
+      "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "89e1301113a108c4bcb3ebacd1ee2462d4cc1cf019c6762b79bc27940746b8c1",
-        "signature": "v2:hE5RgxbmMHsi7O09EdYGGAlV4O5WgwTHbeNnmsM1Nbjl5qmR3QQQDRc3fsGLI/MivgHj2RAIXuQ5C8L7WxYLAg=="
+        "sha256": "568f02dcec343d44609e2d5888ace04fb2bc2659310afcef479e7ad2bf2b0b03",
+        "signature": "v2:DqyuQoKqRUz6DJuQhy3ASyz788pKtZWY6G1fYCzv0wODQJEmFr5sQuFVueNkb805F86GA6ONLUyBGY1KLMtHCQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -51128,8 +52548,8 @@
         "tvdb",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tvdb-0.6.2.utp",
-      "version": "0.6.2"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-tvdb-0.7.0.utp",
+      "version": "0.7.0"
     },
     {
       "application_version_range": ">=1.0.0",
