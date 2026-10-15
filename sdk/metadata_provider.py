@@ -1,4 +1,4 @@
-"""Public Plugin API v1.1.1 metadata wire helpers, independent of the host source."""
+"""Public Plugin API v1.1.13 metadata wire helpers, independent of the host source."""
 
 from __future__ import annotations
 
@@ -102,7 +102,9 @@ class ProviderHttp:
             try:
                 return network(url, **options)
             except ProviderFailure as exc:
-                if exc.code not in {"rate_limited", "unavailable"}:
+                # Providers own token renewal. Retrying a rejected token here
+                # would multiply their explicitly bounded initialization flow.
+                if exc.status == 403 or exc.code not in {"rate_limited", "unavailable"}:
                     raise
                 delay = exc.retry_after if exc.retry_after is not None else 2 ** attempt
                 if exc.code == "rate_limited" and self.min_gap:
