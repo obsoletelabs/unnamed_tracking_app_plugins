@@ -28,6 +28,10 @@ def safe_action(handler):
     return invoke
 
 
+class NotConnected(epic.EpicError):
+    """The Epic account is gone, so a personal schedule has nothing to sync."""
+
+
 def actor(values):
     context = values.get("_plugin_context")
     if not isinstance(context, dict):
@@ -83,13 +87,15 @@ def session_for(user):
     key = "secrets/users/" + user
     session = load(key)
     if not session:
-        raise epic.EpicError("Connect your Epic account first.")
+        raise NotConnected("Connect your Epic account first.")
     if session["expires_at"] <= time.time() + 30:
         replacement = epic.token_pair(
             {"grant_type": "refresh_token", "refresh_token": session["refresh_token"]}
         )
         if replacement["account_id"] != session["account_id"]:
-            raise epic.EpicError("Epic returned a different account. Reconnect before importing.")
+            raise epic.EpicAuthRejected(
+                "Epic returned a different account. Reconnect before importing."
+            )
         # Persist the rotated refresh token before any inventory or host import work.
         store(key, replacement)
         session = replacement
@@ -293,13 +299,21 @@ def step(values):
         return public_status(user)
 
 
-@safe_action
-def sync(values):
-    """Run one checkpoint for either the Games menu or a personal host schedule."""
+STALE_CHECKPOINT_SECONDS = 6 * 3600
+RATE_LIMIT_RETRY_SECONDS = 300
+
+
+def _sync_once(values):
     current = public_status(actor(values))
     if not current["connected"]:
-        raise epic.EpicError("Connect your Epic account first.")
-    if current["phase"] in {"idle", "complete"}:
+        raise NotConnected("Connect your Epic account first.")
+    stale = (
+        current["phase"] not in {"idle", "complete"}
+        and time.time() - (current["updated_at"] or 0) > STALE_CHECKPOINT_SECONDS
+    )
+    if stale or current["phase"] in {"idle", "complete"}:
+        # An old walk could resume from an expired cursor. Availability is only ever
+        # changed by a walk that finishes in one run of checkpoints, so begin again.
         start.__wrapped__(values)
     current = step.__wrapped__(values)
     completed = current["phase"] == "complete"
@@ -307,9 +321,30 @@ def sync(values):
         **current,
         "completed": completed,
         "summary": f"Epic sync complete: {current['imported']} games saved."
-        if completed else f"Epic sync saved at {current['phase']}. The next step will resume automatically.",
+        if completed
+        else f"Epic sync saved at {current['phase']}. The next step will resume automatically.",
         **({} if completed else {"continue_after_seconds": 60}),
     }
+
+
+def sync(values):
+    """Run one checkpoint for either the Games menu or a personal host schedule.
+
+    Failures return a public `summary` and, when useful, host scheduling hints:
+    `retry_after_seconds` for Epic rate limits and `disable_schedule` once the account is
+    disconnected or Epic rejects the saved sign-in. The inventory checkpoint is retained."""
+    try:
+        return _sync_once(values)
+    except GatewayRequestError:
+        message = "The host denied or could not complete this action. Check plugin permissions, then retry."
+        return {"ok": False, "error": message, "completed": False, "summary": message}
+    except epic.EpicError as exc:
+        hints = {}
+        if isinstance(exc, epic.EpicRateLimited):
+            hints["retry_after_seconds"] = RATE_LIMIT_RETRY_SECONDS
+        elif isinstance(exc, (NotConnected, epic.EpicAuthRejected)):
+            hints["disable_schedule"] = True
+        return {"ok": False, "error": str(exc), "completed": False, "summary": str(exc), **hints}
 
 
 def main():

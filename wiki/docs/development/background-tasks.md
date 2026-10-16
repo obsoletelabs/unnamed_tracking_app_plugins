@@ -49,6 +49,20 @@ enabled. Return `completed: true` after the final checkpoint to restore the user
 chosen interval. Returning a failure without a delay waits for that interval.
 Epic Games uses the same `sync` action for its Games menu and personal schedule.
 
+A failing personal step may add two optional scheduling hints next to `completed: false`
+and a public `summary`. Hosts that do not know them ignore them:
+
+* `retry_after_seconds`: the provider is rate limiting; the host waits at least this long
+  (clamped to 60–3600 seconds) instead of its shorter failure backoff.
+* `disable_schedule: true`: the account was disconnected or the provider rejected the saved
+  sign-in. The host turns the owner's schedule off; the user enables it again after
+  reconnecting. Keep the checkpoint; do not delete records.
+
+Only mark items unavailable after one walk that finished its whole inventory, and restart
+a checkpoint that is too old to trust (Epic restarts after six hours). The host adds
+Pause, Resume and Cancel, a durable no-overlap lease, retry backoff, last successful
+and next run times; a plugin only has to make each step bounded and resumable.
+
 ## Goal
 
 Have an action record durable work for one supervised worker.
