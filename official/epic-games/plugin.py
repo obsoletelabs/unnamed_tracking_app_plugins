@@ -237,7 +237,8 @@ def import_step(user, state):
                 }
                 state["imported"] += 1
         store(known_key, known)
-    state["pending"] = [i for i in state["pending"] if i not in state["batch_ids"]]
+    batch_ids = set(state["batch_ids"])
+    state["pending"] = [i for i in state["pending"] if i not in batch_ids]
     state.pop("batch", None)
     state.pop("batch_ids", None)
     state["phase"] = "catalogue"

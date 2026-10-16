@@ -137,7 +137,8 @@ def dispatch(values):
             found = sorted(store.records(user, "cards"), key=lambda item: item.get("archive_number") or 0)
             for field in ("game_id", "set_id"):
                 if query.get(field):
-                    found = [item for item in found if item.get(field) == store.identifier(query[field][0])]
+                    wanted = store.identifier(query[field][0])
+                    found = [item for item in found if item.get(field) == wanted]
             return paginate(found, query)
         if len(segments) == 1 and method == "POST":
             result, status = cards.create(user, body), 201
@@ -154,7 +155,15 @@ def dispatch(values):
             raise store.ArchiveError("Card operation not found.", 404)
     elif resource == "sets":
         if len(segments) == 1 and method == "GET":
-            found = [cards.set_read(user, item["id"]) for item in sorted(store.records(user, "sets"), key=lambda item: item["name"])]
+            # Count cards once instead of re-reading every card for each set.
+            counts: dict = {}
+            for card in store.records(user, "cards"):
+                counts[card.get("set_id")] = counts.get(card.get("set_id"), 0) + 1
+            found = []
+            for item in sorted(store.records(user, "sets"), key=lambda item: item["name"]):
+                count, target = counts.get(item["id"], 0), item.get("target_total")
+                found.append({**item, "card_count": count,
+                              "is_complete": bool(target is not None and count >= target)})
             return paginate(found, query)
         if len(segments) == 1 and method == "POST":
             result, status = cards.set_save(user, body), 201
