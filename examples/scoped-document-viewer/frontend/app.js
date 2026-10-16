@@ -610,7 +610,8 @@ moreButton.onclick = () => {
 window.addEventListener("beforeunload", clearViewer);
 async function initialize() {
   try {
-    await loadSettings();
+    // A settings failure keeps the default (unlimited) preview limit instead of disabling the reader.
+    await loadSettings().catch(() => {});
     const context = await pluginRequest("plugin.context");
     if (context.document_id) {
       if (

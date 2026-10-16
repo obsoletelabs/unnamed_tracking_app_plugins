@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-import os
+import sys
 import time
-from pathlib import Path
 
 from sdk.plugin_protocol import request
 
@@ -17,6 +16,8 @@ def announce_page(values: dict) -> bool:
             context = json.loads(context)
         except json.JSONDecodeError:
             context = {}
+    if not isinstance(context, dict):
+        context = {}
     page = context.get("page_title") or context.get("page_id") or "Unknown page"
     path = context.get("path") or "/"
     # Ask the host runtime to deliver the message. The runtime reads the
@@ -34,6 +35,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if len(os.sys.argv) > 1 and os.sys.argv[1] == "announce":
-        raise SystemExit(0 if announce_page(json.load(os.sys.stdin)) else 1)
+    if len(sys.argv) > 1 and sys.argv[1] == "announce":
+        raise SystemExit(0 if announce_page(json.load(sys.stdin)) else 1)
     main()

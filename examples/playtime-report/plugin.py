@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import heapq
+import json
 import time
 
 from sdk.plugin_protocol import request
+
+PLAYTIME_KEYS = ("playtime_minutes", "total_playtime_minutes", "playtime")
 
 
 def _number(game: dict, *keys: str) -> float:
@@ -23,22 +27,16 @@ def refresh(values: dict) -> dict:
     result = request("games.list", "games.read", {"limit": 500})
     games = list(result.get("games", result.get("items", [])))
 
-    total_minutes = sum(
-        _number(game, "playtime_minutes", "total_playtime_minutes", "playtime")
-        for game in games
-    )
-    ranked = sorted(
-        games,
-        key=lambda game: _number(game, "playtime_minutes", "total_playtime_minutes", "playtime"),
-        reverse=True,
-    )
+    # Parse each game's playtime once; nlargest matches sorted(reverse=True)[:10], ties included.
+    scored = [(_number(game, *PLAYTIME_KEYS), game) for game in games]
+    total_minutes = sum(minutes for minutes, _ in scored)
 
     top_games = [
         {
             "name": str(game.get("name") or game.get("title") or "Unknown game"),
-            "minutes": int(_number(game, "playtime_minutes", "total_playtime_minutes", "playtime")),
+            "minutes": int(minutes),
         }
-        for game in ranked[:10]
+        for minutes, game in heapq.nlargest(10, scored, key=lambda pair: pair[0])
     ]
 
     request(
@@ -46,7 +44,7 @@ def refresh(values: dict) -> dict:
         "plugin.storage",
         {
             "key": f"users/{user_id}/latest-report",
-            "value": __import__("json").dumps(
+            "value": json.dumps(
                 {
                     "game_count": len(games),
                     "total_minutes": int(total_minutes),

@@ -23,11 +23,8 @@ def _max_preview_bytes() -> int:
 def get_settings(values: dict[str, Any]) -> dict[str, Any]:
     """Return the persisted non-secret viewer settings."""
     del values
-    result = request("settings.get", "plugin.settings", {"key": "max_preview_mb"})
-    value = result.get("value", 0)
-    if type(value) is not int or value < 0:
-        value = 0
-    return {"value": value}
+    # Share the enforcement path so the UI never shows a different limit (e.g. 5.0 vs 0).
+    return {"value": _max_preview_bytes() // (1024 * 1024)}
 
 
 def list_documents(values: dict[str, Any]) -> dict[str, Any]:
@@ -58,14 +55,13 @@ def read_document(values: dict[str, Any]) -> dict[str, Any]:
     requested_max = values.get("max_bytes")
     max_bytes = requested_max if type(requested_max) is int and requested_max >= 0 else _max_preview_bytes()
     payload: dict[str, Any] = {"document_id": document_id, "chunk_bytes": 24 * 1024, "max_bytes": max_bytes}
-    if any(key in values for key in ("chunk_bytes", "offset", "content_sha256")):
-        payload.update(
-            {
-                key: values[key]
-                for key in ("chunk_bytes", "offset", "content_sha256")
-                if key in values
-            }
-        )
+    payload.update(
+        {
+            key: values[key]
+            for key in ("chunk_bytes", "offset", "content_sha256")
+            if key in values
+        }
+    )
     return request("documents.read", "documents.read", payload)
 
 
