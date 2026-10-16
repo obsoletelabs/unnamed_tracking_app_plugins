@@ -8,7 +8,7 @@ It provides four pages, a private Discord webhook setting, and an **Announce thi
 
 The manifest requests `plugin.storage` and `notifications.send`.
 
-The webhook is **not** stored in `ui.json` or ordinary plugin settings. The frontend sends it to the host's secret API, which stores it as `secrets/discord_webhook` in the plugin's private persistent data directory. The runtime gives the plugin action access to that directory as `PLUGIN_DATA_DIR`; the action reads the webhook from there when it sends an announcement.
+The webhook is **not** stored in `ui.json` or ordinary plugin settings. The frontend sends it to the host's secret API, which stores it as `secrets/discord_webhook` in the plugin's private persistent data directory. The announce action never reads or echoes the webhook: it emits a Discord announcement request and the host runtime delivers it using the stored secret.
 
 Plugin storage is private to the plugin runtime, quota-limited, path-confined, and written with owner-only file permissions. The frontend does not put the webhook in browser localStorage/sessionStorage.
 
@@ -23,9 +23,9 @@ After installation and permission approval, open **Settings → Plugins → Plug
 | Page | What to look for |
 | --- | --- |
 | **Overview** | The first/default tab; confirms the custom Vue frontend loaded. |
-| **Library** | Example filter controls and filtered sample rows; changing filters should immediately change the table. |
-| **Details** | Plugin/frontend/storage/action information. |
-| **Diagnostics** | Frontend bridge, page-count, filter, and secret-API smoke-test information. |
+| **Library** | Plugin-rendered page showing its own page id; used to check tab switching. |
+| **Details** | Plugin-rendered page showing its own page id; used to check tab switching. |
+| **Diagnostics** | Plugin-rendered page showing its own page id; used to check tab switching. |
 
 The **Discord announcement** controls appear below the current page. Enter a webhook, choose **Save webhook securely**, then use **Announce this page**. The action receives the current page context, so changing tabs and announcing should produce a different page name.
 

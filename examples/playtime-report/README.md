@@ -18,5 +18,5 @@ It demonstrates a normal plugin pattern:
 
 It does not implement game storage, lifecycle management, or the plugin gateway itself.
 
-Build/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).
+Build/test and release instructions are in the [author guide](../../wiki/docs/plugin-author-guide.md).
 The package includes this README, release-specific policy/tags and an icon.

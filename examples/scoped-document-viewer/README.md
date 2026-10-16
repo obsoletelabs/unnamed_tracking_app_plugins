@@ -73,7 +73,7 @@ Browser tests run the actual assets in the host's opaque sandbox/CSP and verify 
 python tools/check_document_parity.py --reference /path/to/pr241-checkout --host /path/to/updated-host
 ```
 
-See the [validation report](../../docs/scoped-document-viewer-validation.md) for recorded results, baseline static-check failures, and environment limitations.
+See the [validation report](../../wiki/docs/scoped-document-viewer-validation.md) for recorded results, baseline static-check failures, and environment limitations.
 
 `tools/vendor_document_libraries.py` reproducibly downloads the pinned upstream libraries (PDF.js 5.6.205, DOMPurify 3.4.14, js-sha256 0.11.1, fflate 0.8.3), checks npm SHA-512 archive integrity against `vendor-lock.json`, and records packaged-file SHA-256 hashes and licenses. Classic-script wrappers allow the libraries to run in an opaque origin without module CORS or worker/network privileges. PDF.js uses its in-process worker implementation.
 
