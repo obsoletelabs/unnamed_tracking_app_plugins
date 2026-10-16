@@ -92,6 +92,14 @@
 .office-italic {
   font-style: italic;
 }
+.office-object {
+  display: block;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px dashed var(--ui-border-strong);
+  border-radius: 5px;
+  font-style: italic;
+}
 .office-slide {
   border: 1px solid #cad2dd;
   border-radius: 6px;

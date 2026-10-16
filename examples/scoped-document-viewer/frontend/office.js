@@ -47,14 +47,12 @@
         parts.includes("..") ||
         names.has(name.toLowerCase()) ||
         parts.some((part) =>
-          [
-            "vbaproject.bin",
-            "scripts",
-            "basic",
-            "activex",
-            "embeddings",
-          ].includes(part),
-        )
+          ["vbaproject.bin", "scripts", "basic", "activex"].includes(part),
+        ) ||
+        // Charts keep their data in a macro-free embedded package, which is
+        // never opened; OLE objects and macro-enabled packages stay refused.
+        (parts.includes("embeddings") &&
+          !/\.(xlsx|docx|pptx)$/i.test(decoded))
       )
         throw new Error("Active or unsafe office archive.");
       names.add(name.toLowerCase());
@@ -199,6 +197,18 @@
     image.loading = "lazy";
     target.append(image);
   }
+  function placeholders(node, target) {
+    const objects =
+      descendants(node, "chart").length +
+      descendants(node, "OLEObject").length +
+      descendants(node, "oleObj").length;
+    for (let index = 0; index < objects; index++) {
+      const note = document.createElement("span");
+      note.className = "office-object";
+      note.textContent = "Chart or embedded object not shown in preview";
+      target.append(note);
+    }
+  }
   function wordBlocks(node, target, files, links) {
     for (const child of children(node)) {
       if (child.localName === "p") {
@@ -225,6 +235,7 @@
         }
         for (const blip of descendants(child, "blip"))
           image(files, links.get(attribute(blip, "embed")), paragraph);
+        placeholders(child, paragraph);
         target.append(paragraph);
       } else if (child.localName === "tbl") {
         const table = document.createElement("table");
@@ -327,6 +338,7 @@
       const media = relationships(files, path);
       for (const blip of descendants(slide, "blip"))
         image(files, media.get(attribute(blip, "embed")), section);
+      placeholders(slide, section);
       target.append(section);
     }
   }

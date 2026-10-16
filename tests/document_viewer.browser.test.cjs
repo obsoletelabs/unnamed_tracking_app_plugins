@@ -649,6 +649,11 @@ for (const [label, addition] of [
     },
   ],
   ["malformed XML", { "word/document.xml": "<broken" }],
+  ["OLE objects", { "word/embeddings/oleObject1.bin": "object" }],
+  [
+    "macro-enabled embedded packages",
+    { "word/embeddings/Microsoft_Excel_Macro-Enabled.xlsm": "object" },
+  ],
 ])
   test(`office ${label} is rejected without active rendering`, async () => {
     const { page, frame, requests } = await openFixture({
@@ -753,3 +758,35 @@ test("unlimited previews render text beyond the legacy five MiB ceiling", async 
   assert.ok(reads.every((call) => call.payload.values.max_bytes === 0));
   await page.close();
 });
+
+for (const format of ["docx", "pptx"])
+  test(`${format} charts keep their embedded workbook and show a placeholder`, async () => {
+    const C = "http://schemas.openxmlformats.org/drawingml/2006/chart";
+    const chart = `<a:graphic xmlns:a="${A}"><a:graphicData><c:chart xmlns:c="${C}" r:id="chart"/></a:graphicData></a:graphic>`;
+    const additions =
+      format === "docx"
+        ? {
+            "word/document.xml": `<w:document xmlns:w="${W}" xmlns:r="${R}"><w:body><w:p><w:r><w:t>Sales</w:t></w:r><w:r><w:drawing>${chart}</w:drawing></w:r></w:p></w:body></w:document>`,
+            "word/charts/chart1.xml": "<chartSpace/>",
+            "word/embeddings/Microsoft_Excel_Worksheet.xlsx": "workbook",
+          }
+        : {
+            "ppt/slides/slide1.xml": `<p:sld xmlns:p="${P}" xmlns:a="${A}" xmlns:r="${R}"><p:cSld><p:spTree><p:graphicFrame>${chart}</p:graphicFrame></p:spTree></p:cSld></p:sld>`,
+            "ppt/charts/chart1.xml": "<chartSpace/>",
+            "ppt/embeddings/Microsoft_Excel_Worksheet.xlsx": "workbook",
+          };
+    const { page, frame, errors } = await openFixture({
+      filename: `charts.${format}`,
+      bytes: officeFixture(format, additions),
+      format,
+      mediaType: OFFICE_TYPES[format],
+    });
+    await frame.locator(".office-document").waitFor();
+    assert.equal(await frame.locator(".office-object").count(), 1);
+    assert.match(
+      await frame.locator(".office-object").textContent(),
+      /Chart or embedded object not shown/,
+    );
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
