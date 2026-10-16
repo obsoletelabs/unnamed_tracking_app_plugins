@@ -18,13 +18,22 @@ The popup uses the host's appearance and spacing, with an account summary and
 import controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the
 app open. If clipboard access is unavailable, copy the selected link manually.
 Alternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so
-the host validates Epic's returned HTTPS destination and navigates the host tab;
-the sandboxed plugin does not open a popup itself. After signing in, use browser
-Back to return to the plugin page, then paste the one-time authorization code,
-JSON page or redirect URL into the password field. No popup permission is needed.
-The host opens the declared Epic sign-in destination outside the sandbox. Your
+the host validates Epic's returned HTTPS destination and opens it in a new tab,
+leaving this popup open; the sandboxed plugin does not open a popup itself.
+After signing in, Epic shows a page of text. Select all of it, copy it and paste
+it into the code field: pasting the whole page connects without another click.
+The one-time authorization code, its JSON page, a single copied JSON line or the
+redirect URL are all accepted. Hosts that predate new-tab handling, or a browser
+that blocks the tab, navigate the host tab instead; then use browser Back and
+reopen **Connections → Epic Games**. No popup permission is needed. Your
 password stays on Epic's site. The code is cleared immediately after submission
 and is never saved in settings.
+
+If Epic later rejects the saved sign-in (for example after a password change),
+the popup shows the code field again. **Replace sign-in** does the same at any
+time. The existing connection stays until Epic accepts the new code; an
+accepted replacement then starts a fresh import checkpoint, and games already
+imported stay in your library.
 
 Launcher access/refresh tokens are validated independently from the 32-character
 account ID and bounded to 8 KiB. Hosts must support authorization headers larger

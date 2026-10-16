@@ -9,9 +9,9 @@
 <main>
   <section aria-label="Epic account">
     <p id="account" class="hint" role="status">Checking connection…</p>
-    <button id="disconnect" class="ghost" type="button" hidden>Disconnect Epic</button>
-    <div id="connect-panel">
-      <p>Sign in on Epic, copy the one-time code or JSON it shows, then paste it here.</p>
+    <div id="account-actions" class="toolbar" hidden><button id="reconnect" class="ghost" type="button" hidden>Replace sign-in</button><button id="disconnect" class="ghost" type="button" hidden>Disconnect Epic</button></div>
+    <div id="connect-panel" hidden>
+      <p>Sign in on Epic Games. Epic then shows a page of text: select all of it (Ctrl+A or Cmd+A), copy it and paste it below. Epic warns not to share that code; it is expected here, because the code only goes to this app's server. It expires after a few minutes.</p>
       <button id="signin" type="button">Sign in on Epic Games</button>
       <details><summary>Use your regular browser</summary><div class="signin-link"><label for="signin-url">Epic sign-in link</label><input id="signin-url" type="url" readonly spellcheck="false"><button id="copy-signin" class="ghost" type="button" disabled>Copy sign-in link</button><p id="copy-status" class="muted" role="status" aria-live="polite"></p></div></details>
       <form id="connect-form"><label for="code">Epic authorization code</label><input id="code" type="password" autocomplete="off" spellcheck="false" maxlength="8192" placeholder="One-time code or JSON"><button id="connect" type="button">Connect Epic</button></form>
