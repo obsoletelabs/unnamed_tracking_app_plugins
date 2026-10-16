@@ -45,7 +45,7 @@ def build(root: Path, output: Path) -> list[dict]:
         records.append({"plugin_id": manifest["plugin_id"], "version": version,
             "package": package.name, "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
             "source_digest": fingerprint, "source_commit": commit, "signed": False})
-    (output / "index.json").write_text(json.dumps(records, indent=2) + "\n")
+    (output / "index.json").write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
     (output / "README.md").write_text(
         "# Unsigned branch previews\n\n"
         f"Source commit: `{commit}`. Each .utp is built from this branch's current source. "
@@ -53,7 +53,7 @@ def build(root: Path, output: Path) -> list[dict]:
         "In Administration → Plugins → Install, upload the chosen .utp. Review its "
         "permissions, explicitly allow the untrusted preview, and reauthenticate if asked. "
         "An older version is pinned and automatic updates are disabled by the host. "
-        "Keep it pinned while testing; use the normal update review to return to a verified release.\n")
+        "Keep it pinned while testing; use the normal update review to return to a verified release.\n", encoding="utf-8")
     return records
 
 
