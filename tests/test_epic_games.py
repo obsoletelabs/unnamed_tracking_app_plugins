@@ -221,10 +221,31 @@ def test_status_reports_only_connected_flag_and_account_name(service):
         json.dumps({"authorizationCode": CODE}),
         json.dumps({"redirectUrl": "https://www.epicgames.com/id/api/redirect?code=" + CODE}),
         "https://www.epicgames.com/id/api/redirect?code=" + CODE,
+        # Partial copies of Epic's JSON page still carry the code.
+        f'"authorizationCode": "{CODE}",',
+        f"authorizationCode\t{CODE}\nredirectUrl\thttps://localhost/launcher/authorized?code={CODE}",
+        (
+            f'{{"warning":"Do not share this code","redirectUrl":"https://localhost/?code={CODE}",'
+            f'"authorizationCode":"{CODE}","sid":null'
+        ),
     ],
 )
 def test_authorization_code_formats_are_validated(service, value):
     assert service.epic.code_from(value) == CODE
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        # The sign-in link holds only the public client ID, never a code.
+        lambda epic: epic.LOGIN_URL,
+        # Two different candidates are ambiguous rather than guessed.
+        lambda epic: f"{CODE} {'c' * 32}",
+    ],
+)
+def test_ambiguous_or_codeless_pastes_are_rejected(service, value):
+    with pytest.raises(service.epic.EpicError):
+        service.epic.code_from(value(service.epic))
 
 
 @pytest.mark.parametrize(

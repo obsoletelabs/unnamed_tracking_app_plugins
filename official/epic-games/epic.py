@@ -30,6 +30,7 @@ LOGIN_URL = "https://www.epicgames.com/id/login?" + urlencode(
     }
 )
 IDENTIFIER = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
+CODE_CANDIDATE = re.compile(r"(?<![0-9A-Fa-f])[0-9A-Fa-f]{32}(?![0-9A-Fa-f])")
 MAX_TOKEN_LENGTH = 8192
 MAX_REFRESH_INTERVAL = 86400
 NON_GAME = {"addons", "digitalextras", "plugins", "engines"}
@@ -51,9 +52,20 @@ def code_from(raw):
             value = ""
     if isinstance(value, str) and "code=" in value:
         value = parse_qs(urlsplit(value).query).get("code", [""])[0]
-    if not isinstance(value, str) or not re.fullmatch(r"[0-9a-fA-F]{32}", value.strip()):
-        raise EpicError("Paste the 32-character authorization code, its JSON page or redirect URL.")
-    return value.strip()
+    if isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{32}", value.strip()):
+        return value.strip()
+    # Partial copies (one line of the JSON page, a browser JSON viewer's table)
+    # still carry the code. Epic repeats the same code in redirectUrl, so accept
+    # exactly one distinct candidate; the public client ID in a pasted sign-in
+    # link is never a code.
+    candidates = {
+        found
+        for found in CODE_CANDIDATE.findall(raw)
+        if found.lower() != CLIENT_ID
+    }
+    if len(candidates) == 1:
+        return candidates.pop()
+    raise EpicError("Paste the 32-character authorization code, its JSON page or redirect URL.")
 
 
 def http(url, *, token=None, form=None):
