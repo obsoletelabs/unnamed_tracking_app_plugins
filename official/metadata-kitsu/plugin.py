@@ -59,11 +59,12 @@ def metadata(values):
                     for entry in result.get("data", []) if isinstance(entry.get("attributes", {}).get("number"), int)]
         return {"metadata": {"episodes": episodes}, "next_cursor": str(offset + 20) if (result.get("links") or {}).get("next") else None}
     attributes = item["attributes"]
+    candidate = identity(item)
     return {"metadata": {
-        "title": identity(item)["title"], "release_date": attributes.get("startDate"),
+        "title": candidate["title"], "release_date": attributes.get("startDate"),
         "description": attributes.get("synopsis"), "episode_count": attributes.get("episodeCount"),
         "episode_runtime_minutes": attributes.get("episodeLength"), "format": attributes.get("subtype"),
-        "provider_ids": identity(item)["provider_ids"], "alternate_titles": identity(item)["alternate_titles"],
+        "provider_ids": candidate["provider_ids"], "alternate_titles": candidate["alternate_titles"],
         "airing": {"is_airing": attributes.get("status") == "current", "total_episodes": attributes.get("episodeCount"),
                    "status": {"current": "ongoing", "finished": "completed"}.get(attributes.get("status"), "unknown")},
     }}
