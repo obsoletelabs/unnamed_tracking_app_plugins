@@ -2,7 +2,7 @@
 
 PRIVATE direct messages, optional host-verified SECURE recovery, and PUBLIC channel notifications using a dedicated Discord bot.
 
-**Host requirement:** use a host with Plugin API 1.1.11 for the current generic provider and native configuration UI. Older hosts may reject registration or lack the required settings integrations. The updated source requires the independent destination-status read permission; transport and secrets remain plugin-owned.
+**Host requirement:** use a host with Plugin API 1.1.14 (rich embeds, edits and follow-ups; 1.1.11 is enough for the generic provider and native configuration UI only). Older hosts may reject registration or lack the required settings integrations. The updated source requires the independent destination-status read permission; transport and secrets remain plugin-owned.
 
 ## Per-account destinations
 
@@ -153,3 +153,34 @@ private-channel kind, with a valid channel and exact connected member. Guild
 rooms remain restricted to the configured server. Saving this policy can retain
 the existing secret by leaving its field blank for the same application ID.
 Private Activity participation is separate from notification DM enrollment.
+
+## Rich batches and editable story messages (host Plugin API 1.1.14)
+
+The per-account DM and server-channel providers declare presentation capabilities and an edit
+action (`edit-account`, `edit-channel`). `sdk/discord_embeds.py` renders host-approved facts,
+images, links and action links as embeds with link buttons (the live story page first, at most 5),
+a digest of up to 8 items as one message (one embed per item, "And N more" plus the story link
+beyond that) and keeps every message inside Discord's limits (10 embeds, 6,000 characters in
+total, 256/4,096/1,024 for title/description/field value, 25 fields). Truncation is
+deterministic; mentions never notify; only http(s) links survive.
+
+* **Message references.** A created message is returned to the host as an opaque
+  `channel_id:message_id` reference. For an edit the provider re-checks the destination
+  revision, owner, server revision and (for channels) the administrator allowlist exactly as
+  for a send, then requires the reference's channel to be this destination's channel (for a DM,
+  the channel opened for the currently linked account) before `PATCH`ing it. A foreign
+  reference, another bot's message (HTTP 403) or a deleted one (404) is reported as `gone`; the
+  host then sends a follow-up, threaded with `message_reference` when the original still exists.
+* **Isolation and revocation.** Each destination uses the bot token of its own installation
+  server record; a retired, re-routed, re-linked or stale-revision destination makes no Discord
+  call at all, so revoked or unlinked destinations receive no later updates.
+* **Retries.** The host's idempotency key becomes the Discord `nonce` (with `enforce_nonce`), so a
+  crash after Discord accepted a message cannot post it twice. 429 and 5xx/network failures are
+  retryable and create nothing; a 403 on create falls back once to plain text with previews
+  suppressed (missing Embed Links), as before. Other failures are permanent and per delivery.
+* **Privacy.** Channels stay PUBLIC and DMs PRIVATE. The provider renders only the fields the
+  host supplied for the destination's projection; facts, HTML and identifiers the host did not
+  send for a PUBLIC projection cannot appear. Tests/verification/recovery keep the previous
+  minimal path. The legacy grouped `.dm` provider is unchanged.
+
+Release order: host (Plugin API 1.1.14) first, then this package.
