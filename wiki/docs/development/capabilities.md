@@ -11,6 +11,7 @@ nothing.
 | `plugin.settings` | `settings.get`: UI/API and curator |
 | `plugin.storage` | Owned persistent key/value data: reports |
 | `notifications.send` | Host notifications: notifier |
+| `notifications.canonical`, `notifications.actions`, `notifications.urgency`, `notifications.templates.html` | Versioned story notifications (API 1.1.14), each explicit: [Story Notification Demo](notifications.md#versioned-story-notifications-plugin-api-1114) |
 | `events.subscribe`, `tasks.background` | Polling and supervised work: Jellyfin |
 | `documents.read` | Opaque scoped documents: Document Viewer |
 | `backend.routes.plugin` | Authenticated namespaced JSON routes |
