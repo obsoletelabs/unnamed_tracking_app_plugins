@@ -34,7 +34,10 @@ def register_provider(
 
     Existing host-owned transports remain supported. Plugin-owned destinations
     use the generic plugin transport plus a bounded declarative definition;
-    credentials and endpoint values remain inside plugin storage.
+    credentials and endpoint values remain inside plugin storage. On host 1.1.14
+    or later the definition may add ``capabilities`` (see
+    ``sdk.notification_stories.provider_capabilities``) and an ``edit_action`` for
+    providers that can change a message they already sent.
     """
     if (transport == "plugin") != (definition is not None):
         raise ValueError("Generic plugin providers require a definition; legacy transports forbid it")
@@ -98,8 +101,13 @@ def provider_context(values: dict[str, Any], *, operation: str, provider_id: str
     return context
 
 
-def poll_lifecycle(cursor: str | None = None, *, limit: int = 100) -> dict[str, Any]:
+def poll_lifecycle(
+    cursor: str | None = None, *, limit: int = 100, include_revisions: bool = False
+) -> dict[str, Any]:
     """Replay own installation metadata on host 1.1.4 with an explicit read grant.
+
+    ``include_revisions`` (host 1.1.14 or later) also replays ``revised``: an unread story
+    item was updated in place. Omit it on older hosts; the request then keeps its 1.1.4 shape.
 
     Save the returned cursor only after processing its events. If
     resync_required is true, discard stale local assumptions and restart using
@@ -109,9 +117,12 @@ def poll_lifecycle(cursor: str | None = None, *, limit: int = 100) -> dict[str, 
         raise ValueError("Lifecycle limit must be an integer from 1 to 200")
     if cursor is not None and (not isinstance(cursor, str) or not 1 <= len(cursor) <= 1024):
         raise ValueError("Lifecycle cursor must be a nonempty bounded string")
-    return request("notifications.lifecycle.poll", "notifications.lifecycle.read", {
-        "cursor": cursor, "limit": limit,
-    })
+    payload: dict[str, Any] = {"cursor": cursor, "limit": limit}
+    if include_revisions is True:
+        payload["include_revisions"] = True
+    elif include_revisions is not False:
+        raise ValueError("include_revisions must be true or false")
+    return request("notifications.lifecycle.poll", "notifications.lifecycle.read", payload)
 
 def destination_status(*, provider_id: str | None = None, after: str | None = None, limit: int = 50) -> dict[str, Any]:
     """Read current actor/current installation status with an independent 1.1.11 grant.

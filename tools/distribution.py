@@ -190,6 +190,11 @@ def collect_payload(
                                        "notification_providers.register", "notification_providers.deliver"}
            for capability in manifest.get("capabilities", [])):
         files["sdk/notifications.py"] = source_bytes(root / "sdk/notifications.py")
+    if any(capability["name"] in {"notifications.canonical", "notifications.actions",
+                                       "notifications.urgency", "notifications.templates.html"}
+           for capability in manifest.get("capabilities", [])):
+        # Plugin API 1.1.14 helpers; they depend only on the always-bundled protocol module.
+        files["sdk/notification_stories.py"] = source_bytes(root / "sdk/notification_stories.py")
     if manifest.get("frontend"):
         files["frontend/appearance.js"] = source_bytes(
             root / "sdk/frontend_appearance.js"
