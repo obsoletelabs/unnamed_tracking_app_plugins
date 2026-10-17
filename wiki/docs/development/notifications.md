@@ -275,9 +275,7 @@ and the updated provider and lifecycle documents); `tools/check_host_contract.py
 the paired host, and `tests/fixtures/notification_contract/` holds the shared conformance cases the
 SDK is tested against. The runnable demonstration is `examples/story-notification-demo`.
 
-##
-
-# Official producers on stories
+### Official producers on stories
 
 Background workers act for a subscribed account through `tasks.request`, which the host allows to carry
 exactly two story operations in addition to `notifications.send` and `notifications.emit`:

@@ -59,7 +59,10 @@ include a reverse-proxy path; redirects are refused. Secrets stay in private
 actions. This storage is access-controlled by the runtime, not an encrypted vault;
 protect runtime backups accordingly. The plugin has no host database, filesystem,
 environment or secret access. Native UI keeps the existing privileged permission
-and requires normal user grants. Optional notification denial does not stop sync.
+and requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one
+notification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a
+successful sync resolves it, with a link to the accounts page; hosts or grants without story support
+receive the earlier single message.
 
 Target: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges
 remain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral

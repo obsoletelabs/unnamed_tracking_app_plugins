@@ -45,7 +45,7 @@ def film(index=1):
 def service(monkeypatch):
     monkeypatch.syspath_prepend(str(SOURCE))
     modules = {}
-    for name in ("jellyfin", "plugin", "sync"):
+    for name in ("jellyfin", "plugin", "attention", "sync"):
         spec = importlib.util.spec_from_file_location(name, SOURCE / (name + ".py"))
         module = importlib.util.module_from_spec(spec)
         monkeypatch.setitem(__import__("sys").modules, name, module)
@@ -80,6 +80,8 @@ def service(monkeypatch):
                 raise RuntimeError("denied SECRET")
             if payload["method"] == "notifications.send":
                 return {"sent": True}
+            if payload["method"] in {"notification_sources.register", "notifications.publish"}:
+                return {"created": True, "registered": True}
             data = payload["payload"]
             imports.append(data)
             return {
@@ -160,6 +162,7 @@ def service(monkeypatch):
 
     for module in modules.values():
         monkeypatch.setattr(module, "request", gateway)
+    monkeypatch.setattr(__import__("sdk.notification_stories", fromlist=["x"]), "request", gateway)
     plugin, sync, jellyfin = (modules[k] for k in ("plugin", "sync", "jellyfin"))
     server_id = plugin.save_server(
         context(admin=True, url="https://fixture.test/jellyfin/", api_key=TOKEN)
@@ -525,3 +528,59 @@ def test_reported_history_does_not_complete_a_partially_numbered_series(service)
     history = [p for p in imports if p["history"]]
     assert history and all(not p["inventory_complete"] for p in history)
     assert all(p["history"][0]["episode_external_id"] == external for p in history)
+
+
+def background_calls(calls, method):
+    return [
+        p["payload"]
+        for m, c, p in calls
+        if m == "tasks.request" and p["method"] == method
+    ]
+
+
+def test_sync_problems_are_one_story_per_account_that_resolves_on_recovery(service):
+    plugin, sync, _, _, account, _, calls, _, _, errors, denied, _ = service
+    plugin.save_account(context(account_id=account, notifications=True))
+    errors["/Items"] = {"status": 500, "error": "remote SECRET"}
+    state = finish(service)
+    assert state["phase"] == "error"
+    published = background_calls(calls, "notifications.publish")
+    assert len(published) == 1 and background_calls(calls, "notifications.send") == []
+    event = published[0]
+    assert event["story"] == {"key": "sync:" + account, "phase": "attention"}
+    assert event["content"]["actions"][0]["target"] == {
+        "kind": "host_route",
+        "path": "/plugins/official.jellyfin-media-sync/accounts",
+    }
+    assert "SECRET" not in json.dumps(event)
+    assert background_calls(calls, "notification_sources.register")
+    # The same failure again is not a second event; a recovery resolves the same story.
+    status_key = "status/" + USER + "/" + account
+    plugin.store(status_key, {**plugin.load(status_key), "retry_at": 0, "failures": 0})
+    sync.run_account(USER, plugin.account_by_id(USER, account))
+    assert len(background_calls(calls, "notifications.publish")) == 1
+    errors.clear()
+    assert finish(service)["phase"] == "idle"
+    resolved = background_calls(calls, "notifications.publish")[-1]
+    assert resolved["story"] == {"key": "sync:" + account, "phase": "resolved"}
+    assert plugin.load(status_key)["notified_error"] is None
+
+
+def test_unavailable_story_contract_falls_back_to_the_plain_message(service):
+    plugin, _, _, _, account, _, calls, _, _, errors, denied, _ = service
+    plugin.save_account(context(account_id=account, notifications=True))
+    errors["/Items"] = {"status": 500, "error": "remote SECRET"}
+    denied.add("notifications.canonical")
+    state = finish(service)
+    assert state["phase"] == "error" and "SECRET" not in state["error"]
+    sent = background_calls(calls, "notifications.send")
+    assert len(sent) == 1 and sent[0]["body"] == state["error"]
+
+
+def test_stories_are_not_published_when_the_user_disabled_notifications(service):
+    plugin, _, _, _, account, _, calls, _, _, errors, _, _ = service
+    plugin.save_account(context(account_id=account, notifications=False))
+    errors["/Items"] = {"status": 500, "error": "x"}
+    finish(service)
+    assert not background_calls(calls, "notifications.publish")
+    assert not background_calls(calls, "notifications.send")
