@@ -13,6 +13,10 @@ from typing import Any
 from urllib.parse import quote, urlencode, urlsplit
 from uuid import UUID
 
+from sdk.discord_embeds import (
+    DiscordRenderError, decode_reference, encode_reference, nonce, render_delivery, render_text,
+)
+from sdk.notification_stories import ContractError, delivery_operation, delivery_result, provider_capabilities
 from sdk.notifications import destination_status, provider_context, register_provider
 from sdk.plugin_protocol import GatewayRequestError, request
 
@@ -35,6 +39,14 @@ class DiscordForbiddenError(PluginError):
 
 class DiscordTemporaryError(PluginError):
     """Transient Discord failure; core owns retry timing and persisted attempts."""
+
+
+class DiscordRateLimitError(DiscordTemporaryError):
+    """HTTP 429: Discord did not process the request, so repeating it later is safe."""
+
+
+class DiscordNotFoundError(PluginError):
+    """HTTP 404: the channel or message no longer exists."""
 
 
 def _actor(values: dict[str, Any], *, admin: bool = False) -> str:
@@ -100,9 +112,9 @@ def _discord(token: str, method: str, path: str, body: dict | None = None) -> An
         if status == 403:
             raise DiscordForbiddenError("Discord denied access. Check the bot's server membership and permissions.")
         if status == 404:
-            raise PluginError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
+            raise DiscordNotFoundError("Discord could not find the requested server or resource. Check the server ID and bot membership.")
         if status == 429:
-            raise DiscordTemporaryError("Discord is rate limiting requests. Wait briefly and try again.")
+            raise DiscordRateLimitError("Discord is rate limiting requests. Wait briefly and try again.")
         if status == 0:
             raise DiscordTemporaryError("Discord could not be reached. Check the host's outbound network and TLS configuration.")
         if status >= 500:
@@ -534,6 +546,79 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
 
 
 
+# Presentation declared for the per-account DM and server-channel providers. Bot messages can be
+# edited and replied to, carry link buttons and up to ten embeds; the package keeps every message
+# inside those hard limits (sdk.discord_embeds).
+BOT_CAPABILITIES = provider_capabilities(
+    max_batch_items=8, message_updates="edit", threaded_follow_ups=True, rich_embeds=True,
+    images={"max_images": 4, "external_urls": True}, action_buttons=5, links=True,
+    live_page_links=True, max_title_chars=256, max_text_chars=4096, max_payload_bytes=30000,
+)
+
+
+def _post_rich(token: str, channel_id: str, delivery: dict[str, Any], operation: str, reference: str | None) -> dict[str, Any]:
+    """Create the message for a send or follow-up and return its opaque `channel:message` reference."""
+    body = render_delivery(delivery, components=True)
+    if not body["components"]:
+        del body["components"]
+    unique = nonce(delivery.get("idempotency_key"))
+    if unique:
+        # A repeat after a crash with the same key is answered with the original message.
+        body["nonce"] = unique
+        body["enforce_nonce"] = True
+    if operation == "follow_up" and reference:
+        try:
+            earlier_channel, earlier = decode_reference(reference)
+        except DiscordRenderError:
+            earlier_channel = earlier = ""
+        if earlier_channel == channel_id:
+            body["message_reference"] = {"message_id": earlier, "channel_id": channel_id, "fail_if_not_exists": False}
+    path = f"/channels/{channel_id}/messages"
+    try:
+        data = _discord(token, "POST", path, body)
+    except DiscordForbiddenError:
+        # Missing Embed Links is indistinguishable from other 403s; one plain attempt, links suppressed.
+        data = _discord(token, "POST", path, {"content": render_text(delivery), "flags": 4, "allowed_mentions": {"parse": []}})
+    created = data.get("id") if isinstance(data, dict) else None
+    try:
+        return delivery_result(success=True, remote_ref=encode_reference(channel_id, created))
+    except DiscordRenderError:
+        return delivery_result(success=True)
+
+
+def _edit_rich(token: str, channel_id: str, delivery: dict[str, Any], reference: str) -> dict[str, Any]:
+    """Replace the earlier message; a deleted, foreign or uneditable one is reported as gone."""
+    try:
+        earlier_channel, earlier = decode_reference(reference)
+    except DiscordRenderError:
+        return delivery_result(success=False, gone=True)
+    if earlier_channel != channel_id:
+        # A reference only ever applies to the destination that produced it.
+        return delivery_result(success=False, gone=True)
+    body = render_delivery(delivery, components=True)
+    body["content"] = None
+    try:
+        _discord(token, "PATCH", f"/channels/{channel_id}/messages/{earlier}", body)
+    except (DiscordNotFoundError, DiscordForbiddenError):
+        return delivery_result(success=False, gone=True)
+    return delivery_result(success=True, remote_ref=reference)
+
+
+def _deliver_rich(token: str, channel_id: str, delivery: dict[str, Any]) -> dict[str, Any]:
+    operation, reference = delivery_operation(delivery)
+    if operation == "edit" and reference is not None:
+        return _edit_rich(token, channel_id, delivery, reference)
+    return _post_rich(token, channel_id, delivery, operation, reference)
+
+
+def _dm_channel_id(token: str, discord_id: str) -> str:
+    channel = _discord(token, "POST", "/users/@me/channels", {"recipient_id": discord_id})
+    channel_id = channel.get("id") if isinstance(channel, dict) else None
+    if not isinstance(channel_id, str) or not _SNOWFLAKE.fullmatch(channel_id):
+        raise PluginError("Discord could not open a direct message channel.")
+    return channel_id
+
+
 # Separate from the grouped PRIVATE compatibility provider and its native configuration.
 ACCOUNT_PROVIDER_ID = PLUGIN_ID + ".account-dm"
 ACCOUNT_DEFINITION = {
@@ -552,6 +637,7 @@ ACCOUNT_DEFINITION = {
     ],
     "configure_action": "configure-account-destination", "retire_action": "retire-account-destination",
     "test_action": "deliver-account", "features": {"multiple_destinations": True, "critical_supported": False},
+    "capabilities": BOT_CAPABILITIES, "edit_action": "edit-account",
 }
 
 
@@ -657,6 +743,8 @@ def deliver_account(values: dict[str, Any]) -> dict[str, Any]:
         delivery = values.get("delivery")
         if not isinstance(delivery, dict) or not isinstance(delivery.get("title"), str) or not isinstance(delivery.get("body"), str):
             raise PluginError("Notification content is invalid.")
+        if "contract_version" in delivery:
+            return _deliver_rich(server["token"], _dm_channel_id(server["token"], record["discord_id"]), delivery)
         content = f"**{delivery['title'][:250]}**\n{delivery['body']}"
         link = delivery.get("link")
         if isinstance(link, str) and link.startswith(("https://", "http://")):
@@ -674,6 +762,11 @@ def deliver_account(values: dict[str, Any]) -> dict[str, Any]:
 
 
 
+def edit_account(values: dict[str, Any]) -> dict[str, Any]:
+    """Apply a story revision to the message this account destination sent earlier."""
+    return deliver_account(values)
+
+
 # Server channels are PUBLIC even when Discord restricts membership.
 CHANNEL_PROVIDER_ID = PLUGIN_ID + ".channel"
 CHANNEL_DEFINITION = {
@@ -684,6 +777,7 @@ CHANNEL_DEFINITION = {
     "server_fields": ACCOUNT_DEFINITION["server_fields"],
     "configure_action": "configure-channel-destination", "retire_action": "retire-channel-destination",
     "test_action": "deliver-channel", "features": {"multiple_destinations": True, "critical_supported": False},
+    "capabilities": BOT_CAPABILITIES, "edit_action": "edit-channel",
 }
 
 
@@ -847,6 +941,8 @@ def deliver_channel(values: dict[str, Any]) -> dict[str, Any]:
                 or not isinstance(delivery.get("body"), str) or delivery.get("purpose", "notification") not in {"notification", "test"}):
             raise PluginError("Only ordinary public notifications can use a channel.")
         _check_channel(server["token"], server["guild_id"], record["channel_id"])
+        if "contract_version" in delivery:
+            return _deliver_rich(server["token"], record["channel_id"], delivery)
         content = f"**{delivery['title'][:250]}**\n{delivery['body']}"
         link = delivery.get("link")
         if isinstance(link, str) and link.startswith(("https://", "http://")):
@@ -867,6 +963,11 @@ def deliver_channel(values: dict[str, Any]) -> dict[str, Any]:
         print("Discord channel configuration error: " + type(exc).__name__, file=sys.stderr, flush=True)
         return {"success": False, "retryable": False, "error": "discord_channel_unavailable"}
     return {"success": True, "retryable": False}
+
+
+def edit_channel(values: dict[str, Any]) -> dict[str, Any]:
+    """Apply a story revision to the message this channel destination sent earlier."""
+    return deliver_channel(values)
 
 
 def _register_provider() -> None:

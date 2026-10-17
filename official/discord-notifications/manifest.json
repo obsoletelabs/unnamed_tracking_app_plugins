@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.5",
+  "api_contract_version": "1.1.14",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": [],
-  "description": "Discord webhook notifications with plugin-owned credentials and generic destination settings.",
+  "description": "Discord webhook notifications with embeds, digests and editable story messages, plugin-owned credentials and generic destination settings.",
   "entrypoint": "plugin:main",
   "integrity": {
     "key_id": null,
@@ -42,7 +42,7 @@
         "name": "notification_providers.deliver",
         "version": 1
       },
-      "rationale": "Receive only core-approved notification content for enrolled PUBLIC destinations; the plugin controls its final Discord payload."
+      "rationale": "Receive only core-approved notification content for enrolled PUBLIC destinations and edit messages this destination created; the plugin controls its final Discord payload."
     },
     {
       "capability": {
@@ -60,7 +60,7 @@
     }
   ],
   "plugin_id": "official.discord-notifications",
-  "sdk_version_range": "^1.1.5",
+  "sdk_version_range": "^1.1.14",
   "storage": {
     "quota_mb": 4
   },
@@ -68,7 +68,8 @@
     "actions": [
       "configure",
       "retire",
-      "deliver"
+      "deliver",
+      "edit"
     ],
     "menus": [],
     "pages": [],
