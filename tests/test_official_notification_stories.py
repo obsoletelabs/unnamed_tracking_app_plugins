@@ -98,6 +98,7 @@ def test_packaged_producer_publishes_a_valid_contract_story(signed, tmp_path_fac
         "stories.request = gateway; attention.request = gateway\n"
         "account = {'id': 'a1', 'name': 'Living room'}\n"
         "attention.report_problem('00000000-0000-4000-8000-000000000001', account, 'Home', 'Check the token.')\n"
+        "attention.report_problem('00000000-0000-4000-8000-000000000001', account, 'Home', 'Check the token.')\n"
         "attention.report_recovered('00000000-0000-4000-8000-000000000001', account, 'Home')\n"
         "print(json.dumps(calls))\n"
     )
@@ -107,12 +108,16 @@ def test_packaged_producer_publishes_a_valid_contract_story(signed, tmp_path_fac
     sent = json.loads(result.stdout)
     assert [c[2]["method"] for c in sent] == [
         "notification_sources.register", "notifications.publish",
+        "notification_sources.register", "notifications.publish",
         "notification_sources.register", "notifications.publish"]
     assert {c[1] for c in sent} == {"tasks.background"}
-    first, last = sent[1][2]["payload"], sent[3][2]["payload"]
-    assert [first["story"]["phase"], last["story"]["phase"]] == ["attention", "resolved"]
-    assert first["story"]["key"] == last["story"]["key"] == "sync:a1"
-    assert first["event_id"] != last["event_id"] and "recipient" not in json.dumps(sent)
+    first, repeated, last = (sent[1][2]["payload"], sent[3][2]["payload"],
+                             sent[5][2]["payload"])
+    assert [first["story"]["phase"], repeated["story"]["phase"], last["story"]["phase"]] == [
+        "attention", "attention", "resolved"]
+    assert first["story"]["key"] == repeated["story"]["key"] == last["story"]["key"] == "sync:a1"
+    assert first["event_id"] == repeated["event_id"] and first["event_id"] != last["event_id"]
+    assert "recipient" not in json.dumps(sent)
     registration = sent[0][2]["payload"]
     stories.check_registration(registration)
     stories.check_event(first, registration)
