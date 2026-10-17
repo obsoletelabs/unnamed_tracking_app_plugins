@@ -13,7 +13,7 @@ from sdk.notifications import emit, register_type
 from sdk.plugin_protocol import request
 
 EVENT_TYPE = 'example.user-invite-notification-demo.requested'
-DEFINITION = {'event_type': 'example.user-invite-notification-demo.requested', 'label': 'User Invite Routing Demo', 'description': 'Synthetic notification routing demonstration; no real authentication changes.', 'required_trust': 'PRIVATE', 'purpose': 'standard', 'severity': 'info', 'title_template': 'User Invite Routing Demo', 'body_template': "You are invited to a demonstration space. This does not create a real account or grant access. Demo token: {token}. It expires in ten minutes. Confirm it through this plugin's confirm action.", 'parameters': {'token': 'string'}}
+DEFINITION = {'event_type': EVENT_TYPE, 'label': 'User Invite Routing Demo', 'description': 'Synthetic invitation routing demonstration; no real account or access is created.', 'required_trust': 'PRIVATE', 'purpose': 'standard', 'severity': 'info', 'title_template': 'User Invite Routing Demo', 'body_template': "You are invited to a demonstration space. This does not create a real account or grant access. Demo token: {token}. It expires in ten minutes. Confirm it through this plugin's confirm action.", 'parameters': {'token': 'string'}}
 
 
 def actor(values: dict) -> str:

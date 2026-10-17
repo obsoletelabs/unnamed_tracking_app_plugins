@@ -35,12 +35,15 @@ def game_key(game: dict, matching: dict | None = None) -> str:
     return "title:" + title
 
 
+PLATFORM_ALIASES = {"windows": "pc", "windows pc": "pc", "steam": "pc", "win": "pc",
+                    "ps5": "playstation 5", "ps4": "playstation 4", "switch": "nintendo switch",
+                    "macos": "mac", "os x": "mac", "web": "browser"}
+
+
 def platform_key(value: str, *, aliases: bool = True) -> str:
     key = value.strip().casefold()
     if aliases:
-        key = {"windows": "pc", "windows pc": "pc", "steam": "pc", "win": "pc",
-               "ps5": "playstation 5", "ps4": "playstation 4", "switch": "nintendo switch",
-               "macos": "mac", "os x": "mac", "web": "browser"}.get(key, key)
+        key = PLATFORM_ALIASES.get(key, key)
     return key
 
 
@@ -235,9 +238,10 @@ def evaluate(room: dict, *, now: int) -> dict:
             if not platform:
                 reasons.append(f"{label}: confirm your platform")
                 continue
-            platforms.add(platform_key(platform, aliases=matching["platform_aliases"]))
+            normalized = platform_key(platform, aliases=matching["platform_aliases"])
+            platforms.add(normalized)
             crossplay = crossplay and compatibility.get("crossplay", False)
-            if pref["platform"] != "Any" and platform_key(pref["platform"], aliases=matching["platform_aliases"]) != platform_key(platform, aliases=matching["platform_aliases"]):
+            if pref["platform"] != "Any" and platform_key(pref["platform"], aliases=matching["platform_aliases"]) != normalized:
                 reasons.append(f"{label}: platform rule")
             if (compatibility["min_players"] is not None
                     and not compatibility["min_players"] <= count <= compatibility["max_players"]):

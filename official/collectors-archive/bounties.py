@@ -134,7 +134,10 @@ def read(user, value, *, game_cache=None, all_games=None):
             if target > 0 and progress >= target:
                 result.update(status="completed", completed_at=saved.get("completed_at") or int(time.time()))
             return result
-        bounty = store.update(user, "bounties", value, refresh)
+        # Reads are frequent (search and notification providers); only write on change.
+        if ((bounty.get("progress_mode"), bounty.get("progress_target"), bounty.get("progress_value"))
+                != (mode, target, progress) or (target > 0 and progress >= target)):
+            bounty = store.update(user, "bounties", value, refresh)
     if bounty["status"] == "completed":
         award(user, bounty)
     evidence = children(user, value, "evidence")

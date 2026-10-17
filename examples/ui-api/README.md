@@ -13,7 +13,7 @@ The host owns permission classification and supplies authenticated gateway conte
 The entrypoint reports ready and remains supervised instead of exiting after
 startup requests. No plugin JavaScript is loaded by the native host.
 
-Use it as the minimal structure in the [author guide](../../docs/plugin-author-guide.md).
+Use it as the minimal structure in the [author guide](../../wiki/docs/plugin-author-guide.md).
 Build/test with `pytest` and `python tools/build_packages.py`; inspect the isolated
 `.validation/` distribution. New packages include this README, an icon, tags and
 release-specific update metadata. Release signing requires a registered publisher.

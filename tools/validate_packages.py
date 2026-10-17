@@ -8,6 +8,7 @@ import json
 import re
 import sys
 import zipfile
+from functools import lru_cache
 from pathlib import Path
 
 ROUTE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
@@ -71,6 +72,7 @@ def validate_package(path: Path, *, full: bool = False) -> None:
 
     route_ids: set[str] = set()
     route_owners: list[tuple[str, str, str]] = []
+    capability_names = {name for name, version in capabilities if version == 1}
     for route in manifest.get("backend_routes", []):
         if not isinstance(route, dict):
             raise ValueError(f"{path.name}: backend route must be an object")
@@ -112,7 +114,6 @@ def validate_package(path: Path, *, full: bool = False) -> None:
         required = "backend.routes.plugin" if scope == "plugin" else "backend.routes.host"
         if route.get("authorization", "authenticated") not in {"authenticated", "admin"}:
             raise ValueError(f"{path.name}: backend route authorization is invalid")
-        capability_names = {name for name, version in capabilities if version == 1}
         if not {required, "backend.routes", "api.full"}.intersection(capability_names):
             raise ValueError(f"{path.name}: backend route requires {required}")
         for method in methods:
@@ -233,18 +234,23 @@ def validate_package(path: Path, *, full: bool = False) -> None:
         validate_current_contract(manifest, files)
 
 
+@lru_cache(maxsize=None)
+def _schema_validator(name: str):
+    """Parse each bundled schema once per process instead of once per package."""
+    from jsonschema import Draft202012Validator
+
+    schema = Path(__file__).parent / "schemas" / name
+    return Draft202012Validator(json.loads(schema.read_text(encoding="utf-8")))
+
+
 def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
     """Validate current source schemas, handler references and requested UI permissions."""
-    from jsonschema import Draft202012Validator
 
     try:
         from .distribution import validate_metadata, version_key
     except ImportError:
         from distribution import validate_metadata, version_key
-    schemas = Path(__file__).parent / "schemas"
-    Draft202012Validator(json.loads((schemas / "manifest-v1.schema.json").read_text())).validate(
-        manifest
-    )
+    _schema_validator("manifest-v1.schema.json").validate(manifest)
     version_key(manifest["version"])
     contract = manifest.get("api_contract_version", "1.0.0")
     contract_version = version_key(contract)
@@ -306,7 +312,7 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
     document = json.loads(files["ui.json"])
     if document.get("api_contract_version", "1.0.0") != contract:
         raise ValueError("UI and manifest API contracts must match")
-    Draft202012Validator(json.loads((schemas / "ui-v1.schema.json").read_text())).validate(document)
+    _schema_validator("ui-v1.schema.json").validate(document)
     if document["plugin_id"] != manifest["plugin_id"]:
         raise ValueError("UI plugin identity mismatch")
     for field in ("settings", "actions", "pages", "menus"):

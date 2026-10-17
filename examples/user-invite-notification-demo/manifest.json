@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": [],
-  "description": "Executable notification routing demo. Does not change real authentication.",
+  "description": "Executable notification routing demo. Does not create real accounts or grant access.",
   "entrypoint": "plugin:main",
   "integrity": {
     "key_id": null,

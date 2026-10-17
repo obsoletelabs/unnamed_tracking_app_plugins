@@ -16,7 +16,10 @@ DECLARATION = {
 
 
 def get(values, path, **params):
-    credentials = provider_values(PROVIDER_ID, ("api_key",))
+    # One configuration round-trip per operation; metadata may issue several requests.
+    if "_credentials" not in values:
+        values["_credentials"] = provider_values(PROVIDER_ID, ("api_key",))
+    credentials = values["_credentials"]
     return ProviderHttp(values["request"], "tmdb", min_gap=0.1)(
         "https://api.themoviedb.org/3" + path + "?" + urlencode({**params, "api_key": credentials["api_key"]}),
     )
@@ -83,8 +86,11 @@ def metadata(values):
             for entry in sorted(group.get("parts", []), key=lambda entry: entry.get("release_date") or "9999")
             if str(entry["id"]) != identity_id
         ], {"relation_group": group.get("name")})
-    if work.get("resource") == "episodes" and kind == "tv":
-        season = work.get("season_number") or 1
+    if resource == "episodes" and kind == "tv":
+        # Season 0 is TMDB's "Specials" season and must not fall back to season 1.
+        season = work.get("season_number")
+        if season is None:
+            season = 1
         data = get(values, f"/tv/{identity_id}/season/{season}")
         return metadata_page(work, "episodes", [
             {"episode_number": item["episode_number"], "season_number": item.get("season_number"),

@@ -280,18 +280,22 @@ def get_config(values: dict[str, Any]) -> dict[str, Any]:
                 "tested_at",
             )
         }
-    if load("profiles/" + user):
+    if result["profile"]:
         try:
             base = namespace(user, configuration(), result["profile"])
-            result["reviews"] = [
-                {
-                    "title": r["media"]["title"],
-                    "external_id": r["media"]["external_id"],
-                    "reason": r["conflict"],
-                }
-                for key in keys(base + "items/")
-                if (r := load(key, {})).get("conflict")
-            ][:50]
+            # Stop reading items once 50 conflicts are found instead of loading the whole library.
+            reviews = []
+            for key in keys(base + "items/"):
+                r = load(key, {})
+                if r.get("conflict"):
+                    reviews.append({
+                        "title": r["media"]["title"],
+                        "external_id": r["media"]["external_id"],
+                        "reason": r["conflict"],
+                    })
+                    if len(reviews) == 50:
+                        break
+            result["reviews"] = reviews
         except SyncError:
             result["reviews"] = []
     return result

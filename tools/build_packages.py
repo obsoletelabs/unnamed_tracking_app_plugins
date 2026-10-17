@@ -68,6 +68,9 @@ def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bo
             shutil.copyfile(path, stage / "dist" / path.name)
         resolved = []
         if not catalogue_only:
+            # HEAD cannot change during a build; resolve it once rather than per plugin.
+            commit = git(root, "rev-parse", "HEAD")
+            committed_at = git(root, "show", "-s", "--format=%cI", commit) if commit else None
             for source, original in plugins:
                 manifest = json.loads(json.dumps(original))
                 files, metadata = collect_payload(root, source, manifest)
@@ -79,11 +82,10 @@ def build(root: Path, output: Path, *, publish: bool = False, catalogue_only: bo
                 manifest["version"] = version
                 if not reuse:
                     key, key_id = select_signer(root, source, manifest["plugin_id"], required=publish)
-                    commit = git(root, "rev-parse", "HEAD")
                     metadata = {**metadata, "version": version, "automatic_update": (
                         metadata["automatic_update"] if metadata["automatic_update"] is not None else bump != "major"
                     ), "build": {"source_digest": fingerprint, "source_commit": commit,
-                        "source_committed_at": git(root, "show", "-s", "--format=%cI", commit) if commit else None,
+                        "source_committed_at": committed_at,
                         "source_path": source.relative_to(root).as_posix(), "builder": "tools/build_packages.py",
                         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324", "version_bump": bump}}
                     files["distribution.json"] = canonical_json(metadata)

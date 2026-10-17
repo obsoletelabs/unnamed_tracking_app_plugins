@@ -16,6 +16,7 @@ DECLARATION = {
         {"key": "sspassword", "label": "Account password", "scope": "user"},
     ],
 }
+MEDIA_KINDS = {"box-2D": "key_art", "ss": "screenshot", "wheel": "logo", "fanart": "hero"}
 
 
 def get(values, endpoint, **params):
@@ -37,10 +38,9 @@ def media(values):
                                                 for entry in item.get("noms", []))), None)
     if item is None:
         return {"assets": []}
-    kinds = {"box-2D": "key_art", "ss": "screenshot", "wheel": "logo", "fanart": "hero"}
-    return {"assets": [{"kind": kinds[entry["type"]], "url": entry["url"]}
+    return {"assets": [{"kind": MEDIA_KINDS[entry["type"]], "url": entry["url"]}
                        for entry in item.get("medias", [])
-                       if entry.get("type") in kinds and entry.get("url")][:200]}
+                       if entry.get("type") in MEDIA_KINDS and entry.get("url")][:200]}
 
 
 @operation

@@ -1,6 +1,6 @@
 # Official plugins
 
-[Epic Games Library](epic-games/README.md), **0.0.1**, connects a personal Epic
+[Epic Games Library](epic-games/README.md) connects a personal Epic
 account and imports games/playtime through Plugin API 1.1.3. It preserves manual
 library state and resumes bounded inventory/catalogue/import steps after failure.
 Its packaged sandbox UI uses narrow navigation, storage, network and game-write
@@ -29,7 +29,7 @@ remain in `examples/` and use separate demo signing identities. Valid signature
 and official status are distinct; every plugin still requires its declared
 permissions, with no sandbox exemptions or special host APIs.
 
-[Collector's Archive](collectors-archive/README.md), **0.0.1**, preserves Cards,
+[Collector's Archive](collectors-archive/README.md) preserves Cards,
 Sets and Bounties after their removal from the host. It is an unreleased source
 preview, available in branch CI's `unsigned-dist` artifact. Its native pages use
 the public host UI runtime, and its personal import preserves legacy identifiers,
@@ -45,7 +45,20 @@ independently signed previews require fresh installation and destination verific
 See the [catalogue](../list.json) for the current signed package.
 
 
-Maintained password recovery: `official.password-reset` uses host API1.1.7 with explicit administrator activation and verified external recovery destinations. It performs real password recovery through host-owned tokens/account mutation; synthetic notification demos remain separate. See [setup](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/official/password-reset).
+Maintained password recovery: `official.password-reset` uses host API 1.1.7 with explicit administrator activation and verified external recovery destinations. It performs real password recovery through host-owned tokens/account mutation; synthetic notification demos remain separate. See [setup](password-reset/README.md).
 
 
-Maintained user invitations: official.user-invites uses host API 1.1.8 with explicit administrator activation and built-in SMTP. Accounts are created only by single-use acceptance on the host. See [setup](user-invites/README.md).
+Maintained user invitations: `official.user-invites` uses host API 1.1.8 with explicit administrator activation and built-in SMTP. Accounts are created only by single-use acceptance on the host. See [setup](user-invites/README.md).
+
+[Discord Notifications](discord-notifications/README.md) is the maintained Discord webhook
+notification provider. See the [catalogue](../list.json) for its current signed version.
+
+[Game Night](discord-social-activity/README.md) is a Discord Activity for choosing a game
+together. It is an unreleased source preview, available in branch CI's `unsigned-dist` artifact.
+
+Metadata providers supply search, metadata and artwork through the host's provider
+settings: [GiantBomb](metadata-giantbomb/README.md), [GOG](metadata-gog/README.md),
+[HowLongToBeat](metadata-hltb/README.md), [MyAnimeList](metadata-jikan/README.md),
+[Kitsu](metadata-kitsu/README.md), [RetroAchievements](metadata-retroachievements/README.md),
+[ScreenScraper](metadata-screenscraper/README.md), [TMDB](metadata-tmdb/README.md) and
+[TVDB](metadata-tvdb/README.md). See the [catalogue](../list.json) for current signed versions.

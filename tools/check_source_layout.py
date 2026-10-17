@@ -8,12 +8,13 @@ except ImportError:
     from distribution import ROOT, canonical_json, collect_payload, discover_plugins
     from validate_packages import validate_current_contract
 
+SUPPORTED_CONTRACTS = frozenset(f"1.1.{minor}" for minor in range(14))
+
 
 def check(root=ROOT) -> None:
     plugins = discover_plugins(root)
     for source, manifest in plugins:
-        supported_contracts = {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12", "1.1.13"}
-        if manifest.get("api_contract_version") not in supported_contracts:
+        if manifest.get("api_contract_version") not in SUPPORTED_CONTRACTS:
             raise ValueError(
                 f"{source.name}: maintained source must explicitly target a supported "
                 "Plugin API contract version through v1.1.13"

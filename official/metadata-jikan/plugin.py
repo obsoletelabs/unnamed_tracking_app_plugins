@@ -59,10 +59,11 @@ def metadata(values):
     if work.get("resource") == "airing":
         return {"metadata": {"airing": airing}}
     release = (item.get("aired") or {}).get("from")
+    duration = (item.get("duration") or "").split()
     return {"metadata": {
         "title": candidate["title"], "year": candidate["year"], "release_date": release[:10] if release else None,
         "description": item.get("synopsis"), "episode_count": item.get("episodes"),
-        "episode_runtime_minutes": int(item["duration"].split()[0]) if item.get("duration", "").split() and item["duration"].split()[0].isdigit() else None,
+        "episode_runtime_minutes": int(duration[0]) if duration and duration[0].isdigit() else None,
         "studios": [entry["name"] for entry in item.get("studios", [])],
         "genres": [entry["name"] for entry in item.get("genres", [])], "format": item.get("type"),
         "scores": {"mal": item["score"] * 10} if item.get("score") is not None else {},

@@ -41,7 +41,8 @@ def search(values):
                 "platforms": [item["ConsoleName"]] if item.get("ConsoleName") else [],
             })
             if len(candidates) >= work.get("limit", 20):
-                return {"candidates": candidates}
+                # Keep the cursor so the remaining consoles stay searchable.
+                break
     return {"candidates": candidates, "next_cursor": str(offset + 1) if offset + 1 < len(CONSOLES) else None}
 
 

@@ -13,7 +13,7 @@ from sdk.notifications import emit, register_type
 from sdk.plugin_protocol import request
 
 EVENT_TYPE = 'example.password-reset-notification-demo.requested'
-DEFINITION = {'event_type': 'example.password-reset-notification-demo.requested', 'label': 'Password Reset Routing Demo', 'description': 'Synthetic notification routing demonstration; no real authentication changes.', 'required_trust': 'SECURE', 'purpose': 'recovery', 'severity': 'info', 'title_template': 'Password Reset Routing Demo', 'body_template': "This is a synthetic password-reset demonstration. No account password will change. Demo token: {token}. It expires in ten minutes. Confirm it through this plugin's confirm action.", 'parameters': {'token': 'string'}}
+DEFINITION = {'event_type': EVENT_TYPE, 'label': 'Password Reset Routing Demo', 'description': 'Synthetic notification routing demonstration; no real authentication changes.', 'required_trust': 'SECURE', 'purpose': 'recovery', 'severity': 'info', 'title_template': 'Password Reset Routing Demo', 'body_template': "This is a synthetic password-reset demonstration. No account password will change. Demo token: {token}. It expires in ten minutes. Confirm it through this plugin's confirm action.", 'parameters': {'token': 'string'}}
 
 
 def actor(values: dict) -> str:

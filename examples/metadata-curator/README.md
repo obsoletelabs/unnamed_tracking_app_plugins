@@ -10,5 +10,5 @@ page has a real settings section and executable handler. The supervised entrypoi
 reports ready and stays alive. It demonstrates useful behavior without importing
 or duplicating application metadata-provider code.
 
-Build/test and release instructions are in the [author guide](../../docs/plugin-author-guide.md).
+Build/test and release instructions are in the [author guide](../../wiki/docs/plugin-author-guide.md).
 Each new package carries its own README, tags, icon and automatic-update policy.

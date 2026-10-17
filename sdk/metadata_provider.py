@@ -158,13 +158,17 @@ def metadata_page(work, key, entries, base=None):
     patch = dict(base or {})
     patch[key] = []
     response = {"metadata": patch}
-    for entry in entries[offset:offset + 200]:
-        patch[key].append(entry)
-        if len(json.dumps(response, ensure_ascii=False).encode("utf-8")) > 48 * 1024:
-            patch[key].pop()
+    # Track the serialized size incrementally; each list element after the
+    # first adds its own bytes plus the two-byte ", " separator.
+    size = len(json.dumps(response, ensure_ascii=False).encode("utf-8"))
+    for index, entry in enumerate(entries[offset:offset + 200]):
+        entry_size = len(json.dumps(entry, ensure_ascii=False).encode("utf-8")) + (2 if index else 0)
+        if size + entry_size > 48 * 1024:
             if not patch[key]:
                 raise ProviderFailure("invalid_response")
             break
+        patch[key].append(entry)
+        size += entry_size
     next_offset = offset + len(patch[key])
     if next_offset < len(entries):
         response["next_cursor"] = str(next_offset)
@@ -181,6 +185,6 @@ def operation(callback):
             return exc.response()
         except GatewayRequestError:
             return ProviderFailure("plugin_unavailable").response()
-        except (ValueError, KeyError, TypeError):
+        except (ValueError, KeyError, TypeError, AttributeError):
             return ProviderFailure("invalid_response").response()
     return invoke

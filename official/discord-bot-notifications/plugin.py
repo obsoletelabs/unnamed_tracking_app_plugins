@@ -210,8 +210,7 @@ def _avatar_url(user: dict[str, Any] | None, *, size: int = 256) -> str | None:
     return f"https://cdn.discordapp.com/avatars/{user['id']}/{user['avatar']}.png?size={size}"
 
 
-def _permission_names(permission_value: int) -> list[str]:
-    permissions = {
+_PERMISSION_NAMES = {
         1: "CREATE_INSTANT_INVITE", 2: "KICK_MEMBERS", 4: "BAN_MEMBERS", 8: "ADMINISTRATOR", 16: "MANAGE_CHANNELS", 32: "MANAGE_GUILD",
         1024: "VIEW_CHANNEL", 2048: "SEND_MESSAGES", 4096: "SEND_TTS_MESSAGES", 8192: "MANAGE_MESSAGES", 16384: "EMBED_LINKS", 32768: "ATTACH_FILES",
         65536: "READ_MESSAGE_HISTORY", 131072: "MENTION_EVERYONE", 262144: "USE_EXTERNAL_EMOJIS", 524288: "VIEW_GUILD_INSIGHTS", 1048576: "CONNECT",
@@ -221,8 +220,11 @@ def _permission_names(permission_value: int) -> list[str]:
         34359738368: "MODERATE_MEMBERS", 137438953472: "VIEW_AUDIT_LOG", 274877906944: "VIEW_GUILD_ANALYTICS", 1099511627776: "MANAGE_EVENTS",
         4398046511104: "VIEW_CREATOR_MONETIZATION_ANALYTICS", 8796093022208: "USE_SOUNDBOARD", 17592186044416: "CREATE_GUILD_EXPRESSIONS",
         35184372088832: "CREATE_EVENTS", 70368744177664: "USE_EXTERNAL_SOUNDS", 140737488355328: "SEND_VOICE_MESSAGES",
-    }
-    return [name for bit, name in permissions.items() if permission_value & bit]
+}
+
+
+def _permission_names(permission_value: int) -> list[str]:
+    return [name for bit, name in _PERMISSION_NAMES.items() if permission_value & bit]
 
 
 def _bot_snapshot(token: str, guild_id: str) -> dict[str, Any]:
@@ -524,6 +526,8 @@ def deliver(values: dict[str, Any]) -> dict[str, Any]:
     except GatewayRequestError as exc:
         retryable = exc.code in {"unavailable", "rate_limited"}
         return {"success": False, "retryable": retryable, "error": "discord_gateway_unavailable" if retryable else "discord_permission_denied"}
+    except DiscordTemporaryError:
+        return {"success": False, "retryable": True, "error": "discord_temporarily_unavailable"}
     except PluginError:
         return {"success": False, "retryable": False, "error": "discord_delivery_failed"}
     return {"success": True, "retryable": False}

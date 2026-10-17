@@ -493,20 +493,34 @@ def order_accounts(values: dict) -> dict:
     }
 
 
+def ordered_accounts(user: str) -> list:
+    accounts = [load(k) for k in keys("accounts/" + user + "/")]
+    order = load("profiles/" + user, {}).get("order", [])
+    rank: dict = {}
+    for index, account_id in enumerate(order):
+        rank.setdefault(account_id, index)
+    accounts.sort(key=lambda a: rank.get(a["id"], len(order)))
+    return accounts
+
+
 def get_config(values: dict) -> dict:
     user = actor(values)
     admin = values["_plugin_context"].get("is_admin") is True
     servers = [load(k) for k in keys("servers/")]
-    accounts = [load(k) for k in keys("accounts/" + user + "/")]
-    order = load("profiles/" + user, {}).get("order", [])
-    accounts.sort(
-        key=lambda a: order.index(a["id"]) if a["id"] in order else len(order)
-    )
+    servers_by_id = {s["id"]: s for s in servers}
+    secrets: dict = {}
+
+    def secret_for(server: dict) -> str | None:
+        if server["id"] not in secrets:
+            secrets[server["id"]] = server_secret(server)
+        return secrets[server["id"]]
+
+    accounts = ordered_accounts(user)
     for account in accounts:
-        server = next((s for s in servers if s["id"] == account["server_id"]), {})
+        server = servers_by_id.get(account["server_id"], {})
         account["credential_configured"] = (
             bool(
-                server_secret(server)
+                secret_for(server)
                 if account.get("auth") == "approved"
                 else load("secrets/accounts/" + user + "/" + account["id"])
             )
@@ -517,7 +531,7 @@ def get_config(values: dict) -> dict:
     for server in servers:
         if admin:
             visible_servers.append(
-                {**server, "credential_configured": bool(server_secret(server))}
+                {**server, "credential_configured": bool(secret_for(server))}
             )
         else:
             visible_servers.append(
@@ -538,7 +552,8 @@ def get_config(values: dict) -> dict:
                     ],
                 }
             )
-    reviews = [load(k) for k in keys("reviews/" + user + "/")[:50]]
+    review_keys = keys("reviews/" + user + "/")
+    reviews = [load(k) for k in review_keys[:50]]
     return {
         "ok": True,
         "is_admin": admin,
@@ -546,7 +561,7 @@ def get_config(values: dict) -> dict:
         "servers": visible_servers,
         "accounts": accounts,
         "reviews": reviews,
-        "review_total": len(keys("reviews/" + user + "/")),
+        "review_total": len(review_keys),
     }
 
 
@@ -645,15 +660,18 @@ def watch_now(values: dict) -> dict:
     media_id = context.get("resource_id")
     if not media_id:
         raise SyncError("Open a synced media item to watch it in Jellyfin.")
-    config = get_config(values)
-    for account in config["accounts"]:
-        server = next(
-            (s for s in config["servers"] if s["id"] == account["server_id"]), None
-        )
+    # Only accounts and their servers are needed; the full settings payload
+    # (secrets, reviews) would add storage reads for every account.
+    servers: dict = {}
+    for account in ordered_accounts(user):
+        if account["server_id"] not in servers:
+            servers[account["server_id"]] = load(
+                "servers/" + identifier(account["server_id"]), {}
+            ) or {}
+        server = private = servers[account["server_id"]]
         mapped = load(
             "watch/" + user + "/" + str(UUID(media_id)) + "/" + account["id"], {}
         )
-        private = server_by_id(account["server_id"]) if server else {}
         approved = (
             private.get("mappings", {}).get(mapped.get("library_id"), "ignore")
             != "ignore"

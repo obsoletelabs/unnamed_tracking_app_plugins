@@ -124,6 +124,6 @@ identifies the tested archive and records the actual loaded native UI.
 
 ![Authenticated administrator session filters](../../wiki/docs/assets/screenshots/session-admin-loaded-1440-light.png)
 
-![Native admin component with fixture data](../../docs/assets/screenshots/session-manager-admin.png)
+![Native admin component with fixture data](../../wiki/docs/assets/screenshots/session-manager-admin.png)
 
 Screenshot uses the actual native module with disposable fixture data in a local Vue harness, not a deployed authenticated host.
