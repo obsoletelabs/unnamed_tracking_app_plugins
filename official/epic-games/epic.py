@@ -40,6 +40,14 @@ class EpicError(ValueError):
     """Only fixed, safe messages may cross the action boundary."""
 
 
+class EpicRateLimited(EpicError):
+    """Epic asked the client to slow down; the host should retry later."""
+
+
+class EpicAuthRejected(EpicError):
+    """Epic no longer accepts the saved sign-in; the user must connect again."""
+
+
 def code_from(raw):
     if not isinstance(raw, str) or len(raw) > 8192:
         raise EpicError("Paste the one-time code from Epic's sign-in page.")
@@ -87,9 +95,11 @@ def http(url, *, token=None, form=None):
     )
     status = reply.get("status", 0)
     if status == 429:
-        raise EpicError("Epic is busy. Wait a minute, then resume the import.")
+        raise EpicRateLimited("Epic is busy. Wait a minute, then resume the import.")
     if status in {400, 401, 403} and (form is not None or status == 401):
-        raise EpicError("Epic rejected this sign-in. Sign in on Epic again and paste a fresh code.")
+        raise EpicAuthRejected(
+            "Epic rejected this sign-in. Sign in on Epic again and paste a fresh code."
+        )
     if not isinstance(status, int) or not 200 <= status < 300:
         raise EpicError(
             "Epic could not be reached or refused the request. Your saved import is retained."

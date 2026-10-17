@@ -484,3 +484,40 @@ def test_active_lease_prevents_rotating_token_or_checkpoint_races(service):
         "Another Epic action" in service.plugin.connect(context(authorization_code=CODE))["error"]
     )
     assert not any(call[0] == "network.request" for call in service.calls)
+
+
+def test_scheduled_sync_reports_rate_limits_with_a_retry_hint_and_keeps_the_checkpoint(service):
+    connected(service)
+    service.failures["/library/api/public/items"] = {"status": 429}
+    before = service.plugin.status(context())
+    result = service.plugin.sync(context())
+    assert result["completed"] is False and result["retry_after_seconds"] == 300
+    assert "Epic is busy" in result["summary"] and "disable_schedule" not in result
+    assert service.plugin.status(context())["phase"] == before["phase"]
+
+
+def test_scheduled_sync_asks_the_host_to_turn_off_after_disconnect_or_rejection(service):
+    missing = service.plugin.sync(context())
+    assert missing["disable_schedule"] is True and missing["completed"] is False
+    connected(service)
+    key = "secrets/users/" + USER
+    session = json.loads(service.storage[key])
+    session["expires_at"] = 0
+    service.storage[key] = json.dumps(session)
+    service.failures["/account/api/oauth/token"] = {"status": 400}
+    rejected = service.plugin.sync(context())
+    assert rejected["disable_schedule"] is True and "rejected" in rejected["summary"]
+    assert service.plugin.status(context())["phase"] == "inventory"
+
+
+def test_a_stale_checkpoint_restarts_so_availability_comes_from_one_complete_walk(service):
+    connected(service)
+    service.plugin.sync(context())
+    state_key = "sync/users/" + USER
+    state = json.loads(service.storage[state_key])
+    state.update(phase="missing", updated_at=int(time.time()) - 7 * 3600)
+    service.storage[state_key] = json.dumps(state)
+    result = service.plugin.sync(context())
+    assert result["phase"] == "playtime" or result["phase"] == "inventory"
+    assert result["completed"] is False
+    assert json.loads(service.storage[state_key]).get("missing") is None
