@@ -274,3 +274,15 @@ The pinned schemas live in `tools/schemas/` (`notification-canonical-*`, `notifi
 and the updated provider and lifecycle documents); `tools/check_host_contract.py` compares them with
 the paired host, and `tests/fixtures/notification_contract/` holds the shared conformance cases the
 SDK is tested against. The runnable demonstration is `examples/story-notification-demo`.
+
+## Discord rich batches and editable stories
+
+`official.discord-notifications` (webhook) and the per-account/channel providers of
+`official.discord-bot-notifications` use the 1.1.14 `capabilities`/`edit_action` declaration with
+`rich_embeds`. The host passes `facts` (private canonical projection only) and digest `items`
+in `PluginCanonicalDelivery`; `sdk/discord_embeds.py` lays them out within Discord's limits, and the
+providers return the Discord message as the opaque `remote_ref` for later `edit` or `follow_up`
+operations (`gone: true` when it was deleted or cannot be edited). `tests/fake_discord.py` is a
+fake Discord HTTP API at the `network.request` boundary that enforces the limits and records
+edits, deletions, rate limits and cross-bot access for the tests. The gateway needs host
+Plugin API 1.1.14 (`network.request` with `PATCH`).
