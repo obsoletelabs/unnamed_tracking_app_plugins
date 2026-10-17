@@ -523,6 +523,29 @@ def publish(event: dict[str, Any], *, registration: dict[str, Any] | None = None
     return request("notifications.publish", CANONICAL_CAPABILITY, check_event(event, registration))
 
 
+def _for_user(user_id: str, method: str, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """Run one reviewed operation for a subscribed account from a background worker.
+
+    Requires ``tasks.background`` and the account's opt-in; the host rechecks the target
+    account's live grant for ``capability`` and rejects any other operation.
+    """
+    return request("tasks.request", "tasks.background",
+                   {"user_id": user_id, "method": method, "capability": capability, "payload": payload})
+
+
+def register_canonical_type_for_user(user_id: str, registration: dict[str, Any]) -> dict[str, Any]:
+    """``register_canonical_type`` for a background worker acting for ``user_id``."""
+    return _for_user(user_id, "notification_sources.register", "notification_sources.register",
+                     check_registration(registration))
+
+
+def publish_for_user(user_id: str, event: dict[str, Any], *,
+                     registration: dict[str, Any] | None = None) -> dict[str, Any]:
+    """``publish`` for a background worker acting for ``user_id`` (idempotent by event_id)."""
+    return _for_user(user_id, "notifications.publish", CANONICAL_CAPABILITY,
+                     check_event(event, registration))
+
+
 # --- host callbacks ----------------------------------------------------------------------------
 
 

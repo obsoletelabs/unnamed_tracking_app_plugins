@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 from uuid import uuid4
 
+import attention
 from jellyfin import FIELDS, SyncError, api, integer, normalized, playback
 from sdk.plugin_protocol import request
 from plugin import account_token, delete, keys, load, server_by_id, server_secret, store
@@ -720,6 +721,12 @@ def run_account(user: str, account: dict) -> None:
         )
         if done:
             state["finished_at"] = now
+            if state.get("notified_error"):
+                try:
+                    attention.report_recovered(user, account, str(server.get("name", "")))
+                except (RuntimeError, ValueError, OSError):
+                    # The earlier alert may be a plain message; there is no story to resolve.
+                    pass
             state["notified_error"] = None
         store(status_key, state)
     except (ValueError, RuntimeError, OSError, TypeError, KeyError) as exc:
@@ -745,19 +752,7 @@ def run_account(user: str, account: dict) -> None:
         store(status_key, state)
         if account.get("notifications") and state.get("notified_error") != safe:
             try:
-                request(
-                    "tasks.request",
-                    "tasks.background",
-                    {
-                        "user_id": user,
-                        "method": "notifications.send",
-                        "capability": "notifications.send",
-                        "payload": {
-                            "title": "Jellyfin sync needs attention",
-                            "body": safe,
-                        },
-                    },
-                )
+                attention.report_problem(user, account, str(server.get("name", "")), safe)
                 state["notified_error"] = safe
                 store(status_key, state)
             except (RuntimeError, ValueError, OSError):
