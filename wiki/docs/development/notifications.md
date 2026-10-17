@@ -296,7 +296,7 @@ plugins.
 `tests/test_official_notification_stories.py` builds the real plugin with a throwaway official key,
 verifies the package and runs the packaged producer against a fake gateway.
 
-Discord rich batches and editable stories
+## Discord rich batches and editable stories
 
 `official.discord-notifications` (webhook) and the per-account/channel providers of
 `official.discord-bot-notifications` use the 1.1.14 `capabilities`/`edit_action` declaration with
