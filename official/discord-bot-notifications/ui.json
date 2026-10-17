@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.12",
+  "api_contract_version": "1.1.14",
   "plugin_id": "official.discord-bot-notifications",
   "title": "Discord Bot Notifications",
   "settings": [],
@@ -250,6 +250,24 @@
       "label": "revalidate-activity",
       "id": "revalidate-activity",
       "handler": "plugin:revalidate_activity"
+    },
+    {
+      "id": "edit-account",
+      "label": "Edit an earlier Discord account DM",
+      "handler": "plugin:edit_account",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
+    },
+    {
+      "id": "edit-channel",
+      "label": "Edit an earlier Discord channel message",
+      "handler": "plugin:edit_channel",
+      "capability": {
+        "name": "notification_providers.deliver",
+        "version": 1
+      }
     }
   ],
   "menus": [],

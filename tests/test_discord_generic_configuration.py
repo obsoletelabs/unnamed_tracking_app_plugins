@@ -166,7 +166,7 @@ def test_configuration_rejects_ui_identity_and_installation_cannot_claim_old_sec
 def test_actual_package_is_standalone_with_exact_minimal_grants(current_packages, tmp_path):
     with zipfile.ZipFile(current_packages[ID]) as archive:
         manifest = json.loads(archive.read("manifest.json"))
-        assert manifest["api_contract_version"] == "1.1.5"
+        assert manifest["api_contract_version"] == "1.1.14"
         assert {cap["name"] for cap in manifest["capabilities"]} == {
             "notification_providers.register", "notification_providers.deliver", "plugin.storage", "network.outbound"}
         assert manifest.get("storage") and not manifest.get("frontend")
