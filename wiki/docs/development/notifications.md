@@ -182,3 +182,116 @@ The bot separates actual host destinations from compatibility profile links. Joi
 ![Host-authoritative destination status in the installed bot](../assets/screenshots/discord-host-destination-status.jpg)
 
 ![Searchable bot server selection](../assets/screenshots/discord-server-search.jpg)
+
+## Versioned story notifications (Plugin API 1.1.14)
+
+Plugin API 1.1.14 lets a plugin describe an evolving event instead of a one-off message: a
+**story** with a declared lifecycle (for example `available` → `installed` or `failed`), structured
+facts, a typed action and presentation hints. The host keeps ownership of recipients, destinations,
+credentials, trust, consent, retention, scheduling, aggregation, dispatch and audit; a plugin
+supplies facts for event types in its own namespace. The helpers are in `sdk/notification_stories.py`
+and are bundled only into packages that declare one of the capabilities below. The paired host
+documentation is the host's [plugin contract](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/main/wiki/docs/development/notification-contract.md).
+
+**Release order:** the host change ships first, then this SDK and any plugin that targets
+1.1.14. Do not publish a package that targets 1.1.14 against an older host; manifests that declare
+these capabilities with an older `api_contract_version` are rejected, and
+`sdk.notification_stories.negotiate_contract()` reports what the connected host supports. The
+`story-notification-demo` example stays in `unreleased_plugins` until that host is released.
+
+| Capability | Use |
+| --- | --- |
+| `notifications.canonical` | Register a canonical event type, publish events, negotiate the contract version. |
+| `notifications.actions` | Declare typed actions that the host runs after rechecking access. |
+| `notifications.urgency` | Publish `urgency: critical` events (the host and the user's limits still decide whether it bypasses quiet hours). |
+| `notifications.templates.html` | Declare sanitised HTML email templates (critical risk; requires an explicit grant). |
+
+None of them is implied by `notifications.send`, `notifications.emit`, `notifications` or `api.full`.
+Request only those the plugin uses and give each a rationale.
+
+```python
+from sdk.notification_stories import CONTRACT_VERSION, publish, register_canonical_type
+
+REGISTRATION = {
+    "contract_version": CONTRACT_VERSION,
+    "event_type": "example.sync.update",
+    "label": "Sync update",
+    "story_key_prefix": "update:",
+    "grouping": {"strategy": "key", "merge": "digest"},
+    "lifecycle": {...},   # phases, initial_phases, transitions
+    "facts": [{"key": "version", "label": "Version", "kind": "text"}],
+    "actions": [{"action_id": "acknowledge", "label": "Acknowledge",
+                 "input": {"version": {"type": "string", "max_length": 32}}}],
+}
+
+register_canonical_type(REGISTRATION)
+publish(event, registration=REGISTRATION)   # validated locally, then again by the host
+```
+
+The registration declares the lifecycle, the stable story-key prefix, grouping (`none` or `key`, and
+whether the key may join host digests), typed facts, typed actions (with optional extra capabilities
+the action requires), up to eight render contributions and an urgency ceiling. Events must follow it:
+undeclared facts, wrong fact kinds, missing required facts, keys without the declared prefix,
+undeclared phases or actions and mistyped action inputs are rejected before anything is stored.
+Fact kinds are `text`, `integer`, `decimal`, `money`, `timestamp` and `boolean`; decimals and money
+are exact strings, never floats.
+
+What the host rejects, with no receipt consumed: oversized text or too many facts, blocks, images or
+actions; HTML, scripts, frames, forms, event handlers and `javascript:`/`data:` URLs; URLs that are
+not public HTTPS names; secret-bearing query parameters; credential-shaped text; unknown fields such
+as recipients, destinations, trust or installation identifiers; and unsupported or newer contract
+versions. Plugin JavaScript never runs in a notification.
+
+### Actions
+
+An action declared in the registration is offered on the story page. When the user chooses it, the
+host rechecks the account, the story, the installation, the grants (`notifications.actions`,
+`notifications.canonical` and any declared requirements) and that the plugin still declares the
+action, then calls the plugin's UI action of the same name. The handler receives only its declared
+typed input plus a private `_notification_context`; validate it with
+`story_action_context(values)` and return `{"message": "..."}` (at most 300 characters). Calling the
+handler any other way fails the context check.
+
+### Providers that edit messages
+
+A plugin-owned delivery provider can add `capabilities=provider_capabilities(message_updates="edit",
+...)` and an `edit_action` to its definition. The host then sends canonical deliveries with an
+`operation` (`send`, `edit` or `follow_up`), the earlier message's `remote_ref` for edits, an
+idempotency key and host-sanitised HTML, link buttons and images. Read them with
+`delivery_operation(delivery)` and answer with `delivery_result(success=..., remote_ref=...)`; return
+`gone=True` when the earlier message cannot be changed and the host will send a follow-up. Declarations
+describe presentation only; they never grant trust, verification or consent.
+
+### Lifecycle replay and compatibility
+
+`poll_lifecycle(include_revisions=True)` also replays `revised` (a story's unread item changed in
+place) on 1.1.14 hosts; without it the 1.1.4 statuses are unchanged. Older manifests keep using
+`notifications.send`, `notifications.emit` and the legacy provider registration. Disabling or
+uninstalling the plugin retires its types and queued work, and revoking a grant stops publication,
+dispatch of already accepted work and action invocation, while notification history is retained.
+
+The pinned schemas live in `tools/schemas/` (`notification-canonical-*`, `notification-contract-*`
+and the updated provider and lifecycle documents); `tools/check_host_contract.py` compares them with
+the paired host, and `tests/fixtures/notification_contract/` holds the shared conformance cases the
+SDK is tested against. The runnable demonstration is `examples/story-notification-demo`.
+
+### Official producers on stories
+
+Background workers act for a subscribed account through `tasks.request`, which the host allows to carry
+exactly two story operations in addition to `notifications.send` and `notifications.emit`:
+`notification_sources.register` and `notifications.publish`, each with its own capability and the target
+account's live grant. `register_canonical_type_for_user` and `publish_for_user` in
+`sdk/notification_stories.py` wrap them and run the same local validation as the direct helpers.
+
+The official Jellyfin Media Sync plugin (`official/jellyfin-media-sync/attention.py`) is the migrated
+producer. Each account has one `sync:<account id>` story: a sync problem opens it (`attention`), a
+different problem revises it, and the next successful sync resolves it. A repeated identical problem is
+the same event and sends nothing. The story carries the account and server as facts and a host-route
+action to the plugin's accounts page; error text is the plugin's already-sanitised message, never remote
+diagnostics. If the host or the user's grant cannot take the story, the plugin falls back to the earlier
+single `notifications.send` message and sync recovery is never affected. The host's own producers (plugin
+updates, game releases and price events) are migrated in the paired host change; they need nothing from
+plugins.
+
+`tests/test_official_notification_stories.py` builds the real plugin with a throwaway official key,
+verifies the package and runs the packaged producer against a fake gateway.

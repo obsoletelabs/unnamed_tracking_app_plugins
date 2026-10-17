@@ -96,11 +96,11 @@ def main() -> None:
         schema = model.model_json_schema()
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         schema["x-api-contract-version"] = {
-            "notification-provider-v1": "1.1.6",
+            "notification-provider-v1": "1.1.14",
             "notification-content-v1": "1.1.5",
             "notification-destination-v1": "1.1.5",
-            "notification-lifecycle-query-v1": "1.1.4",
-            "notification-lifecycle-page-v1": "1.1.4",
+            "notification-lifecycle-query-v1": "1.1.14",
+            "notification-lifecycle-page-v1": "1.1.14",
         }.get(name, "1.1.2")
         expected_schema = json.loads(
             (root / "tools/schemas" / f"{name}.schema.json").read_bytes()
@@ -114,6 +114,13 @@ def main() -> None:
                 lineterm="",
             )))
         assert schema == expected_schema, name
+    from src.plugin_api import notification_contract_schemas, plugin_notification_schemas
+    published = {**notification_contract_schemas(), **plugin_notification_schemas()}
+    for name, schema in published.items():
+        # The canonical 1.0.0 contract and the 1.1.14 plugin documents are pinned verbatim.
+        assert schema == json.loads(
+            (root / "tools/schemas" / f"{name}.schema.json").read_bytes()
+        ), name
     from src.plugin_api.auth_contracts import PasswordResetFlowDefinition
     auth_schema = PasswordResetFlowDefinition.model_json_schema()
     auth_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
@@ -167,7 +174,7 @@ def main() -> None:
             document = PluginUiDocument.model_validate_json((source / "ui.json").read_bytes())
             assert manifest.plugin_id == document.plugin_id
             assert manifest.api_contract_version == document.api_contract_version
-            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12", "1.1.13"}
+            assert manifest.api_contract_version in {"1.1.0", "1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12", "1.1.13", "1.1.14"}
             assert all(capability_definition(ref.name) for ref in manifest.capabilities)
             assert capability_definition(Capability.FRONTEND_NATIVE).highly_privileged
             for key in ("settings", "actions", "pages", "menus"):

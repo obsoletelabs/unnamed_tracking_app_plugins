@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.0",
+  "api_contract_version": "1.1.14",
   "application_version_range": "^1.0.0",
   "capabilities": [
     {
@@ -48,6 +48,14 @@
     },
     {
       "name": "notifications.send",
+      "version": 1
+    },
+    {
+      "name": "notification_sources.register",
+      "version": 1
+    },
+    {
+      "name": "notifications.canonical",
       "version": 1
     },
     {
@@ -162,7 +170,21 @@
         "name": "notifications.send",
         "version": 1
       },
-      "rationale": "Optionally notify the subscribing user about sync errors; denied grants do not stop sync."
+      "rationale": "Optional fallback: notify the subscribing user about sync errors with a plain message when the story contract is unavailable; denied grants do not stop sync."
+    },
+    {
+      "capability": {
+        "name": "notification_sources.register",
+        "version": 1
+      },
+      "rationale": "Declare this plugin's own sync-attention notification type; the core validates and namespaces it."
+    },
+    {
+      "capability": {
+        "name": "notifications.canonical",
+        "version": 1
+      },
+      "rationale": "Publish one evolving sync-attention story per Jellyfin account for the subscribing user; the core owns routing, privacy and history. Denied grants do not stop sync."
     },
     {
       "capability": {
@@ -187,7 +209,7 @@
     }
   ],
   "plugin_id": "official.jellyfin-media-sync",
-  "sdk_version_range": "^1.1.0",
+  "sdk_version_range": "^1.1.14",
   "storage": {
     "quota_mb": 128
   },

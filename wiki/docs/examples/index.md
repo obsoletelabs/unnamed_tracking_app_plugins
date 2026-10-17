@@ -37,6 +37,8 @@ the [audit](../history/ecosystem-audit.md), not duplicate legacy source director
 
 [Password Reset Routing Demo](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/password-reset-notification-demo) and [User Invite Routing Demo](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/user-invite-notification-demo) exercise registered namespaced events and synthetic expiring token confirmation. Both use the included public SDK and existing host capability review, routing, persistence and delivery machinery. Reset requires an explicit sensitive-content grant and SECURE external recovery destination. Invite uses ordinary PRIVATE routing. These are protocol/action demos with no new frontend page; they do not implement production authentication. See their READMEs and tests/test_notification_demos.py for issue/confirm, ownership, replay, expiry, permissions and actual package checks.
 
+[Story Notification Demo](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/tree/main/examples/story-notification-demo) shows the Plugin API 1.1.14 versioned notification contract: one story that moves from available to installed, typed facts, a typed host-authorised action and a Markdown render contribution. See `tests/test_notification_story_contract.py` for the shared conformance cases and a real signed-package check.
+
 
 ## Legacy Discord replacement
 

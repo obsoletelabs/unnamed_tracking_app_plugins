@@ -21,10 +21,15 @@
       "minimum": 1,
       "title": "Limit",
       "type": "integer"
+    },
+    "include_revisions": {
+      "default": false,
+      "title": "Include Revisions",
+      "type": "boolean"
     }
   },
   "title": "NotificationLifecycleQuery",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "x-api-contract-version": "1.1.4"
+  "x-api-contract-version": "1.1.14"
 }

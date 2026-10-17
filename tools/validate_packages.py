@@ -303,6 +303,12 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
             raise ValueError(f"handler function is missing: {handler}")
 
     handler_exists(manifest["entrypoint"])
+    validate_notification_contract(
+        manifest,
+        contract_version,
+        {c["name"] for c in manifest["capabilities"]},
+        {p["capability"]["name"] for p in manifest["permissions"]},
+    )
     for route in manifest.get("backend_routes", []):
         handler_exists(route["handler"])
     if "ui.json" not in files:
@@ -380,6 +386,32 @@ def validate_current_contract(manifest: dict, files: dict[str, bytes]) -> None:
         required.add("plugin.settings")
     if not required <= declared & granted:
         raise ValueError("UI contributions require declared frontend/settings permissions")
+
+
+NOTIFICATION_CONTRACT_CAPABILITIES = frozenset({
+    "notifications.canonical", "notifications.actions", "notifications.urgency",
+    "notifications.templates.html",
+})
+
+
+def validate_notification_contract(
+    manifest: dict, contract_version: tuple[int, ...], declared: set[str], granted: set[str]
+) -> None:
+    """Plugin API 1.1.14 notification capabilities are explicit, versioned and justified."""
+    used = declared & NOTIFICATION_CONTRACT_CAPABILITIES
+    if not used:
+        return
+    if contract_version < (1, 1, 14):
+        raise ValueError("versioned notification capabilities require Plugin API v1.1.14")
+    if not used <= granted:
+        raise ValueError("versioned notification capabilities require explicit permissions")
+    # Publishing registers a canonical type first, and actions need a declaring event type.
+    if "notification_sources.register" not in declared | granted and "notifications.canonical" in used:
+        raise ValueError("canonical notifications require notification_sources.register")
+    if {"notifications.actions", "notifications.urgency", "notifications.templates.html"} & used and (
+        "notifications.canonical" not in used
+    ):
+        raise ValueError("notification actions, urgency and templates require notifications.canonical")
 
 
 def validate_scheduled_tasks(

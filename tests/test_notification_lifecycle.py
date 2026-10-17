@@ -59,4 +59,8 @@ def test_query_schema_rejects_caller_selected_owner():
     schema = json.loads((ROOT / "tools/schemas/notification-lifecycle-query-v1.schema.json").read_text())
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate({"user_id": str(uuid4())}, schema)
-    assert schema["x-api-contract-version"] == "1.1.4"
+    # The query keeps its 1.1.4 shape plus the optional, opt-in 1.1.14 revision replay flag.
+    assert schema["x-api-contract-version"] == "1.1.14"
+    assert set(schema["properties"]) == {"cursor", "limit", "include_revisions"}
+    jsonschema.validate({"cursor": "c", "limit": 5}, schema)
+    jsonschema.validate({"include_revisions": True}, schema)
