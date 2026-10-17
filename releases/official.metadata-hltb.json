@@ -1360,6 +1360,142 @@
         "official"
       ],
       "version": "0.7.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "031eb2ef246929d8658acaf7b29f9d3805d1fb42",
+        "source_committed_at": "2026-10-17T09:21:35+08:00",
+        "source_digest": "3f4690c4022deaa9af6d9e7d1ac6aad691d9a4a3b2b6304c0e2ce9c3d58809b1",
+        "source_path": "official/metadata-hltb",
+        "version_bump": "patch"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.13",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
+          "signature": "v2:E1ysvQTdlIjmbZZyqhRXV89J3yk2+9xxTjV0JZG2aCTR1cxfstUFZAShLMKKFD65hQCsUgoCzS094xgR/kFKAg=="
+        },
+        "manifest_version": 1,
+        "name": "HowLongToBeat Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-hltb",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "metadata",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.7.1"
+      },
+      "package": {
+        "filename": "official.metadata-hltb-0.7.1.utp",
+        "format": "utp-v1",
+        "size_bytes": 9605
+      },
+      "package_sha256": "390b06ecbae9b2ad4bb088098b607fcf753047106e6be48af21153140e3cd0ae",
+      "plugin_id": "official.metadata-hltb",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
+        "signature": "v2:E1ysvQTdlIjmbZZyqhRXV89J3yk2+9xxTjV0JZG2aCTR1cxfstUFZAShLMKKFD65hQCsUgoCzS094xgR/kFKAg=="
+      },
+      "tags": [
+        "metadata",
+        "hltb",
+        "official"
+      ],
+      "version": "0.7.1"
     }
   ],
   "version": 1
