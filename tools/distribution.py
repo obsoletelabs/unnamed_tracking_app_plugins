@@ -195,6 +195,15 @@ def collect_payload(
            for capability in manifest.get("capabilities", [])):
         # Plugin API 1.1.14 helpers; they depend only on the always-bundled protocol module.
         files["sdk/notification_stories.py"] = source_bytes(root / "sdk/notification_stories.py")
+    # Provider helpers a plugin imports explicitly (for example the Discord embed renderer).
+    plugin_text = "\n".join(
+        source_bytes(path).decode("utf-8", "replace") for path in source.rglob("*.py")
+        if not any(part.startswith(".") or part in {"__pycache__", "node_modules"}
+                   for part in path.relative_to(source).parts)
+    )
+    for helper in ("notification_stories", "discord_embeds"):
+        if re.search(rf"from sdk\.{helper} import|import sdk\.{helper}\b|from sdk import [^\n]*\b{helper}\b", plugin_text):
+            files[f"sdk/{helper}.py"] = source_bytes(root / f"sdk/{helper}.py")
     if manifest.get("frontend"):
         files["frontend/appearance.js"] = source_bytes(
             root / "sdk/frontend_appearance.js"
