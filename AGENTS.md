@@ -34,6 +34,7 @@ Maintained source is split by product purpose and signing identity:
 examples/<plugin-name>/  # complete reference/demo sources (demo signers)
 official/<plugin-name>/  # maintained user-facing plugins (official signers)
 plugins/<plugin-name>/   # independent sources (generic signers, optional)
+reference-clients/<name>/  # packaged non-plugin consumers of public host contracts
 sdk/                    # public Plugin API v1 protocol helper
 wiki/docs/              # Material/MkDocs developer manual and dated history
 tests/                  # source, package, browser and release contract tests
