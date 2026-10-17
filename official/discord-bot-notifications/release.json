@@ -7,5 +7,5 @@
   ],
   "icon": "native/icon.svg",
   "automatic_update": false,
-  "release_notes": "Adds an optional Discord Activity OAuth identity and live room-membership adapter, with verified avatar data. Requires Plugin API 1.1.12 and explicit integrations.identity_provider permission. Existing notification destinations and manual updates are preserved."
+  "release_notes": "Account DM and server channel messages render as embeds with facts, images and link buttons, digest several items in one message, edit the earlier message for story updates and send threaded follow-ups when it is gone; requires host Plugin API 1.1.14."
 }
