@@ -287,7 +287,7 @@ fake Discord HTTP API at the `network.request` boundary that enforces the limits
 edits, deletions, rate limits and cross-bot access for the tests. The gateway needs host
 Plugin API 1.1.14 (`network.request` with `PATCH`).
 
-# Official producers on stories
+### Official producers on stories
 
 Background workers act for a subscribed account through `tasks.request`, which the host allows to carry
 exactly two story operations in addition to `notifications.send` and `notifications.emit`:
