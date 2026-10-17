@@ -20,8 +20,8 @@ let browser;
 before(async () => { browser = await chromium.launch({ args: ["--no-sandbox"] }); });
 after(async () => { await browser?.close(); });
 
-async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixture=1", menuSync = false) {
-  await page.evaluate(({ markup, signinUrl, menuSync }) => {
+async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixture=1", menuSync = false, startConnected = false) {
+  await page.evaluate(({ markup, signinUrl, menuSync, startConnected }) => {
     const iframe = document.querySelector("iframe");
     window.actions = [];
     window.addEventListener("message", event => {
@@ -31,19 +31,60 @@ async function mount(page, signinUrl = "https://www.epicgames.com/id/login?fixtu
       if (event.data.method === "plugin.context") result = { initial_action_id: menuSync ? "sync" : "" };
       if (event.data.method === "plugin.run-action") {
         window.actions.push({ action: payload.actionId, code: payload.values.authorization_code });
-        if (payload.actionId === "status") result = { connected: menuSync, display_name: "Fixture player", phase: "idle", login_url: signinUrl };
+        if (payload.actionId === "status") result = { connected: Boolean(menuSync || startConnected), display_name: "Fixture player", phase: "idle", login_url: signinUrl };
+        else if (payload.actionId === "start") result = { ok: false, error: "Epic rejected this sign-in. Sign in on Epic again and paste a fresh code." };
         else if (menuSync && ["sync", "step"].includes(payload.actionId)) result = { connected: true, display_name: "Fixture player", phase: payload.actionId === "sync" && menuSync !== "complete" ? "playtime" : "complete", imported: 1 };
         else if (payload.actionId === "signin") {
           result = { redirect_url: signinUrl };
           window.setTimeout(() => window.location.assign(signinUrl), 0);
-        } else if (payload.values.authorization_code === "b".repeat(32)) result = { connected: true, display_name: "Fixture player", phase: "idle" };
+        } else if (String(payload.values.authorization_code || "").includes("b".repeat(32))) result = { connected: true, display_name: "Fixture player", phase: "idle" };
         else result = { ok: false, error: "Paste a valid one-time code." };
       }
       event.source.postMessage({ type: "plugin-api-response", requestId, result }, "*");
     });
     iframe.srcdoc = markup;
-  }, { markup: html, signinUrl, menuSync });
+  }, { markup: html, signinUrl, menuSync, startConnected });
 }
+
+test("a connected account can replace an expired sign-in without disconnecting", async () => {
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", error => errors.push(String(error)));
+  try {
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
+    await mount(page, "https://www.epicgames.com/id/login?fixture=1", false, true);
+    const frame = page.frameLocator("iframe");
+    await frame.getByText("Connected as Fixture player.", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#connect-panel").isVisible(), false);
+    // An import that finds the sign-in expired offers the code field in place.
+    await frame.getByRole("button", { name: "Import games" }).click();
+    await frame.getByText("Epic rejected this sign-in. Sign in on Epic again and paste a fresh code.", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#connect-panel").isVisible(), true);
+    // Pasting Epic's page connects without another click.
+    await frame.locator("#code").evaluate(input => {
+      input.value = JSON.stringify({ redirectUrl: "https://localhost/?code=" + "b".repeat(32), authorizationCode: "b".repeat(32) });
+      input.dispatchEvent(new Event("paste"));
+    });
+    await frame.locator("#error").waitFor({ state: "hidden" });
+    await page.waitForFunction(() => window.actions.some(item => item.action === "connect"));
+    assert.equal(await frame.locator("#connect-panel").isVisible(), false);
+    assert.equal(await frame.getByRole("button", { name: "Replace sign-in" }).isVisible(), true);
+    assert.deepEqual(errors, []);
+  } finally { await page.close(); }
+});
+
+test("a connected account does not see sign-in controls while status loads", async () => {
+  const page = await browser.newPage();
+  try {
+    await page.setContent('<iframe title="Epic" sandbox="allow-scripts"></iframe>');
+    // No host response yet: the frame must keep its neutral loading state.
+    await page.evaluate(markup => { document.querySelector("iframe").srcdoc = markup; }, html);
+    const frame = page.frameLocator("iframe");
+    await frame.getByText("Checking connection…", { exact: true }).waitFor();
+    assert.equal(await frame.locator("#connect-panel").isVisible(), false);
+    assert.equal(await frame.locator("#import-panel").isVisible(), false);
+  } finally { await page.close(); }
+});
 
 test("opaque sandbox connects through clicks and Enter, clearing codes and showing safe errors", async () => {
   const page = await browser.newPage();

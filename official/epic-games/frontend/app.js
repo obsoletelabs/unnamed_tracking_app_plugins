@@ -3,14 +3,19 @@
   let snapshot = { connected: false, phase: "idle" };
   let busy = false;
   let paused = false;
+  // Until the first status arrives, don't flash sign-in controls at a connected account.
+  let loaded = false;
+  // A connected account can replace an expired or revoked Epic sign-in without disconnecting.
+  let reconnecting = false;
   const phases = { idle: "No import started.", inventory: "Reading your Epic inventory…", playtime: "Reading recorded playtime…", catalogue: "Looking up game details…", import: "Saving games to your library…", missing: "Checking availability against the complete inventory…", complete: "Import complete." };
-  function request(actionId, values = {}) {
-    return hostRequest("plugin.run-action", { actionId, values });
+  function request(actionId, values = {}, timeoutMs = 35000) {
+    return hostRequest("plugin.run-action", { actionId, values }, timeoutMs);
   }
-  function hostRequest(method, payload) {
+  function hostRequest(method, payload, timeoutMs = 35000) {
     return new Promise((resolve, reject) => {
       const requestId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `epic-${Date.now()}-${Math.random()}`;
-      const timer = setTimeout(() => { window.removeEventListener("message", receive); reject(new Error("The host did not respond. Resume to retry the saved step.")); }, 35000);
+      // 0 waits for the host: e.g. its Disconnect confirmation may stay open for any length of time.
+      const timer = timeoutMs > 0 ? setTimeout(() => { window.removeEventListener("message", receive); reject(new Error("The host did not respond. Try again; a saved import resumes where it stopped.")); }, timeoutMs) : undefined;
       function receive(event) {
         if (event.source !== window.parent || event.data?.type !== "plugin-api-response" || event.data.requestId !== requestId) return;
         clearTimeout(timer); window.removeEventListener("message", receive);
@@ -23,11 +28,13 @@
     });
   }
   function render() {
-    $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
-    $("connect-panel").hidden = snapshot.connected;
-    $("import-panel").hidden = !snapshot.connected;
-    $("account").className = snapshot.connected ? "connected" : "hint";
-    $("disconnect").hidden = !snapshot.connected;
+    if (loaded) $("account").textContent = snapshot.connected ? `Connected as ${snapshot.display_name}.` : "Connect your Epic account to start.";
+    $("connect-panel").hidden = !loaded || (snapshot.connected && !reconnecting);
+    $("import-panel").hidden = !loaded || !snapshot.connected;
+    $("account").className = loaded && snapshot.connected ? "connected" : "hint";
+    $("account-actions").hidden = $("disconnect").hidden = !loaded || !snapshot.connected;
+    $("reconnect").hidden = !loaded || !snapshot.connected || reconnecting;
+    $("reconnect").disabled = busy;
     $("signin-url").value = snapshot.login_url || "";
     $("copy-signin").disabled = busy || !snapshot.login_url;
     $("import").textContent = ["idle", "complete"].includes(snapshot.phase) ? "Import games" : "Resume import";
@@ -43,7 +50,11 @@
     if (busy) return;
     busy = true; paused = false; $("error").hidden = true; render();
     try { await work(); }
-    catch (error) { $("error").textContent = error.message; $("error").hidden = false; }
+    catch (error) {
+      $("error").textContent = error.message; $("error").hidden = false;
+      // An expired or revoked sign-in: offer the code field instead of a dead end.
+      if (snapshot.connected && /sign in on epic again/i.test(error.message)) reconnecting = true;
+    }
     finally { busy = false; render(); }
   }
   async function importGames(restart) {
@@ -56,16 +67,26 @@
   function connect() {
     if (busy) return;
     const authorization_code = $("code").value; $("code").value = "";
-    void perform(async () => { snapshot = await request("connect", { authorization_code }); });
+    void perform(async () => {
+      snapshot = await request("connect", { authorization_code });
+      reconnecting = false;
+    }).then(() => { if (snapshot.connected && !$("import").disabled) $("import").focus(); });
   }
   function signIn() {
     // Do not call window.open() from inside the sandbox. The declared
-    // external_navigation action is handled by the host after the action
-    // returns its validated redirect_url, so browser popup blockers are not
-    // involved and the plugin does not need popup/same-origin privileges.
+    // external_navigation action is handled by the host, which opens the
+    // validated redirect_url in a new tab where it can (keeping this page
+    // open for the code) and the plugin needs no popup/same-origin privileges.
     if (busy) return;
     void perform(async () => { await request("signin"); });
   }
+  // Pasting Epic's whole page (Ctrl/Cmd+A, then copy) connects in one step.
+  $("code").addEventListener("paste", () => {
+    setTimeout(() => {
+      const value = $("code").value.trim();
+      if (/^[0-9a-fA-F]{32}$/.test(value) || value.includes("authorizationCode")) connect();
+    }, 0);
+  });
   // The host's opaque sandbox blocks native forms; use the action bridge.
   $("connect").onclick = connect;
   $("code").addEventListener("keydown", (event) => {
@@ -73,7 +94,11 @@
       event.preventDefault(); connect();
     }
   });
-  $("disconnect").onclick = () => perform(async () => { const result = await request("disconnect"); if (!result.cancelled) snapshot = result; });
+  $("disconnect").onclick = () => perform(async () => {
+    const result = await request("disconnect", {}, 0);
+    if (!result.cancelled) { snapshot = result; reconnecting = false; }
+  }).then(() => { if (!snapshot.connected) $("signin").focus(); });
+  $("reconnect").onclick = () => { reconnecting = true; render(); $("signin").focus(); };
   $("signin").onclick = signIn;
   $("copy-signin").onclick = async () => {
     const input = $("signin-url");
@@ -91,7 +116,8 @@
   $("restart").onclick = () => perform(async () => importGames(true));
   $("pause").onclick = () => { paused = true; $("pause").disabled = true; };
   void perform(async () => {
-    snapshot = await request("status");
+    try { snapshot = await request("status"); }
+    finally { loaded = true; }
     const context = await hostRequest("plugin.context", {});
     if (snapshot.connected && context.initial_action_id === "sync") {
       snapshot = await request("sync");
