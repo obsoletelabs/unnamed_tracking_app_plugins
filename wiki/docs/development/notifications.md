@@ -275,7 +275,30 @@ and the updated provider and lifecycle documents); `tools/check_host_contract.py
 the paired host, and `tests/fixtures/notification_contract/` holds the shared conformance cases the
 SDK is tested against. The runnable demonstration is `examples/story-notification-demo`.
 
-## Discord rich batches and editable stories
+##
+
+# Official producers on stories
+
+Background workers act for a subscribed account through `tasks.request`, which the host allows to carry
+exactly two story operations in addition to `notifications.send` and `notifications.emit`:
+`notification_sources.register` and `notifications.publish`, each with its own capability and the target
+account's live grant. `register_canonical_type_for_user` and `publish_for_user` in
+`sdk/notification_stories.py` wrap them and run the same local validation as the direct helpers.
+
+The official Jellyfin Media Sync plugin (`official/jellyfin-media-sync/attention.py`) is the migrated
+producer. Each account has one `sync:<account id>` story: a sync problem opens it (`attention`), a
+different problem revises it, and the next successful sync resolves it. A repeated identical problem is
+the same event and sends nothing. The story carries the account and server as facts and a host-route
+action to the plugin's accounts page; error text is the plugin's already-sanitised message, never remote
+diagnostics. If the host or the user's grant cannot take the story, the plugin falls back to the earlier
+single `notifications.send` message and sync recovery is never affected. The host's own producers (plugin
+updates, game releases and price events) are migrated in the paired host change; they need nothing from
+plugins.
+
+`tests/test_official_notification_stories.py` builds the real plugin with a throwaway official key,
+verifies the package and runs the packaged producer against a fake gateway.
+
+Discord rich batches and editable stories
 
 `official.discord-notifications` (webhook) and the per-account/channel providers of
 `official.discord-bot-notifications` use the 1.1.14 `capabilities`/`edit_action` declaration with
