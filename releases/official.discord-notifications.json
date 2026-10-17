@@ -1179,6 +1179,133 @@
         "official"
       ],
       "version": "1.7.0"
+    },
+    {
+      "automatic_update": false,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "b3431e5a1b0e892526f5726e6a813c6a2543c0cf",
+        "source_committed_at": "2026-10-17T22:54:50+08:00",
+        "source_digest": "f007a84decf0d14af5b2d502c4c31facc279b891961c104e35f32866f4d81ebd",
+        "source_path": "official/discord-notifications",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "35878a54a656772077bd25fe042f7b715432b9b6ba67ee4080d6d3f5f69f758d"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.14",
+        "application_version_range": ">=1.0.0",
+        "capabilities": [
+          {
+            "name": "notification_providers.register",
+            "version": 1
+          },
+          {
+            "name": "notification_providers.deliver",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Discord webhook notifications with embeds, digests and editable story messages, plugin-owned credentials and generic destination settings.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "08974f1834406faa47f84b0bf1278ee58540913044f60634b2484c95d6d01314",
+          "signature": "v2:2vmlIaYt+G6tBL8kaDEk4M7iTRr72FXor0UObAbg8bca8AHM8/B5zGBsqQJruGQ8+QS091lc0JmFIuUIECi4Dw=="
+        },
+        "manifest_version": 1,
+        "name": "Discord Notifications",
+        "permissions": [
+          {
+            "capability": {
+              "name": "notification_providers.register",
+              "version": 1
+            },
+            "rationale": "Register the generic public Discord webhook destination contract."
+          },
+          {
+            "capability": {
+              "name": "notification_providers.deliver",
+              "version": 1
+            },
+            "rationale": "Receive only core-approved notification content for enrolled PUBLIC destinations and edit messages this destination created; the plugin controls its final Discord payload."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Store configured webhook credentials in plugin-owned storage, bound to opaque installation/destination revisions."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Send the notification to the configured Discord webhook."
+          }
+        ],
+        "plugin_id": "official.discord-notifications",
+        "sdk_version_range": "^1.1.14",
+        "storage": {
+          "quota_mb": 4
+        },
+        "ui": {
+          "actions": [
+            "configure",
+            "retire",
+            "deliver",
+            "edit"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "1.8.0"
+      },
+      "package": {
+        "filename": "official.discord-notifications-1.8.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 24713
+      },
+      "package_sha256": "d09eacc2b4c9b9d18d3759539f1303502920410a26c8268331fb85ef91f49d4e",
+      "plugin_id": "official.discord-notifications",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Discord Webhook Notifications\n\nMaintained Discord webhook delivery through the generic provider contract (rich delivery needs Plugin API 1.1.14).\nDeploy the paired host provider/settings change before installing this release.\n\n## Setup\n\n1. Install the plugin and approve its provider, storage and outbound-network grants.\n2. Open the host's notification settings and enable Discord Webhook for your account.\n3. Add a destination using the generated configuration form. Enter a label and an\n   ordinary Discord text-channel webhook URL. Multiple destinations are supported.\n4. Choose notification types and use **Send test notification** to exercise the\n   configured credentials through the core dispatcher.\n\nWebhooks remain PUBLIC. Default media announcements contain public release facts.\nEach destination revision can separately opt into the richer followed-media\nprojection; this does not permit account identifiers, watch history, ratings or\nsecurity content. Critical urgency is not supported by this provider.\n\n## Configuration and delivery\n\nThe plugin declares its fields, destination kind and features; the host renders\nthem with shared controls. The plugin validates and stores its own webhook tokens\nunder opaque installation/destination IDs and revisions. Credentials are never\nreturned to forms, action results, lifecycle records or host notification rows.\nEditing retains an omitted saved URL, invalidates pending work and clears previous\nmedia consent. Removal deletes the URL and retains only a revision tombstone.\n\nOnly exact HTTPS discord.com/discordapp.com webhook paths are accepted, without\nuserinfo, alternate ports, query parameters or fragments. The plugin uses its own\nbounded network grant and renders only core-approved content with mentions disabled.\nEmpty successful Discord responses are accepted; rate limits and server/network\nfailures are retryable, while invalid/revoked webhook responses fail permanently.\nCore owns delivery state, leases, retries, preferences and routing checks.\n\n## Rich batches and editable story messages (host Plugin API 1.1.14)\n\nThe webhook declares presentation capabilities (`rich_embeds`, edits, up to 8 digest items,\n4 images, link actions) and an `edit` action. Canonical deliveries are laid out by\n`sdk/discord_embeds.py` within Discord's hard limits: at most 10 embeds and 6,000 characters\nper message, 256/4,096 characters for title/description and 25 fields of 256/1,024 characters.\nTruncation is deterministic, a cut description always ends with the live story link, mentions\nnever notify (`allowed_mentions` parses nothing) and only http(s) links survive. Webhooks cannot\ncarry buttons, so actions are listed as links in the embed.\n\nMessages are created with `?wait=true`; Discord's message id is returned to the host as the opaque\nreference. A later story revision edits that message (`PATCH .../messages/{id}`) while the host\ndecides it is eligible; a deleted message (HTTP 404/403) is reported as `gone` and the host\nsends a selective follow-up instead. Webhook messages cannot be replied to, so follow-ups are\nstandalone. A reference only works with the webhook that created it. The host-owned test message\nkeeps the minimal payload. Rate limits (429) and 5xx/network errors are retryable; other errors\nfail without blocking other providers. Release order: host (Plugin API 1.1.14) first, then this\npackage.\n\n## Migration and testing\n\nThis release requires explicit enrollment. Historical protected webhook secrets\nare not transferred to plugin storage, and automatic update is disabled for this\ntransition. Old packages remain immutable and notification history is retained.\n\nStandalone source and generated-package tests cover field validation, installation\nseparation, revision races, secret removal, malformed URLs, approved content and\nHTTP failure handling. No production Discord credential is required by those tests.\n",
+      "release_notes": "Embeds with facts, links and images, digests of several items and editable story messages (webhook message edits by id) under Discord limits; requires host Plugin API 1.1.14. Test messages keep the minimal payload.",
+      "sha256": "08974f1834406faa47f84b0bf1278ee58540913044f60634b2484c95d6d01314",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "08974f1834406faa47f84b0bf1278ee58540913044f60634b2484c95d6d01314",
+        "signature": "v2:2vmlIaYt+G6tBL8kaDEk4M7iTRr72FXor0UObAbg8bca8AHM8/B5zGBsqQJruGQ8+QS091lc0JmFIuUIECi4Dw=="
+      },
+      "tags": [
+        "notifications",
+        "discord",
+        "official"
+      ],
+      "version": "1.8.0"
     }
   ],
   "version": 1
