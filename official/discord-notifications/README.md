@@ -1,6 +1,6 @@
 # Discord Webhook Notifications
 
-Maintained Discord webhook delivery through the generic Plugin API 1.1.5 provider contract.
+Maintained Discord webhook delivery through the generic provider contract (rich delivery needs Plugin API 1.1.14).
 Deploy the paired host provider/settings change before installing this release.
 
 ## Setup
@@ -32,6 +32,25 @@ bounded network grant and renders only core-approved content with mentions disab
 Empty successful Discord responses are accepted; rate limits and server/network
 failures are retryable, while invalid/revoked webhook responses fail permanently.
 Core owns delivery state, leases, retries, preferences and routing checks.
+
+## Rich batches and editable story messages (host Plugin API 1.1.14)
+
+The webhook declares presentation capabilities (`rich_embeds`, edits, up to 8 digest items,
+4 images, link actions) and an `edit` action. Canonical deliveries are laid out by
+`sdk/discord_embeds.py` within Discord's hard limits: at most 10 embeds and 6,000 characters
+per message, 256/4,096 characters for title/description and 25 fields of 256/1,024 characters.
+Truncation is deterministic, a cut description always ends with the live story link, mentions
+never notify (`allowed_mentions` parses nothing) and only http(s) links survive. Webhooks cannot
+carry buttons, so actions are listed as links in the embed.
+
+Messages are created with `?wait=true`; Discord's message id is returned to the host as the opaque
+reference. A later story revision edits that message (`PATCH .../messages/{id}`) while the host
+decides it is eligible; a deleted message (HTTP 404/403) is reported as `gone` and the host
+sends a selective follow-up instead. Webhook messages cannot be replied to, so follow-ups are
+standalone. A reference only works with the webhook that created it. The host-owned test message
+keeps the minimal payload. Rate limits (429) and 5xx/network errors are retryable; other errors
+fail without blocking other providers. Release order: host (Plugin API 1.1.14) first, then this
+package.
 
 ## Migration and testing
 
