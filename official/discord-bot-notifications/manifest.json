@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.12",
+  "api_contract_version": "1.1.14",
   "application_version_range": ">=1.0.0",
   "capabilities": [
     {
@@ -159,7 +159,7 @@
     }
   ],
   "plugin_id": "official.discord-bot-notifications",
-  "sdk_version_range": "^1.1.2",
+  "sdk_version_range": "^1.1.14",
   "storage": {
     "quota_mb": 8
   },
@@ -191,7 +191,9 @@
       "save-activity-oauth",
       "activity-config",
       "authenticate-activity",
-      "revalidate-activity"
+      "revalidate-activity",
+      "edit-account",
+      "edit-channel"
     ],
     "menus": [],
     "pages": [
@@ -200,5 +202,5 @@
     ],
     "settings": []
   },
-  "version": "0.3.0"
+  "version": "0.4.0"
 }

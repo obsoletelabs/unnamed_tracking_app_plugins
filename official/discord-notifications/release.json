@@ -6,7 +6,7 @@
     "discord",
     "official"
   ],
-  "release_notes": "Generic 1.1.5 destination settings with plugin-owned webhook credentials/transport, revision-bound configuration and safe HTTP failure handling. Explicit new enrollment required; historical protected routes are retired without moving credentials.",
+  "release_notes": "Embeds with facts, links and images, digests of several items and editable story messages (webhook message edits by id) under Discord limits; requires host Plugin API 1.1.14. Test messages keep the minimal payload.",
   "automatic_update": false,
   "icon": "icon.svg"
 }
