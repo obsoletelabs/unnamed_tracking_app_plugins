@@ -1,7 +1,9 @@
 """Epic wire DTOs, actor scoping and resumable failure/retry behavior."""
 
+import base64
 import importlib.util
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -521,3 +523,30 @@ def test_a_stale_checkpoint_restarts_so_availability_comes_from_one_complete_wal
     assert result["phase"] == "playtime" or result["phase"] == "inventory"
     assert result["completed"] is False
     assert json.loads(service.storage[state_key]).get("missing") is None
+
+
+def test_support_docs_name_the_unofficial_dependency_without_launcher_credentials(service):
+    root = SOURCE.parents[1]
+    readme = (SOURCE / "README.md").read_text(encoding="utf-8")
+    pages = [
+        readme,
+        (root / "wiki/docs/examples/epic-games.md").read_text(encoding="utf-8"),
+        (root / "official/README.md").read_text(encoding="utf-8"),
+        (root / "README.md").read_text(encoding="utf-8"),
+    ]
+    secret = base64.b64encode(f"{service.epic.CLIENT_ID}:{service.epic.CLIENT_SECRET}".encode())
+    for page in pages:
+        assert "unofficial" in page.lower()
+        for value in (service.epic.CLIENT_ID, service.epic.CLIENT_SECRET, secret.decode()):
+            assert value.lower() not in page.lower()
+    assert "## Experimental service dependency" in readme
+    assert "## Imported fields" in readme
+    # Fully quoted troubleshooting messages must be the plugin's actual wording.
+    source = (SOURCE / "epic.py").read_text(encoding="utf-8") + (
+        SOURCE / "plugin.py"
+    ).read_text(encoding="utf-8")
+    troubleshooting = readme.split("## Troubleshooting and support", 1)[1]
+    quoted = [m for m in re.findall(r'"([^"]+)"', troubleshooting) if "…" not in m]
+    assert len(quoted) >= 8
+    for message in quoted:
+        assert message in source, message

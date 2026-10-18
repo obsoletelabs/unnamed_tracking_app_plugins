@@ -5,6 +5,32 @@ outside the core app. It requires the host's additive **Plugin API 1.1.11**
 connection sync and personal schedule contracts. Its sandboxed page offers personal sign-in, imports,
 pause/resume and disconnect through declared actions.
 
+## Experimental service dependency
+
+!!! warning "Unofficial Epic services"
+    Epic does not publish or support an API for third-party library imports, and
+    this plugin is not affiliated with or endorsed by Epic Games. It does not use
+    Epic Online Services or an Epic-issued OAuth client. It signs in with the
+    Epic Games Launcher's public client through Epic's own sign-in page, then
+    reads the launcher's undocumented account, library, playtime and catalogue
+    services. Epic can change, rate-limit or withdraw those services at any time,
+    so sign-in, imports or playtime may stop working until a new plugin release
+    adapts.
+
+An Epic service failure is not host data loss. A failed sign-in, refresh or
+provider request keeps the saved connection, checkpoint and library; the plugin
+never deletes games, and disconnecting keeps imported games. Imports carry the
+title, Epic identity, and (when Epic supplies them) description, developer,
+publisher and total playtime. Artwork, release dates, genres/tags and
+achievements are not imported.
+
+The plugin README is the maintained reference for
+[imported fields](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/epic-games/README.md#imported-fields)
+and
+[troubleshooting and support](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/epic-games/README.md#troubleshooting-and-support),
+including the plugin's error messages, reconnection with **Replace sign-in** and
+where to report problems.
+
 Sign in on Epic's own site and submit its one-time code. Use **Copy sign-in link**
 to open Epic in your regular browser while leaving the app open; if clipboard
 access is unavailable, copy the selected link manually. The plugin retains
