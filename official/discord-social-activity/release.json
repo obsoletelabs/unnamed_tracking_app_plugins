@@ -1,6 +1,6 @@
 {
   "automatic_update": false,
-  "release_notes": "First signed official Game Night release: shared Discord rooms, consented library connections, guest games, personal rules, shortlists and voting. Recovers room cleanup after temporary host-gateway outages and includes a setup/troubleshooting guide. Requires host Plugin API v1.1.12 and Discord Bot Notifications >=0.1.2. Manual updates; pricing filters remain paused.",
+  "release_notes": "Fix optional room player limits: save a known maximum while leaving minimum unknown, or vice versa. Partial ranges retain the known bound and confirm only the current group size; changed groups need renewed approval. Known limits, ownership, platform rules and vetoes remain enforced. Includes updated player instructions and troubleshooting. Same seven capabilities, manual updates; requires host Plugin API v1.1.12 and Discord Bot Notifications >=0.1.2.",
   "tags": [
     "official",
     "discord",

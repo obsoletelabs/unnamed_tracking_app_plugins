@@ -160,7 +160,8 @@ def test_existing_manual_confirmation_supplies_missing_limits_but_not_personal_r
     assert "session length" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
 
 
-@pytest.mark.parametrize("minimum,maximum", [(True, 4), (0, 4), (4, 2), (1, 33), (1, None)])
+@pytest.mark.parametrize("minimum,maximum", [(True, 4), (0, 4), (4, 2), (1, 33),
+    (None, None), (None, False), (None, 0), (33, None), ("", 4), (2, "4")])
 def test_shared_limits_validate_counts(minimum, maximum):
     state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
     with pytest.raises(engine.SessionError, match="player range"):
@@ -436,3 +437,80 @@ def test_multiplayer_marker_without_limits_is_a_labeled_small_group_signal():
     ctx["library"][0].update(features=[], play_compatibility={"min_players": None, "max_players": None, "crossplay": False})
     _, result = engine.transition(None, {}, ctx, now=1000)
     assert result["pool"]["eligible"][0]["player_limits"] is None
+
+
+@pytest.mark.parametrize("minimum,maximum", [(None, 4), (2, None)])
+def test_partial_limits_preserve_unknown_and_approve_only_current_group(minimum, maximum):
+    state = None
+    for actor in ("one", "two", "three"):
+        state, _ = engine.transition(state, {}, multiplayer_context(actor), now=1000)
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": minimum, "max_players": maximum}, multiplayer_context(), now=1001)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["player_limits"] == {"min_players": minimum, "max_players": maximum,
+                                          "confirmed_by": "one"}
+    assert candidate["group_approval"] == {"players": 3, "confirmed_by": "one"}
+    assert candidate["needs_player_limits"] and not candidate["requires_player_limits"]
+    assert all(person["min_players"] == minimum and person["max_players"] == maximum
+               for person in candidate["access"])
+    state, result = engine.transition(state, {}, multiplayer_context("four"), now=1002)
+    assert not result["pool"]["eligible"]
+    candidate = result["pool"]["excluded"][0]
+    assert candidate["requires_player_limits"] and candidate["group_approval"] is None
+    assert candidate["player_limits"]["max_players"] == maximum
+    state, result = engine.transition(state, {"operation": "approve-group", "keys": ["title:together"]},
+                                      multiplayer_context(), now=1003)
+    assert result["pool"]["eligible"][0]["group_approval"]["players"] == 4
+    assert state["player_limits"][0]["min_players"] == minimum
+
+
+@pytest.mark.parametrize("minimum,maximum", [(None, 2), (4, None)])
+def test_group_approval_cannot_override_a_known_partial_bound(minimum, maximum):
+    state = None
+    for actor in ("one", "two", "three"):
+        state, _ = engine.transition(state, {}, multiplayer_context(actor), now=1000)
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": minimum, "max_players": maximum}, multiplayer_context(), now=1001)
+    _, result = engine.transition(state, {"operation": "approve-group", "keys": ["title:together"]},
+                                  multiplayer_context(), now=1002)
+    assert not result["pool"]["eligible"]
+    assert "player-count rule" in " ".join(result["pool"]["excluded"][0]["excluded_reasons"])
+
+
+def test_partial_limits_do_not_implicitly_reapprove_a_smaller_party():
+    state, _ = engine.transition(None, {}, multiplayer_context(), now=1000)
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": None, "max_players": 4}, multiplayer_context(), now=1001)
+    _, result = engine.transition(state, {}, multiplayer_context("two"), now=1002)
+    assert not result["pool"]["eligible"]
+    assert result["pool"]["excluded"][0]["requires_player_limits"]
+
+
+@pytest.mark.parametrize("restriction,reason", [("offline", "access unavailable"),
+    ("unowned", "ownership"), ("platform", "Cross-platform"), ("veto", "vetoed"),
+    ("known_maximum", "player-count rule"), ("duration", "session length")])
+def test_partial_limits_preserve_participant_access_and_hard_rules(restriction, reason):
+    state = None
+    for actor in ("one", "two", "three"):
+        state, _ = engine.transition(state, {}, multiplayer_context(actor), now=1000)
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": None, "max_players": 4}, multiplayer_context(), now=1001)
+    ctx = multiplayer_context("two")
+    operation = {}
+    if restriction == "offline":
+        ctx["source_states"]["source"] = "offline"
+    elif restriction == "unowned":
+        ctx["library"][0]["owned"] = False
+        ctx["library"].append({**ctx["library"][0], "id": "other", "title": "Other", "owned": True})
+    elif restriction == "platform":
+        ctx["library"][0]["platform"] = "PlayStation 5"
+    elif restriction == "known_maximum":
+        ctx["library"][0]["play_compatibility"] = {"min_players": 1, "max_players": 2}
+    elif restriction == "duration":
+        operation = {"operation": "preferences", "preferences": {"max_minutes": 30}}
+    else:
+        operation = {"operation": "veto", "key": "title:together"}
+    _, result = engine.transition(state, operation, ctx, now=1002)
+    assert not result["pool"]["eligible"]
+    candidate = next(item for item in result["pool"]["excluded"] if item["key"] == "title:together")
+    assert reason in " ".join(candidate["excluded_reasons"])

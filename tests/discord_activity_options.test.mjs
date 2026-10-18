@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { multiplayer, connectionScopes, trackingChange, gamePlatform } from "../official/discord-social-activity/ui/options.mjs";
+import { multiplayer, connectionScopes, trackingChange, gamePlatform, playerCountLabel } from "../official/discord-social-activity/ui/options.mjs";
 import { canSaveCompatibility, saveCompatibilityTargets } from "../official/discord-social-activity/ui/library.mjs";
 test("multiplayer detection uses available metadata without inventing unknown compatibility", () => {
   assert.equal(multiplayer({ features: ["Single-player", "Online Co-op"] }), true);
@@ -8,6 +8,13 @@ test("multiplayer detection uses available metadata without inventing unknown co
   assert.equal(multiplayer({ tags: ["MMORPG"] }), true);
   assert.equal(multiplayer({ features: ["Single-player"] }), false);
   assert.equal(multiplayer({ features: ["Full controller support"] }), null);
+});
+
+test("player-count labels preserve a known bound without inventing the other", () => {
+  assert.equal(playerCountLabel({min_players: 2, max_players: 4}), "2–4 players");
+  assert.equal(playerCountLabel({min_players: null, max_players: 4}), "Up to 4 players · minimum unknown");
+  assert.equal(playerCountLabel({min_players: 2, max_players: null}), "At least 2 players · maximum unknown");
+  assert.equal(playerCountLabel({min_players: null, max_players: null}), "Exact player limits unknown");
 });
 
 test("library consent stays minimal until the participant chooses progress features", () => {

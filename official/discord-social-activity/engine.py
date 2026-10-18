@@ -198,7 +198,16 @@ def evaluate(room: dict, *, now: int) -> dict:
                             "confirmed_by": pid}
                            for pid, games in contributions.items()
                            if key in games and games[key].get("compatibility")), None)
+        complete_limits = limits is not None and all(
+            limits[field] is not None for field in ("min_players", "max_players"))
+        # A partial confirmation is deliberately scoped to the approved party size.
+        # Do not silently replace its unknown bound with the small-group inference.
+        if limits is not None and not complete_limits:
+            small_group = False
         reasons, access, owners, score = [], [], 0, 0
+        if limits and ((limits["min_players"] is not None and count < limits["min_players"])
+                       or (limits["max_players"] is not None and count > limits["max_players"])):
+            reasons.append("Known room player-count rule")
         missing_platforms = [pid for pid, games in contributions.items()
                              if key in games and not games[key].get("platform")]
         platforms, crossplay = set(), True
@@ -222,7 +231,7 @@ def evaluate(room: dict, *, now: int) -> dict:
                     continue
             compatibility = game.get("compatibility")
             method = "self_reported"
-            if compatibility is None and (limits is not None or approved or small_group):
+            if compatibility is None and (complete_limits or approved or small_group):
                 saved = game.get("play_compatibility") or {}
                 method = "self_reported" if limits else "current_group" if approved else "detected_multiplayer"
                 compatibility = {"min_players": limits["min_players"] if limits else None,
@@ -243,8 +252,8 @@ def evaluate(room: dict, *, now: int) -> dict:
             crossplay = crossplay and compatibility.get("crossplay", False)
             if pref["platform"] != "Any" and platform_key(pref["platform"], aliases=matching["platform_aliases"]) != normalized:
                 reasons.append(f"{label}: platform rule")
-            if (compatibility["min_players"] is not None
-                    and not compatibility["min_players"] <= count <= compatibility["max_players"]):
+            if ((compatibility["min_players"] is not None and count < compatibility["min_players"])
+                    or (compatibility["max_players"] is not None and count > compatibility["max_players"])):
                 reasons.append(f"{label}: player-count rule")
             duration = compatibility.get("duration_minutes")
             if pref["max_minutes"] and (duration is None or duration > pref["max_minutes"]):
@@ -274,8 +283,8 @@ def evaluate(room: dict, *, now: int) -> dict:
             reasons.append("Discovery needs at least one confirmed owner")
         purchase_required = any(item["purchase_required"] for item in access)
         candidate = {"key": key, "title": display["title"], "access": access,
-                     "needs_player_limits": limits is None,
-                     "requires_player_limits": limits is None and not approved and not small_group,
+                     "needs_player_limits": not complete_limits,
+                     "requires_player_limits": not complete_limits and not approved and not small_group,
                      "group_approval": {"players": count, "confirmed_by": approval["confirmed_by"]} if approved else None,
                      "missing_platforms": missing_platforms,
                      "player_limits": {field: limits[field] for field in (
@@ -283,7 +292,7 @@ def evaluate(room: dict, *, now: int) -> dict:
                      "provider_ids": display.get("provider_ids", {}),
                      "score": score + owners, "reasons": ["Everyone owns it or consented to considering a purchase" if purchase_required else "Everyone has access",
                      "Price unknown; price filters are paused" if purchase_required else "No purchase required",
-                     "Known player limits checked" if limits else "Approved for this group; exact limits unknown" if approved else "Multiplayer accepted for 1–2 players; exact limits unknown" if small_group else "Player limits need confirmation",
+                     "Known player limits checked" if complete_limits else "Approved for this group; exact limits unknown" if approved else "Multiplayer accepted for 1–2 players; exact limits unknown" if small_group else "Player limits need confirmation",
                      "Personal hard rules satisfied"], "excluded_reasons": reasons,
                      "price_status": "unavailable" if purchase_required else "not_required", "evaluated_at": now,
                      "match_provenance": "provider_id" if key.startswith("steam:") else "title_match"}
@@ -320,6 +329,19 @@ def _public(room: dict, actor_id: str, now: int) -> dict:
             "pool": pool, "shortlist": shortlist,
             "selected": room["selected"] if room["selected"] and room["selected"]["key"] in valid else None,
             "history": room["history"][-20:]}
+
+
+def _approve_current_group(room: dict, candidates: list[dict], count: int,
+                           actor_id: str, now: int) -> None:
+    keys = {candidate["key"] for candidate in candidates}
+    approvals = [item for item in room.get("group_approvals", [])
+                 if game_key(item, room["matching"]) not in keys]
+    if len(approvals) + len(candidates) > 500:
+        raise SessionError("This room has reached its group approval capacity.")
+    for candidate in candidates:
+        approvals.append({"title": candidate["title"], "provider_ids": candidate["provider_ids"],
+            "players": count, "confirmed_by": actor_id, "confirmed_at": now})
+    room["group_approvals"] = approvals
 
 
 def transition(saved: dict | None, values: dict, context: dict, *, now: int | None = None) -> tuple[dict, dict]:
@@ -378,9 +400,11 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
         person["manual"] = [game for game in person["manual"] if game["key"] != values.get("key")]
     elif operation == "player-limits":
         minimum, maximum = values.get("min_players"), values.get("max_players")
-        if (type(minimum) is not int or type(maximum) is not int
-                or not 1 <= minimum <= maximum <= 32):
-            raise SessionError("Confirm a supported player range from 1 to 32.")
+        if ((minimum is None and maximum is None)
+                or any(bound is not None and (type(bound) is not int or not 1 <= bound <= 32)
+                       for bound in (minimum, maximum))
+                or (minimum is not None and maximum is not None and minimum > maximum)):
+            raise SessionError("Confirm a supported player range from 1 to 32; leave unknown limits blank.")
         pool = evaluate(room, now=now)
         candidate = next((game for game in pool["eligible"] + pool["excluded"]
                           if game["key"] == values.get("key")), None)
@@ -412,6 +436,8 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
                        "confirmed_by": previous["confirmed_by"] if same_counts else actor_id,
                        "confirmed_at": now})
         room["player_limits"] = limits
+        if minimum is None or maximum is None:
+            _approve_current_group(room, [candidate], pool["player_count"], actor_id, now)
     elif operation == "approve-group":
         keys = values.get("keys")
         if (not isinstance(keys, list) or not 1 <= len(keys) <= 100
@@ -434,15 +460,8 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
                 raise SessionError("This room has reached your saved platform capacity.")
             person["platform_overrides"] = overrides + [{"title": candidate["title"],
                 "provider_ids": candidate["provider_ids"], "platform": platform.strip()}]
-        approvals = [item for item in room.get("group_approvals", [])
-                     if game_key(item, room["matching"]) not in keys]
-        if len(approvals) + len(keys) > 500:
-            raise SessionError("This room has reached its group approval capacity.")
-        for key in keys:
-            candidate = candidates[key]
-            approvals.append({"title": candidate["title"], "provider_ids": candidate["provider_ids"],
-                "players": pool["player_count"], "confirmed_by": actor_id, "confirmed_at": now})
-        room["group_approvals"] = approvals
+        _approve_current_group(room, [candidates[key] for key in keys],
+                               pool["player_count"], actor_id, now)
     elif operation == "mode":
         if values.get("mode") not in {"strict", "balanced", "discovery"}:
             raise SessionError("Choose strict, balanced or discovery.")

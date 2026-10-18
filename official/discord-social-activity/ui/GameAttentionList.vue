@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
+import { playerCountLabel } from "./options.mjs";
 const props = defineProps({ games: Array, me: Object, busy: Boolean, playerCount: Number, platforms: Array });
 const emit = defineEmits(["action", "info"]);
 const search = ref(""), page = ref(1), selected = ref([]), editing = ref("");
@@ -20,8 +21,8 @@ function edit(game) {
 }
 function save(game) {
   const platform = game.missing_platforms.includes(props.me.id) ? { platform: draft.platform } : {};
-  if (Number.isInteger(draft.min_players) && Number.isInteger(draft.max_players)) {
-    emit("action", { operation: "player-limits", key: game.key, min_players: draft.min_players, max_players: draft.max_players, ...platform });
+  if (Number.isInteger(draft.min_players) || Number.isInteger(draft.max_players)) {
+    emit("action", { operation: "player-limits", key: game.key, min_players: Number.isInteger(draft.min_players) ? draft.min_players : null, max_players: Number.isInteger(draft.max_players) ? draft.max_players : null, ...platform });
   } else emit("action", { operation: "approve-group", keys: [game.key], ...platform });
 }
 function selectVisible(checked) {
@@ -47,9 +48,9 @@ function selectVisible(checked) {
       </div>
       <form v-if="editing === game.key" @submit.prevent="save(game)">
         <label v-if="game.missing_platforms.includes(me.id)">Your platform<select v-model="draft.platform" required><option value="" disabled>Choose your platform</option><option v-for="platform in platforms" :key="platform">{{ platform }}</option></select><small>Only your own room entry changes.</small></label>
-        <p v-if="game.player_limits" class="fine">{{ game.player_limits.min_players }}–{{ game.player_limits.max_players }} players already confirmed for the room.</p>
-        <template v-else><div class="limit-presets"><button v-for="range in [[1,2],[1,4],[2,8]]" :key="range.join('-')" type="button" class="pill" @click="draft.min_players=range[0]; draft.max_players=range[1]">{{ range[0] }}–{{ range[1] }}</button></div><div class="fields"><label>Minimum players <small>Optional</small><input v-model.number="draft.min_players" type="number" min="1" max="32" :required="Boolean(draft.max_players)" placeholder="Unknown" /></label><label>Maximum players <small>Optional</small><input v-model.number="draft.max_players" type="number" :min="draft.min_players || 1" max="32" :required="Boolean(draft.min_players)" placeholder="Unknown" /></label></div></template>
-        <p class="fine">Leaving limits blank approves this group only. Known limits apply to future group sizes too.</p>
+        <p v-if="game.player_limits" class="fine">{{ playerCountLabel(game.player_limits) }} already confirmed for the room.</p>
+        <template v-if="game.needs_player_limits"><div class="limit-presets"><button v-for="range in [[1,2],[1,4],[2,8]]" :key="range.join('-')" type="button" class="pill" @click="draft.min_players=range[0]; draft.max_players=range[1]">{{ range[0] }}–{{ range[1] }}</button></div><div class="fields"><label>Minimum players <small>Optional</small><input v-model.number="draft.min_players" type="number" min="1" max="32" placeholder="Unknown" /></label><label>Maximum players <small>Optional</small><input v-model.number="draft.max_players" type="number" :min="draft.min_players || 1" max="32" placeholder="Unknown" /></label></div></template>
+        <p class="fine">Leave either limit blank if unknown. Saving keeps any known limit and approves this {{ playerCount }}-player group only; approve again if its size changes. Confirm both limits to cover future group sizes.</p>
         <button class="primary" :disabled="busy">Save details</button> <button type="button" class="quiet" @click="editing=''">Cancel</button>
       </form>
     </article>
