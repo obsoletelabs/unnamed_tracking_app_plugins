@@ -15,6 +15,10 @@
       "version": 1
     },
     {
+      "name": "metadata_providers.media",
+      "version": 1
+    },
+    {
       "name": "metadata_providers.health",
       "version": 1
     },
@@ -61,6 +65,13 @@
     },
     {
       "capability": {
+        "name": "metadata_providers.media",
+        "version": 1
+      },
+      "rationale": "List artwork the configured Atlas server has already downloaded and verified for a game."
+    },
+    {
+      "capability": {
         "name": "metadata_providers.health",
         "version": 1
       },
@@ -90,11 +101,12 @@
     "actions": [
       "search",
       "metadata",
+      "media",
       "health"
     ],
     "menus": [],
     "pages": [],
     "settings": []
   },
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

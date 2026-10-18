@@ -8,5 +8,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": true,
-  "release_notes": "Initial preview: search and metadata from a configurable Atlas v2 server."
+  "release_notes": "Search, metadata and cached artwork from a configurable Atlas v2 server."
 }

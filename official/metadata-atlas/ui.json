@@ -23,6 +23,15 @@
       }
     },
     {
+      "id": "media",
+      "label": "Media",
+      "handler": "plugin:media",
+      "capability": {
+        "name": "metadata_providers.media",
+        "version": 1
+      }
+    },
+    {
       "id": "health",
       "label": "Health",
       "handler": "plugin:health",

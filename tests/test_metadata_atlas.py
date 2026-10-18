@@ -131,3 +131,26 @@ def test_health_validates_url_and_token(atlas, monkeypatch):
     assert atlas.health(work()) == {"health": "healthy"}
     Gateway(monkeypatch, routes={"/games": {"status": 401, "error": "no"}})
     assert atlas.health(work())["failure"]["code"] == "invalid_configuration"
+
+
+def test_media_lists_only_cached_artwork_as_public_links(atlas, monkeypatch):
+    digest = "a" * 64
+    art = {"results": [
+        {"kind": "key_art", "media_url": f"/api/v2/media/{digest}", "width": 600, "height": 900},
+        {"kind": "screenshot", "media_url": None, "url": "https://provider.test/s.jpg"},  # not cached: skipped
+        {"kind": "weird", "media_url": f"/api/v2/media/{'b' * 64}"},
+        {"kind": "hero", "media_url": "/api/v2/media/../../etc/passwd"}]}
+    gateway = Gateway(monkeypatch, routes={"/games/" + GAME["id"] + "/artwork": {"status": 200, "data": art}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    out = atlas.media({"request": {}, "candidate": selected})
+    assert out == {"assets": [{"kind": "key_art", "url": f"https://atlas.test/media/{digest}", "priority": 0,
+                               "width": 600, "height": 900}]}
+    schema = json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text())
+    jsonschema.validate(out, schema)
+    assert all("provider.test" not in call["url"] for call in gateway.calls)
+
+
+def test_media_without_a_certain_match_returns_no_assets(atlas, monkeypatch):
+    Gateway(monkeypatch, routes={"/resolve": {"status": 200, "data": {"results": [{"method": "fuzzy", "game": GAME}]}}})
+    out = atlas.media({"request": {}, "candidate": {"provider": "x", "title": "Portal 2", "year": 2011}})
+    assert out == {"assets": []}
