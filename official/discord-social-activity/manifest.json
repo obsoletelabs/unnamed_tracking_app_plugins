@@ -1,38 +1,15 @@
 {
-  "public_app": {
-    "identity_provider_plugin_id": "official.discord-bot-notifications",
-    "action_id": "session",
-    "entry": "frontend/index.html"
-  },
-  "storage": {
-    "quota_mb": 32
-  },
-  "integrity": {
-    "signature": null,
-    "key_id": null,
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
-  },
-  "dependencies": [
-    {
-      "optional": false,
-      "version_range": ">=0.1.2",
-      "plugin_id": "official.discord-bot-notifications"
-    }
-  ],
-  "frontend": {
-    "entry": "frontend/index.html"
-  },
-  "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
-  "name": "Game Night",
-  "manifest_version": 1,
+  "api_contract_version": "1.1.12",
+  "application_version_range": ">=1.0.0",
+  "automatic_update": false,
   "capabilities": [
     {
-      "version": 1,
-      "name": "integrations.public_app"
+      "name": "integrations.public_app",
+      "version": 1
     },
     {
-      "version": 1,
-      "name": "plugin.storage"
+      "name": "plugin.storage",
+      "version": 1
     },
     {
       "name": "integrations.public_app.admin",
@@ -55,39 +32,45 @@
       "version": 1
     }
   ],
+  "dependencies": [
+    {
+      "optional": false,
+      "plugin_id": "official.discord-bot-notifications",
+      "version_range": ">=0.1.2"
+    }
+  ],
+  "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
   "entrypoint": "plugin:main",
-  "plugin_id": "official.discord-social-activity",
-  "sdk_version_range": "^1.1.12",
-  "automatic_update": false,
-  "application_version_range": ">=1.0.0",
-  "api_contract_version": "1.1.12",
-  "version": "0.1.0",
-  "ui": {
-    "menus": [],
-    "actions": [
-      "session",
-      "admin-list",
-      "admin-manage"
-    ],
-    "settings": [],
-    "pages": [
-      "admin"
+  "frontend": {
+    "entry": "frontend/index.html"
+  },
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "Game Night",
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css"
     ]
   },
   "permissions": [
     {
-      "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions.",
       "capability": {
-        "version": 1,
-        "name": "integrations.public_app"
-      }
+        "name": "integrations.public_app",
+        "version": 1
+      },
+      "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions."
     },
     {
-      "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry.",
       "capability": {
-        "version": 1,
-        "name": "plugin.storage"
-      }
+        "name": "plugin.storage",
+        "version": 1
+      },
+      "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry."
     },
     {
       "capability": {
@@ -125,10 +108,27 @@
       "rationale": "Place participant management in Administration."
     }
   ],
-  "native_frontend": {
-    "entry": "native/app.js",
-    "styles": [
-      "native/style.css"
-    ]
-  }
+  "plugin_id": "official.discord-social-activity",
+  "public_app": {
+    "action_id": "session",
+    "entry": "frontend/index.html",
+    "identity_provider_plugin_id": "official.discord-bot-notifications"
+  },
+  "sdk_version_range": "^1.1.12",
+  "storage": {
+    "quota_mb": 32
+  },
+  "ui": {
+    "actions": [
+      "session",
+      "admin-list",
+      "admin-manage"
+    ],
+    "menus": [],
+    "pages": [
+      "admin"
+    ],
+    "settings": []
+  },
+  "version": "0.1.0"
 }

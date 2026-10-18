@@ -33553,6 +33553,476 @@
       "version": "1.8.0"
     },
     {
+      "application_version_range": ">=1.0.0",
+      "automatic_update": false,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "11b4e380bfbe3bd87cd9c2b1c576759c5f121b45",
+        "source_committed_at": "2026-10-18T13:03:06+08:00",
+        "source_digest": "973dd139e0dee3911f545f5c960d059e68947c6e2a4e3c938d7a820465c676c7",
+        "source_path": "official/discord-social-activity",
+        "version_bump": "initial"
+      },
+      "capabilities": [
+        {
+          "name": "integrations.public_app",
+          "version": 1
+        },
+        {
+          "name": "plugin.storage",
+          "version": 1
+        },
+        {
+          "name": "integrations.public_app.admin",
+          "version": 1
+        },
+        {
+          "name": "frontend.native",
+          "version": 1
+        },
+        {
+          "name": "frontend.settings",
+          "version": 1
+        },
+        {
+          "name": "frontend.navigation.settings",
+          "version": 1
+        },
+        {
+          "name": "frontend.placement.settings.admin",
+          "version": 1
+        }
+      ],
+      "dependencies": [
+        {
+          "optional": false,
+          "plugin_id": "official.discord-bot-notifications",
+          "version_range": ">=0.1.2"
+        }
+      ],
+      "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
+      "documentation": {
+        "format": "markdown",
+        "packaged": true,
+        "readme_path": "README.md"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "749b8655c108d60fd03da6c6aca4df4e57d16c09a2e0884b2ec1c89ac2e9581e"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.12",
+        "application_version_range": ">=1.0.0",
+        "automatic_update": false,
+        "capabilities": [
+          {
+            "name": "integrations.public_app",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "integrations.public_app.admin",
+            "version": 1
+          },
+          {
+            "name": "frontend.native",
+            "version": 1
+          },
+          {
+            "name": "frontend.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.placement.settings.admin",
+            "version": 1
+          }
+        ],
+        "dependencies": [
+          {
+            "optional": false,
+            "plugin_id": "official.discord-bot-notifications",
+            "version_range": ">=0.1.2"
+          }
+        ],
+        "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
+        "entrypoint": "plugin:main",
+        "frontend": {
+          "entry": "frontend/index.html"
+        },
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+          "signature": "v2:bCxCHgFlmsMfGKC26SDen4Zq/kGLqFDtDYaMQwRthGXUvAI9MOQQCfOv5m9DYy9CWuHtzEJMcu74yiqU6gfZDw=="
+        },
+        "manifest_version": 1,
+        "name": "Game Night",
+        "native_frontend": {
+          "entry": "native/app.js",
+          "styles": [
+            "native/style.css"
+          ]
+        },
+        "permissions": [
+          {
+            "capability": {
+              "name": "integrations.public_app",
+              "version": 1
+            },
+            "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry."
+          },
+          {
+            "capability": {
+              "name": "integrations.public_app.admin",
+              "version": 1
+            },
+            "rationale": "Allow administrators to inspect and forget this installation's saved external participants and source connections."
+          },
+          {
+            "capability": {
+              "name": "frontend.native",
+              "version": 1
+            },
+            "rationale": "Render the administrator participant-management page through the native bridge."
+          },
+          {
+            "capability": {
+              "name": "frontend.settings",
+              "version": 1
+            },
+            "rationale": "Provide Game Night administration settings."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.settings",
+              "version": 1
+            },
+            "rationale": "Expose the Game Night participant settings page."
+          },
+          {
+            "capability": {
+              "name": "frontend.placement.settings.admin",
+              "version": 1
+            },
+            "rationale": "Place participant management in Administration."
+          }
+        ],
+        "plugin_id": "official.discord-social-activity",
+        "public_app": {
+          "action_id": "session",
+          "entry": "frontend/index.html",
+          "identity_provider_plugin_id": "official.discord-bot-notifications"
+        },
+        "sdk_version_range": "^1.1.12",
+        "storage": {
+          "quota_mb": 32
+        },
+        "ui": {
+          "actions": [
+            "session",
+            "admin-list",
+            "admin-manage"
+          ],
+          "menus": [],
+          "pages": [
+            "admin"
+          ],
+          "settings": []
+        },
+        "version": "0.1.0"
+      },
+      "name": "Game Night",
+      "package": {
+        "filename": "official.discord-social-activity-0.1.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 116575
+      },
+      "package_sha256": "f45f7849786530994a541162efa33761a610ac6c7964e15192b4912c94700ba8",
+      "permissions": [
+        {
+          "capability": {
+            "name": "integrations.public_app",
+            "version": 1
+          },
+          "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions."
+        },
+        {
+          "capability": {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry."
+        },
+        {
+          "capability": {
+            "name": "integrations.public_app.admin",
+            "version": 1
+          },
+          "rationale": "Allow administrators to inspect and forget this installation's saved external participants and source connections."
+        },
+        {
+          "capability": {
+            "name": "frontend.native",
+            "version": 1
+          },
+          "rationale": "Render the administrator participant-management page through the native bridge."
+        },
+        {
+          "capability": {
+            "name": "frontend.settings",
+            "version": 1
+          },
+          "rationale": "Provide Game Night administration settings."
+        },
+        {
+          "capability": {
+            "name": "frontend.navigation.settings",
+            "version": 1
+          },
+          "rationale": "Expose the Game Night participant settings page."
+        },
+        {
+          "capability": {
+            "name": "frontend.placement.settings.admin",
+            "version": 1
+          },
+          "rationale": "Place participant management in Administration."
+        }
+      ],
+      "plugin_id": "official.discord-social-activity",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Game Night Discord Activity\n\nAn independently packaged Discord Activity for Unnamed Tracking App. It uses\nPlugin API **v1.1.12** public-app infrastructure and the updated Discord Bot\nNotifications identity adapter. It imports no host modules and has no database,\nnetwork sockets, bot token or OAuth client secret of its own.\n\nThe signed **0.1.0** release is available from the official plugin catalogue under\n**Unnamed Tracking Official**. Updates require manual review. This is an early\nrelease; pricing, federation and the remaining device/context acceptance work\nare documented limitations, not implied by its signature.\n\n## What works\n\n- Verified Discord OAuth identity and live Activity instance membership.\n- Shared persisted rooms, individual inputs, host transfer and reconnect recovery.\n- User-approved connections to independent HTTPS tracking instances.\n- Guest games and explicit self-reported multiplayer compatibility annotations.\n- Strict, balanced and discovery modes, personal hard platform/genre/time rules.\n- A shortlist of up to three games, one vote per participant, personal vetoes,\n  selection and rerolls. Ties use a random draw among tied eligible games.\n- Imported cover artwork where available, readable fallbacks, eligibility reasons.\n- Public Steam cover fallback and title details with Steam/own tracking-page links.\n- Verified Discord avatars and circular participant thumbnails.\n- Saved group-play presets from connected libraries, with manual confirmation for\n  unknown multiplayer counts; entry-specific genres reset after adding a game.\n- Room-host matching settings, personal undo-veto controls, and spectators for\n  participants with no games. Host transfer requires a separate confirmation.\n- Native Discord invitation controls and optional verified DM/group-DM rooms.\n- Automatic owned multiplayer contributions; one participant can supply missing\n  player limits for the room directly from the exclusion list. Saved/manual\n  limits also supply missing counts without repeated entry. Personal access,\n  known platform-specific limits, rules and crossplay consent remain separate.\n- Native library bulk multiplayer presets and optional cross-instance saves under\n  separate `compatibility.write` consent, with per-game failure results.\n- Own-account tracking changes and explicitly local achievement reports when the\n  participant grants the appropriate write scopes.\n- Responsive layout, keyboard controls and reduced-motion support.\n\nCurrent purchase offers are unavailable in the host. Price, budget and discount\nfilters are paused. Strict still requires everyone to own the game; balanced and\ndiscovery allow a participant to consider an unowned game only with their own\npurchase consent and owned-only rule disabled. Unknown prices are labeled and\nnever reported as free or within budget. No action authorizes a purchase.\nWishlist entries are never treated as ownership. Compatibility annotations are\nself-reported, not provider verification; title matches need edition confirmation.\n\n## Configure\n\n1. Install **Discord Bot Notifications** and **Game Night** from the official\n   catalogue in Administration → Plugins. Review their verified publisher,\n   compatibility and permissions. For an unpublished branch build, use its separate\n   unsigned-development package review instead.\n2. Grant the Activity `integrations.public_app` and `plugin.storage` globally.\n   Grant the bot `integrations.identity_provider` explicitly, alongside its existing\n   permissions. Neither grant is implied by `api.full`.\n3. Configure the bot token/server using the bot administrator page. Add the same\n   application's ID and OAuth client secret under **Discord Activity sign-in**.\n   Existing notification destinations retain their configuration and proof.\n4. Enable integration access on the Activity host. Enable guests if desired.\n5. Configure Discord Activity URL mappings:\n   `/` → `HOST/api/public-apps/official.discord-social-activity/app/`\n   and `/api` → `HOST/api`. Enable Activities for the tested platforms. Keep a\n   redirect URI configured for the Embedded App SDK OAuth flow.\n6. On each source instance, enable integrations and approve the Activity host's\n   exact HTTPS origin. Participants sign in on that source and approve their own\n   scopes/expiry; write scopes default to unchecked.\n7. Launch from the Discord App Launcher in the bot's configured server. Connect\n   an instance or add manual games, confirm compatibility, then shortlist and vote.\n\nFor private-channel rooms, explicitly enable **Allow Activities in DMs and group\nDMs** in the bot's Activity settings. Discord must also allow user installation\nand private-channel launch for your application/testers. The adapter validates\nDiscord's `pc` location and connected user list; enabling DMs does not allow\nActivities in other guilds. See the complete\n[operator/player setup guide](../../wiki/docs/examples/discord-game-night.md).\n\nPublic sessions are separate external principals, not host accounts. Credentials\nfor connected instances remain encrypted in the host broker, and never enter this\nplugin or the browser. Removing a source connection forgets its broker credential;\nrevoke it in the source instance's Connected apps to invalidate the grant there too.\n\nUsers may explicitly choose **Until revoked** instead of timed access. Remembered\nlinks belong to the verified Discord identity and are reused on reconnect while\ntheir credentials remain valid. The first connection always needs consent; a\nDiscord username or display name alone never links an application account.\n\nFor an older source without the delegation API, the Activity operator can enable\n**Allow unsafe legacy API-key connections** in Integration access. The participant\nmust select legacy mode and acknowledge the broad key. The host encrypts it and\nuses only fixed identity/library GET requests. Legacy connections cannot write\ntracking, achievements or multiplayer settings and do not expose imported artwork; public Steam cover\nfallback still applies. Disconnect the connection and revoke the key on the old\ninstance when finished. Legacy clients do not require upgrading the old instance.\n\nSource administrators may optionally allow consent requests from any HTTPS origin.\nLibrary connections request only identity and game reads by default. Participants\ncan choose optional progress access before connecting; the source still presents\ntracking and achievement writes unchecked for explicit approval. Unused history,\nmedia and custom-list capabilities are not requested by Game Night.\nThis registers requesters without individual origin setup; it never approves a\nuser's data. Individually disabled origins stay blocked. Central Activity hosting\ncan connect independent source instances through this same broker and consent\nboundary. Operator approval, personal rules and personal vetoes remain distinct.\n\nGame titles use normalized case, spacing and punctuation by default. Steam IDs\nare optional; edition ambiguity still requires human confirmation. Platform\naliases and empty-library spectators can be configured by the current room host.\nFor one or two players, detected multiplayer is accepted with unknown limits. Larger groups can approve games without extra details for the current player count, or set known limits once. Known constraints still win. Steam app IDs infer PC only when the platform is blank. Both shortcuts are configurable by the room host.\nStore metadata is informational and cannot override personal rules.\n\n## Build and test\n\nAdministrators can use **Game Night participants** in Administration to inspect\nsaved names/IDs and source states, unlink connections, or purge participant/all\nlocal Activity data with confirmation. Updating requires reviewing the separate\n`integrations.public_app.admin` and native admin-page permissions. Host enforcement\nchecks the administrator and exact installation; public participants cannot use\nthis API. Room cleanup clears cached results as well as participant inputs.\nSource libraries and upstream grants are not deleted. Guest/room retention can\nbe set to365 days; valid remembered source grants have their own lifetime.\nConnected apps shows the external account label; older remote grants need fresh\nconsent. Retroactive account merging is a separate follow-up.\n\n```sh\nnpm install\nnpm run build:activity\nnpm run check:activity\npython -m pytest tests/test_discord_activity.py tests/test_discord_activity_identity.py\npython tools/build_packages.py\n```\n\nSource is under `ui/`; compiled assets are under `frontend/` and included in the\nvalidated `.utp`. The builder preserves historical published packages. Test the\nactual preview package against the matching host branch before deployment.\n\nThe Activity stores bounded room inputs/votes using public storage CAS. Rooms\nexpire under the host retention policy; its background worker clears expired\nrooms. Temporary host-gateway outages retry with delays from one to thirty seconds;\npermission denials and other permanent failures remain visible in Diagnostics.\nFor a blank or refused Activity, follow the [operator troubleshooting steps](../../wiki/docs/examples/discord-game-night.md#troubleshooting)\nto distinguish a failed worker from a reverse-proxy frame header or OAuth problem.\nThere is no persistent Discord Gateway connection, custom chat command or\nnotification delivery in the Activity. Those remain the bot's responsibilities.\n\nThe [architecture and acceptance matrix](../../wiki/docs/architecture/discord-game-night.md) links the implementation to the open issues and distinguishes verified behavior from release follow-ups.\n",
+      "release_notes": "First signed official Game Night release: shared Discord rooms, consented library connections, guest games, personal rules, shortlists and voting. Recovers room cleanup after temporary host-gateway outages and includes a setup/troubleshooting guide. Requires host Plugin API v1.1.12 and Discord Bot Notifications >=0.1.2. Manual updates; pricing filters remain paused.",
+      "releases": [
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "11b4e380bfbe3bd87cd9c2b1c576759c5f121b45",
+            "source_committed_at": "2026-10-18T13:03:06+08:00",
+            "source_digest": "973dd139e0dee3911f545f5c960d059e68947c6e2a4e3c938d7a820465c676c7",
+            "source_path": "official/discord-social-activity",
+            "version_bump": "initial"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "749b8655c108d60fd03da6c6aca4df4e57d16c09a2e0884b2ec1c89ac2e9581e"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.12",
+            "application_version_range": ">=1.0.0",
+            "automatic_update": false,
+            "capabilities": [
+              {
+                "name": "integrations.public_app",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "integrations.public_app.admin",
+                "version": 1
+              },
+              {
+                "name": "frontend.native",
+                "version": 1
+              },
+              {
+                "name": "frontend.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.settings.admin",
+                "version": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "optional": false,
+                "plugin_id": "official.discord-bot-notifications",
+                "version_range": ">=0.1.2"
+              }
+            ],
+            "description": "Choose what to play together in Discord, with user-approved independent libraries and guest game lists.",
+            "entrypoint": "plugin:main",
+            "frontend": {
+              "entry": "frontend/index.html"
+            },
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+              "signature": "v2:bCxCHgFlmsMfGKC26SDen4Zq/kGLqFDtDYaMQwRthGXUvAI9MOQQCfOv5m9DYy9CWuHtzEJMcu74yiqU6gfZDw=="
+            },
+            "manifest_version": 1,
+            "name": "Game Night",
+            "native_frontend": {
+              "entry": "native/app.js",
+              "styles": [
+                "native/style.css"
+              ]
+            },
+            "permissions": [
+              {
+                "capability": {
+                  "name": "integrations.public_app",
+                  "version": 1
+                },
+                "rationale": "Serve this Activity and operate shared rooms using isolated Discord participants, without any app-account permissions."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Persist game-night inputs and votes with compare-and-swap and bounded expiry."
+              },
+              {
+                "capability": {
+                  "name": "integrations.public_app.admin",
+                  "version": 1
+                },
+                "rationale": "Allow administrators to inspect and forget this installation's saved external participants and source connections."
+              },
+              {
+                "capability": {
+                  "name": "frontend.native",
+                  "version": 1
+                },
+                "rationale": "Render the administrator participant-management page through the native bridge."
+              },
+              {
+                "capability": {
+                  "name": "frontend.settings",
+                  "version": 1
+                },
+                "rationale": "Provide Game Night administration settings."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.settings",
+                  "version": 1
+                },
+                "rationale": "Expose the Game Night participant settings page."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.settings.admin",
+                  "version": 1
+                },
+                "rationale": "Place participant management in Administration."
+              }
+            ],
+            "plugin_id": "official.discord-social-activity",
+            "public_app": {
+              "action_id": "session",
+              "entry": "frontend/index.html",
+              "identity_provider_plugin_id": "official.discord-bot-notifications"
+            },
+            "sdk_version_range": "^1.1.12",
+            "storage": {
+              "quota_mb": 32
+            },
+            "ui": {
+              "actions": [
+                "session",
+                "admin-list",
+                "admin-manage"
+              ],
+              "menus": [],
+              "pages": [
+                "admin"
+              ],
+              "settings": []
+            },
+            "version": "0.1.0"
+          },
+          "package": {
+            "filename": "official.discord-social-activity-0.1.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 116575
+          },
+          "package_sha256": "f45f7849786530994a541162efa33761a610ac6c7964e15192b4912c94700ba8",
+          "plugin_id": "official.discord-social-activity",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Game Night Discord Activity\n\nAn independently packaged Discord Activity for Unnamed Tracking App. It uses\nPlugin API **v1.1.12** public-app infrastructure and the updated Discord Bot\nNotifications identity adapter. It imports no host modules and has no database,\nnetwork sockets, bot token or OAuth client secret of its own.\n\nThe signed **0.1.0** release is available from the official plugin catalogue under\n**Unnamed Tracking Official**. Updates require manual review. This is an early\nrelease; pricing, federation and the remaining device/context acceptance work\nare documented limitations, not implied by its signature.\n\n## What works\n\n- Verified Discord OAuth identity and live Activity instance membership.\n- Shared persisted rooms, individual inputs, host transfer and reconnect recovery.\n- User-approved connections to independent HTTPS tracking instances.\n- Guest games and explicit self-reported multiplayer compatibility annotations.\n- Strict, balanced and discovery modes, personal hard platform/genre/time rules.\n- A shortlist of up to three games, one vote per participant, personal vetoes,\n  selection and rerolls. Ties use a random draw among tied eligible games.\n- Imported cover artwork where available, readable fallbacks, eligibility reasons.\n- Public Steam cover fallback and title details with Steam/own tracking-page links.\n- Verified Discord avatars and circular participant thumbnails.\n- Saved group-play presets from connected libraries, with manual confirmation for\n  unknown multiplayer counts; entry-specific genres reset after adding a game.\n- Room-host matching settings, personal undo-veto controls, and spectators for\n  participants with no games. Host transfer requires a separate confirmation.\n- Native Discord invitation controls and optional verified DM/group-DM rooms.\n- Automatic owned multiplayer contributions; one participant can supply missing\n  player limits for the room directly from the exclusion list. Saved/manual\n  limits also supply missing counts without repeated entry. Personal access,\n  known platform-specific limits, rules and crossplay consent remain separate.\n- Native library bulk multiplayer presets and optional cross-instance saves under\n  separate `compatibility.write` consent, with per-game failure results.\n- Own-account tracking changes and explicitly local achievement reports when the\n  participant grants the appropriate write scopes.\n- Responsive layout, keyboard controls and reduced-motion support.\n\nCurrent purchase offers are unavailable in the host. Price, budget and discount\nfilters are paused. Strict still requires everyone to own the game; balanced and\ndiscovery allow a participant to consider an unowned game only with their own\npurchase consent and owned-only rule disabled. Unknown prices are labeled and\nnever reported as free or within budget. No action authorizes a purchase.\nWishlist entries are never treated as ownership. Compatibility annotations are\nself-reported, not provider verification; title matches need edition confirmation.\n\n## Configure\n\n1. Install **Discord Bot Notifications** and **Game Night** from the official\n   catalogue in Administration → Plugins. Review their verified publisher,\n   compatibility and permissions. For an unpublished branch build, use its separate\n   unsigned-development package review instead.\n2. Grant the Activity `integrations.public_app` and `plugin.storage` globally.\n   Grant the bot `integrations.identity_provider` explicitly, alongside its existing\n   permissions. Neither grant is implied by `api.full`.\n3. Configure the bot token/server using the bot administrator page. Add the same\n   application's ID and OAuth client secret under **Discord Activity sign-in**.\n   Existing notification destinations retain their configuration and proof.\n4. Enable integration access on the Activity host. Enable guests if desired.\n5. Configure Discord Activity URL mappings:\n   `/` → `HOST/api/public-apps/official.discord-social-activity/app/`\n   and `/api` → `HOST/api`. Enable Activities for the tested platforms. Keep a\n   redirect URI configured for the Embedded App SDK OAuth flow.\n6. On each source instance, enable integrations and approve the Activity host's\n   exact HTTPS origin. Participants sign in on that source and approve their own\n   scopes/expiry; write scopes default to unchecked.\n7. Launch from the Discord App Launcher in the bot's configured server. Connect\n   an instance or add manual games, confirm compatibility, then shortlist and vote.\n\nFor private-channel rooms, explicitly enable **Allow Activities in DMs and group\nDMs** in the bot's Activity settings. Discord must also allow user installation\nand private-channel launch for your application/testers. The adapter validates\nDiscord's `pc` location and connected user list; enabling DMs does not allow\nActivities in other guilds. See the complete\n[operator/player setup guide](../../wiki/docs/examples/discord-game-night.md).\n\nPublic sessions are separate external principals, not host accounts. Credentials\nfor connected instances remain encrypted in the host broker, and never enter this\nplugin or the browser. Removing a source connection forgets its broker credential;\nrevoke it in the source instance's Connected apps to invalidate the grant there too.\n\nUsers may explicitly choose **Until revoked** instead of timed access. Remembered\nlinks belong to the verified Discord identity and are reused on reconnect while\ntheir credentials remain valid. The first connection always needs consent; a\nDiscord username or display name alone never links an application account.\n\nFor an older source without the delegation API, the Activity operator can enable\n**Allow unsafe legacy API-key connections** in Integration access. The participant\nmust select legacy mode and acknowledge the broad key. The host encrypts it and\nuses only fixed identity/library GET requests. Legacy connections cannot write\ntracking, achievements or multiplayer settings and do not expose imported artwork; public Steam cover\nfallback still applies. Disconnect the connection and revoke the key on the old\ninstance when finished. Legacy clients do not require upgrading the old instance.\n\nSource administrators may optionally allow consent requests from any HTTPS origin.\nLibrary connections request only identity and game reads by default. Participants\ncan choose optional progress access before connecting; the source still presents\ntracking and achievement writes unchecked for explicit approval. Unused history,\nmedia and custom-list capabilities are not requested by Game Night.\nThis registers requesters without individual origin setup; it never approves a\nuser's data. Individually disabled origins stay blocked. Central Activity hosting\ncan connect independent source instances through this same broker and consent\nboundary. Operator approval, personal rules and personal vetoes remain distinct.\n\nGame titles use normalized case, spacing and punctuation by default. Steam IDs\nare optional; edition ambiguity still requires human confirmation. Platform\naliases and empty-library spectators can be configured by the current room host.\nFor one or two players, detected multiplayer is accepted with unknown limits. Larger groups can approve games without extra details for the current player count, or set known limits once. Known constraints still win. Steam app IDs infer PC only when the platform is blank. Both shortcuts are configurable by the room host.\nStore metadata is informational and cannot override personal rules.\n\n## Build and test\n\nAdministrators can use **Game Night participants** in Administration to inspect\nsaved names/IDs and source states, unlink connections, or purge participant/all\nlocal Activity data with confirmation. Updating requires reviewing the separate\n`integrations.public_app.admin` and native admin-page permissions. Host enforcement\nchecks the administrator and exact installation; public participants cannot use\nthis API. Room cleanup clears cached results as well as participant inputs.\nSource libraries and upstream grants are not deleted. Guest/room retention can\nbe set to365 days; valid remembered source grants have their own lifetime.\nConnected apps shows the external account label; older remote grants need fresh\nconsent. Retroactive account merging is a separate follow-up.\n\n```sh\nnpm install\nnpm run build:activity\nnpm run check:activity\npython -m pytest tests/test_discord_activity.py tests/test_discord_activity_identity.py\npython tools/build_packages.py\n```\n\nSource is under `ui/`; compiled assets are under `frontend/` and included in the\nvalidated `.utp`. The builder preserves historical published packages. Test the\nactual preview package against the matching host branch before deployment.\n\nThe Activity stores bounded room inputs/votes using public storage CAS. Rooms\nexpire under the host retention policy; its background worker clears expired\nrooms. Temporary host-gateway outages retry with delays from one to thirty seconds;\npermission denials and other permanent failures remain visible in Diagnostics.\nFor a blank or refused Activity, follow the [operator troubleshooting steps](../../wiki/docs/examples/discord-game-night.md#troubleshooting)\nto distinguish a failed worker from a reverse-proxy frame header or OAuth problem.\nThere is no persistent Discord Gateway connection, custom chat command or\nnotification delivery in the Activity. Those remain the bot's responsibilities.\n\nThe [architecture and acceptance matrix](../../wiki/docs/architecture/discord-game-night.md) links the implementation to the open issues and distinguishes verified behavior from release follow-ups.\n",
+          "release_notes": "First signed official Game Night release: shared Discord rooms, consented library connections, guest games, personal rules, shortlists and voting. Recovers room cleanup after temporary host-gateway outages and includes a setup/troubleshooting guide. Requires host Plugin API v1.1.12 and Discord Bot Notifications >=0.1.2. Manual updates; pricing filters remain paused.",
+          "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+            "signature": "v2:bCxCHgFlmsMfGKC26SDen4Zq/kGLqFDtDYaMQwRthGXUvAI9MOQQCfOv5m9DYy9CWuHtzEJMcu74yiqU6gfZDw=="
+          },
+          "tags": [
+            "official",
+            "discord",
+            "games"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-social-activity-0.1.0.utp",
+          "version": "0.1.0"
+        }
+      ],
+      "sdk_version_range": "^1.1.12",
+      "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "500ef9d4789449939fa310e3a9edb072831394636ed87142273d1912161e54f6",
+        "signature": "v2:bCxCHgFlmsMfGKC26SDen4Zq/kGLqFDtDYaMQwRthGXUvAI9MOQQCfOv5m9DYy9CWuHtzEJMcu74yiqU6gfZDw=="
+      },
+      "source": {
+        "lifecycle": "source",
+        "manifest_version": 1,
+        "path": "official/discord-social-activity"
+      },
+      "tags": [
+        "official",
+        "discord",
+        "games"
+      ],
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.discord-social-activity-0.1.0.utp",
+      "version": "0.1.0"
+    },
+    {
       "application_version_range": ">=0.0.1",
       "automatic_update": false,
       "build": {
