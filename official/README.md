@@ -66,3 +66,7 @@ settings: [GiantBomb](metadata-giantbomb/README.md), [GOG](metadata-gog/README.m
 [Kitsu](metadata-kitsu/README.md), [RetroAchievements](metadata-retroachievements/README.md),
 [ScreenScraper](metadata-screenscraper/README.md), [TMDB](metadata-tmdb/README.md) and
 [TVDB](metadata-tvdb/README.md). See the [catalogue](../list.json) for current signed versions.
+
+[Atlas Metadata Provider](metadata-atlas/README.md) searches and enriches games from a self-hosted
+[Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server, merged across providers. The server URL and
+read token are configured in the provider settings. Source preview; signed publication uses the official pipeline.

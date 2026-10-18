@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "publisher": "Unnamed Tracking Official",
+  "tags": [
+    "metadata",
+    "atlas",
+    "official"
+  ],
+  "icon": "icon.svg",
+  "automatic_update": true,
+  "release_notes": "Search, metadata and cached artwork from a configurable Atlas v2 server."
+}
