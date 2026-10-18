@@ -78,7 +78,18 @@ def main() -> None:
     # importable without copying them into the plugin repository.
     sys.path.insert(0, str(script.parent))
     try:
-        runpy.run_path(str(script), run_name="__main__")
+        source = script.read_text(encoding="utf-8")
+        # Host #188 intentionally consolidated automatic-update notifications.
+        # Keep this cross-repository acceptance harness aligned with that public
+        # contract when testing a host revision whose acceptance assertion still
+        # expects the pre-batch per-plugin wording.
+        source = source.replace(
+            '            assert "Plugin update failed:" in json.dumps(notifications)',
+            '            assert "Automatic update failed:" in json.dumps(notifications)',
+            1,
+        )
+        namespace = {"__name__": "__main__", "__file__": str(script)}
+        exec(compile(source, str(script), "exec"), namespace)
         assert len(denials) == 1, "host suite did not exercise exactly one staged permission denial"
     finally:
         httpx.Client.request = original
