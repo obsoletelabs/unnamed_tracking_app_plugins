@@ -5,7 +5,7 @@ Plugin API **v1.1.12** public-app infrastructure and the updated Discord Bot
 Notifications identity adapter. It imports no host modules and has no database,
 network sockets, bot token or OAuth client secret of its own.
 
-The signed **0.1.1** release is available from the official plugin catalogue under
+The signed **0.2.1** release is available from the official plugin catalogue under
 **Unnamed Tracking Official**. Updates require manual review. This is an early
 release; pricing, federation and the remaining device/context acceptance work
 are documented limitations, not implied by its signature.
@@ -107,8 +107,11 @@ user's data. Individually disabled origins stay blocked. Central Activity hostin
 can connect independent source instances through this same broker and consent
 boundary. Operator approval, personal rules and personal vetoes remain distinct.
 
-Game titles use normalized case, spacing and punctuation by default. Steam IDs
-are optional; edition ambiguity still requires human confirmation. Platform
+Game titles use normalized case, spacing and punctuation by default. Copies a
+participant grouped as one game on their instance (for example *Minecraft for
+Windows* under *Minecraft*, from the library's `identity.main_title`) match by that
+game's main title. Steam IDs are optional; edition ambiguity still requires human
+confirmation. Platform
 aliases and empty-library spectators can be configured by the current room host.
 For one or two players, detected multiplayer is accepted with unknown limits. Larger groups can approve games without extra details for the current player count, or set known limits once. Known constraints still win. Steam app IDs infer PC only when the platform is blank. Both shortcuts are configurable by the room host.
 Store metadata is informational and cannot override personal rules.

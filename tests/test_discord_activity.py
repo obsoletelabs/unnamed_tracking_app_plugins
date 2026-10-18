@@ -514,3 +514,55 @@ def test_partial_limits_preserve_participant_access_and_hard_rules(restriction, 
     assert not result["pool"]["eligible"]
     candidate = next(item for item in result["pool"]["excluded"] if item["key"] == "title:together")
     assert reason in " ".join(candidate["excluded_reasons"])
+
+
+def test_copies_grouped_on_an_instance_match_by_the_games_main_title():
+    """Host #274: delegated libraries mark copies of one game with its main title."""
+    windows = game(title="Minecraft for Windows",
+                   identity={"group_id": "g1", "is_main": False, "main_title": "Minecraft"})
+    assert engine.game_key(windows) == engine.game_key(game(title="Minecraft"))
+    assert engine.game_key(game(title="Minecraft for Windows", identity={"main_title": " "})) == "title:minecraftforwindows"
+    assert engine.game_key(game(title="Hades", identity="not-a-dict")) == "title:hades"
+    # A participant's imported copy meets another participant's manual "Minecraft".
+    state, _ = add(title="Minecraft")
+    library = [{"id": "g2", "title": "Minecraft for Windows", "owned": True, "source_id": "source",
+                "source_state": "connected", "ownership_provenance": "instance_library",
+                "platforms": ["PC"], "min_players": 1, "max_players": 4, "genres": ["Co-op"],
+                "identity": {"group_id": "g2", "is_main": False, "main_title": "Minecraft"}}]
+    ctx = context("two", library=library, source_states={"source": "connected"}, connected=True)
+    state, result = engine.transition(state, {}, ctx, now=1001)
+    keys = {key for person in state["participants"].values()
+            for key in [engine.game_key(g, state["matching"]) for g in person["library"] + person["manual"]]}
+    assert keys == {"title:minecraft"}
+
+
+@pytest.mark.parametrize("limits", [None, (None, 4), (2, 4)])
+def test_grouped_copy_confirmations_keep_the_matching_identity_and_own_platform(limits):
+    def grouped(actor):
+        ctx = multiplayer_context(actor)
+        ctx["library"][0].update(title="Together (" + actor + " copy)", provider_ids={},
+            identity={"main_title": "Together", "group_id": actor + "-private-group"},
+            platform=None if actor == "one" else "PC")
+        return ctx
+
+    state = None
+    for actor in ("one", "two", "three"):
+        state, _ = engine.transition(state, {}, grouped(actor), now=1000)
+    values = {"operation": "approve-group", "keys": ["title:together"], "platform": "PC"}
+    if limits is not None:
+        values = {"operation": "player-limits", "key": "title:together",
+                  "min_players": limits[0], "max_players": limits[1], "platform": "PC"}
+    state, result = engine.transition(state, values, grouped("one"), now=1001)
+    assert result["pool"]["eligible"]
+    candidate = result["pool"]["eligible"][0]
+    assert not candidate["missing_platforms"]
+    if limits is None:
+        assert candidate["group_approval"] == {"players": 3, "confirmed_by": "one"}
+    else:
+        assert candidate["player_limits"]["min_players"] == limits[0]
+        assert candidate["player_limits"]["max_players"] == limits[1]
+    # The public room needs the matching title, not an instance's private group ID.
+    assert candidate["identity"] == {"main_title": "Together"}
+    assert state["participants"]["one"]["platform_overrides"][0]["identity"] == candidate["identity"]
+    _, result = engine.transition(state, {}, grouped("one"), now=1002)
+    assert result["pool"]["eligible"]

@@ -7,7 +7,7 @@ the operator permits it. Only the Activity operator needs to configure a bot.
 
 ![A two-participant Game Night with artwork, avatars and a shared winner](../images/discord-game-night-live.jpg)
 
-Game Night **0.1.1** is an early signed release in the official catalogue under
+Game Night **0.2.1** is an early signed release in the official catalogue under
 **Unnamed Tracking Official**, requiring **Plugin API 1.1.12** or a compatible
 newer host and the updated bot adapter. Updates require manual review. A signature
 verifies its publisher and package integrity; it does not approve permissions or
@@ -273,6 +273,8 @@ mean **1** or unlimited, and approval cannot override a known bound.
 Enter both bounds to confirm a reusable range for future group sizes. Common
 ranges are available as buttons. These room details survive
 reconnects until room retention expiry; they do not write anyone's source library.
+For copies grouped on an instance, confirmations retain the main matching title
+so they still apply when the displayed copy has a different title.
 If your platform is missing, the form asks only for your own platform. A valid
 Steam app ID infers **PC** when the platform is blank; an explicit platform wins.
 The host can disable small-group acceptance or Steam inference in room settings.
@@ -312,7 +314,9 @@ connections afterward. A failed source does not roll back successful saves.
 **My rules** controls your platform, genres, time and ownership/purchase consent.
 The host chooses Strict, Balanced or Discovery and can change room matching
 defaults. Normalized titles tolerate case, spacing and punctuation; edition or
-crossplay differences still need confirmation. Current purchase offers are
+crossplay differences still need confirmation. Copies someone grouped as one game on
+their own instance (Minecraft Java Edition and Minecraft for Windows under Minecraft)
+count as that game, matched by its main title, so they meet other people's copies. Current purchase offers are
 unavailable, so price/budget/discount filtering is paused and unknown prices are
 never called free.
 
@@ -494,7 +498,7 @@ Further multiplayer metadata and cross-instance bulk refinements are deferred to
 | Linking returns HTTP 500 before consent | Update the host with the saved public URL fix; confirm Shared public app URL in Application settings |
 | Connected but no eligible games | Expand Needs attention; check ownership, group approval, hard rules, source state and other participants' vetoes |
 | Bulk multiplayer Save disabled | Every selected source must grant compatibility.write; reconnect with multiplayer settings access and approve it |
-| Optional minimum is required after entering a maximum | Update Game Night to 0.1.1 or later, then close and relaunch the Activity to load the new form. Leave unknown bounds blank; saving one bound keeps it and confirms only the current group size |
+| Optional minimum is required after entering a maximum | Update Game Night to 0.2.1 or later, then close and relaunch the Activity to load the new form. Leave unknown bounds blank; saving one bound keeps it and confirms only the current group size |
 | Images unavailable | Public metadata may be absent or ambiguous; imported legacy artwork is not supported; readable fallback remains |
 | Source offline/revoked | Check the source's reachability and Connected apps grant/key, then refresh or reconnect |
 | Old UI after an update | Leave/reload/relaunch Discord so it fetches the versioned frontend assets |

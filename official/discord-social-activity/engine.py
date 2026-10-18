@@ -25,7 +25,12 @@ def game_key(game: dict, matching: dict | None = None) -> str:
     steam = providers.get("steam") if isinstance(providers, dict) else None
     if steam and not matching.get("title_fallback", True):
         return "steam:" + str(steam)
-    title = re.sub(r"\s+", " ", str(game.get("title", "")).strip()).casefold()
+    # Copies the owner grouped as one game on their instance (Minecraft for Windows under
+    # Minecraft) are matched by that game's main title, so they meet other people's copies.
+    identity = game.get("identity")
+    main_title = identity.get("main_title") if isinstance(identity, dict) else None
+    title = main_title if isinstance(main_title, str) and main_title.strip() else game.get("title", "")
+    title = re.sub(r"\s+", " ", str(title).strip()).casefold()
     if not title or len(title) > 500:
         raise SessionError("Use a game title of at most 500 characters.")
     if matching.get("title_fallback", True):
@@ -131,6 +136,15 @@ def automatic_game(game: dict) -> bool:
 
 def has_games(person: dict) -> bool:
     return bool(person["manual"]) or any(automatic_game(game) for game in person["library"])
+
+
+def _room_game_reference(game: dict) -> dict:
+    """Keep the matching title with room confirmations, without instance-local group IDs."""
+    reference = {"title": game["title"], "provider_ids": game.get("provider_ids", {})}
+    identity = game.get("identity")
+    if isinstance(identity, dict) and isinstance(identity.get("main_title"), str):
+        reference["identity"] = {"main_title": identity["main_title"]}
+    return reference
 
 
 def _contributions(person: dict, matching: dict) -> dict[str, dict]:
@@ -282,14 +296,13 @@ def evaluate(room: dict, *, now: int) -> dict:
         elif room["mode"] == "discovery" and owners < 1:
             reasons.append("Discovery needs at least one confirmed owner")
         purchase_required = any(item["purchase_required"] for item in access)
-        candidate = {"key": key, "title": display["title"], "access": access,
+        candidate = {"key": key, **_room_game_reference(display), "access": access,
                      "needs_player_limits": not complete_limits,
                      "requires_player_limits": not complete_limits and not approved and not small_group,
                      "group_approval": {"players": count, "confirmed_by": approval["confirmed_by"]} if approved else None,
                      "missing_platforms": missing_platforms,
                      "player_limits": {field: limits[field] for field in (
                          "min_players", "max_players", "confirmed_by")} if limits else None,
-                     "provider_ids": display.get("provider_ids", {}),
                      "score": score + owners, "reasons": ["Everyone owns it or consented to considering a purchase" if purchase_required else "Everyone has access",
                      "Price unknown; price filters are paused" if purchase_required else "No purchase required",
                      "Known player limits checked" if complete_limits else "Approved for this group; exact limits unknown" if approved else "Multiplayer accepted for 1–2 players; exact limits unknown" if small_group else "Player limits need confirmation",
@@ -339,7 +352,7 @@ def _approve_current_group(room: dict, candidates: list[dict], count: int,
     if len(approvals) + len(candidates) > 500:
         raise SessionError("This room has reached its group approval capacity.")
     for candidate in candidates:
-        approvals.append({"title": candidate["title"], "provider_ids": candidate["provider_ids"],
+        approvals.append({**_room_game_reference(candidate),
             "players": count, "confirmed_by": actor_id, "confirmed_at": now})
     room["group_approvals"] = approvals
 
@@ -420,8 +433,7 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
                          if game_key(item, room["matching"]) != candidate["key"]]
             if len(platforms) >= 500:
                 raise SessionError("This room has reached your saved platform capacity.")
-            platforms.append({"title": candidate["title"],
-                              "provider_ids": candidate["provider_ids"],
+            platforms.append({**_room_game_reference(candidate),
                               "platform": platform.strip()})
             person["platform_overrides"] = platforms
         limits = [item for item in room.get("player_limits", [])
@@ -431,7 +443,7 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
         previous = candidate["player_limits"]
         same_counts = (previous is not None and previous["min_players"] == minimum
                        and previous["max_players"] == maximum)
-        limits.append({"title": candidate["title"], "provider_ids": candidate["provider_ids"],
+        limits.append({**_room_game_reference(candidate),
                        "min_players": minimum, "max_players": maximum,
                        "confirmed_by": previous["confirmed_by"] if same_counts else actor_id,
                        "confirmed_at": now})
@@ -458,8 +470,8 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
                          if game_key(item, room["matching"]) != keys[0]]
             if len(overrides) >= 500:
                 raise SessionError("This room has reached your saved platform capacity.")
-            person["platform_overrides"] = overrides + [{"title": candidate["title"],
-                "provider_ids": candidate["provider_ids"], "platform": platform.strip()}]
+            person["platform_overrides"] = overrides + [{**_room_game_reference(candidate),
+                "platform": platform.strip()}]
         _approve_current_group(room, [candidates[key] for key in keys],
                                pool["player_count"], actor_id, now)
     elif operation == "mode":
