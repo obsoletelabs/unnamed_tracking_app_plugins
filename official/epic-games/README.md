@@ -7,6 +7,39 @@ use an earlier Epic release on a host that predates 1.1.11. This plugin uses the
 The host page/sign-in support is completed by
 [host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).
 
+## Experimental service dependency
+
+Epic does not publish or support an API for third-party library imports, and
+this plugin is not affiliated with or endorsed by Epic Games. It does not use
+Epic Online Services or Epic Account Services, and Unnamed Tracking App has no
+Epic-issued OAuth client. Instead, the plugin signs in the same way the Epic
+Games Launcher does: Epic's own sign-in page returns a one-time authorization
+code for the launcher's public client, and the plugin exchanges that code for
+launcher access/refresh tokens. It then reads the same unofficial account,
+library, playtime and catalogue services the launcher uses.
+
+Those services are undocumented and Epic can change, rate-limit or withdraw them
+at any time. Treat the integration as experimental: an Epic-side change can stop
+sign-in, imports or playtime until a new plugin release adapts to it. Epic
+support cannot help with this plugin; report problems to this repository instead
+(see [Troubleshooting and support](#troubleshooting-and-support)).
+
+An Epic service failure is not host data loss. Failed sign-ins, refreshes,
+inventory pages, playtime or catalogue lookups stop the current step and keep
+your saved connection, checkpoint and library. The plugin never deletes games.
+Disconnecting removes only this plugin's saved tokens and checkpoint for your
+account; imported games, notes, ratings, status and playtime stay in the host.
+
+## Imported fields
+
+Each Epic game is imported with its title and its Epic identity (catalogue
+namespace and item ID, scoped to the connected account). When Epic's catalogue
+supplies them, the description, developer and publisher are imported too. Total
+playtime is imported when Epic's playtime service answers. Catalogue text is
+requested in US English. Artwork, release dates, genres/tags, achievements,
+prices, DLC/add-ons and install state are not imported. Use the host's metadata
+lookup for artwork and other metadata.
+
 ## Connect and import
 
 Install this plugin's `.utp` through Settings → Plugins, approve the declared
@@ -78,3 +111,35 @@ ratings. Playtime only increases; absent/unavailable playtime leaves known value
 alone. When multiple launcher artifacts share a catalogue identity, the largest
 reported artifact total is used to avoid counting duplicate platform entries.
 Only a complete valid inventory can mark previously imported games unavailable.
+
+## Troubleshooting and support
+
+Messages come from the plugin and never include token values. Most Epic-side
+failures are recovered by waiting and choosing **Resume import**.
+
+| Message or symptom | What it means and what to do |
+| --- | --- |
+| "Paste the 32-character authorization code, its JSON page or redirect URL." | The pasted text did not contain exactly one code. Choose **Sign in on Epic Games** (or **Copy sign-in link**) again and paste the whole page Epic shows. Each code works once. |
+| "Epic rejected this sign-in. Sign in on Epic again and paste a fresh code." | Epic no longer accepts the saved sign-in (for example after a password change), or rejected the pasted code. Choose **Replace sign-in** and paste a fresh code. If this happens during autosync, the schedule turns itself off; re-enable it in **Account → Background tasks** after reconnecting. |
+| "Epic returned a different account. Reconnect before importing." | A token refresh answered for another Epic account. Use **Replace sign-in** with the account you intend to import. As above, re-enable autosync afterwards if it turned off. |
+| "Epic is busy. Wait a minute, then resume the import." | Epic rate-limited the request. Wait, then **Resume import**. Autosync retries on its own after at least five minutes. |
+| "Epic could not be reached or refused the request. Your saved import is retained." | Epic's service was unavailable or answered with an error. Resume later; the checkpoint is kept. |
+| "Epic returned an incomplete inventory…", "…invalid inventory paging information", "…repeated an inventory cursor", "…omitted catalogue entries", "…omitted a game title" or "…unreadable game categories" | Epic's reply did not match what the plugin expects. Nothing is marked unavailable from a partial inventory. Resume later; if it persists across days it is probably an Epic-side change, so report it. |
+| "Epic playtime was unavailable. Existing playtime was retained." | Games still import; known playtime is not lowered or cleared. A later import fills playtime when Epic answers again. |
+| "Another Epic action is running. Wait briefly, then resume." | Two Epic actions for your account overlapped, for example a manual import and autosync. Wait about a minute and resume. |
+| "Start a new import for this connected account." | The saved checkpoint belongs to an earlier connection. Choose **Start new inventory**. |
+| "Epic's inventory exceeded the safety limit. Availability has not changed." | The library exceeded 10,000 entries or 200 inventory pages. Report it. |
+| "The host denied or could not complete this action. Check plugin permissions, then retry." | A host-side refusal, not an Epic failure. In **Settings → Plugins**, check that the plugin is enabled and its permissions are approved. |
+| **Local conflicts** count increases | A game you deleted in the app, or one whose identity changed, is left alone instead of being recreated. |
+
+Only a complete, valid inventory marks games that left your Epic library as
+unavailable. They are not deleted, and they become available again when a later
+import lists them.
+
+Report persistent Epic sign-in or import failures as an
+[issue in this repository](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues),
+not to Epic or the host application. Include the plugin version (shown in
+**Settings → Plugins**), the host release or image tag you deployed and the exact
+message. Never include the authorization code, the text of Epic's sign-in page,
+the redirect URL, tokens or your Epic account ID. Installation, permission and Connections-page problems that
+are not specific to Epic belong to the host's plugin documentation.
