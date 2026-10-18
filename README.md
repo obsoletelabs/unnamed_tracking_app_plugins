@@ -57,7 +57,9 @@ The [Game Night setup guide](wiki/docs/examples/discord-game-night.md) walks
 operators and players through the Discord bot, Activity URL mappings, scoped or
 legacy library connections, personal rules and troubleshooting. The separate
 [Game Night plugin](official/discord-social-activity/README.md) is an API 1.1.12
-development preview with its identity adapter in Discord Bot Notifications.
+Discord Activity published under **Unnamed Tracking Official**, with manual
+updates and its identity adapter in Discord Bot Notifications. See the
+[catalogue](list.json) for the signed package.
 
 Start with the executable [first-plugin tutorial](wiki/docs/getting-started/first-plugin.md),
 then use the [developer manual](wiki/docs/index.md) and [complete API reference](wiki/docs/plugin-author-guide.md).

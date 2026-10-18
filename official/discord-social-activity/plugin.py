@@ -2,10 +2,11 @@
 
 import hashlib
 import json
+import sys
 import time
 from typing import Any
 
-from sdk.plugin_protocol import request
+from sdk.plugin_protocol import GatewayRequestError, request
 from sdk.public_apps import participant_context
 
 from engine import SessionError, transition
@@ -63,12 +64,24 @@ def session_action(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
+    delay = 1
     while True:
         # Bounded data retention even if the Discord instance never reconnects.
-        keys = request("storage.keys", "plugin.storage", {"prefix": "rooms/"}).get("keys", [])
-        for key in keys:
-            previous = request("storage.get", "plugin.storage", {"key": key}).get("value")
-            if previous and json.loads(previous).get("expires_at", 0) <= int(time.time()):
-                request("storage.compare_and_swap", "plugin.storage",
-                        {"key": key, "expected": previous, "value": None})
+        try:
+            keys = request("storage.keys", "plugin.storage", {"prefix": "rooms/"}).get("keys", [])
+            for key in keys:
+                previous = request("storage.get", "plugin.storage", {"key": key}).get("value")
+                if previous and json.loads(previous).get("expires_at", 0) <= int(time.time()):
+                    request("storage.compare_and_swap", "plugin.storage",
+                            {"key": key, "expected": previous, "value": None})
+        except GatewayRequestError as exc:
+            if exc.code != "unavailable":
+                raise
+            # The host may still be starting or briefly unavailable during a reload.
+            print("Waiting for the host gateway before cleaning up Game Night rooms.",
+                  file=sys.stderr, flush=True)
+            time.sleep(delay)
+            delay = min(delay * 2, 30)
+            continue
+        delay = 1
         time.sleep(60)

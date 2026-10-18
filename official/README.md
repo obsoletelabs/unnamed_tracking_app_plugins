@@ -56,7 +56,9 @@ Maintained user invitations: `official.user-invites` uses host API 1.1.8 with ex
 notification provider. See the [catalogue](../list.json) for its current signed version.
 
 [Game Night](discord-social-activity/README.md) is a Discord Activity for choosing a game
-together. It is an unreleased source preview, available in branch CI's `unsigned-dist` artifact.
+together, published under **Unnamed Tracking Official** with manual updates. See
+the [catalogue](../list.json) for its signed package and the
+[setup and troubleshooting guide](../wiki/docs/examples/discord-game-night.md).
 
 Metadata providers supply search, metadata and artwork through the host's provider
 settings: [GiantBomb](metadata-giantbomb/README.md), [GOG](metadata-gog/README.md),

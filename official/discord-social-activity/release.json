@@ -1,13 +1,12 @@
 {
   "automatic_update": false,
-  "release_notes": "Initial Discord game-night Activity with independent instance consent, guests, personal hard rules, shortlists and voting. Requires host Plugin API v1.1.12 and the updated Discord Bot Notifications identity adapter.",
+  "release_notes": "First signed official Game Night release: shared Discord rooms, consented library connections, guest games, personal rules, shortlists and voting. Recovers room cleanup after temporary host-gateway outages and includes a setup/troubleshooting guide. Requires host Plugin API v1.1.12 and Discord Bot Notifications >=0.1.2. Manual updates; pricing filters remain paused.",
   "tags": [
     "official",
-    "preview",
     "discord",
     "games"
   ],
-  "publisher": "Unnamed Tracking official plugins",
+  "publisher": "Unnamed Tracking Official",
   "schema_version": 1,
   "icon": "icon.svg"
 }
