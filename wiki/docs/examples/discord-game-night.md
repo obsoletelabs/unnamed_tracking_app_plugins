@@ -287,7 +287,9 @@ connections afterward. A failed source does not roll back successful saves.
 **My rules** controls your platform, genres, time and ownership/purchase consent.
 The host chooses Strict, Balanced or Discovery and can change room matching
 defaults. Normalized titles tolerate case, spacing and punctuation; edition or
-crossplay differences still need confirmation. Current purchase offers are
+crossplay differences still need confirmation. Copies someone grouped as one game on
+their own instance (Minecraft Java Edition and Minecraft for Windows under Minecraft)
+count as that game, matched by its main title, so they meet other people's copies. Current purchase offers are
 unavailable, so price/budget/discount filtering is paused and unknown prices are
 never called free.
 

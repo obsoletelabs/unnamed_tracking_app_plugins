@@ -436,3 +436,23 @@ def test_multiplayer_marker_without_limits_is_a_labeled_small_group_signal():
     ctx["library"][0].update(features=[], play_compatibility={"min_players": None, "max_players": None, "crossplay": False})
     _, result = engine.transition(None, {}, ctx, now=1000)
     assert result["pool"]["eligible"][0]["player_limits"] is None
+
+
+def test_copies_grouped_on_an_instance_match_by_the_games_main_title():
+    """Host #274: delegated libraries mark copies of one game with its main title."""
+    windows = game(title="Minecraft for Windows",
+                   identity={"group_id": "g1", "is_main": False, "main_title": "Minecraft"})
+    assert engine.game_key(windows) == engine.game_key(game(title="Minecraft"))
+    assert engine.game_key(game(title="Minecraft for Windows", identity={"main_title": " "})) == "title:minecraftforwindows"
+    assert engine.game_key(game(title="Hades", identity="not-a-dict")) == "title:hades"
+    # A participant's imported copy meets another participant's manual "Minecraft".
+    state, _ = add(title="Minecraft")
+    library = [{"id": "g2", "title": "Minecraft for Windows", "owned": True, "source_id": "source",
+                "source_state": "connected", "ownership_provenance": "instance_library",
+                "platforms": ["PC"], "min_players": 1, "max_players": 4, "genres": ["Co-op"],
+                "identity": {"group_id": "g2", "is_main": False, "main_title": "Minecraft"}}]
+    ctx = context("two", library=library, source_states={"source": "connected"}, connected=True)
+    state, result = engine.transition(state, {}, ctx, now=1001)
+    keys = {key for person in state["participants"].values()
+            for key in [engine.game_key(g, state["matching"]) for g in person["library"] + person["manual"]]}
+    assert keys == {"title:minecraft"}
