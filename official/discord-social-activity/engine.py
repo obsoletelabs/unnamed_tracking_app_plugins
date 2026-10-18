@@ -25,7 +25,12 @@ def game_key(game: dict, matching: dict | None = None) -> str:
     steam = providers.get("steam") if isinstance(providers, dict) else None
     if steam and not matching.get("title_fallback", True):
         return "steam:" + str(steam)
-    title = re.sub(r"\s+", " ", str(game.get("title", "")).strip()).casefold()
+    # Copies the owner grouped as one game on their instance (Minecraft for Windows under
+    # Minecraft) are matched by that game's main title, so they meet other people's copies.
+    identity = game.get("identity")
+    main_title = identity.get("main_title") if isinstance(identity, dict) else None
+    title = main_title if isinstance(main_title, str) and main_title.strip() else game.get("title", "")
+    title = re.sub(r"\s+", " ", str(title).strip()).casefold()
     if not title or len(title) > 500:
         raise SessionError("Use a game title of at most 500 characters.")
     if matching.get("title_fallback", True):
