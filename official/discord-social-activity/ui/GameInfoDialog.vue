@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { playerCountLabel } from "./options.mjs";
 const props = defineProps({ game: Object, info: Object, artwork: String, trackingUrl: String, busy: Boolean });
 const emit = defineEmits(["close", "open-link"]);
 const dialog = ref(null);
@@ -19,7 +20,7 @@ onMounted(() => dialog.value.showModal());
     <p v-if="info?.features?.length">Features · {{ info.features.join(' · ') }}</p>
     <p v-if="!busy && !info?.matched">Public metadata is unavailable for this title. Your group's own game details still apply.</p>
     <p v-if="game.group_approval" class="fine">Approved for the current {{ game.group_approval.players }} players. Exact limits remain unknown.</p>
-    <ul><li v-for="person in game.access" :key="person.participant_id">{{ person.name }} · {{ person.platform }}<span v-if="person.platform_provenance === 'inferred_steam'"> (inferred from Steam)</span> · {{ person.owned ? 'Has access' : 'Considering a purchase · Price unknown' }} · {{ person.min_players != null ? person.min_players + '–' + person.max_players + ' players' : 'Exact player limits unknown' }}<span v-if="person.compatibility === 'detected_multiplayer'"> · Detected multiplayer accepted for this small group</span></li></ul>
+    <ul><li v-for="person in game.access" :key="person.participant_id">{{ person.name }} · {{ person.platform }}<span v-if="person.platform_provenance === 'inferred_steam'"> (inferred from Steam)</span> · {{ person.owned ? 'Has access' : 'Considering a purchase · Price unknown' }} · {{ playerCountLabel(person) }}<span v-if="person.compatibility === 'detected_multiplayer'"> · Detected multiplayer accepted for this small group</span></li></ul>
     <div class="info-links"><button v-if="steamId" class="secondary" @click="emit('open-link', 'https://store.steampowered.com/app/' + steamId + '/')">Steam page ↗</button><button v-if="trackingUrl" class="primary" @click="emit('open-link', trackingUrl)">My tracking page ↗</button><button class="quiet" @click="emit('close')">Close</button></div>
   </dialog>
 </template>

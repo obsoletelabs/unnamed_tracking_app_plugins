@@ -5,7 +5,7 @@ Plugin API **v1.1.12** public-app infrastructure and the updated Discord Bot
 Notifications identity adapter. It imports no host modules and has no database,
 network sockets, bot token or OAuth client secret of its own.
 
-The signed **0.1.0** release is available from the official plugin catalogue under
+The signed **0.2.1** release is available from the official plugin catalogue under
 **Unnamed Tracking Official**. Updates require manual review. This is an early
 release; pricing, federation and the remaining device/context acceptance work
 are documented limitations, not implied by its signature.
@@ -31,6 +31,10 @@ are documented limitations, not implied by its signature.
   player limits for the room directly from the exclusion list. Saved/manual
   limits also supply missing counts without repeated entry. Personal access,
   known platform-specific limits, rules and crossplay consent remain separate.
+- Optional room limits can be saved independently. An unknown minimum stays
+  unknown while the maximum is retained (and vice versa). Saving a partial range
+  confirms only the current group size; changed groups need approval again and
+  still cannot exceed a known bound. Complete ranges remain reusable.
 - Native library bulk multiplayer presets and optional cross-instance saves under
   separate `compatibility.write` consent, with per-game failure results.
 - Own-account tracking changes and explicitly local achievement reports when the

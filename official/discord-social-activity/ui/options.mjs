@@ -16,6 +16,12 @@ export function connectionScopes(includeProgress = false, includeCompatibility =
 export function gamePlatform(game, inferSteam = true) {
   return game.platform || (inferSteam && /^\d{1,12}$/.test(String(game.provider_ids?.steam || "")) ? "PC" : "");
 }
+export function playerCountLabel({ min_players: minimum, max_players: maximum }) {
+  if (minimum != null && maximum != null) return `${minimum}–${maximum} players`;
+  if (minimum != null) return `At least ${minimum} players · maximum unknown`;
+  if (maximum != null) return `Up to ${maximum} players · minimum unknown`;
+  return "Exact player limits unknown";
+}
 export function readableScope(scope) {
   return ({"profile.read":"Account identity", "games.read":"Library", "achievements.read":"Achievements", "tracking.write":"Tracking changes", "achievements.write":"Local achievement reports", "compatibility.write":"Multiplayer settings"})[scope] || scope;
 }
