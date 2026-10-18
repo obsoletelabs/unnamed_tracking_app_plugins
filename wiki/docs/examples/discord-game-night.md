@@ -202,6 +202,12 @@ application and its saved OAuth credentials.
 
 ## 6. Connect a current tracking instance
 
+The Activity operator saves its own HTTPS origin under **Settings →
+Administration → Application → Shared public app URL**. Current hosts resolve
+this saved setting through the existing configuration handler; an optional
+`PUBLIC_APP_URL` environment or `.env` value takes precedence. An environment
+variable is not required. Use the operator's domain, not Discord's proxy domain.
+
 The source instance's administrator first enables Integration access and allows
 the Activity host's exact HTTPS origin. They may instead explicitly allow consent
 requests from any HTTPS origin; individually disabled origins remain blocked.
@@ -410,6 +416,21 @@ host setting and relaunch. Keep any recovery copy in a private password manager
 or other secure operator storage; neither credential belongs in a support ticket,
 URL mapping or repository.
 
+### Linking returns HTTP 500 before a consent page opens
+
+An older host's source broker read only the startup `PUBLIC_APP_URL` value and
+ignored the shared URL saved in Application settings. A blank environment value
+could therefore raise an unhandled origin-validation error. This is host behavior;
+reinstalling Game Night or resetting Discord credentials cannot repair it.
+
+Update the **host application** to include the
+[saved public URL fix](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/279),
+then confirm the shared public HTTPS URL in Application settings and retry
+Connections. The fix uses the existing ENV handler and saved setting, and reports
+an actionable HTTP 503 if neither supplies a valid public URL. Source-origin
+approval and each user's consent remain required, including when the Activity and
+source share the same instance.
+
 ### Guests, retention and saved participants
 
 Everyone signs in through Discord. **Guest** means there is no active connected
@@ -461,6 +482,7 @@ Further multiplayer metadata and cross-instance bulk refinements are deferred to
 | Room membership could not be verified | Join this exact instance; confirm configured server or permitted private-channel location |
 | Legacy connections disabled | Activity host's Integration access policy, then Save instance policy |
 | Owner must approve an origin | Approve the Activity host's actual HTTPS origin on the source, or enable its optional open requester policy |
+| Linking returns HTTP 500 before consent | Update the host with the saved public URL fix; confirm Shared public app URL in Application settings |
 | Connected but no eligible games | Expand Needs attention; check ownership, group approval, hard rules, source state and other participants' vetoes |
 | Bulk multiplayer Save disabled | Every selected source must grant compatibility.write; reconnect with multiplayer settings access and approve it |
 | Images unavailable | Public metadata may be absent or ambiguous; imported legacy artwork is not supported; readable fallback remains |
