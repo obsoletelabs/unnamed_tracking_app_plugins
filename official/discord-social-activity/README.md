@@ -1,9 +1,14 @@
-# Game Night Discord Activity (preview)
+# Game Night Discord Activity
 
 An independently packaged Discord Activity for Unnamed Tracking App. It uses
 Plugin API **v1.1.12** public-app infrastructure and the updated Discord Bot
 Notifications identity adapter. It imports no host modules and has no database,
 network sockets, bot token or OAuth client secret of its own.
+
+The signed **0.1.0** release is available from the official plugin catalogue under
+**Unnamed Tracking Official**. Updates require manual review. This is an early
+release; pricing, federation and the remaining device/context acceptance work
+are documented limitations, not implied by its signature.
 
 ## What works
 
@@ -42,8 +47,10 @@ self-reported, not provider verification; title matches need edition confirmatio
 
 ## Configure
 
-1. Install both preview packages using the host's explicit unsigned-development
-   package review. No trusted signed release is currently published for this plugin.
+1. Install **Discord Bot Notifications** and **Game Night** from the official
+   catalogue in Administration → Plugins. Review their verified publisher,
+   compatibility and permissions. For an unpublished branch build, use its separate
+   unsigned-development package review instead.
 2. Grant the Activity `integrations.public_app` and `plugin.storage` globally.
    Grant the bot `integrations.identity_provider` explicitly, alongside its existing
    permissions. Neither grant is implied by `api.full`.

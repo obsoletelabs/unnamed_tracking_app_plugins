@@ -1,7 +1,7 @@
 # Game Night architecture and acceptance
 
-This describes the Game Night development preview and coordinated Plugin API
-1.1.12 host support, as of 14 October 2026.
+This describes the early signed Game Night release and coordinated Plugin API
+1.1.12 host support, as of 18 October 2026.
 It records the implemented design and remaining checks; it is not a claim that
 every item in the umbrella issue is released. Start with the
 [operator and player guide](../examples/discord-game-night.md) for setup.
@@ -175,5 +175,6 @@ Discord's launch restrictions.
 
 Implementation PRs: [host #121](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/121)
 and [plugins #44](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/pull/44).
-Trusted signing/catalogue publication and the
-remaining live acceptance checks are release gates, not completed features.
+The early 0.1.0 release uses the registered official signer and catalogue, with
+manual updates. The remaining live acceptance checks above stay open; signed
+publication does not mark those checks or deferred features complete.

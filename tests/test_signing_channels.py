@@ -118,6 +118,36 @@ def test_real_publish_uses_three_independent_keys(scoped_checkout):
     }
 
 
+def test_game_night_promotion_signs_the_actual_source_and_keeps_other_previews(scoped_checkout):
+    root, env = scoped_checkout
+    for name in ("discord-bot-notifications", "discord-social-activity"):
+        shutil.copytree(ROOT / "official" / name, root / "official" / name,
+                        ignore=shutil.ignore_patterns("__pycache__"))
+    plugin_id = "official.discord-social-activity"
+    config = {"name": "Promotion test", "base_url": "https://example.invalid/plugins",
+              "unreleased_plugins": [plugin_id, "community.signing"]}
+    (root / "catalogue.json").write_text(json.dumps(config))
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(root), "commit", "-m", "feat: prepare Game Night"],
+                   check=True, capture_output=True)
+
+    result = build(root, env, "--publish", "--promote-plugin", plugin_id)
+    assert result.returncode == 0, result.stderr
+    entry = next(item for item in json.loads((root / "list.json").read_text())["plugins"]
+                 if item["plugin_id"] == plugin_id)
+    assert entry["publisher"] == "Unnamed Tracking Official"
+    assert entry["signing"]["key_id"] == "official"
+    assert entry["signing"]["signature"].startswith("v2:")
+    assert entry["lifecycle"] == "published"
+    assert entry["automatic_update"] is False
+    assert json.loads((root / "catalogue.json").read_text())["unreleased_plugins"] == ["community.signing"]
+    assert not list((root / "dist").glob("community.signing-*.utp"))
+    package = root / "dist" / entry["package"]["filename"]
+    result = subprocess.run([sys.executable, str(root / "tools/verify_packages.py"), str(package)],
+                            capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
 @pytest.mark.parametrize(
     "folder,prefix,signer",
     [

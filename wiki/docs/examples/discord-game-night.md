@@ -7,9 +7,12 @@ the operator permits it. Only the Activity operator needs to configure a bot.
 
 ![A two-participant Game Night with artwork, avatars and a shared winner](../images/discord-game-night-live.jpg)
 
-This is an unsigned development preview requiring the coordinated **Plugin API
-1.1.12** host and updated bot adapter. It is not yet a signed catalogue release.
-Back up your instance before testing a development host branch. Existing
+Game Night **0.1.0** is an early signed release in the official catalogue under
+**Unnamed Tracking Official**, requiring **Plugin API 1.1.12** or a compatible
+newer host and the updated bot adapter. Updates require manual review. A signature
+verifies its publisher and package integrity; it does not approve permissions or
+claim every planned feature is complete. Back up your instance before testing a
+development host branch. Existing
 notification destinations do not need to be recreated for an ordinary update
 under the same publisher and installation identity.
 
@@ -27,16 +30,23 @@ Only operators need sections 1–5 below. Players can start at section 6.
 
 ## 1. What the operator needs
 
-- An Unnamed Tracking host with API 1.1.12, working plugin runtime and HTTPS public
+- An Unnamed Tracking host with API 1.1.12 or a compatible newer version, working plugin runtime and HTTPS public
   URL. The Activity host can also be one of the source libraries.
 - Administrator access to that host and permission to configure a Discord
   application in the [Developer Portal](https://discord.com/developers/applications).
-- The matching **Discord Bot Notifications** preview (adapter 0.1.2 or newer) and
-  **Game Night** preview packages.
+- **Discord Bot Notifications** (adapter 0.1.2 or newer) and **Game Night** from
+  the official plugin catalogue.
 - A Discord test server and the ability to invite the bot. Private applications
   may require participants to be accepted application testers before launching.
 
-For branch testing, download **unsigned-dist** from the plugin repository's
+For a normal installation, use **Administration → Plugins → Discover** and select
+the official Game Night release. Review **Unnamed Tracking Official**, the
+signature, dependencies and requested permissions. If you previously used an
+unsigned preview, the first signed update requires a fresh permission review;
+the host cannot inherit grants from an unverified publisher. Use the normal
+update flow to preserve saved data, rather than uninstalling with purge.
+
+For unpublished branch testing, download **unsigned-dist** from the plugin repository's
 [Plugin checks workflow](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/actions/workflows/ci.yml).
 Extract the archive and select the two `.utp` files. Review the source commit and
 permissions. Do not use a random package sent by someone you do not trust.
@@ -69,9 +79,9 @@ belong in URL mappings, source code, browser query strings or Discord messages.
 
 ## 3. Install and configure the two plugins
 
-1. Open **Settings → Administration → Plugins** on the Activity host. Upload the
-   updated Discord Bot Notifications package first. Review its signature status,
-   permissions and explicit unsigned-preview confirmation.
+1. Open **Settings → Administration → Plugins** on the Activity host. Install or
+   update Discord Bot Notifications from the official catalogue first. Review its
+   verified publisher, compatibility and requested permissions.
 2. Approve the bot's `integrations.identity_provider` permission along with the
    declared permissions its existing features require. Enable the bot.
 3. In **Settings → Administration → Discord Bot Notifications**, enter the bot
@@ -80,7 +90,7 @@ belong in URL mappings, source code, browser query strings or Discord messages.
 4. In **Discord Activity sign-in**, enter that application's ID and its OAuth
    client secret. Save them. The status should say **Activity OAuth configured**.
    The adapter checks that the configured bot belongs to this application.
-5. Upload the Game Night package, review it and approve `integrations.public_app`
+5. Install Game Night from Discover, review it and approve `integrations.public_app`
    and `plugin.storage`. Enable it. Its dependency requires the updated bot.
 6. In **Settings → Administration → Integration access**, enable integrations.
    Enable hosted guests if people should be able to play without a tracking
@@ -358,7 +368,7 @@ Discord and launch it again; the failed frame does not refresh itself.
 Restarting preserves saved rooms and linked accounts. Reinstalling with purge
 is unnecessary for this failure.
 
-Preview **0.0.2** retries room cleanup when the gateway reports `unavailable`,
+Game Night **0.1.0** retries room cleanup when the gateway reports `unavailable`,
 with delays of 1, 2, 4, 8, 16 and then at most 30 seconds. It resumes the normal
 minute cleanup interval after recovery. A waiting message appears in Diagnostics;
 if it continues, investigate host/runtime reachability. Permission denials and
