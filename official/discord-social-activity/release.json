@@ -1,6 +1,6 @@
 {
   "automatic_update": false,
-  "release_notes": "Initial Discord game-night Activity with independent instance consent, guests, personal hard rules, shortlists and voting. Requires host Plugin API v1.1.12 and the updated Discord Bot Notifications identity adapter.",
+  "release_notes": "Keep Game Night running when room cleanup encounters a temporarily unavailable host gateway, with bounded retry delays. Includes operator troubleshooting for worker failures, Discord proxy frame headers and sign-in. Requires host Plugin API v1.1.12 and the updated Discord Bot Notifications identity adapter.",
   "tags": [
     "official",
     "preview",

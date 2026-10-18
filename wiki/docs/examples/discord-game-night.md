@@ -313,6 +313,93 @@ use your tracking app to inspect further pages.
 
 ## Troubleshooting
 
+### Start with these three checks
+
+A blank Discord Activity does not always mean the bot token is wrong. Check the
+worker, the public page and Discord's proxy in that order. A healthy notification
+bot alone does not establish that Game Night is running.
+
+1. Open **Administration → Plugins → Game Night → Diagnostics**. Game Night and
+   **Discord Bot Notifications** should both be **running** and **healthy**.
+   If Game Night failed, read its recent diagnostic events before changing keys.
+2. Open your host's public Activity URL:
+   `https://tracking.example.com/api/public-apps/official.discord-social-activity/app/`.
+   It should return **200** and the Game Night launch page. A direct visit does
+   not join a room; launch inside Discord for that.
+3. Inspect the response headers on both that URL and
+   `https://APPLICATION_ID.discordsays.com/`, replacing `APPLICATION_ID` with the
+   ID in the Developer Portal. Both must return the Activity HTML without a
+   blocking `X-Frame-Options` header. Confirm the URL mappings in section 4.
+
+For example, on Linux/macOS:
+
+```sh
+curl -sS -D - -o /dev/null https://tracking.example.com/api/public-apps/official.discord-social-activity/app/
+curl -sS -D - -o /dev/null https://APPLICATION_ID.discordsays.com/
+```
+
+On Windows PowerShell, use `curl.exe` and replace `/dev/null` with `NUL`.
+These are public-page checks and require no bot token, client secret or API key.
+Do not paste credentials into these commands or share unredacted response
+headers containing cookies.
+
+### Game Night failed after a host restart
+
+An older preview's room-cleanup worker could exit on a temporary host-gateway
+**HTTP 503**, leaving Game Night enabled but **failed / unhealthy**. Its public
+page then returned **404** with
+`This public app or identity provider is unavailable.` Discord may present this
+as a generic refused connection rather than displaying the server's error.
+
+Wait for the host/runtime to become available, then use **Retry** in Game Night's
+plugin settings, or **Start** if it is stopped. Refresh Diagnostics and confirm
+**running**, **healthy** and no new exit event. Leave the failed Activity in
+Discord and launch it again; the failed frame does not refresh itself.
+Restarting preserves saved rooms and linked accounts. Reinstalling with purge
+is unnecessary for this failure.
+
+Preview **0.0.2** retries room cleanup when the gateway reports `unavailable`,
+with delays of 1, 2, 4, 8, 16 and then at most 30 seconds. It resumes the normal
+minute cleanup interval after recovery. A waiting message appears in Diagnostics;
+if it continues, investigate host/runtime reachability. Permission denials and
+other permanent failures still surface instead of retrying indefinitely. Review
+the exact installation's grants and compatibility for those errors.
+
+If the public page returns **403**, check **Administration → Integration access**
+and the explicit installation-wide `integrations.public_app` grant. The bot also
+needs its separate `integrations.identity_provider` grant for sign-in. Repeated
+retries cannot repair a missing permission.
+
+### The page returns 200 but Discord still refuses to connect
+
+Check your outer reverse proxy as well as the application's own proxy. A
+server-wide `X-Frame-Options: SAMEORIGIN` or `DENY` can survive Discord's proxy
+even when the direct page's Content Security Policy permits Discord. A successful
+direct visit therefore does not prove that the embedded page can load.
+
+Apply the narrow Activity-path exception from section 4 to the hostname Discord
+actually targets. When moving hosting from a demo domain to your main domain,
+the old domain's exception does not apply to the new one. Keep the other security
+headers and frame protection for the rest of the application. Check for duplicate
+headers from an upstream proxy too. Validate with `nginx -t`, gracefully reload
+the proxy, repeat both public header checks, then leave and relaunch the Activity.
+
+### Check OAuth only after the Activity page loads
+
+In **Administration → Discord Bot Notifications**, use **Refresh** to verify the
+bot identity and API health. Confirm **Activity OAuth configured**, the same
+Application ID as the Developer Portal, and the intended server ID. A bot that
+looks offline in Discord can still pass these checks: this integration uses HTTP
+and does not maintain a persistent Gateway presence.
+
+The **bot token** authenticates bot API calls; the **OAuth client secret** exchanges
+the participant's sign-in code. They are not interchangeable. Leave the secret
+field blank to retain an existing secret for the same application. Rotate only
+when the credential is invalid, lost or exposed, then update the corresponding
+host setting and relaunch. Keep any recovery copy in a private password manager
+or other secure operator storage; neither credential belongs in a support ticket,
+URL mapping or repository.
+
 ### Guests, retention and saved participants
 
 Everyone signs in through Discord. **Guest** means there is no active connected
@@ -356,7 +443,10 @@ Further multiplayer metadata and cross-instance bulk refinements are deferred to
 
 | Symptom | Check |
 | --- | --- |
-| `discordsays.com refused to connect` | Root mapping, HTTPS reachability, frame headers and Content Security Policy |
+| `discordsays.com refused to connect` | Check Game Night Diagnostics, direct Activity HTTP status, then both direct and Discord-proxied frame headers |
+| Enabled but failed / unhealthy after restart | Read Diagnostics for gateway HTTP 503; wait for host readiness, Retry, then leave and relaunch Discord |
+| Public Activity returns 404 / unavailable | Confirm Game Night is installed, compatible and running; check the bot adapter separately for sign-in |
+| Public Activity returns 403 | Integration access policy and exact installation-wide public-app permission |
 | OAuth not configured / sign-in failed | Same application ID/bot, OAuth client secret rather than bot token, latest bot package, then relaunch |
 | Room membership could not be verified | Join this exact instance; confirm configured server or permitted private-channel location |
 | Legacy connections disabled | Activity host's Integration access policy, then Save instance policy |

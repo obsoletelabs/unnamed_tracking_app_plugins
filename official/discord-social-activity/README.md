@@ -129,7 +129,11 @@ actual preview package against the matching host branch before deployment.
 
 The Activity stores bounded room inputs/votes using public storage CAS. Rooms
 expire under the host retention policy; its background worker clears expired
-rooms. There is no persistent Discord Gateway connection, custom chat command or
+rooms. Temporary host-gateway outages retry with delays from one to thirty seconds;
+permission denials and other permanent failures remain visible in Diagnostics.
+For a blank or refused Activity, follow the [operator troubleshooting steps](../../wiki/docs/examples/discord-game-night.md#troubleshooting)
+to distinguish a failed worker from a reverse-proxy frame header or OAuth problem.
+There is no persistent Discord Gateway connection, custom chat command or
 notification delivery in the Activity. Those remain the bot's responsibilities.
 
 The [architecture and acceptance matrix](../../wiki/docs/architecture/discord-game-night.md) links the implementation to the open issues and distinguishes verified behavior from release follow-ups.
