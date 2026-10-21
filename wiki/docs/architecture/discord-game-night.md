@@ -123,8 +123,11 @@ room and be reused by the same verified identity. Disconnect removes the broker
 copy; source-side revoke invalidates the grant. The engine has a leave/clear
 operation. The native administrator plugin page lists saved participants and
 supports source unlink, participant purge and installation-wide purge, with a
-separate critical permission and explicit confirmation. Self-service guest-data
-deletion/profile controls remain in #39; verified retroactive linking is tracked
+separate critical permission and explicit confirmation. Participants can delete their own
+saved Activity data from **My rules** (the `forget` operation: games, rules, votes
+and room confirmations; cached shortlists are cleared, other people's inputs and
+every tracking library are untouched). Hosts can enable a **verified libraries only**
+room policy, where self-reported games never count as games or ownership. Verified retroactive linking is tracked
 in [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45).
 
 ## Launch contexts and deployment
@@ -165,13 +168,13 @@ Discord's launch restrictions.
 | [#36](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/36) | Independent shell, onboarding, guest/linked labels, reconnect and configuration | Full lifecycle acceptance on deployed installation |
 | [#37](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/37) | Independent sources, provenance/access freshness, saved presets, reads and consented writes | Live independent-source outage test |
 | [#38](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/38) | Three selection modes, personal hard rules, explainable exclusions/vetoes | Custom owner thresholds; pricing intentionally paused |
-| [#39](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/39) | Hosted guest self-reports and retention; no host-account impersonation | Rich guest profile / early-delete UI and verified-only room policy |
+| [#39](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/39) | Hosted guest self-reports and retention; no host-account impersonation | Guest profile card and early delete (**My rules**), verified-only room policy | Cross-instance guest identity boundaries |
 | [#40](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/40) | Host-aligned styling, setup/player guides, screenshots and regression tests | Full narrow/mobile/focus/motion, GDM, source-outage and disable/uninstall acceptance; live provider override needs provider rows |
 | [#41](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/41) | No persistent community product in MVP | Follow-up |
 | [#42](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/42) | Independent source consent is not federation | Follow-up |
 | [#43](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/43) | Public boundaries support future work | Follow-up extension contracts remain |
 | [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45) | Administrator unlink/purge available | Verified retroactive account linking and conflict handling |
-| [#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46) | Optional presets, bulk editor, labeled inference and group approval | Deferred metadata and cross-instance bulk refinements |
+| [#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46) | Optional presets, bulk editor, labeled inference and group approval | Provider-labeled limits (host contract from unnamed_tracking_app_2#329), conflict flag, room-confirmed precedence, per-instance bulk results | Editions/platform variants, duration provenance, stale-data states |
 
 Implementation PRs: [host #121](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/121)
 and [plugins #44](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/pull/44).

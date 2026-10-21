@@ -566,3 +566,92 @@ def test_grouped_copy_confirmations_keep_the_matching_identity_and_own_platform(
     assert state["participants"]["one"]["platform_overrides"][0]["identity"] == candidate["identity"]
     _, result = engine.transition(state, {}, grouped("one"), now=1002)
     assert result["pool"]["eligible"]
+
+
+def provider_context(actor, low, high, source="provider", **changes):
+    ctx = multiplayer_context(actor, **changes)
+    compat = {"min_players": low, "max_players": high, "crossplay": False}
+    if source:
+        compat["source"] = source
+    ctx["library"][0]["play_compatibility"] = compat
+    return ctx
+
+
+def test_provider_player_limits_are_labeled_and_never_called_user_confirmed():
+    state, result = engine.transition(None, {}, provider_context("one", 1, 4), now=1000)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["limits_source"] == "provider"
+    assert candidate["access"][0]["compatibility"] == "provider"
+    _, result = engine.transition(None, {}, provider_context("one", 1, 4, source=None), now=1000)
+    assert result["pool"]["eligible"][0]["limits_source"] == "saved"
+    assert result["pool"]["eligible"][0]["access"][0]["compatibility"] == "self_reported"
+
+
+def test_contradictory_provider_ranges_are_flagged_and_the_narrowest_applies():
+    state, _ = engine.transition(None, {}, provider_context("one", 1, 4), now=1000)
+    state, result = engine.transition(state, {}, provider_context("two", 1, 2), now=1001)
+    candidate = (result["pool"]["eligible"] + result["pool"]["excluded"])[0]
+    assert candidate["metadata_conflict"] is True
+    assert any("disagree" in reason for reason in candidate["reasons"])
+    state, result = engine.transition(state, {}, provider_context("three", 1, 4), now=1002)
+    candidate = (result["pool"]["eligible"] + result["pool"]["excluded"])[0]
+    assert candidate["excluded_reasons"] and "two: player-count rule" in candidate["excluded_reasons"]
+
+
+def test_room_confirmed_limits_outrank_provider_metadata():
+    state, _ = engine.transition(None, {}, provider_context("one", 1, 2), now=1000)
+    state, result = engine.transition(state, {}, provider_context("two", 1, 2), now=1001)
+    state, result = engine.transition(state, {}, provider_context("three", 1, 2), now=1002)
+    assert not result["pool"]["eligible"]
+    state, result = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 6}, provider_context("one", 1, 2), now=1003)
+    candidate = result["pool"]["eligible"][0]
+    assert candidate["limits_source"] == "room" and candidate["metadata_conflict"] is False
+    assert all(item["compatibility"] == "self_reported" for item in candidate["access"])
+
+
+def test_missing_provider_fields_do_not_block_or_invent_limits():
+    ctx = provider_context("one", None, None)
+    state, result = engine.transition(None, {"operation": "matching", "matching": {
+        **engine.MATCHING_DEFAULTS, "small_multiplayer": False}}, ctx, now=1000)
+    candidate = result["pool"]["excluded"][0]
+    assert candidate["limits_source"] == "unknown" and candidate["needs_player_limits"]
+
+
+def test_verified_only_room_ignores_self_reported_games_and_ownership():
+    state, _ = add()
+    state, result = add(state, "two")
+    assert result["pool"]["eligible"]
+    state, result = engine.transition(state, {"operation": "matching", "matching": {
+        **engine.MATCHING_DEFAULTS, "verified_only": True}}, context(), now=1001)
+    assert not result["pool"]["eligible"] and not result["pool"]["excluded"]
+    assert all(person["spectating"] for person in result["participants"])
+    # A linked owner's library still counts, and a guest cannot upgrade its ownership.
+    state, result = engine.transition(state, {}, multiplayer_context("three"), now=1002)
+    assert result["pool"]["eligible"][0]["access"][0]["participant_id"] == "three"
+    state, result = engine.transition(state, {"operation": "manual", "game": game(owned=True)}, context("two", source_states={"source": "connected"}), now=1003)
+    candidate = result["pool"]["eligible"][0]
+    assert [item["participant_id"] for item in candidate["access"]] == ["three"]
+
+
+def test_verified_only_does_not_downgrade_a_linked_owner_with_annotation():
+    ctx = multiplayer_context("one")
+    state, _ = engine.transition(None, {"operation": "matching", "matching": {
+        **engine.MATCHING_DEFAULTS, "verified_only": True}}, ctx, now=1000)
+    state, result = engine.transition(state, {"operation": "manual", "game": game(title="Together")}, ctx, now=1001)
+    assert result["pool"]["eligible"] and result["pool"]["eligible"][0]["access"][0]["owned"]
+
+
+def test_a_participant_can_delete_their_own_data_without_touching_others():
+    state, _ = add()
+    state, _ = add(state, "two")
+    state, _ = engine.transition(state, {"operation": "player-limits", "key": "title:together",
+        "min_players": 1, "max_players": 4}, context("one"), now=1001)
+    with pytest.raises(engine.SessionError, match="Confirm"):
+        engine.transition(state, {"operation": "forget"}, context("one"), now=1002)
+    state, result = engine.transition(state, {"operation": "forget", "confirmed": True}, context("one"), now=1002)
+    assert result == {"forgotten": True}
+    assert "one" not in state["participants"] and "two" in state["participants"]
+    assert state["participants"]["two"]["manual"]
+    assert not state["player_limits"] and state["host_id"] == "two"
+    assert state["history"] == [] and state["selected"] is None
