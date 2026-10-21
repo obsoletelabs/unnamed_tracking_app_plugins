@@ -154,3 +154,32 @@ def test_media_without_a_certain_match_returns_no_assets(atlas, monkeypatch):
     Gateway(monkeypatch, routes={"/resolve": {"status": 200, "data": {"results": [{"method": "fuzzy", "game": GAME}]}}})
     out = atlas.media({"request": {}, "candidate": {"provider": "x", "title": "Portal 2", "year": 2011}})
     assert out == {"assets": []}
+
+
+def test_richer_atlas_fields_are_forwarded_and_validated_against_the_host_schema(atlas, monkeypatch):
+    rich = {**GAME, "genres": ["Puzzle", "puzzle", "Platformer"], "themes": ["Sci-fi"], "languages": ["English"],
+            "aliases": ["Portal Two", "Portal 2", ""], "age_rating": "PEGI 12", "website": "https://thinkwithportals.com",
+            "critic_score": 95, "user_score": 90}
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": rich}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    data = result["metadata"]
+    assert data["genres"] == ["Puzzle", "Platformer"] and data["tags"] == ["Puzzle", "Sci-fi"]
+    assert data["languages"] == ["English"] and data["alternate_titles"] == ["Portal Two"]
+    assert data["age_rating"] == "PEGI 12" and data["scores"] == {"critic": 95, "user": 90}
+    assert data["links"] == [{"label": "Website", "url": "https://thinkwithportals.com"}]
+
+
+@pytest.mark.parametrize("hostile", [
+    {"genres": "Puzzle", "languages": [1, None], "aliases": {"a": 1}, "age_rating": 12, "website": "javascript:alert(1)",
+     "critic_score": "95", "user_score": True},
+    {"website": "https://evil.test/a b", "critic_score": 101, "user_score": -1, "genres": ["x" * 500]},
+])
+def test_malformed_optional_fields_are_dropped_not_forwarded(atlas, monkeypatch, hostile):
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": {**GAME, **hostile}}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    for key in ("genres", "languages", "alternate_titles", "age_rating", "links", "scores"):
+        assert key not in result["metadata"], key
