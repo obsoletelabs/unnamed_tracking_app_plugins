@@ -59,18 +59,41 @@ def search(values):
     return {"candidates": [candidate(game) for game in data.get("results", []) if game.get("id") and game.get("title")]}
 
 
+def texts(value, limit, size):
+    """Up to `limit` distinct short strings; anything else from the server is ignored."""
+    seen, out = set(), []
+    for item in value if isinstance(value, list) else []:
+        text = item.strip() if isinstance(item, str) else ""
+        if text and len(text) <= size and text.casefold() not in seen:
+            seen.add(text.casefold())
+            out.append(text)
+    return out[:limit]
+
+
 def patch(game):
+    title = game.get("title")
+    age_rating = game.get("age_rating") if isinstance(game.get("age_rating"), str) else None
+    website = game.get("website") if isinstance(game.get("website"), str) else ""
+    scores = {name: game[key] for name, key in (("critic", "critic_score"), ("user", "user_score"))
+              if isinstance(game.get(key), int) and not isinstance(game.get(key), bool) and 0 <= game[key] <= 100}
     out = {
-        "title": game.get("title"), "release_date": game.get("release_date"),
+        "title": title, "release_date": game.get("release_date"),
         "description": game.get("description"), "developer": game.get("developer"),
         "publisher": game.get("publisher"), "series": game.get("series"),
-        "tags": game.get("tags") or [], "features": game.get("features") or [],
-        "platforms": game.get("platforms") or [],
+        # Atlas themes are descriptive labels, the closest the host contract has is tags
+        "tags": texts((game.get("tags") or []) + (game.get("themes") or []), 128, 128),
+        "genres": texts(game.get("genres"), 128, 128), "features": game.get("features") or [],
+        "platforms": game.get("platforms") or [], "languages": texts(game.get("languages"), 64, 128),
+        "alternate_titles": [name for name in texts(game.get("aliases"), 21, 512) if name != title][:20],
+        "age_rating": age_rating.strip()[:64] if age_rating else None,
+        "links": [{"label": "Website", "url": website}] if website.startswith("https://") and len(website) <= 500
+        and not any(c.isspace() for c in website) else [],
+        "scores": scores,
         "provider_ids": candidate(game)["provider_ids"],
     }
     if game.get("release_date"):
         out["year"] = int(game["release_date"][:4])
-    return {key: value for key, value in out.items() if value not in (None, "", [])}
+    return {key: value for key, value in out.items() if value not in (None, "", [], {})}
 
 
 def resolve(values, selected):
