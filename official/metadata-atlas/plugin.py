@@ -70,6 +70,26 @@ def texts(value, limit, size):
     return out[:limit]
 
 
+def group_play(game):
+    """Atlas's standard multiplayer fields (players_min, players_max, crossplay), only when valid.
+
+    Atlas allows larger player counts than the host stores (1-32): anything outside is dropped, and
+    an inconsistent range is dropped as a whole. Unknown stays unset; nothing is guessed."""
+    values = game.get("custom") if isinstance(game.get("custom"), dict) else {}
+
+    def count(key):
+        value = values.get(key)
+        return value if isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 32 else None
+
+    low, high = count("players_min"), count("players_max")
+    if low is not None and high is not None and low > high:
+        low = high = None
+    out = {"players_min": low, "players_max": high}
+    if values.get("crossplay") in ("yes", "no", "partial"):
+        out["crossplay"] = values["crossplay"]
+    return out
+
+
 def patch(game):
     title = game.get("title")
     age_rating = game.get("age_rating") if isinstance(game.get("age_rating"), str) else None
@@ -89,6 +109,7 @@ def patch(game):
         "links": [{"label": "Website", "url": website}] if website.startswith("https://") and len(website) <= 500
         and not any(c.isspace() for c in website) else [],
         "scores": scores,
+        **group_play(game),
         "provider_ids": candidate(game)["provider_ids"],
     }
     if game.get("release_date"):

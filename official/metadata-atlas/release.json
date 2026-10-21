@@ -8,5 +8,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": true,
-  "release_notes": "Also forwards genres, languages, age rating, alternate titles, website and scores from Atlas."
+  "release_notes": "Also forwards genres, languages, age rating, alternate titles, website and scores, and Atlas's player counts and crossplay (needs a host that supports them)."
 }
