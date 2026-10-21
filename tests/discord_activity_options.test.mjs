@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { multiplayer, connectionScopes, trackingChange, gamePlatform, playerCountLabel } from "../official/discord-social-activity/ui/options.mjs";
-import { canSaveCompatibility, saveCompatibilityTargets } from "../official/discord-social-activity/ui/library.mjs";
+import { canSaveCompatibility, saveCompatibilityTargets, summarizeSaveResults } from "../official/discord-social-activity/ui/library.mjs";
 test("multiplayer detection uses available metadata without inventing unknown compatibility", () => {
   assert.equal(multiplayer({ features: ["Single-player", "Online Co-op"] }), true);
   assert.equal(multiplayer({ features: ["Multi-player"] }), true);
@@ -60,4 +60,18 @@ test("bulk settings preserve per-instance failures and cannot change an unapprov
   assert.equal(result[1].error, "Instance unavailable");
   assert.match(result[2].error, /approve multiplayer/);
   assert.equal(result[1].origin, "https://two.example");
+});
+
+test("bulk presets keep a known play time and summarize each instance", async () => {
+  const source = {state: "connected", scopes: ["compatibility.write"], origin: "https://one.example"};
+  const saved = [];
+  const results = await saveCompatibilityTargets([
+    {id: "a", source_id: "s0", title: "A", source, play_compatibility: {min_players: 1, max_players: 2, duration_minutes: 45, source: "provider"}},
+    {id: "b", source_id: "s0", title: "B", source},
+  ], {min_players: 2, max_players: 4, duration_minutes: null, crossplay: true}, async (game, value) => { saved.push(value); });
+  assert.equal(saved[0].duration_minutes, 45);
+  assert.equal(saved[1].duration_minutes, null);
+  assert.equal(saved[0].min_players, 2);
+  const failing = [...results, {id: "c", source_id: "s1", origin: "https://two.example", error: "offline"}];
+  assert.deepEqual(summarizeSaveResults(failing).map(e => [e.origin, e.saved, e.failed.length]), [["https://one.example", 2, 0], ["https://two.example", 0, 1]]);
 });

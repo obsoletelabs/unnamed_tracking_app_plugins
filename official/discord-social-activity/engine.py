@@ -16,7 +16,8 @@ class SessionError(ValueError):
 
 
 MATCHING_DEFAULTS = {"title_fallback": True, "platform_aliases": True, "skip_empty": True,
-                     "small_multiplayer": True, "steam_platform": True}
+                     "small_multiplayer": True, "steam_platform": True,
+                     "verified_only": False}
 
 
 def game_key(game: dict, matching: dict | None = None) -> str:
@@ -134,8 +135,9 @@ def automatic_game(game: dict) -> bool:
     )
 
 
-def has_games(person: dict) -> bool:
-    return bool(person["manual"]) or any(automatic_game(game) for game in person["library"])
+def has_games(person: dict, verified_only: bool = False) -> bool:
+    """With the verified-only room policy, self-reported entries do not count as games."""
+    return (bool(person["manual"]) and not verified_only) or any(automatic_game(game) for game in person["library"])
 
 
 def _room_game_reference(game: dict) -> dict:
@@ -178,9 +180,9 @@ def _contributions(person: dict, matching: dict) -> dict[str, dict]:
         if imported:
             # A manual compatibility annotation never upgrades a revoked imported claim.
             result[key] = {**imported, "compatibility": game,
-                           "owned": imported["owned"] or game["owned"],
+                           "owned": imported["owned"] or (game["owned"] and not matching["verified_only"]),
                            "available": imported["available"]}
-        else:
+        elif not matching["verified_only"]:
             result[key] = {**game, "compatibility": game, "available": True}
     return result
 
@@ -188,7 +190,7 @@ def _contributions(person: dict, matching: dict) -> dict[str, dict]:
 def evaluate(room: dict, *, now: int) -> dict:
     matching = {**MATCHING_DEFAULTS, **room.get("matching", {})}
     people = {pid: person for pid, person in room["participants"].items() if person["active"]
-              and (not matching["skip_empty"] or has_games(person))}
+              and (not matching["skip_empty"] or has_games(person, matching["verified_only"]))}
     count = len(people)
     contributions = {pid: _contributions(person, matching) for pid, person in people.items()}
     shared_limits = {game_key(item, matching): item for item in room.get("player_limits", [])}
@@ -212,6 +214,15 @@ def evaluate(room: dict, *, now: int) -> dict:
                             "confirmed_by": pid}
                            for pid, games in contributions.items()
                            if key in games and games[key].get("compatibility")), None)
+        limits_source = ("room" if shared_limits.get(key) is not None else
+                         "unknown" if limits is None else
+                         "provider" if (contributions[limits["confirmed_by"]][key]["compatibility"] or {}).get("source") == "provider"
+                         else "saved")
+        # Different providers or owners can report contradictory ranges. Each participant's own
+        # range still applies (the narrowest wins), but the disagreement is surfaced, never hidden.
+        ranges = {(games[key]["compatibility"]["min_players"], games[key]["compatibility"]["max_players"])
+                  for games in contributions.values() if key in games and games[key].get("compatibility")}
+        metadata_conflict = shared_limits.get(key) is None and len(ranges) > 1
         complete_limits = limits is not None and all(
             limits[field] is not None for field in ("min_players", "max_players"))
         # A partial confirmation is deliberately scoped to the approved party size.
@@ -257,6 +268,14 @@ def evaluate(room: dict, *, now: int) -> dict:
             if compatibility is None:
                 reasons.append("Confirm supported player count once for this room")
                 continue
+            explicit = shared_limits.get(key)
+            if explicit is not None and compatibility.get("source") == "provider":
+                # A human-confirmed room range outranks automatic provider data.
+                compatibility = {**compatibility, **{field: explicit[field] for field in (
+                    "min_players", "max_players") if explicit[field] is not None}}
+                method = "self_reported"
+            elif compatibility.get("source") == "provider":
+                method = "provider"
             platform = compatibility["platform"]
             if not platform:
                 reasons.append(f"{label}: confirm your platform")
@@ -298,6 +317,7 @@ def evaluate(room: dict, *, now: int) -> dict:
         purchase_required = any(item["purchase_required"] for item in access)
         candidate = {"key": key, **_room_game_reference(display), "access": access,
                      "needs_player_limits": not complete_limits,
+                     "limits_source": limits_source, "metadata_conflict": metadata_conflict,
                      "requires_player_limits": not complete_limits and not approved and not small_group,
                      "group_approval": {"players": count, "confirmed_by": approval["confirmed_by"]} if approved else None,
                      "missing_platforms": missing_platforms,
@@ -306,7 +326,9 @@ def evaluate(room: dict, *, now: int) -> dict:
                      "score": score + owners, "reasons": ["Everyone owns it or consented to considering a purchase" if purchase_required else "Everyone has access",
                      "Price unknown; price filters are paused" if purchase_required else "No purchase required",
                      "Known player limits checked" if complete_limits else "Approved for this group; exact limits unknown" if approved else "Multiplayer accepted for 1–2 players; exact limits unknown" if small_group else "Player limits need confirmation",
-                     "Personal hard rules satisfied"], "excluded_reasons": reasons,
+                     "Personal hard rules satisfied"]
+                     + (["Sources disagree on player limits; the narrowest range for each person applies"]
+                        if metadata_conflict else []), "excluded_reasons": reasons,
                      "price_status": "unavailable" if purchase_required else "not_required", "evaluated_at": now,
                      "match_provenance": "provider_id" if key.startswith("steam:") else "title_match"}
         candidate["excluded_reasons"] = list(dict.fromkeys(reasons))
@@ -334,8 +356,8 @@ def _public(room: dict, actor_id: str, now: int) -> dict:
             "participants": [{"id": pid, "display_name": person["display_name"],
                               "avatar_path": person.get("avatar_path"),
                               "active": person["active"], "connected": person["connected"],
-                              "last_seen_at": person["last_seen_at"], "ready": has_games(person),
-                              "spectating": room["matching"]["skip_empty"] and not has_games(person),
+                              "last_seen_at": person["last_seen_at"], "ready": has_games(person, room["matching"]["verified_only"]),
+                              "spectating": room["matching"]["skip_empty"] and not has_games(person, room["matching"]["verified_only"]),
                               "vote_cast": person["vote"] is not None}
                              for pid, person in room["participants"].items()],
             "me": {**room["participants"][actor_id], "id": actor_id},
@@ -543,6 +565,21 @@ def transition(saved: dict | None, values: dict, context: dict, *, now: int | No
         room["selected"], room["phase"] = eligible[winner["key"]], "selected"
         room["history"].append({"round": room["round"], "event": "selected", "at": now,
                                  "title": winner["title"], "votes": best, "tie_count": len(winners)})
+    elif operation == "forget":
+        if values.get("confirmed") is not True:
+            raise SessionError("Confirm that you want to delete your saved Activity data.")
+        del participants[actor_id]
+        for field in ("player_limits", "group_approvals"):
+            room[field] = [entry for entry in room.get(field, []) if entry.get("confirmed_by") != actor_id]
+        # Cached results embed names, avatars and library contributions.
+        room["shortlist"], room["selected"], room["history"], room["phase"] = [], None, [], "lobby"
+        for member in participants.values():
+            member["vote"] = None
+        if room["host_id"] == actor_id:
+            room["host_id"] = next((pid for pid, member in participants.items() if member["active"]),
+                                   next(iter(participants), None))
+        room["revision"] += 1
+        return room, {"forgotten": True}
     elif operation == "leave":
         person["active"] = False
         person["library"], person["manual"], person["vetoes"], person["vote"] = [], [], [], None

@@ -448,7 +448,7 @@ source share the same instance.
 
 Everyone signs in through Discord. **Guest** means there is no active connected
 tracking library; it does not mean anonymous, and it does not create a tracking
-account. Guests can add self-reported games only when the operator enables them.
+account. Guests can add self-reported games only when the operator enables them, and can delete their saved data early.
 An offline/revoked source is not proof of current access. Linked users' source
 grants have their own expiry, including explicitly approved Until revoked access.
 
@@ -482,8 +482,29 @@ Retroactive account merging/reassignment needs explicit identity proof and
 conflict rules and is tracked in [#45](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/45). For now, reconnect under the intended
 source account. Matching display names never merges accounts.
 
-Further multiplayer metadata and cross-instance bulk refinements are deferred to
-[#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46).
+### Player limits from providers
+
+When your tracking instance supports provider player counts, the Activity labels them
+**Reported by a metadata provider**. Provider values are never shown as confirmed:
+a person's own saved details and a limit confirmed for the room both outrank them. If
+two participants' records disagree, the card says so and each person's own range
+still applies, so the narrowest one decides. Missing values stay unknown and are never
+invented. Bulk saves keep each game's known play time and report saved/failed counts
+per instance. Remaining metadata work (editions, platform variants, stale-data states)
+is tracked in [#46](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues/46).
+
+![Provider-reported player limits and a metadata disagreement](../images/discord-game-night-provider-limits.jpg)
+
+### Your own data and verified-only rooms
+
+**My rules → Your saved Activity data** shows whether you are a linked participant or
+a guest, what is saved and when the room expires, and lets you delete it early. This
+never changes a tracking library; a connected library is read again while you stay in
+the room. The host can turn on **Verified libraries only** under *Room host settings*:
+self-reported games then do not count as games or ownership (participants with only
+self-reported games spectate), while linked libraries are unaffected.
+
+![Saved data and bulk editor on a narrow screen](../images/discord-game-night-guest-data.jpg)
 
 | Symptom | Check |
 | --- | --- |

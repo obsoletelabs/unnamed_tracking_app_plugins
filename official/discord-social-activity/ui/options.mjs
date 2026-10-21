@@ -22,6 +22,13 @@ export function playerCountLabel({ min_players: minimum, max_players: maximum })
   if (maximum != null) return `Up to ${maximum} players · minimum unknown`;
   return "Exact player limits unknown";
 }
+export function limitsSourceLabel(source, name) {
+  const who = name || "a participant";
+  if (source === "provider") return "Reported by a metadata provider · not confirmed in this room";
+  if (source === "room") return "Confirmed by " + who + " for this room";
+  if (source === "saved") return "Saved on " + who + "'s game record";
+  return "Exact player limits unknown";
+}
 export function readableScope(scope) {
   return ({"profile.read":"Account identity", "games.read":"Library", "achievements.read":"Achievements", "tracking.write":"Tracking changes", "achievements.write":"Local achievement reports", "compatibility.write":"Multiplayer settings"})[scope] || scope;
 }
