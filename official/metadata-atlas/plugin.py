@@ -90,6 +90,28 @@ def group_play(game):
     return out
 
 
+def custom_values(game):
+    """Atlas's other admin-defined fields as bounded provider custom values (the host contract, API 1.1.15).
+
+    The multiplayer fields travel as their own typed fields, so they are left out here. Keys and values the
+    host would reject are dropped one by one rather than failing the whole record."""
+    values = game.get("custom") if isinstance(game.get("custom"), dict) else {}
+    out = {}
+    for key, value in values.items():
+        if key in ("players_min", "players_max", "crossplay") or len(out) >= 32:
+            continue
+        if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", key):
+            continue
+        if isinstance(value, (bool, int)) or (isinstance(value, float) and value == value and abs(value) != float("inf")):
+            out[key] = value
+        elif isinstance(value, str) and 0 < len(value) <= 500:
+            out[key] = value
+        elif isinstance(value, list) and 0 < len(value) <= 50 and all(
+                isinstance(item, str) and 0 < len(item) <= 200 for item in value):
+            out[key] = value
+    return out
+
+
 def patch(game):
     title = game.get("title")
     age_rating = game.get("age_rating") if isinstance(game.get("age_rating"), str) else None
@@ -110,6 +132,7 @@ def patch(game):
         and not any(c.isspace() for c in website) else [],
         "scores": scores,
         **group_play(game),
+        "custom": custom_values(game),
         "provider_ids": candidate(game)["provider_ids"],
     }
     if game.get("release_date"):

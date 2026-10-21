@@ -206,3 +206,20 @@ def test_atlas_multiplayer_fields_are_forwarded_and_validated_against_the_host_s
 def test_invalid_or_unknown_multiplayer_values_are_left_unset(atlas, custom, expected):
     patch = atlas.patch({**GAME, "custom": custom})
     assert {k: patch[k] for k in ("players_min", "players_max", "crossplay") if k in patch} == expected
+
+
+def test_other_atlas_custom_fields_are_forwarded_as_bounded_provider_values(atlas, monkeypatch):
+    rich = {**GAME, "custom": {"players_max": 4, "difficulty": "hard", "runtime_min": 90, "story": True,
+                               "modes": ["Co-op", "PvP"], "Bad Key": "x", "empty": "", "nested": {"a": 1},
+                               "long": "y" * 501, "ratio": 1.5}}
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": rich}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    assert result["metadata"]["custom"] == {"difficulty": "hard", "runtime_min": 90, "story": True,
+                                            "modes": ["Co-op", "PvP"], "ratio": 1.5}
+    assert result["metadata"]["players_max"] == 4  # typed field, not duplicated in custom
+
+
+def test_no_custom_fields_means_no_custom_key(atlas):
+    assert "custom" not in atlas.patch({**GAME, "custom": {}}) and "custom" not in atlas.patch(GAME)

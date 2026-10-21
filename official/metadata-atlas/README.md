@@ -1,6 +1,6 @@
 # Atlas Metadata Provider
 
-Search and enrich games from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server: one canonical record merged from Steam, IGDB, RAWG and curated sources, with the provider identifiers Atlas has linked to it. Uses public Plugin API v1.1.1 (search, metadata, media, health).
+Search and enrich games from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server: one canonical record merged from Steam, IGDB, RAWG and curated sources, with the provider identifiers Atlas has linked to it. Uses public Plugin API v1.1.15 (search, metadata, media, health).
 
 ## Configure
 
@@ -17,7 +17,7 @@ Use your own server, a LAN mirror or a public one; the plugin contacts only the 
 
 - **Search** returns lightweight candidates with Atlas ID plus linked store identifiers (`steam`, `igdb`, ...) so the host can cross-link them.
 - **Metadata** is fetched by Atlas ID. A candidate without one is looked up by its other provider identifiers or exact title and year, and is only accepted on a certain match (`crosswalk` or `exact`). Anything uncertain returns no metadata rather than a guess.
-- **Metadata fields** forwarded to the app: title, release date, description, developer, publisher, series, tags (Atlas tags plus themes), genres, features, platforms, languages, alternate titles (Atlas aliases), age rating, website link and critic/user scores (0-100). Optional fields that are missing or malformed are dropped. Atlas's standard multiplayer fields (`players_min`, `players_max` 1-32, and `crossplay` yes/no/partial) are forwarded when valid; **this needs a host that accepts them** (obsoletelabs/unnamed_tracking_app_2#329), because the host rejects unknown fields. Other Atlas custom fields are not forwarded.
+- **Metadata fields** forwarded to the app: title, release date, description, developer, publisher, series, tags (Atlas tags plus themes), genres, features, platforms, languages, alternate titles (Atlas aliases), age rating, website link and critic/user scores (0-100). Optional fields that are missing or malformed are dropped. Atlas's standard multiplayer fields (`players_min`, `players_max` 1-32, and `crossplay` yes/no/partial) are forwarded when valid; **this needs a host that accepts them** (obsoletelabs/unnamed_tracking_app_2#329), because the host rejects unknown fields. Other Atlas custom fields are forwarded as bounded provider custom values (keys `a-z0-9._-`, text up to 500 characters, numbers, booleans, short lists); anything the host would reject is dropped one by one. The plugin targets Plugin API 1.1.15, so older hosts refuse to install it instead of rejecting its responses.
 - **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. The app downloads them itself under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.
 - Merged Atlas IDs keep working: a record merged into another is returned under its current ID.
 - Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.
