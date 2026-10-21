@@ -183,3 +183,26 @@ def test_malformed_optional_fields_are_dropped_not_forwarded(atlas, monkeypatch,
     jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
     for key in ("genres", "languages", "alternate_titles", "age_rating", "links", "scores"):
         assert key not in result["metadata"], key
+
+
+def test_atlas_multiplayer_fields_are_forwarded_and_validated_against_the_host_schema(atlas, monkeypatch):
+    rich = {**GAME, "custom": {"players_min": 1, "players_max": 4, "crossplay": "partial"}}
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": rich}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    assert (result["metadata"]["players_min"], result["metadata"]["players_max"]) == (1, 4)
+    assert result["metadata"]["crossplay"] == "partial"
+
+
+@pytest.mark.parametrize("custom, expected", [
+    ({}, {}),
+    ({"players_max": 4}, {"players_max": 4}),
+    ({"players_min": 5, "players_max": 2}, {}),
+    ({"players_min": 1, "players_max": 64}, {"players_min": 1}),
+    ({"players_min": "1", "players_max": True, "crossplay": "maybe"}, {}),
+    ({"crossplay": "no"}, {"crossplay": "no"}),
+])
+def test_invalid_or_unknown_multiplayer_values_are_left_unset(atlas, custom, expected):
+    patch = atlas.patch({**GAME, "custom": custom})
+    assert {k: patch[k] for k in ("players_min", "players_max", "crossplay") if k in patch} == expected
