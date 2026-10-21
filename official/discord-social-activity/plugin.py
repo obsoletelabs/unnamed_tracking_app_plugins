@@ -55,7 +55,8 @@ def session_action(values: dict[str, Any]) -> dict[str, Any]:
             state, result = transition(saved, values, context)
         except SessionError as exc:
             return {"error": str(exc)}
-        updated = json.dumps(state, separators=(",", ":"), allow_nan=False)
+        # A participant who deleted their data may leave an empty room behind.
+        updated = json.dumps(state, separators=(",", ":"), allow_nan=False) if state["participants"] else None
         committed = request("storage.compare_and_swap", "plugin.storage",
                             {"key": room_key, "expected": previous, "value": updated})
         if committed.get("swapped"):
