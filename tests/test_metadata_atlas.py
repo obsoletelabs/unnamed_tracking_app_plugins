@@ -206,3 +206,59 @@ def test_atlas_multiplayer_fields_are_forwarded_and_validated_against_the_host_s
 def test_invalid_or_unknown_multiplayer_values_are_left_unset(atlas, custom, expected):
     patch = atlas.patch({**GAME, "custom": custom})
     assert {k: patch[k] for k in ("players_min", "players_max", "crossplay") if k in patch} == expected
+
+
+def test_other_atlas_custom_fields_are_forwarded_as_bounded_provider_values(atlas, monkeypatch):
+    rich = {**GAME, "custom": {"players_max": 4, "difficulty": "hard", "runtime_min": 90, "story": True,
+                               "modes": ["Co-op", "PvP"], "Bad Key": "x", "empty": "", "nested": {"a": 1},
+                               "long": "y" * 501, "ratio": 1.5}}
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": rich}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    assert result["metadata"]["custom"] == {"difficulty": "hard", "runtime_min": 90, "story": True,
+                                            "modes": ["Co-op", "PvP"], "ratio": 1.5}
+    assert result["metadata"]["players_max"] == 4  # typed field, not duplicated in custom
+
+
+def test_no_custom_fields_means_no_custom_key(atlas):
+    assert "custom" not in atlas.patch({**GAME, "custom": {}}) and "custom" not in atlas.patch(GAME)
+
+
+DIGEST = "c" * 64
+ACHIEVEMENTS = {"results": [
+    {"id": "ach_1", "name": "Wake Up Call", "description": "Finish chapter 1", "global_percent": 40.5, "hidden": False,
+     "icon_url": f"/api/v2/media/{DIGEST}", "locked_icon_url": f"/api/v2/media/{'d' * 64}", "kind": "missable",
+     "tier": "gold", "points": 50, "external_ids": {"steam": "ACH_1", "Bad Key": "x"}},
+    {"id": "ach_2", "name": "Hidden achievement", "description": "", "hidden": True, "icon_url": None},
+    {"id": "ach_3", "name": "", "description": "unnamed is skipped"},
+    {"id": "ach_1", "name": "Duplicate id is skipped", "global_percent": 400, "icon_url": "javascript:alert(1)"},
+    {"name": "No id is skipped"},
+]}
+
+
+def test_declares_the_achievements_resource(atlas):
+    assert atlas.DECLARATION["metadata_resources"] == ["entity", "achievements"]
+
+
+def test_achievements_resource_returns_the_catalogue_validated_against_the_host_schema(atlas, monkeypatch):
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"] + "/achievements": {"status": 200, "data": ACHIEVEMENTS},
+                                 "/games/" + GAME["id"]: {"status": 200, "data": GAME}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    items = result["metadata"]["achievements"]
+    assert [i["external_id"] for i in items] == ["ach_1", "ach_2"]
+    assert items[0] == {"name": "Wake Up Call", "external_id": "ach_1", "hidden": False,
+                        "description": "Finish chapter 1", "global_percent": 40.5,
+                        "icon_url": f"https://atlas.test/media/{DIGEST}",  # Atlas's public path, not the token-gated one
+                        "locked_icon_url": "https://atlas.test/media/" + "d" * 64, "kind": "missable", "tier": "gold",
+                        "points": 50, "source_ids": {"steam": "ACH_1"}}
+    assert items[1]["hidden"] is True and "icon_url" not in items[1]
+    assert "title" not in result["metadata"]  # the achievements resource carries only the catalogue
+
+
+def test_games_without_achievements_return_nothing_rather_than_an_error(atlas, monkeypatch):
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME}})  # no achievements route: 404
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    assert atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected}) == {}

@@ -10,6 +10,7 @@ PROVIDER_ID = "official.metadata-atlas.atlas"
 DECLARATION = {
     "provider_id": PROVIDER_ID, "name": "Atlas", "identifier_namespace": "atlas",
     "media_types": ["game"],
+    "metadata_resources": ["entity", "achievements"],
     "operations": {"search": "search", "metadata": "metadata", "media": "media", "health": "health"},
     "configuration": [
         {"key": "base_url", "label": "Atlas server URL", "scope": "both", "secret": False},
@@ -90,6 +91,28 @@ def group_play(game):
     return out
 
 
+def custom_values(game):
+    """Atlas's other admin-defined fields as bounded provider custom values (the host contract, API 1.1.15).
+
+    The multiplayer fields travel as their own typed fields, so they are left out here. Keys and values the
+    host would reject are dropped one by one rather than failing the whole record."""
+    values = game.get("custom") if isinstance(game.get("custom"), dict) else {}
+    out = {}
+    for key, value in values.items():
+        if key in ("players_min", "players_max", "crossplay") or len(out) >= 32:
+            continue
+        if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", key):
+            continue
+        if isinstance(value, (bool, int)) or (isinstance(value, float) and value == value and abs(value) != float("inf")):
+            out[key] = value
+        elif isinstance(value, str) and 0 < len(value) <= 500:
+            out[key] = value
+        elif isinstance(value, list) and 0 < len(value) <= 50 and all(
+                isinstance(item, str) and 0 < len(item) <= 200 for item in value):
+            out[key] = value
+    return out
+
+
 def patch(game):
     title = game.get("title")
     age_rating = game.get("age_rating") if isinstance(game.get("age_rating"), str) else None
@@ -110,6 +133,7 @@ def patch(game):
         and not any(c.isspace() for c in website) else [],
         "scores": scores,
         **group_play(game),
+        "custom": custom_values(game),
         "provider_ids": candidate(game)["provider_ids"],
     }
     if game.get("release_date"):
@@ -145,10 +169,63 @@ def locate(values, selected):
         raise
 
 
+def achievement_catalogue(values, game):
+    """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress.
+
+    Icons are Atlas's own verified copies, offered through its public /media path like artwork, so the
+    host downloads them itself under its public-network rules. Hidden entries arrive redacted from Atlas
+    and are forwarded as they come, flagged hidden."""
+    try:
+        data = call(values, "/games/" + quote(game["id"], safe=":") + "/achievements")
+    except ProviderFailure as exc:
+        if exc.status == 404:
+            return {}
+        raise
+    root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+    items, seen = [], set()
+    for entry in data.get("results", []):
+        name = entry.get("name")
+        identity = entry.get("id")
+        if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
+            continue
+        if not isinstance(identity, str) or not 0 < len(identity) <= 200 or identity in seen:
+            continue
+        seen.add(identity)
+        item = {"name": name.strip(), "external_id": identity, "hidden": entry.get("hidden") is True}
+        if isinstance(entry.get("description"), str) and entry["description"].strip():
+            item["description"] = entry["description"].strip()[:2000]
+        percent = entry.get("global_percent")
+        if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
+            item["global_percent"] = float(percent)
+        for source, target in (("icon_url", "icon_url"), ("locked_icon_url", "locked_icon_url")):
+            digest = (entry.get(source) or "").rsplit("/", 1)[-1] if isinstance(entry.get(source), str) else ""
+            if re.fullmatch(r"[0-9a-f]{64}", digest):
+                item[target] = f"{root}/media/{digest}"
+        if entry.get("kind") in ("progression", "missable", "win_condition"):
+            item["kind"] = entry["kind"]
+        if entry.get("tier") in ("bronze", "silver", "gold"):
+            item["tier"] = entry["tier"]
+        points = entry.get("points")
+        if isinstance(points, int) and not isinstance(points, bool) and 0 <= points <= 100_000:
+            item["points"] = points
+        ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
+        source_ids = {k: v for k, v in ids.items() if isinstance(k, str) and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", k)
+                      and isinstance(v, str) and 0 < len(v) <= 512}
+        if source_ids:
+            item["source_ids"] = dict(list(source_ids.items())[:8])
+        items.append(item)
+    return {"achievements": items[:2000]} if items else {}
+
+
 @operation
 def metadata(values):
     game = locate(values, values["candidate"])
-    return {"metadata": patch(game)} if game and game.get("title") else {}
+    if not game or not game.get("title"):
+        return {}
+    if values["request"].get("resource") == "achievements":
+        found = achievement_catalogue(values, game)
+        return {"metadata": found} if found else {}
+    return {"metadata": patch(game)}
 
 
 @operation
