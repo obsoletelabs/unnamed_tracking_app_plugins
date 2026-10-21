@@ -228,7 +228,8 @@ def test_no_custom_fields_means_no_custom_key(atlas):
 DIGEST = "c" * 64
 ACHIEVEMENTS = {"results": [
     {"id": "ach_1", "name": "Wake Up Call", "description": "Finish chapter 1", "global_percent": 40.5, "hidden": False,
-     "icon_url": f"/api/v2/media/{DIGEST}", "external_ids": {"steam": "ACH_1"}},
+     "icon_url": f"/api/v2/media/{DIGEST}", "locked_icon_url": f"/api/v2/media/{'d' * 64}", "kind": "missable",
+     "tier": "gold", "points": 50, "external_ids": {"steam": "ACH_1", "Bad Key": "x"}},
     {"id": "ach_2", "name": "Hidden achievement", "description": "", "hidden": True, "icon_url": None},
     {"id": "ach_3", "name": "", "description": "unnamed is skipped"},
     {"id": "ach_1", "name": "Duplicate id is skipped", "global_percent": 400, "icon_url": "javascript:alert(1)"},
@@ -250,7 +251,9 @@ def test_achievements_resource_returns_the_catalogue_validated_against_the_host_
     assert [i["external_id"] for i in items] == ["ach_1", "ach_2"]
     assert items[0] == {"name": "Wake Up Call", "external_id": "ach_1", "hidden": False,
                         "description": "Finish chapter 1", "global_percent": 40.5,
-                        "icon_url": f"https://atlas.test/media/{DIGEST}"}  # Atlas's public path, not the token-gated one
+                        "icon_url": f"https://atlas.test/media/{DIGEST}",  # Atlas's public path, not the token-gated one
+                        "locked_icon_url": "https://atlas.test/media/" + "d" * 64, "kind": "missable", "tier": "gold",
+                        "points": 50, "source_ids": {"steam": "ACH_1"}}
     assert items[1]["hidden"] is True and "icon_url" not in items[1]
     assert "title" not in result["metadata"]  # the achievements resource carries only the catalogue
 

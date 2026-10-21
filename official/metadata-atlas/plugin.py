@@ -197,9 +197,22 @@ def achievement_catalogue(values, game):
         percent = entry.get("global_percent")
         if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
             item["global_percent"] = float(percent)
-        digest = (entry.get("icon_url") or "").rsplit("/", 1)[-1] if isinstance(entry.get("icon_url"), str) else ""
-        if re.fullmatch(r"[0-9a-f]{64}", digest):
-            item["icon_url"] = f"{root}/media/{digest}"
+        for source, target in (("icon_url", "icon_url"), ("locked_icon_url", "locked_icon_url")):
+            digest = (entry.get(source) or "").rsplit("/", 1)[-1] if isinstance(entry.get(source), str) else ""
+            if re.fullmatch(r"[0-9a-f]{64}", digest):
+                item[target] = f"{root}/media/{digest}"
+        if entry.get("kind") in ("progression", "missable", "win_condition"):
+            item["kind"] = entry["kind"]
+        if entry.get("tier") in ("bronze", "silver", "gold"):
+            item["tier"] = entry["tier"]
+        points = entry.get("points")
+        if isinstance(points, int) and not isinstance(points, bool) and 0 <= points <= 100_000:
+            item["points"] = points
+        ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
+        source_ids = {k: v for k, v in ids.items() if isinstance(k, str) and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", k)
+                      and isinstance(v, str) and 0 < len(v) <= 512}
+        if source_ids:
+            item["source_ids"] = dict(list(source_ids.items())[:8])
         items.append(item)
     return {"achievements": items[:2000]} if items else {}
 
