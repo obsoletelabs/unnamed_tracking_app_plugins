@@ -225,12 +225,14 @@ def test_no_custom_fields_means_no_custom_key(atlas):
     assert "custom" not in atlas.patch({**GAME, "custom": {}}) and "custom" not in atlas.patch(GAME)
 
 
+DIGEST = "c" * 64
 ACHIEVEMENTS = {"results": [
-    {"name": "Wake Up Call", "description": "Finish chapter 1", "global_percent": 40.5, "hidden": False,
-     "icon_url": "https://img.test/a.png", "external_ids": {"steam": "ACH_1"}},
-    {"name": "Secret", "hidden": True, "external_ids": {}},
-    {"name": "", "description": "unnamed is skipped"},
-    {"name": "Bad", "global_percent": 400, "icon_url": "javascript:alert(1)", "external_ids": {"steam": "ACH_1"}},
+    {"id": "ach_1", "name": "Wake Up Call", "description": "Finish chapter 1", "global_percent": 40.5, "hidden": False,
+     "icon_url": f"/api/v2/media/{DIGEST}", "external_ids": {"steam": "ACH_1"}},
+    {"id": "ach_2", "name": "Hidden achievement", "description": "", "hidden": True, "icon_url": None},
+    {"id": "ach_3", "name": "", "description": "unnamed is skipped"},
+    {"id": "ach_1", "name": "Duplicate id is skipped", "global_percent": 400, "icon_url": "javascript:alert(1)"},
+    {"name": "No id is skipped"},
 ]}
 
 
@@ -245,10 +247,11 @@ def test_achievements_resource_returns_the_catalogue_validated_against_the_host_
     result = atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
     jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
     items = result["metadata"]["achievements"]
-    assert [i["name"] for i in items] == ["Wake Up Call", "Secret"]  # unnamed skipped, duplicate id skipped
-    assert items[0] == {"name": "Wake Up Call", "external_id": "ACH_1", "hidden": False,
-                        "description": "Finish chapter 1", "global_percent": 40.5, "icon_url": "https://img.test/a.png"}
-    assert items[1]["hidden"] is True and items[1]["external_id"].startswith("atlas:secret")
+    assert [i["external_id"] for i in items] == ["ach_1", "ach_2"]
+    assert items[0] == {"name": "Wake Up Call", "external_id": "ach_1", "hidden": False,
+                        "description": "Finish chapter 1", "global_percent": 40.5,
+                        "icon_url": f"https://atlas.test/media/{DIGEST}"}  # Atlas's public path, not the token-gated one
+    assert items[1]["hidden"] is True and "icon_url" not in items[1]
     assert "title" not in result["metadata"]  # the achievements resource carries only the catalogue
 
 

@@ -170,32 +170,37 @@ def locate(values, selected):
 
 
 def achievement_catalogue(values, game):
-    """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress."""
+    """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress.
+
+    Icons are Atlas's own verified copies, offered through its public /media path like artwork, so the
+    host downloads them itself under its public-network rules. Hidden entries arrive redacted from Atlas
+    and are forwarded as they come, flagged hidden."""
     try:
         data = call(values, "/games/" + quote(game["id"], safe=":") + "/achievements")
     except ProviderFailure as exc:
         if exc.status == 404:
             return {}
         raise
-    items = []
+    root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+    items, seen = [], set()
     for entry in data.get("results", []):
         name = entry.get("name")
+        identity = entry.get("id")
         if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
             continue
-        ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
-        external = next((v for v in ids.values() if isinstance(v, str) and 0 < len(v) <= 200), None)
-        item = {"name": name.strip(), "external_id": external or "atlas:" + re.sub(r"\W+", "-", name.casefold()).strip("-")[:190],
-                "hidden": entry.get("hidden") is True}
+        if not isinstance(identity, str) or not 0 < len(identity) <= 200 or identity in seen:
+            continue
+        seen.add(identity)
+        item = {"name": name.strip(), "external_id": identity, "hidden": entry.get("hidden") is True}
         if isinstance(entry.get("description"), str) and entry["description"].strip():
             item["description"] = entry["description"].strip()[:2000]
         percent = entry.get("global_percent")
         if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
             item["global_percent"] = float(percent)
-        icon = entry.get("icon_url")
-        if isinstance(icon, str) and icon.startswith("https://") and len(icon) <= 2000 and not any(c.isspace() for c in icon):
-            item["icon_url"] = icon
-        if item["external_id"] not in {i["external_id"] for i in items}:
-            items.append(item)
+        digest = (entry.get("icon_url") or "").rsplit("/", 1)[-1] if isinstance(entry.get("icon_url"), str) else ""
+        if re.fullmatch(r"[0-9a-f]{64}", digest):
+            item["icon_url"] = f"{root}/media/{digest}"
+        items.append(item)
     return {"achievements": items[:2000]} if items else {}
 
 
