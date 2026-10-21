@@ -223,3 +223,36 @@ def test_other_atlas_custom_fields_are_forwarded_as_bounded_provider_values(atla
 
 def test_no_custom_fields_means_no_custom_key(atlas):
     assert "custom" not in atlas.patch({**GAME, "custom": {}}) and "custom" not in atlas.patch(GAME)
+
+
+ACHIEVEMENTS = {"results": [
+    {"name": "Wake Up Call", "description": "Finish chapter 1", "global_percent": 40.5, "hidden": False,
+     "icon_url": "https://img.test/a.png", "external_ids": {"steam": "ACH_1"}},
+    {"name": "Secret", "hidden": True, "external_ids": {}},
+    {"name": "", "description": "unnamed is skipped"},
+    {"name": "Bad", "global_percent": 400, "icon_url": "javascript:alert(1)", "external_ids": {"steam": "ACH_1"}},
+]}
+
+
+def test_declares_the_achievements_resource(atlas):
+    assert atlas.DECLARATION["metadata_resources"] == ["entity", "achievements"]
+
+
+def test_achievements_resource_returns_the_catalogue_validated_against_the_host_schema(atlas, monkeypatch):
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"] + "/achievements": {"status": 200, "data": ACHIEVEMENTS},
+                                 "/games/" + GAME["id"]: {"status": 200, "data": GAME}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    result = atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
+    jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
+    items = result["metadata"]["achievements"]
+    assert [i["name"] for i in items] == ["Wake Up Call", "Secret"]  # unnamed skipped, duplicate id skipped
+    assert items[0] == {"name": "Wake Up Call", "external_id": "ACH_1", "hidden": False,
+                        "description": "Finish chapter 1", "global_percent": 40.5, "icon_url": "https://img.test/a.png"}
+    assert items[1]["hidden"] is True and items[1]["external_id"].startswith("atlas:secret")
+    assert "title" not in result["metadata"]  # the achievements resource carries only the catalogue
+
+
+def test_games_without_achievements_return_nothing_rather_than_an_error(atlas, monkeypatch):
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME}})  # no achievements route: 404
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
+    assert atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected}) == {}

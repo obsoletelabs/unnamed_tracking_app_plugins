@@ -10,6 +10,7 @@ PROVIDER_ID = "official.metadata-atlas.atlas"
 DECLARATION = {
     "provider_id": PROVIDER_ID, "name": "Atlas", "identifier_namespace": "atlas",
     "media_types": ["game"],
+    "metadata_resources": ["entity", "achievements"],
     "operations": {"search": "search", "metadata": "metadata", "media": "media", "health": "health"},
     "configuration": [
         {"key": "base_url", "label": "Atlas server URL", "scope": "both", "secret": False},
@@ -168,10 +169,45 @@ def locate(values, selected):
         raise
 
 
+def achievement_catalogue(values, game):
+    """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress."""
+    try:
+        data = call(values, "/games/" + quote(game["id"], safe=":") + "/achievements")
+    except ProviderFailure as exc:
+        if exc.status == 404:
+            return {}
+        raise
+    items = []
+    for entry in data.get("results", []):
+        name = entry.get("name")
+        if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
+            continue
+        ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
+        external = next((v for v in ids.values() if isinstance(v, str) and 0 < len(v) <= 200), None)
+        item = {"name": name.strip(), "external_id": external or "atlas:" + re.sub(r"\W+", "-", name.casefold()).strip("-")[:190],
+                "hidden": entry.get("hidden") is True}
+        if isinstance(entry.get("description"), str) and entry["description"].strip():
+            item["description"] = entry["description"].strip()[:2000]
+        percent = entry.get("global_percent")
+        if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
+            item["global_percent"] = float(percent)
+        icon = entry.get("icon_url")
+        if isinstance(icon, str) and icon.startswith("https://") and len(icon) <= 2000 and not any(c.isspace() for c in icon):
+            item["icon_url"] = icon
+        if item["external_id"] not in {i["external_id"] for i in items}:
+            items.append(item)
+    return {"achievements": items[:2000]} if items else {}
+
+
 @operation
 def metadata(values):
     game = locate(values, values["candidate"])
-    return {"metadata": patch(game)} if game and game.get("title") else {}
+    if not game or not game.get("title"):
+        return {}
+    if values["request"].get("resource") == "achievements":
+        found = achievement_catalogue(values, game)
+        return {"metadata": found} if found else {}
+    return {"metadata": patch(game)}
 
 
 @operation
