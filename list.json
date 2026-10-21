@@ -41304,9 +41304,9 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "cd9093a45e324fdad406f67d2197aa11ae18decf",
-        "source_committed_at": "2026-10-21T20:20:10+08:00",
-        "source_digest": "c202e12b698d9eec1a2ed6548e651deaebfaf626ea079ef66adfd2d503103c06",
+        "source_commit": "d1da826bfbef254c336731ff1fe8373f4ce0024d",
+        "source_committed_at": "2026-10-21T23:40:46+08:00",
+        "source_digest": "678212792028027263b558b1ed5e9f49300ff79254d5155dfc268f62ab261af1",
         "source_path": "official/metadata-atlas",
         "version_bump": "minor"
       },
@@ -41361,7 +41361,7 @@
         "downloadable"
       ],
       "manifest": {
-        "api_contract_version": "1.1.1",
+        "api_contract_version": "1.1.15",
         "application_version_range": ">=0.0.1",
         "capabilities": [
           {
@@ -41398,8 +41398,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "fb7be4548f87ad50a1211e2f54296ef29a864761ef4d137776c9c9e64102b796",
-          "signature": "v2:f1PIxdEUswlHDvA3lDEahS24BGEM2IvogA2iNHvu6Ff/oBPzL9ErPNeZhO7kcfXwkX3cyM2qTDLX8lPr91KRAw=="
+          "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
+          "signature": "v2:SaZUWMdEH9BCoqOepGTTMtqESWB2sg8CBDfHHJ+BCZ//aBCyIQX/yyhU4mQMe9YTT+AO1sT/DCfgzEJprPaqCg=="
         },
         "manifest_version": 1,
         "name": "Atlas Metadata Provider",
@@ -41470,15 +41470,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.4.0"
+        "version": "0.5.0"
       },
       "name": "Atlas Metadata Provider",
       "package": {
-        "filename": "official.metadata-atlas-0.4.0.utp",
+        "filename": "official.metadata-atlas-0.5.0.utp",
         "format": "utp-v1",
-        "size_bytes": 11952
+        "size_bytes": 13372
       },
-      "package_sha256": "89274f1092a940eb8a1ef20bccdea0cddbba42e6f7ed96ac7bcdf1923524e734",
+      "package_sha256": "d412e773f2ab9ef4ebd36863f080f6614cc0db28c5c96b6af39b3512c3154cd6",
       "permissions": [
         {
           "capability": {
@@ -41532,7 +41532,7 @@
       ],
       "plugin_id": "official.metadata-atlas",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Atlas Metadata Provider\n\nSearch and enrich games from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server: one canonical record merged from Steam, IGDB, RAWG and curated sources, with the provider identifiers Atlas has linked to it. Uses public Plugin API v1.1.1 (search, metadata, media, health).\n\n## Configure\n\nInstall its .utp through Plugin Manager and grant the declared permissions, then set, in the host-rendered provider settings (system or personal scope):\n\n| Setting | Meaning |\n| --- | --- |\n| **Atlas server URL** | Root of your Atlas node, e.g. `https://atlas.example.org` or `http://192.168.1.20:8000`. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |\n| **Atlas API token** | A token with the `read` scope (`atlas token --name tracker --scopes read`). Write-only and encrypted by the host. |\n\nUse your own server, a LAN mirror or a public one; the plugin contacts only the configured URL. Egress is governed by the `network.outbound` grant, so the administrator chooses the destination.\n\n## Behaviour\n\n- **Search** returns lightweight candidates with Atlas ID plus linked store identifiers (`steam`, `igdb`, ...) so the host can cross-link them.\n- **Metadata** is fetched by Atlas ID. A candidate without one is looked up by its other provider identifiers or exact title and year, and is only accepted on a certain match (`crosswalk` or `exact`). Anything uncertain returns no metadata rather than a guess.\n- **Metadata fields** forwarded to the app: title, release date, description, developer, publisher, series, tags (Atlas tags plus themes), genres, features, platforms, languages, alternate titles (Atlas aliases), age rating, website link and critic/user scores (0-100). Optional fields that are missing or malformed are dropped. Atlas's standard multiplayer fields (`players_min`, `players_max` 1-32, and `crossplay` yes/no/partial) are forwarded when valid; **this needs a host that accepts them** (obsoletelabs/unnamed_tracking_app_2#329), because the host rejects unknown fields. Other Atlas custom fields are not forwarded.\n- **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. The app downloads them itself under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.\n- Merged Atlas IDs keep working: a record merged into another is returned under its current ID.\n- Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.\n- Personal data is never sent. Only titles, years and provider IDs go to the server.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.\n",
+      "readme": "# Atlas Metadata Provider\n\nSearch and enrich games from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server: one canonical record merged from Steam, IGDB, RAWG and curated sources, with the provider identifiers Atlas has linked to it. Uses public Plugin API v1.1.15 (search, metadata, media, health).\n\n## Configure\n\nInstall its .utp through Plugin Manager and grant the declared permissions, then set, in the host-rendered provider settings (system or personal scope):\n\n| Setting | Meaning |\n| --- | --- |\n| **Atlas server URL** | Root of your Atlas node, e.g. `https://atlas.example.org` or `http://192.168.1.20:8000`. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |\n| **Atlas API token** | A token with the `read` scope (`atlas token --name tracker --scopes read`). Write-only and encrypted by the host. |\n\nUse your own server, a LAN mirror or a public one; the plugin contacts only the configured URL. Egress is governed by the `network.outbound` grant, so the administrator chooses the destination.\n\n## Behaviour\n\n- **Search** returns lightweight candidates with Atlas ID plus linked store identifiers (`steam`, `igdb`, ...) so the host can cross-link them.\n- **Metadata** is fetched by Atlas ID. A candidate without one is looked up by its other provider identifiers or exact title and year, and is only accepted on a certain match (`crosswalk` or `exact`). Anything uncertain returns no metadata rather than a guess.\n- **Metadata fields** forwarded to the app: title, release date, description, developer, publisher, series, tags (Atlas tags plus themes), genres, features, platforms, languages, alternate titles (Atlas aliases), age rating, website link and critic/user scores (0-100). Optional fields that are missing or malformed are dropped. Atlas's standard multiplayer fields (`players_min`, `players_max` 1-32, and `crossplay` yes/no/partial) are forwarded when valid; **this needs a host that accepts them** (obsoletelabs/unnamed_tracking_app_2#329), because the host rejects unknown fields. Other Atlas custom fields are forwarded as bounded provider custom values (keys `a-z0-9._-`, text up to 500 characters, numbers, booleans, short lists); anything the host would reject is dropped one by one. The plugin targets Plugin API 1.1.15, so older hosts refuse to install it instead of rejecting its responses.\n- **Achievements**: the plugin declares the `achievements` metadata resource and returns Atlas's achievement definitions (name, description, hidden flag, global percentage, HTTPS icon, a stable id), never anyone's progress. The host stores them as locked achievements and fetches them when you use **Refresh achievements** on a game that has none from Steam, PlayStation or RetroAchievements, or on a metadata refresh of a game with no achievements yet (needs a host with Plugin API 1.1.15, obsoletelabs/unnamed_tracking_app_2#329).\n- **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. The app downloads them itself under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.\n- Merged Atlas IDs keep working: a record merged into another is returned under its current ID.\n- Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.\n- Personal data is never sent. Only titles, years and provider IDs go to the server.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.\n",
       "release_notes": "Also forwards genres, languages, age rating, alternate titles, website and scores, and Atlas's player counts and crossplay (needs a host that supports them).",
       "releases": [
         {
@@ -41856,14 +41856,175 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-atlas-0.4.0.utp",
           "version": "0.4.0"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "d1da826bfbef254c336731ff1fe8373f4ce0024d",
+            "source_committed_at": "2026-10-21T23:40:46+08:00",
+            "source_digest": "678212792028027263b558b1ed5e9f49300ff79254d5155dfc268f62ab261af1",
+            "source_path": "official/metadata-atlas",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "bcbbc9bf6b2734c1ac72450f807c44c4cfd803146ba09711061ca43167f774b9"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.15",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.media",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Merged cross-provider game metadata from a self-hosted Atlas server with a configurable URL and token.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
+              "signature": "v2:SaZUWMdEH9BCoqOepGTTMtqESWB2sg8CBDfHHJ+BCZ//aBCyIQX/yyhU4mQMe9YTT+AO1sT/DCfgzEJprPaqCg=="
+            },
+            "manifest_version": 1,
+            "name": "Atlas Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Register the Atlas provider so the host can search and enrich games from a configured Atlas server."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Search the configured Atlas server for games by title."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Fetch merged game metadata from the configured Atlas server."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.media",
+                  "version": 1
+                },
+                "rationale": "List artwork the configured Atlas server has already downloaded and verified for a game."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Report whether the configured Atlas server and token are reachable and valid."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Send bounded requests to the Atlas server URL the administrator chose; no other destination is contacted."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Read the Atlas server URL and API token the administrator or user configured."
+              }
+            ],
+            "plugin_id": "official.metadata-atlas",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "media",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.5.0"
+          },
+          "package": {
+            "filename": "official.metadata-atlas-0.5.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 13372
+          },
+          "package_sha256": "d412e773f2ab9ef4ebd36863f080f6614cc0db28c5c96b6af39b3512c3154cd6",
+          "plugin_id": "official.metadata-atlas",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Atlas Metadata Provider\n\nSearch and enrich games from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server: one canonical record merged from Steam, IGDB, RAWG and curated sources, with the provider identifiers Atlas has linked to it. Uses public Plugin API v1.1.15 (search, metadata, media, health).\n\n## Configure\n\nInstall its .utp through Plugin Manager and grant the declared permissions, then set, in the host-rendered provider settings (system or personal scope):\n\n| Setting | Meaning |\n| --- | --- |\n| **Atlas server URL** | Root of your Atlas node, e.g. `https://atlas.example.org` or `http://192.168.1.20:8000`. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |\n| **Atlas API token** | A token with the `read` scope (`atlas token --name tracker --scopes read`). Write-only and encrypted by the host. |\n\nUse your own server, a LAN mirror or a public one; the plugin contacts only the configured URL. Egress is governed by the `network.outbound` grant, so the administrator chooses the destination.\n\n## Behaviour\n\n- **Search** returns lightweight candidates with Atlas ID plus linked store identifiers (`steam`, `igdb`, ...) so the host can cross-link them.\n- **Metadata** is fetched by Atlas ID. A candidate without one is looked up by its other provider identifiers or exact title and year, and is only accepted on a certain match (`crosswalk` or `exact`). Anything uncertain returns no metadata rather than a guess.\n- **Metadata fields** forwarded to the app: title, release date, description, developer, publisher, series, tags (Atlas tags plus themes), genres, features, platforms, languages, alternate titles (Atlas aliases), age rating, website link and critic/user scores (0-100). Optional fields that are missing or malformed are dropped. Atlas's standard multiplayer fields (`players_min`, `players_max` 1-32, and `crossplay` yes/no/partial) are forwarded when valid; **this needs a host that accepts them** (obsoletelabs/unnamed_tracking_app_2#329), because the host rejects unknown fields. Other Atlas custom fields are forwarded as bounded provider custom values (keys `a-z0-9._-`, text up to 500 characters, numbers, booleans, short lists); anything the host would reject is dropped one by one. The plugin targets Plugin API 1.1.15, so older hosts refuse to install it instead of rejecting its responses.\n- **Achievements**: the plugin declares the `achievements` metadata resource and returns Atlas's achievement definitions (name, description, hidden flag, global percentage, HTTPS icon, a stable id), never anyone's progress. The host stores them as locked achievements and fetches them when you use **Refresh achievements** on a game that has none from Steam, PlayStation or RetroAchievements, or on a metadata refresh of a game with no achievements yet (needs a host with Plugin API 1.1.15, obsoletelabs/unnamed_tracking_app_2#329).\n- **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. The app downloads them itself under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.\n- Merged Atlas IDs keep working: a record merged into another is returned under its current ID.\n- Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.\n- Personal data is never sent. Only titles, years and provider IDs go to the server.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.\n",
+          "release_notes": "Also forwards genres, languages, age rating, alternate titles, website and scores, and Atlas's player counts and crossplay (needs a host that supports them).",
+          "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
+            "signature": "v2:SaZUWMdEH9BCoqOepGTTMtqESWB2sg8CBDfHHJ+BCZ//aBCyIQX/yyhU4mQMe9YTT+AO1sT/DCfgzEJprPaqCg=="
+          },
+          "tags": [
+            "metadata",
+            "atlas",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-atlas-0.5.0.utp",
+          "version": "0.5.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "fb7be4548f87ad50a1211e2f54296ef29a864761ef4d137776c9c9e64102b796",
+      "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "fb7be4548f87ad50a1211e2f54296ef29a864761ef4d137776c9c9e64102b796",
-        "signature": "v2:f1PIxdEUswlHDvA3lDEahS24BGEM2IvogA2iNHvu6Ff/oBPzL9ErPNeZhO7kcfXwkX3cyM2qTDLX8lPr91KRAw=="
+        "sha256": "7f4f867aeb2b6d8097506d6d26e48a691860127685aeb558f3c0b5d230983bc2",
+        "signature": "v2:SaZUWMdEH9BCoqOepGTTMtqESWB2sg8CBDfHHJ+BCZ//aBCyIQX/yyhU4mQMe9YTT+AO1sT/DCfgzEJprPaqCg=="
       },
       "source": {
         "lifecycle": "source",
@@ -41875,8 +42036,8 @@
         "atlas",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-atlas-0.4.0.utp",
-      "version": "0.4.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-atlas-0.5.0.utp",
+      "version": "0.5.0"
     },
     {
       "application_version_range": ">=0.0.1",
