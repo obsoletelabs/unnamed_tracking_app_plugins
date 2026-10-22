@@ -68,6 +68,15 @@ def test_search_maps_games_and_sends_token_only_in_authorization(atlas, monkeypa
     assert TOKEN not in call["url"] and call["headers"]["Authorization"] == "Bearer " + TOKEN
 
 
+@pytest.mark.parametrize("media_type", ["game", "anime", "movie", "tv_show"])
+def test_search_sends_and_returns_the_requested_media_type(atlas, monkeypatch, media_type):
+    record = {**GAME, "media_type": media_type}
+    gateway = Gateway(monkeypatch, routes={"/api/v2/games": {"status": 200, "data": {"results": [record]}}})
+    result = atlas.search(work(media_type=media_type))
+    assert result["candidates"][0]["media_type"] == media_type
+    assert "type=" + media_type in gateway.calls[0]["url"]
+
+
 def test_metadata_by_atlas_id_matches_response_schema(atlas, monkeypatch):
     Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME}})
     selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
@@ -140,7 +149,8 @@ def test_media_lists_only_cached_artwork_as_public_links(atlas, monkeypatch):
         {"kind": "screenshot", "media_url": None, "url": "https://provider.test/s.jpg"},  # not cached: skipped
         {"kind": "weird", "media_url": f"/api/v2/media/{'b' * 64}"},
         {"kind": "hero", "media_url": "/api/v2/media/../../etc/passwd"}]}
-    gateway = Gateway(monkeypatch, routes={"/games/" + GAME["id"] + "/artwork": {"status": 200, "data": art}})
+    gateway = Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME},
+                                           "/games/" + GAME["id"] + "/artwork": {"status": 200, "data": art}})
     selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
     out = atlas.media({"request": {}, "candidate": selected})
     assert out == {"assets": [{"kind": "key_art", "url": f"https://atlas.test/media/{digest}", "priority": 0,
@@ -154,6 +164,62 @@ def test_media_without_a_certain_match_returns_no_assets(atlas, monkeypatch):
     Gateway(monkeypatch, routes={"/resolve": {"status": 200, "data": {"results": [{"method": "fuzzy", "game": GAME}]}}})
     out = atlas.media({"request": {}, "candidate": {"provider": "x", "title": "Portal 2", "year": 2011}})
     assert out == {"assets": []}
+
+
+@pytest.mark.parametrize(("media_type", "fields", "expected"), [
+    ("movie", {"developer": "Greta Gerwig", "publisher": "LuckyChap",
+                "custom": {"runtime_minutes": 114, "writer": ["Greta Gerwig", "Noah Baumbach"],
+                           "production_countries": ["United States"], "tagline": "This Barbie is a film."}},
+     {"director": "Greta Gerwig", "studios": ["LuckyChap"], "runtime_minutes": 114,
+      "writer": "Greta Gerwig, Noah Baumbach", "countries": ["United States"],
+      "custom": {"tagline": "This Barbie is a film."}}),
+    ("anime", {"developer": "Bones", "series": "My Hero Academia", "platforms": ["TV"],
+                "features": ["Superhero"], "custom": {"format": "TV", "episode_count": 13,
+                    "status": "Finished", "source_material": "Manga"}},
+     {"studios": ["Bones"], "format": "TV", "episode_count": 13, "tags": ["Puzzle", "Superhero"],
+      "custom": {"status": "Finished", "source_material": "Manga", "franchise": "My Hero Academia"}}),
+    ("tv_show", {"developer": "Jesse Armstrong", "publisher": "HBO", "series": "Succession",
+                  "custom": {"episode_count": 39, "season_count": 4, "episode_runtime_minutes": 60,
+                             "status": "Ended"}},
+     {"creators": ["Jesse Armstrong"], "episode_count": 39, "episode_runtime_minutes": 60,
+      "custom": {"season_count": 4, "status": "Ended", "network": "HBO", "franchise": "Succession"}}),
+])
+def test_media_fields_map_to_the_app_contract(atlas, monkeypatch, media_type, fields, expected):
+    record = {**GAME, "media_type": media_type, **fields}
+    Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": record}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": GAME["title"],
+                "media_type": media_type}
+    result = atlas.metadata({"request": {}, "candidate": selected})
+    schema = json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text())
+    jsonschema.validate(result, schema)
+    data = result["metadata"]
+    for key, value in expected.items():
+        assert data[key] == value
+    assert "developer" not in data and "publisher" not in data
+
+
+@pytest.mark.parametrize("media_type", ["anime", "movie", "tv_show"])
+def test_media_key_art_becomes_a_poster_for_non_games(atlas, monkeypatch, media_type):
+    digest = "e" * 64
+    record = {**GAME, "media_type": media_type}
+    routes = {"/games/" + GAME["id"]: {"status": 200, "data": record},
+              "/games/" + GAME["id"] + "/artwork": {"status": 200, "data": {"results": [
+                  {"kind": "key_art", "media_url": f"/api/v2/media/{digest}", "width": 600, "height": 900}]}}}
+    Gateway(monkeypatch, routes=routes)
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": GAME["title"],
+                "media_type": media_type}
+    assert atlas.media({"request": {}, "candidate": selected}) == {"assets": [
+        {"kind": "poster", "url": f"https://atlas.test/media/{digest}", "priority": 0, "width": 600, "height": 900}]}
+
+
+def test_cross_type_identity_is_rejected_and_achievements_are_game_only(atlas, monkeypatch):
+    record = {**GAME, "media_type": "game"}
+    gateway = Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": record}})
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": GAME["title"],
+                "media_type": "movie"}
+    assert atlas.metadata({"request": {}, "candidate": selected}) == {}
+    assert atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected}) == {}
+    assert len(gateway.calls) == 2  # neither path requests the game achievement catalogue
 
 
 def test_richer_atlas_fields_are_forwarded_and_validated_against_the_host_schema(atlas, monkeypatch):
@@ -256,6 +322,23 @@ def test_achievements_resource_returns_the_catalogue_validated_against_the_host_
                         "points": 50, "source_ids": {"steam": "ACH_1"}}
     assert items[1]["hidden"] is True and "icon_url" not in items[1]
     assert "title" not in result["metadata"]  # the achievements resource carries only the catalogue
+
+
+def test_achievements_resolve_from_a_linked_steam_identity(atlas, monkeypatch):
+    result = {"results": [{"canonical_id": GAME["id"], "method": "crosswalk", "game": GAME}]}
+    gateway = Gateway(monkeypatch, routes={
+        "/resolve": {"status": 200, "data": result},
+        "/games/" + GAME["id"] + "/achievements": {"status": 200, "data": ACHIEVEMENTS},
+    })
+    selected = {
+        "provider": "official.metadata-steam.steam", "external_id": "620", "title": "Portal 2",
+        "year": 2011, "media_type": "game", "provider_ids": {"steam": "620"},
+    }
+    response = atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
+    assert response["metadata"]["achievements"][0]["external_id"] == "ach_1"
+    resolve_call = next(call for call in gateway.calls if call["url"].endswith("/resolve"))
+    assert resolve_call["body"]["items"][0]["media_type"] == "game"
+    assert resolve_call["body"]["items"][0]["provider_ids"] == {"steam": "620"}
 
 
 def test_games_without_achievements_return_nothing_rather_than_an_error(atlas, monkeypatch):
