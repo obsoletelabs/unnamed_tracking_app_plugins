@@ -305,7 +305,15 @@ def metadata(values):
             return {}
         found = achievement_catalogue(values, record)
         return {"metadata": found} if found else {}
-    return {"metadata": patch(record)}
+    result = patch(record)
+    identity = record.get("id")
+    if isinstance(identity, str) and ATLAS_ID.fullmatch(identity):
+        root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+        result["links"] = [
+            {"label": "Atlas record", "url": f"{root}/game/{quote(identity, safe=':')}"},
+            *result.get("links", []),
+        ]
+    return {"metadata": result}
 
 
 @operation

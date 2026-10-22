@@ -8,5 +8,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": true,
-  "release_notes": "Adds typed Atlas search and metadata for games, anime, movies and TV shows, including media-specific credits and details, and maps cached key art to posters. Achievements remain game-only."
+  "release_notes": "Adds typed Atlas search and metadata for games, anime, movies and TV shows, including media-specific credits and details, Atlas record links, and cached posters. Achievement definitions remain game-only and can resolve through linked provider IDs."
 }

@@ -85,6 +85,7 @@ def test_metadata_by_atlas_id_matches_response_schema(atlas, monkeypatch):
     jsonschema.validate(result, schema)
     assert result["metadata"]["developer"] == "Valve" and result["metadata"]["year"] == 2011
     assert result["metadata"]["provider_ids"] == {"atlas": GAME["id"], "steam": "620", "igdb": "72"}
+    assert result["metadata"]["links"] == [{"label": "Atlas record", "url": "https://atlas.test/game/" + GAME["id"]}]
 
 
 def test_unknown_or_malformed_id_returns_nothing_not_failure(atlas, monkeypatch):
@@ -234,7 +235,10 @@ def test_richer_atlas_fields_are_forwarded_and_validated_against_the_host_schema
     assert data["genres"] == ["Puzzle", "Platformer"] and data["tags"] == ["Puzzle", "Sci-fi"]
     assert data["languages"] == ["English"] and data["alternate_titles"] == ["Portal Two"]
     assert data["age_rating"] == "PEGI 12" and data["scores"] == {"critic": 95, "user": 90}
-    assert data["links"] == [{"label": "Website", "url": "https://thinkwithportals.com"}]
+    assert data["links"] == [
+        {"label": "Atlas record", "url": "https://atlas.test/game/" + GAME["id"]},
+        {"label": "Website", "url": "https://thinkwithportals.com"},
+    ]
 
 
 @pytest.mark.parametrize("hostile", [
@@ -247,8 +251,11 @@ def test_malformed_optional_fields_are_dropped_not_forwarded(atlas, monkeypatch,
     selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
     result = atlas.metadata({"request": {}, "candidate": selected})
     jsonschema.validate(result, json.loads((ROOT / "tools/schemas/metadata-response-v1.schema.json").read_text()))
-    for key in ("genres", "languages", "alternate_titles", "age_rating", "links", "scores"):
+    for key in ("genres", "languages", "alternate_titles", "age_rating", "scores"):
         assert key not in result["metadata"], key
+    assert result["metadata"]["links"] == [
+        {"label": "Atlas record", "url": "https://atlas.test/game/" + GAME["id"]}
+    ]
 
 
 def test_atlas_multiplayer_fields_are_forwarded_and_validated_against_the_host_schema(atlas, monkeypatch):
