@@ -14,7 +14,8 @@ DECLARATION = {
     "metadata_resources": ["entity", "achievements"],
     "operations": {"search": "search", "metadata": "metadata", "media": "media", "health": "health"},
     "configuration": [
-        {"key": "base_url", "label": "Atlas server URL", "scope": "both", "secret": False},
+        {"key": "base_url", "label": "Atlas API URL", "scope": "both", "secret": False},
+        {"key": "public_base_url", "label": "Public Atlas URL (optional)", "scope": "both", "secret": False},
         {"key": "api_token", "label": "Atlas API token (read scope)", "scope": "both"},
     ],
 }
@@ -32,6 +33,12 @@ def base_url(values):
             or parts.query or parts.fragment:
         raise ProviderFailure("invalid_configuration")
     return raw
+
+
+def public_base_url():
+    """A browser-reachable Atlas root for artwork and links, defaulting to the API URL."""
+    values = provider_values(PROVIDER_ID, ("base_url",))
+    return base_url({"base_url": values.get("public_base_url") or values.get("base_url")})
 
 
 def call(values, path, **options):
@@ -255,7 +262,7 @@ def achievement_catalogue(values, game):
         if exc.status == 404:
             return {}
         raise
-    root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+    root = public_base_url()
     items, seen = [], set()
     for entry in data.get("results", []):
         name = entry.get("name")
@@ -308,7 +315,7 @@ def metadata(values):
     result = patch(record)
     identity = record.get("id")
     if isinstance(identity, str) and ATLAS_ID.fullmatch(identity):
-        root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+        root = public_base_url()
         result["links"] = [
             {"label": "Atlas record", "url": f"{root}/game/{quote(identity, safe=':')}"},
             *result.get("links", []),
@@ -327,7 +334,7 @@ def media(values):
     identity = record and record.get("id")
     if not identity or not ATLAS_ID.match(identity):
         return {"assets": []}
-    root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
+    root = public_base_url()
     try:
         data = call(values, "/games/" + quote(identity, safe=":") + "/artwork")
     except ProviderFailure as exc:

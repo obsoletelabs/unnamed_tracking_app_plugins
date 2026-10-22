@@ -54,6 +54,7 @@ def test_registration_declares_url_as_plain_setting_and_token_as_secret(atlas):
     jsonschema.validate(atlas.DECLARATION, schema)
     fields = {item["key"]: item for item in atlas.DECLARATION["configuration"]}
     assert fields["base_url"]["secret"] is False
+    assert fields["public_base_url"]["secret"] is False
     assert fields["api_token"].get("secret", True) is True
 
 
@@ -123,6 +124,44 @@ def test_path_prefix_and_trailing_slash_are_supported(atlas, monkeypatch):
                       routes={"/games": {"status": 200, "data": {"results": []}}})
     assert atlas.search(work()) == {"candidates": []}
     assert gateway.calls[0]["url"].startswith("http://192.168.1.20:8000/atlas/api/v2/games?")
+
+
+def test_public_atlas_url_is_used_for_images_and_record_links(atlas, monkeypatch):
+    digest = "a" * 64
+    public_url = "http://127.0.0.1:28080"
+    routes = {
+        "/games/" + GAME["id"]: {"status": 200, "data": GAME},
+        "/games/" + GAME["id"] + "/artwork": {"status": 200, "data": {"results": [
+            {"kind": "key_art", "media_url": f"/api/v2/media/{digest}"}
+        ]}},
+        "/games/" + GAME["id"] + "/achievements": {"status": 200, "data": {
+            "results": [{"id": "atlas-achievement", "name": "First", "icon_url": f"/api/v2/media/{digest}"}]
+        }},
+    }
+    gateway = Gateway(
+        monkeypatch,
+        config={
+            "base_url": "http://atlas:8000",
+            "public_base_url": public_url,
+            "api_token": TOKEN,
+        },
+        routes=routes,
+    )
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": GAME["title"]}
+
+    metadata = atlas.metadata({"request": {}, "candidate": selected})["metadata"]
+    media = atlas.media({"request": {}, "candidate": selected})["assets"][0]
+    achievements = atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
+
+    assert metadata["links"][0]["url"].startswith(public_url + "/game/")
+    assert media["url"] == f"{public_url}/media/{digest}"
+    assert achievements["metadata"]["achievements"][0]["icon_url"] == f"{public_url}/media/{digest}"
+    assert all(call["url"].startswith("http://atlas:8000/api/v2/") for call in gateway.calls)
+
+
+def test_public_atlas_url_defaults_to_api_url(atlas, monkeypatch):
+    Gateway(monkeypatch, config={"base_url": "https://atlas.test/", "api_token": TOKEN})
+    assert atlas.public_base_url() == "https://atlas.test"
 
 
 def test_missing_configuration_and_rejected_token_are_typed(atlas, monkeypatch):
