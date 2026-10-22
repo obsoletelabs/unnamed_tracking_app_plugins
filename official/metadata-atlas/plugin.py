@@ -1,4 +1,4 @@
-"""Atlas metadata provider: merged, cross-provider game records from a self-hosted Atlas node."""
+"""Atlas metadata provider: merged, cross-provider media records from a self-hosted Atlas node."""
 
 import re
 import time
@@ -7,9 +7,10 @@ from urllib.parse import quote, urlencode, urlsplit
 from sdk.metadata_provider import ProviderFailure, ProviderHttp, external_id, operation, provider_values, register
 
 PROVIDER_ID = "official.metadata-atlas.atlas"
+MEDIA_TYPES = ("game", "anime", "movie", "tv_show")
 DECLARATION = {
     "provider_id": PROVIDER_ID, "name": "Atlas", "identifier_namespace": "atlas",
-    "media_types": ["game"],
+    "media_types": list(MEDIA_TYPES),
     "metadata_resources": ["entity", "achievements"],
     "operations": {"search": "search", "metadata": "metadata", "media": "media", "health": "health"},
     "configuration": [
@@ -45,19 +46,26 @@ def call(values, path, **options):
     return data
 
 
-def candidate(game):
-    ids = {"atlas": game["id"], **{key: str(value) for key, value in (game.get("provider_ids") or {}).items()
+def candidate(record, media_type="game"):
+    media_type = record.get("media_type") if record.get("media_type") in MEDIA_TYPES else media_type
+    ids = {"atlas": record["id"], **{key: str(value) for key, value in (record.get("provider_ids") or {}).items()
                                    if key != "atlas"}}
-    year = int(game["release_date"][:4]) if game.get("release_date") else None
-    return {"provider": PROVIDER_ID, "external_id": game["id"], "title": game["title"],
-            "media_type": "game", "provider_ids": ids, "year": year}
+    year = int(record["release_date"][:4]) if record.get("release_date") else None
+    return {"provider": PROVIDER_ID, "external_id": record["id"], "title": record["title"],
+            "media_type": media_type, "provider_ids": ids, "year": year}
 
 
 @operation
 def search(values):
     work = values["request"]
-    data = call(values, "/games?" + urlencode({"q": work["query"], "limit": min(int(work.get("limit", 20)), 50)}))
-    return {"candidates": [candidate(game) for game in data.get("results", []) if game.get("id") and game.get("title")]}
+    media_type = work.get("media_type", "game")
+    if media_type not in MEDIA_TYPES:
+        raise ProviderFailure("invalid_response")
+    query = urlencode({"q": work["query"], "limit": min(int(work.get("limit", 20)), 50), "type": media_type})
+    data = call(values, "/games?" + query)
+    return {"candidates": [candidate(record, media_type) for record in data.get("results", [])
+                            if record.get("id") and record.get("title")
+                            and record.get("media_type", media_type) == media_type]}
 
 
 def texts(value, limit, size):
@@ -91,15 +99,104 @@ def group_play(game):
     return out
 
 
-def custom_values(game):
-    """Atlas's other admin-defined fields as bounded provider custom values (the host contract, API 1.1.15).
+def _custom(record):
+    value = record.get("custom")
+    return value if isinstance(value, dict) else {}
 
-    The multiplayer fields travel as their own typed fields, so they are left out here. Keys and values the
-    host would reject are dropped one by one rather than failing the whole record."""
-    values = game.get("custom") if isinstance(game.get("custom"), dict) else {}
+
+def _count(value):
+    return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 100_000 else None
+
+
+def _join_texts(value, limit, size, total):
+    values = texts(value if isinstance(value, list) else [value], limit, size)
+    out = []
+    length = 0
+    for item in values:
+        addition = len(item) + (2 if out else 0)
+        if length + addition > total:
+            break
+        out.append(item)
+        length += addition
+    return ", ".join(out)
+
+
+def patch(record):
+    """Map Atlas's type-labelled fields to the app's provider-neutral media contract."""
+    media_type = record.get("media_type", "game")
+    if media_type not in MEDIA_TYPES:
+        return {}
+    custom = _custom(record)
+    title = record.get("title")
+    age_rating = record.get("age_rating") if isinstance(record.get("age_rating"), str) else None
+    website = record.get("website") if isinstance(record.get("website"), str) else ""
+    scores = {name: record[key] for name, key in (("critic", "critic_score"), ("user", "user_score"))
+              if isinstance(record.get(key), int) and not isinstance(record.get(key), bool)
+              and 0 <= record[key] <= 100}
+    tags = (record.get("tags") if isinstance(record.get("tags"), list) else []) + (
+        record.get("themes") if isinstance(record.get("themes"), list) else [])
+    out = {
+        "title": title, "release_date": record.get("release_date"),
+        "description": record.get("description"),
+        "tags": texts(tags, 128, 128),
+        "genres": texts(record.get("genres"), 128, 128),
+        "languages": texts(record.get("languages"), 64, 128),
+        "alternate_titles": [name for name in texts(record.get("aliases"), 21, 512) if name != title][:20],
+        "age_rating": age_rating.strip()[:64] if age_rating else None,
+        "links": [{"label": "Website", "url": website}] if website.startswith("https://") and len(website) <= 500
+        and not any(c.isspace() for c in website) else [],
+        "scores": scores,
+        "custom": custom_values(record, media_type),
+        "provider_ids": candidate(record, media_type)["provider_ids"],
+    }
+    if record.get("release_date"):
+        out["year"] = int(record["release_date"][:4])
+
+    if media_type == "game":
+        out.update({
+            "developer": record.get("developer"), "publisher": record.get("publisher"),
+            "series": record.get("series"), "features": record.get("features") or [],
+            "platforms": record.get("platforms") or [], **group_play(record),
+        })
+    elif media_type == "movie":
+        out["director"] = record.get("developer")
+        out["studios"] = texts([record.get("publisher")], 64, 256)
+        out["runtime_minutes"] = _count(custom.get("runtime_minutes"))
+        out["writer"] = _join_texts(custom.get("writer"), 16, 512, 512) or None
+        out["countries"] = texts(custom.get("production_countries"), 64, 128)
+    elif media_type == "anime":
+        out["studios"] = texts([record.get("developer")], 64, 256)
+        custom_format = custom.get("format")
+        out["format"] = (custom_format.strip() if isinstance(custom_format, str) and 0 < len(custom_format.strip()) <= 64
+                         else (texts(record.get("platforms"), 1, 64) or [None])[0])
+        out["episode_count"] = _count(custom.get("episode_count"))
+        out["tags"] = texts(tags + (record.get("features") or []), 128, 128)
+        if record.get("series"):
+            out["custom"] = {**out["custom"], "franchise": record["series"]}
+    else:  # tv_show
+        out["creators"] = texts([record.get("developer")], 64, 512)
+        network = texts([record.get("publisher")], 1, 256)
+        out["episode_count"] = _count(custom.get("episode_count"))
+        out["episode_runtime_minutes"] = _count(custom.get("episode_runtime_minutes"))
+        if network:
+            out["custom"] = {**out["custom"], "network": network[0]}
+        if record.get("series"):
+            out["custom"] = {**out["custom"], "franchise": record["series"]}
+    return {key: value for key, value in out.items() if value not in (None, "", [], {})}
+
+
+def custom_values(record, media_type="game"):
+    """Forward bounded fields Atlas exposes that have no typed app equivalent for this media type."""
+    values = _custom(record)
+    promoted = {
+        "game": {"players_min", "players_max", "crossplay"},
+        "movie": {"runtime_minutes", "writer", "production_countries"},
+        "anime": {"format", "episode_count"},
+        "tv_show": {"episode_count", "episode_runtime_minutes"},
+    }.get(media_type, set())
     out = {}
     for key, value in values.items():
-        if key in ("players_min", "players_max", "crossplay") or len(out) >= 32:
+        if key in promoted or len(out) >= 32:
             continue
         if not isinstance(key, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", key):
             continue
@@ -113,39 +210,12 @@ def custom_values(game):
     return out
 
 
-def patch(game):
-    title = game.get("title")
-    age_rating = game.get("age_rating") if isinstance(game.get("age_rating"), str) else None
-    website = game.get("website") if isinstance(game.get("website"), str) else ""
-    scores = {name: game[key] for name, key in (("critic", "critic_score"), ("user", "user_score"))
-              if isinstance(game.get(key), int) and not isinstance(game.get(key), bool) and 0 <= game[key] <= 100}
-    out = {
-        "title": title, "release_date": game.get("release_date"),
-        "description": game.get("description"), "developer": game.get("developer"),
-        "publisher": game.get("publisher"), "series": game.get("series"),
-        # Atlas themes are descriptive labels, the closest the host contract has is tags
-        "tags": texts((game.get("tags") or []) + (game.get("themes") or []), 128, 128),
-        "genres": texts(game.get("genres"), 128, 128), "features": game.get("features") or [],
-        "platforms": game.get("platforms") or [], "languages": texts(game.get("languages"), 64, 128),
-        "alternate_titles": [name for name in texts(game.get("aliases"), 21, 512) if name != title][:20],
-        "age_rating": age_rating.strip()[:64] if age_rating else None,
-        "links": [{"label": "Website", "url": website}] if website.startswith("https://") and len(website) <= 500
-        and not any(c.isspace() for c in website) else [],
-        "scores": scores,
-        **group_play(game),
-        "custom": custom_values(game),
-        "provider_ids": candidate(game)["provider_ids"],
-    }
-    if game.get("release_date"):
-        out["year"] = int(game["release_date"][:4])
-    return {key: value for key, value in out.items() if value not in (None, "", [], {})}
-
-
 def resolve(values, selected):
     """Find the Atlas record for a candidate that only carries other providers' identifiers."""
     item = {key: value for key, value in {
         "title": selected.get("title"),
         "release_date": f"{selected['year']}-01-01" if selected.get("year") else None,
+        "media_type": selected.get("media_type", "game"),
         "provider_ids": {key: value for key, value in (selected.get("provider_ids") or {}).items()
                          if key != "atlas" and re.fullmatch(r"[a-z0-9._-]{1,50}", key)} or None,
     }.items() if value}
@@ -157,12 +227,16 @@ def resolve(values, selected):
 
 
 def locate(values, selected):
-    """The Atlas record for a candidate: by Atlas ID when it has one, else by certain identity match."""
+    """The matching Atlas record, constrained to the selected media type."""
     identity = external_id(selected, PROVIDER_ID, "atlas")
     if identity and not ATLAS_ID.match(identity):
         return None
     try:
-        return call(values, "/games/" + quote(identity, safe=":")) if identity else resolve(values, selected)
+        record = call(values, "/games/" + quote(identity, safe=":")) if identity else resolve(values, selected)
+        expected_type = selected.get("media_type", "game")
+        if record and record.get("media_type", "game") != expected_type:
+            return None
+        return record
     except ProviderFailure as exc:
         if exc.status == 404:
             return None
@@ -219,14 +293,20 @@ def achievement_catalogue(values, game):
 
 @operation
 def metadata(values):
-    game = locate(values, values["candidate"])
-    if not game or not game.get("title"):
+    selected = values["candidate"]
+    media_type = selected.get("media_type", "game")
+    if media_type not in MEDIA_TYPES:
+        return {}
+    record = locate(values, selected)
+    if not record or not record.get("title"):
         return {}
     if values["request"].get("resource") == "achievements":
-        found = achievement_catalogue(values, game)
+        if media_type != "game":
+            return {}
+        found = achievement_catalogue(values, record)
         return {"metadata": found} if found else {}
-    result = patch(game)
-    identity = game.get("id")
+    result = patch(record)
+    identity = record.get("id")
     if isinstance(identity, str) and ATLAS_ID.fullmatch(identity):
         root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
         result["links"] = [
@@ -240,10 +320,11 @@ def metadata(values):
 def media(values):
     """Artwork Atlas has already downloaded and verified, served from its public /media path."""
     selected = values["candidate"]
-    identity = external_id(selected, PROVIDER_ID, "atlas")
-    if not identity:
-        game = locate(values, selected)
-        identity = game and game.get("id")
+    media_type = selected.get("media_type", "game")
+    if media_type not in MEDIA_TYPES:
+        return {"assets": []}
+    record = locate(values, selected)
+    identity = record and record.get("id")
     if not identity or not ATLAS_ID.match(identity):
         return {"assets": []}
     root = base_url(provider_values(PROVIDER_ID, ("base_url", "api_token")))
@@ -257,7 +338,10 @@ def media(values):
     for item in data.get("results", []):
         digest = (item.get("media_url") or "").rsplit("/", 1)[-1]
         if item.get("kind") in ASSET_KINDS and re.fullmatch(r"[0-9a-f]{64}", digest):
-            asset = {"kind": item["kind"], "url": f"{root}/media/{digest}", "priority": min(len(assets) * 10, 10000)}
+            kind = item["kind"]
+            if media_type != "game" and kind == "key_art":
+                kind = "poster"
+            asset = {"kind": kind, "url": f"{root}/media/{digest}", "priority": min(len(assets) * 10, 10000)}
             asset.update({k: item[k] for k in ("width", "height") if isinstance(item.get(k), int) and item[k] > 0})
             assets.append(asset)
     return {"assets": assets[:200]}

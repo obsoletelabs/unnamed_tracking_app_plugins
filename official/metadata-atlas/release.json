@@ -8,5 +8,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": true,
-  "release_notes": "Also forwards genres, languages, age rating, alternate titles, website and scores, and Atlas's player counts and crossplay (needs a host that supports them)."
+  "release_notes": "Adds typed Atlas search and metadata for games, anime, movies and TV shows, including media-specific credits and details, Atlas record links, and cached posters. Achievement definitions remain game-only and can resolve through linked provider IDs."
 }
