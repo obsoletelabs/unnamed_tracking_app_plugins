@@ -640,6 +640,166 @@
         "official"
       ],
       "version": "0.6.0"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "8f92ec54bbf29801608e7e665ca80136b2cfed74",
+        "source_committed_at": "2026-10-22T18:39:13+08:00",
+        "source_digest": "f8ea10f24e2d000776466bb983340a3898db4a95e63ade7b92aa7086ba96f6c6",
+        "source_path": "official/metadata-atlas",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "bcbbc9bf6b2734c1ac72450f807c44c4cfd803146ba09711061ca43167f774b9"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.15",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.media",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Merged cross-provider game, anime, movie and TV metadata from a self-hosted Atlas server.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "945ed77247cd43a10a17f05124c3c4bfdc70f6f65f69d5b7da24666ec65ffdd3",
+          "signature": "v2:6rJySbUzr/UsT9LEfrlE/DEDshh2boyvjb6fu5kSMUt8qIKG1e6bKXgTut7pkI3OZH13UGPYqrepxaMRsF/nDw=="
+        },
+        "manifest_version": 1,
+        "name": "Atlas Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Register the Atlas provider so the host can search and enrich all supported media types from a configured Atlas server."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Search the configured Atlas server by title and requested media type."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Fetch merged metadata for the selected game, anime, movie or TV show."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.media",
+              "version": 1
+            },
+            "rationale": "List artwork the configured Atlas server has already downloaded and verified for the selected media record."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Report whether the configured Atlas server and token are reachable and valid."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Send bounded requests to the Atlas server URL the administrator chose; no other destination is contacted."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Read the Atlas server URL and API token the administrator or user configured."
+          }
+        ],
+        "plugin_id": "official.metadata-atlas",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "media",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.7.0"
+      },
+      "package": {
+        "filename": "official.metadata-atlas-0.7.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 14247
+      },
+      "package_sha256": "649674606ba1f05e8f8942431c37abe3a291e072aa0956332900afdebd17836a",
+      "plugin_id": "official.metadata-atlas",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Atlas Metadata Provider\n\nSearch and enrich games, anime, movies and TV shows from an [Atlas](https://github.com/obsoletelabs/unnamed_tracking_metadata) server. Atlas can merge Steam, IGDB, TMDB and curated sources into one canonical record, while the app combines Atlas with its other providers using the user's provider ranking. Uses public Plugin API v1.1.15 (search, metadata, media, health).\n\n## Configure\n\nInstall its .utp through Plugin Manager and grant the declared permissions, then set, in the host-rendered provider settings (system or personal scope):\n\n| Setting | Meaning |\n| --- | --- |\n| **Atlas server URL** | Root of your Atlas node, e.g. `https://atlas.example.org` or `http://192.168.1.20:8000`. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |\n| **Atlas API token** | A token with the `read` scope (`atlas token --name tracker --scopes read`). Write-only and encrypted by the host. |\n\nUse your own server, a LAN mirror or a public one; the plugin contacts only the configured URL. Egress is governed by the `network.outbound` grant, so the administrator chooses the destination.\n\n## Behaviour\n\n- **Search** is filtered to the requested media type and returns lightweight candidates with Atlas ID plus linked store/provider identifiers (`steam`, `igdb`, `tmdb`, ...) so the host can cross-link them.\n- **Metadata** is fetched by Atlas ID. A candidate without one is resolved by linked provider IDs or exact title and year, constrained to the same media type; only certain matches (`crosswalk` or `exact`) are accepted. Returned records include an **Atlas record** link so you can open Atlas and propose missing identifiers through its linking workflow.\n- **Metadata fields** are mapped by media type to the app's provider-neutral contract. Games include developer, publisher, series, features, platforms and multiplayer facts. Movies include director, studio, runtime, writers and production countries. Anime includes studios, format, episode count and themes. TV shows include creators, episode count and episode runtime; networks and season count remain visible as provider custom details. All types can include release date, description, tags, genres, languages, alternate titles, age rating, links, scores, provider IDs and bounded Atlas custom values. Invalid or missing fields are omitted. Provider ordering in the app determines the default winner when sources disagree; fields no other provider supplies still complement the result.\n- **Achievements** are game-only definitions (name, description, hidden flag, global percentage, cached icons, stable IDs and source IDs), never player progress. The host stores definitions without changing progress and can resolve them through linked IDs such as Steam. Non-game records never request the game achievement endpoint.\n- **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. For anime, movies and TV, Atlas key art is exposed as a poster. Achievement icons use the same verified media path. The app downloads the images under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.\n- Merged Atlas IDs keep working: a record merged into another is returned under its current ID.\n- Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.\n- Personal data is never sent. Only titles, years and provider IDs go to the server.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.\n",
+      "release_notes": "Adds typed Atlas search and metadata for games, anime, movies and TV shows, including media-specific credits and details, Atlas record links, and cached posters. Achievement definitions remain game-only and can resolve through linked provider IDs.",
+      "sha256": "945ed77247cd43a10a17f05124c3c4bfdc70f6f65f69d5b7da24666ec65ffdd3",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "945ed77247cd43a10a17f05124c3c4bfdc70f6f65f69d5b7da24666ec65ffdd3",
+        "signature": "v2:6rJySbUzr/UsT9LEfrlE/DEDshh2boyvjb6fu5kSMUt8qIKG1e6bKXgTut7pkI3OZH13UGPYqrepxaMRsF/nDw=="
+      },
+      "tags": [
+        "metadata",
+        "atlas",
+        "official"
+      ],
+      "version": "0.7.0"
     }
   ],
   "version": 1
