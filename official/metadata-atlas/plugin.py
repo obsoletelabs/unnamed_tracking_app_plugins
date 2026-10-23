@@ -15,7 +15,7 @@ DECLARATION = {
     "operations": {"search": "search", "metadata": "metadata", "media": "media", "health": "health"},
     "configuration": [
         {"key": "base_url", "label": "Atlas API URL", "scope": "both", "secret": False},
-        {"key": "public_base_url", "label": "Public Atlas URL (optional)", "scope": "both", "secret": False},
+        {"key": "public_base_url", "label": "Public Atlas URL (optional)", "scope": "both", "required": False, "secret": False},
         {"key": "api_token", "label": "Atlas API token (read scope)", "scope": "both"},
     ],
 }
