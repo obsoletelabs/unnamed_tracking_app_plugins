@@ -26,3 +26,11 @@ Use your own server, a LAN mirror or a public one; the plugin contacts only the 
 - Personal data is never sent. Only titles, years and provider IDs go to the server.
 
 Build development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.
+
+## Local browser check
+
+For an app and Atlas running in separate Docker containers, set **Atlas API URL** to the container address (for example `http://atlas:8000`) and **Public Atlas URL** to the address your browser can open (for example `http://127.0.0.1:28080`). Save the provider settings, then run **Achievements sync** again under **Settings → Account → Background tasks** so existing achievement icon links are refreshed. The public Atlas URL must serve `/media/<hash>` without requiring a browser token.
+
+This local app test used Atlas 0.7.1 and a small blue icon fixture. The achievement definition, its icon, and separate Pin/Edit controls are visible together:
+
+![Atlas achievement icon loaded in the tracking app](https://github.com/user-attachments/assets/3105f083-1949-4f8e-9eee-7f7958dd21ab)
