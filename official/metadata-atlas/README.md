@@ -8,7 +8,8 @@ Install its .utp through Plugin Manager and grant the declared permissions, then
 
 | Setting | Meaning |
 | --- | --- |
-| **Atlas server URL** | Root of your Atlas node, e.g. `https://atlas.example.org` or `http://192.168.1.20:8000`. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |
+| **Atlas API URL** | Root used by the app server to reach your Atlas node, e.g. `https://atlas.example.org` or `http://atlas:8000` on a shared Docker network. A path prefix is allowed (`https://host/atlas`). No credentials, query or fragment. |
+| **Public Atlas URL (optional)** | Root that a user's browser can reach. Leave blank when it is the same as the API URL. Set it when the app server uses an internal Docker address but Atlas is published at a different URL, such as API URL `http://atlas:8000` and public URL `https://atlas.example.org`. Artwork, achievement icons, and Atlas record links use this address. |
 | **Atlas API token** | A token with the `read` scope (`atlas token --name tracker --scopes read`). Write-only and encrypted by the host. |
 
 Use your own server, a LAN mirror or a public one; the plugin contacts only the configured URL. Egress is governed by the `network.outbound` grant, so the administrator chooses the destination.
@@ -19,9 +20,17 @@ Use your own server, a LAN mirror or a public one; the plugin contacts only the 
 - **Metadata** is fetched by Atlas ID. A candidate without one is resolved by linked provider IDs or exact title and year, constrained to the same media type; only certain matches (`crosswalk` or `exact`) are accepted. Returned records include an **Atlas record** link so you can open Atlas and propose missing identifiers through its linking workflow.
 - **Metadata fields** are mapped by media type to the app's provider-neutral contract. Games include developer, publisher, series, features, platforms and multiplayer facts. Movies include director, studio, runtime, writers and production countries. Anime includes studios, format, episode count and themes. TV shows include creators, episode count and episode runtime; networks and season count remain visible as provider custom details. All types can include release date, description, tags, genres, languages, alternate titles, age rating, links, scores, provider IDs and bounded Atlas custom values. Invalid or missing fields are omitted. Provider ordering in the app determines the default winner when sources disagree; fields no other provider supplies still complement the result.
 - **Achievements** are game-only definitions (name, description, hidden flag, global percentage, cached icons, stable IDs and source IDs), never player progress. The host stores definitions without changing progress and can resolve them through linked IDs such as Steam. Non-game records never request the game achievement endpoint.
-- **Media** lists only artwork Atlas has already downloaded and verified, as public `<server>/media/<hash>` links. For anime, movies and TV, Atlas key art is exposed as a poster. Achievement icons use the same verified media path. The app downloads the images under its public-network rules, so artwork is only fetched when the Atlas server is publicly reachable.
+- **Media** lists only artwork Atlas has already downloaded and verified, as `<public-server>/media/<hash>` links. For anime, movies and TV, Atlas key art is exposed as a poster. Achievement icons use the same verified media path. The public URL must be reachable by the app's browser; keeping it separate from the API URL lets the app server use a private Docker address without exposing that address to browsers.
 - Merged Atlas IDs keep working: a record merged into another is returned under its current ID.
 - Failures are typed (`not_configured`, `invalid_configuration` for a bad URL or rejected token, `rate_limited`, `unavailable`); remote bodies and the token are never retained.
 - Personal data is never sent. Only titles, years and provider IDs go to the server.
 
 Build development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; signed publication uses the existing release workflow.
+
+## Local browser check
+
+For an app and Atlas running in separate Docker containers, set **Atlas API URL** to the container address (for example `http://atlas:8000`) and **Public Atlas URL** to the address your browser can open (for example `http://127.0.0.1:28080`). Save the provider settings, then run **Achievements sync** again under **Settings → Account → Background tasks** so existing achievement icon links are refreshed. The public Atlas URL must serve `/media/<hash>` without requiring a browser token.
+
+This local app test used Atlas 0.7.1 and a small blue icon fixture. The achievement definition, its icon, and separate Pin/Edit controls are visible together:
+
+![Atlas achievement icon loaded in the tracking app](https://github.com/user-attachments/assets/3105f083-1949-4f8e-9eee-7f7958dd21ab)
