@@ -3,7 +3,7 @@
   "api_contract_version": "1.1.0",
   "plugin_id": "official.collectors-archive",
   "name": "Collector's Archive",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Official Cards, Sets and Bounties, preserving personal archives, the full card designer, prestige challenges, objectives, evidence, journals and rewards.",
   "entrypoint": "plugin:main",
   "sdk_version_range": "^1.1.0",

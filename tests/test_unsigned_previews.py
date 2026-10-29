@@ -62,3 +62,20 @@ def test_bot_release_matches_registered_official_publisher_and_retains_manual_up
         and record.allows_plugin(manifest["plugin_id"], release=True)
         for record in load_registry().values()
     )
+
+
+def test_collectors_archive_release_matches_registered_official_publisher():
+    from tools.publisher_registry import load_registry
+
+    source = ROOT / "official/collectors-archive"
+    release = json.loads((source / "release.json").read_text())
+    manifest = json.loads((source / "manifest.json").read_text())
+    assert release["publisher"] == "Unnamed Tracking Official"
+    assert release["automatic_update"] is False
+    assert "preview" not in release["tags"]
+    assert any(
+        record.publisher == release["publisher"]
+        and record.channel == "official"
+        and record.allows_plugin(manifest["plugin_id"], release=True)
+        for record in load_registry().values()
+    )
