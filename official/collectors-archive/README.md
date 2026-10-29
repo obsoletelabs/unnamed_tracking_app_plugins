@@ -6,14 +6,14 @@ These bindings appear in host help and personal shortcut settings only while
 the plugin is enabled and authorized; users can disable or remap them. Existing
 bindings keep working if one of these keys conflicts.
 
-Official preview of **Cards, Sets and Bounties**, moved together out of the host.
+Official plugin for **Cards, Sets and Bounties**, moved together out of the host.
 It preserves the complete card designer (front/back templates, symbols, uploaded
 art, rarity, set placement and print status), archive numbers, prestige challenges,
 set completion, automatic and custom goals, objectives, evidence, journal entries
 and reward history. Prestige requires verified 100% achievement completion and
 creates one deterministic challenge for each card.
 
-Install the preview through the plugin manager and review its permissions. Open
+Install Collector's Archive from the official catalogue in the plugin manager and review its permissions. Open
 **Collector's Archive** under Account settings and import your legacy records
 before using the archive. Imports retain original identifiers and archive numbers;
 retrying never overwrites an imported or edited record. Each account imports its
@@ -32,8 +32,8 @@ modules, declare database models or access the database directly. The public
 `library.legacy.read` grant permits the one-time, read-only legacy export.
 `games.read` supplies owned game and achievement data; `media.read` supplies
 owned evidence metadata. Withdrawing a required permission stops the contribution
-through the normal host lifecycle. The source is **0.0.2** and remains a
-preview pending the official signing/release process. Branch archives are
+through the normal host lifecycle. Official publication uses the registered **Unnamed Tracking Official** publisher
+and signed `.utp` packages. Updates require manual review. Branch archives remain
 untrusted previews and require explicit installation consent.
 
 All authenticated actions require the host's private plugin gateway. If pages

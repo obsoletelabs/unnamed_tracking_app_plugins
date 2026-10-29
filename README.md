@@ -45,8 +45,8 @@ the unsigned preview. No build tools or signing key are needed on your machine.
 The artifact includes source commits and package digests; it never updates
 published packages or release history. Previews disable automatic updates.
 
-[Collector's Archive](official/collectors-archive/README.md) is an official source
-preview preserving Cards, Sets and Bounties. Its personal, retryable import reads
+[Collector's Archive](official/collectors-archive/README.md) preserves Cards, Sets and Bounties and is prepared for signed official catalogue
+publication under **Unnamed Tracking Official** with manual updates. Its personal, retryable import reads
 the host's retained legacy records through a separate permission. Its compiled
 native pages share the host's Vue runtime and themed components. Run `npm ci`
 and `npm run build:native` after editing its UI; CI checks the committed bundle.
