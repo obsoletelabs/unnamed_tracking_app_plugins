@@ -1,12 +1,5 @@
 {
-  "manifest_version": 1,
   "api_contract_version": "1.1.0",
-  "plugin_id": "official.collectors-archive",
-  "name": "Collector's Archive",
-  "version": "0.1.0",
-  "description": "Official Cards, Sets and Bounties, preserving personal archives, the full card designer, prestige challenges, objectives, evidence, journals and rewards.",
-  "entrypoint": "plugin:main",
-  "sdk_version_range": "^1.1.0",
   "application_version_range": "^1.0.0",
   "capabilities": [
     {
@@ -66,6 +59,22 @@
       "version": 1
     }
   ],
+  "dependencies": [],
+  "description": "Official Cards, Sets and Bounties, preserving personal archives, the full card designer, prestige challenges, objectives, evidence, journals and rewards.",
+  "entrypoint": "plugin:main",
+  "integrity": {
+    "key_id": null,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "signature": null
+  },
+  "manifest_version": 1,
+  "name": "Collector's Archive",
+  "native_frontend": {
+    "entry": "native/app.js",
+    "styles": [
+      "native/style.css"
+    ]
+  },
   "permissions": [
     {
       "capability": {
@@ -166,20 +175,10 @@
       "rationale": "Offer editable shortcuts for Cards, Sets and Bounties only while this plugin is enabled."
     }
   ],
-  "dependencies": [],
-  "native_frontend": {
-    "entry": "native/app.js",
-    "styles": [
-      "native/style.css"
-    ]
-  },
+  "plugin_id": "official.collectors-archive",
+  "sdk_version_range": "^1.1.0",
   "storage": {
     "quota_mb": 64
-  },
-  "integrity": {
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "key_id": null,
-    "signature": null
   },
   "ui": {
     "actions": [
@@ -193,6 +192,7 @@
       "transport-read",
       "transport-drop"
     ],
+    "menus": [],
     "pages": [
       "cards",
       "card-detail",
@@ -202,7 +202,7 @@
       "migration",
       "goals"
     ],
-    "menus": [],
     "settings": []
-  }
+  },
+  "version": "0.1.0"
 }
