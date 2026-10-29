@@ -22,7 +22,7 @@ const destination = (id, trust, recovery_status) => ({ id, provider_id: "officia
 
 test("actual host SECURE/PRIVATE status stays separate from legacy profile proof", async () => {
   let denied = false;
-  const f = await fixture(id => id === "get-config" ? { configured: false, accounts: [{ username: "legacy", verified: true }] } : id === "get-destinations" ? (() => {
+  const f = await fixture(id => (id === "get-config" || id === "get-saved-config") ? { configured: false, accounts: [{ username: "legacy", verified: true }] } : id === "get-destinations" ? (() => {
     if (denied) throw new Error("permission revoked");
     return { destinations: [destination("verified", "SECURE", "eligible"), destination("ordinary", "PRIVATE", "verification_required")] };
   })() : {});
@@ -57,11 +57,23 @@ test("server selection searches names/IDs and saves selected ID without echoing 
 });
 
 test("channel filtering keeps hidden allowlist selections and never changes trust", async () => {
-  const f = await fixture(id => id === "get-config" ? { configured: true } : id === "list-directory" ? { channels: [{ id: "1", name: "general" }, { id: "2", name: "private" }], users: [], allowed_channel_ids: ["2"] } : { destinations: [] }, true);
+  const f = await fixture(id => (id === "get-config" || id === "get-saved-config") ? { configured: true } : id === "list-directory" ? { channels: [{ id: "1", name: "general" }, { id: "2", name: "private" }], users: [], allowed_channel_ids: ["2"] } : { destinations: [] }, true);
   const nodes = () => all(f.render());
   await nodes().find(x => x.tag === "button" && x.children === "Load Discord directory").props.onClick();
   nodes().find(x => x.tag === "input" && x.props.placeholder === "Channel name or ID").props.onInput({ target: { value: "general" } });
   nodes().find(x => x.tag === "button" && x.children === "Allow matching channels").props.onClick();
   await nodes().find(x => x.tag === "button" && x.children === "Save allowed channels").props.onClick();
   assert(f.calls.some(([id, values]) => id === "allow-channels" && values.channel_ids.includes("1") && values.channel_ids.includes("2")));
+});
+
+
+test("opening settings reads saved configuration without remote health and refresh opts in", async () => {
+  const f = await fixture(id => (id === "get-config" || id === "get-saved-config") ?
+    { configured: true, accounts: [] } : { destinations: [] }, true);
+  assert(f.calls.some(([id]) => id === "get-saved-config"));
+  assert(!f.calls.some(([id]) => id === "get-config"));
+  assert(JSON.stringify(f.render()).includes("Not checked"));
+  assert(!all(f.render()).some(x => x.children === "Healthy"));
+  await all(f.render()).find(x => x.tag === "button" && x.children === "Refresh").props.onClick();
+  assert(f.calls.some(([id]) => id === "get-config"));
 });

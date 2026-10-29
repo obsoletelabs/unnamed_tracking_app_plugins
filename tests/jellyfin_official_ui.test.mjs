@@ -16,7 +16,8 @@ function fixture(admin = false, nativePassword = false) {
   const PasswordInput = { name: "PasswordInput" };
   const components = {}, cleanup = [], unmount = [], calls = [], timers = new Map();
   const original = [global.setTimeout, global.clearTimeout];
-  global.setTimeout = fn => { const id = timers.size + 1; timers.set(id, fn); return id; };
+  const delays = [];
+  global.setTimeout = (fn, delay) => { const id = timers.size + 1; timers.set(id, fn); delays.push(delay); return id; };
   global.clearTimeout = id => timers.delete(id);
   const config = { is_admin: admin, host_user_id: "owned-user", review_total: 1,
     servers: [{ id: "server", name: "Fixture", enabled: true, libraries: [{ id: "library", name: "Films" }], users: [], mappings: { library: "movie" } }],
@@ -24,11 +25,11 @@ function fixture(admin = false, nativePassword = false) {
     reviews: [{ account_id: "account", external_id: "item", title: "Remapped show", reason: "category_changed", media_type: "tv_show", host_id: "media", candidates: [] }] };
   const host = { async runAction(id, values = {}) {
     calls.push([id, values]);
-    return id === "get-config" ? config : id === "status" ? { accounts: { account: { phase: "idle" } } } : { ok: true };
+    return id === "get-config" ? config : id === "status" ? { accounts: { account: { phase: "idle", reviews: config.review_total } } } : { ok: true };
   } };
   activate({ version: "0.0.2", ui: nativePassword ? { PasswordInput } : {}, vue: { h, ref: value => ({ value }), reactive: x => x, defineComponent: x => x, onBeforeUnmount: fn => unmount.push(fn) },
     registerComponent: (id, component) => { components[id] = component; }, onCleanup: fn => cleanup.push(fn) });
-  return { components, host, config, calls, timers, unmount, PasswordInput, close() {
+  return { components, host, config, calls, timers, delays, unmount, PasswordInput, close() {
     cleanup.forEach(fn => fn());
     [global.setTimeout, global.clearTimeout] = original;
   } };
@@ -152,4 +153,34 @@ test("Shared native password box updates and clears Jellyfin secrets", async () 
     assert.equal(f.calls.find(x => x[0] === "login")[1].password, "DisposableSecret");
     assert.equal(password().props.modelValue, "");
   } finally { f.close(); }
+});
+
+
+test("idle polls avoid full configuration reads and hidden pages pause requests", async () => {
+  const f = fixture();
+  const originalDocument = global.document;
+  try {
+    f.components.accounts.setup({ host: f.host }); await flush();
+    assert.equal(f.calls.filter(([id]) => id === "get-config").length, 1);
+    assert.equal(f.delays.at(-1), 30000);
+    const tick = async () => { const fn = [...f.timers.values()][0]; f.timers.clear(); await fn(); };
+    await tick();
+    assert.equal(f.calls.filter(([id]) => id === "get-config").length, 1);
+    const before = f.calls.length;
+    global.document = { hidden: true };
+    await tick();
+    assert.equal(f.calls.length, before);
+    global.document = { hidden: false };
+    f.host.runAction = async (id) => {
+      f.calls.push([id, {}]);
+      return id === "status" ? { accounts: { account: { phase: "syncing", reviews: 2 } } } : f.config;
+    };
+    await tick();
+    assert.equal(f.calls.filter(([id]) => id === "get-config").length, 2);
+    assert.equal(f.delays.at(-1), 5000);
+  } finally {
+    if (originalDocument === undefined) delete global.document;
+    else global.document = originalDocument;
+    f.close();
+  }
 });

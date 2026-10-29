@@ -355,6 +355,15 @@
           },
           "title": "Styles",
           "type": "array"
+        },
+        "activation": {
+          "default": "startup",
+          "enum": [
+            "startup",
+            "page"
+          ],
+          "title": "Activation",
+          "type": "string"
         }
       },
       "required": [

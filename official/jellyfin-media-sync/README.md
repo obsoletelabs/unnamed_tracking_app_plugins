@@ -75,3 +75,10 @@ immutable. The 0.0.1 preview is published through the reviewed official signing
 identity; automatic updates remain disabled during validation. Unsigned local packages must
 use the host's normal untrusted-package approval flow. Test signing keys are for
 disposable integration tests only and never confer production trust.
+
+
+Requires Plugin API v1.1.17 for declared page activation. The native bundle loads
+when a contributed page is opened, rather than during unrelated library navigation.
+Status polls read compact state every five seconds while syncing and every thirty
+seconds while idle. Hidden pages pause requests; full configuration reloads when
+review counts or completed syncs change, preserving unsaved preferences.

@@ -405,3 +405,22 @@ def test_verification_card_emphasizes_code_and_separates_instructions(monkeypatc
     description = calls[-1]["embeds"][0]["description"]
     assert "**12345678**" in description
     assert "\n\nIt expires" in description
+
+
+def test_saved_config_never_fetches_discord_and_never_returns_bot_secret(monkeypatch):
+    provider = load()
+    user_id = "12345678-1234-5678-1234-567812345678"
+    monkeypatch.setattr(provider, "_actor", lambda values, admin=False: user_id)
+    monkeypatch.setattr(provider, "_load", lambda key, default=None: {
+        "secrets/bot-config": {"token": "sensitive-secret", "guild_id": "123456789012345678"},
+        "links/" + user_id: {"discord_id": "223456789012345678", "username": "saved-name"},
+    }.get(key, default))
+    def unexpected(*args, **kwargs):
+        raise AssertionError("saved configuration must not wait on remote Discord")
+    monkeypatch.setattr(provider, "_bot_snapshot", unexpected)
+    monkeypatch.setattr(provider, "_discord", unexpected)
+    result = provider.get_saved_config({"_plugin_context": {"user_id": user_id}})
+    assert result["configured"] is True
+    assert result["accounts"][0]["username"] == "saved-name"
+    assert result.get("health", {}).get("api_ok") is None
+    assert "sensitive-secret" not in repr(result)

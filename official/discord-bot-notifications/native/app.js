@@ -53,28 +53,31 @@ export function activate(context) {
         let live = true;
         onBeforeUnmount(() => { live = false; });
 
-        async function refresh() {
+        async function refresh(checkRemote = false) {
           loading.value = true;
           error.value = "";
           destinations.value = [];
           destinationCursor.value = null;
           const started = performance.now();
           try {
-            const result = await props.host.runAction("get-config");
+            const result = await props.host.runAction(checkRemote === true ? "get-config" : "get-saved-config");
             if (!live) return;
             config.value = { ...result, browser_refresh_ms: Math.round(performance.now() - started) };
-            if (admin) {
-              activityConfig.value = await props.host.runAction("activity-config");
-              activityForm.application_id = activityConfig.value.application_id || "";
-              activityForm.allow_private_channels = activityConfig.value.allow_private_channels === true;
-            }
-            await loadDestinations();
-            if (!admin && result.configured) {
+            const reads = [loadDestinations()];
+            if (admin) reads.push((async () => {
+              const activity = await props.host.runAction("activity-config");
+              if (!live) return;
+              activityConfig.value = activity;
+              activityForm.application_id = activity.application_id || "";
+              activityForm.allow_private_channels = activity.allow_private_channels === true;
+            })());
+            if (!admin && result.configured) reads.push((async () => {
               const choices = await props.host.runAction("channel-choices");
               if (!live) return;
               channelChoices.value = choices.channels || [];
               channelSelection.value = choices.selected || "";
-            }
+            })());
+            await Promise.all(reads);
             if (admin && !tokenForm.guild_id) tokenForm.guild_id = result.guild_id || "";
           } catch (err) {
             if (live) error.value = err?.message || "Discord settings could not be loaded.";
@@ -190,7 +193,7 @@ export function activate(context) {
           const permissions = Array.isArray(member.permission_names) ? member.permission_names : [];
           const roles = Array.isArray(member.role_names) ? member.role_names : [];
           const features = Array.isArray(guild.features) ? guild.features : [];
-          const serverStatus = c.health?.api_ok === false ? "Unavailable" : c.configured ? "Connected" : "Not configured";
+          const serverStatus = c.health?.api_ok === false ? "Unavailable" : c.health?.api_ok === true ? "Connected" : c.configured ? "Configured" : "Not configured";
 
           const adminCards = [
             infoCard("Discord Activity sign-in", [
@@ -214,7 +217,7 @@ export function activate(context) {
               ]),
               c.bot_error ? h("p", { class: "discord-error" }, c.bot_error) : null,
               h("div", { class: "discord-grid" }, [
-                text("API health", c.health?.api_ok === false ? "Unavailable" : "Healthy"),
+                text("API health", c.health?.api_ok === false ? "Unavailable" : c.health?.api_ok === true ? "Healthy" : "Not checked"),
                 text("Plugin request", c.health?.request_ms ? c.health.request_ms + " ms" : "—"),
                 text("Browser refresh", c.browser_refresh_ms ? c.browser_refresh_ms + " ms" : "—"),
                 text("Verified bot", bot.verified === true ? "Yes" : bot.verified === false ? "No" : "Unknown"),
@@ -340,7 +343,7 @@ export function activate(context) {
           return h("section", { class: "discord-bot-settings" }, [
             h("div", { class: "discord-header" }, [
               h("div", [h("h2", admin ? "Discord bot administration" : "Your Discord connection"), h("p", admin ? "Everything the plugin can safely discover about the configured bot and server." : "PRIVATE DMs work before verification. Actual destination trust and password-reset routing below come from the host; verification and recovery choices are managed in Notifications.")]),
-              h("button", { type: "button", disabled: loading.value || busy.value, onClick: refresh }, loading.value ? "Refreshing…" : "Refresh"),
+              h("button", { type: "button", disabled: loading.value || busy.value, onClick: () => refresh(true) }, loading.value ? "Refreshing…" : "Refresh"),
             ]),
             loading.value ? h("p", { role: "status" }, "Loading Discord information…") : null,
             error.value ? h("p", { role: "alert", class: "discord-error" }, error.value) : null,

@@ -1,5 +1,5 @@
 {
-  "api_contract_version": "1.1.0",
+  "api_contract_version": "1.1.17",
   "schema_version": "v1",
   "plugin_id": "example.self-service-session-manager",
   "title": "Extended Session Manager",

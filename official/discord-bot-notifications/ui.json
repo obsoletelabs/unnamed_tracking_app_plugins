@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "api_contract_version": "1.1.14",
+  "api_contract_version": "1.1.17",
   "plugin_id": "official.discord-bot-notifications",
   "title": "Discord Bot Notifications",
   "settings": [],
@@ -268,6 +268,15 @@
         "name": "notification_providers.deliver",
         "version": 1
       }
+    },
+    {
+      "id": "get-saved-config",
+      "label": "Read saved Discord configuration",
+      "handler": "plugin:get_saved_config",
+      "capability": {
+        "name": "plugin.storage",
+        "version": 1
+      }
     }
   ],
   "menus": [],
@@ -287,7 +296,8 @@
         "get-destinations",
         "list-servers",
         "save-activity-oauth",
-        "activity-config"
+        "activity-config",
+        "get-saved-config"
       ],
       "tables": [],
       "dialogs": []
@@ -306,7 +316,8 @@
         "test-dm",
         "channel-choices",
         "select-channel",
-        "get-destinations"
+        "get-destinations",
+        "get-saved-config"
       ],
       "tables": [],
       "dialogs": []

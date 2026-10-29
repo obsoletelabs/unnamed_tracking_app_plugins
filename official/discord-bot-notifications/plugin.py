@@ -353,19 +353,29 @@ def list_servers(values: dict[str, Any]) -> dict[str, Any]:
     return {"servers": servers, "next_after": servers[-1]["id"] if len(response) == 100 and servers else None}
 
 
+def get_saved_config(values: dict[str, Any]) -> dict[str, Any]:
+    """Read owned configuration without waiting for Discord's remote directory."""
+    return _get_config(values, refresh_remote=False)
+
+
 def get_config(values: dict[str, Any]) -> dict[str, Any]:
+    """Explicit refresh retains the existing live Discord identity/health behavior."""
+    return _get_config(values, refresh_remote=True)
+
+
+def _get_config(values: dict[str, Any], *, refresh_remote: bool) -> dict[str, Any]:
     user_id = _actor(values)
     config = _load("secrets/bot-config", {})
     accounts = _linked_accounts(_load("links/" + user_id, {}))
     result: dict[str, Any] = {"configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "bot_configured": isinstance(config, dict) and bool(config.get("token") and config.get("guild_id")), "guild_id": str(config.get("guild_id", "")) if isinstance(config, dict) else "", "linked": bool(accounts), "accounts": []}
-    if result["configured"]:
+    if result["configured"] and refresh_remote:
         try:
             result.update(_bot_snapshot(str(config["token"]), str(config["guild_id"])))
         except GatewayRequestError:
             result["health"] = {"api_ok": False}; result["bot_error"] = "Discord could not be reached right now."
         except PluginError as exc:
             result["health"] = {"api_ok": False}; result["bot_error"] = str(exc)
-    if result["configured"]:
+    if result["configured"] and refresh_remote:
         for account in accounts:
             item = dict(account)
             linked_id = str(account["discord_id"])

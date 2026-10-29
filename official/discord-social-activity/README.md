@@ -151,3 +151,7 @@ There is no persistent Discord Gateway connection, custom chat command or
 notification delivery in the Activity. Those remain the bot's responsibilities.
 
 The [architecture and acceptance matrix](../../wiki/docs/architecture/discord-game-night.md) links the implementation to the open issues and distinguishes verified behavior from release follow-ups.
+
+
+Requires Plugin API v1.1.17 for declared page activation. The native bundle loads
+when a contributed page is opened, rather than during unrelated library navigation.
