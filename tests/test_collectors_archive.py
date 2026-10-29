@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -273,3 +274,35 @@ def test_large_archives_use_bounded_record_pages(archive):
     second = operation(archive, "sets?offset=25")
     assert len(second["body"]) == 25 and second["next_offset"] == 50
     assert len(operation(archive, "sets?offset=50")["body"]) == 10
+
+
+def test_startup_bundle_defers_editor_code_and_styles_but_packages_every_chunk():
+    from tools.distribution import collect_payload
+
+    manifest = json.loads((SOURCE / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["native_frontend"]["styles"] == []
+    files, _ = collect_payload(SOURCE.parent.parent, SOURCE, manifest)
+    native = (SOURCE / "native").resolve()
+    visited = set()
+
+    def static_dependencies(path):
+        assert path.is_relative_to(native) and path.is_file()
+        if path in visited:
+            return
+        visited.add(path)
+        source = path.read_text(encoding="utf-8")
+        for dependency in re.findall(r'from\s+["\'](\.[^"\']+)["\']', source):
+            static_dependencies((path.parent / dependency).resolve())
+
+    entry = native / "app.js"
+    static_dependencies(entry)
+    # Global provider registration must stay small even as the card editor grows.
+    assert sum(path.stat().st_size for path in visited) < 32 * 1024
+    deferred = re.findall(r'import\(["\'](\.[^"\']+)["\']\)', entry.read_text(encoding="utf-8"))
+    assert len(deferred) == 6
+    for reference in deferred:
+        asset = (entry.parent / reference).resolve()
+        assert asset not in visited
+        assert asset.is_relative_to(native)
+        assert files[asset.relative_to(SOURCE).as_posix()] == asset.read_bytes().replace(b"\r\n", b"\n")
+    assert files["native/style.css"] == (native / "style.css").read_bytes().replace(b"\r\n", b"\n")

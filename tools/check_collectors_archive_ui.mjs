@@ -467,11 +467,31 @@ try {
   checkpoint(
     "Home goals show real records and earned points; a deadline reminder opens the exact bounty",
   );
+  // Hold a background suggestion across disable to exercise page teardown
+  // while an installed worker request is still in flight.
+  let releaseSuggestion;
+  const heldSuggestion = new Promise(resolve => { releaseSuggestion = resolve; });
+  let suggestionRequests = 0;
+  const actionRoute = `**/api/plugins/${plugin}/actions/api`;
+  const isSuggestion = request => request.postDataJSON()?.values?.path === "bounties/random";
+  await page.route(actionRoute, async route => {
+    if (isSuggestion(route.request())) {
+      suggestionRequests++;
+      if (suggestionRequests === 1) await heldSuggestion;
+    }
+    await route.continue();
+  });
+  const suggestionStarted = page.waitForRequest(isSuggestion);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await suggestionStarted;
   await http(admin, "POST", `/plugins/${plugin}/disable`);
   archiveDisabled = true;
+  releaseSuggestion();
   await page.goto(origin + "/");
   await page.locator(".archive-goals").waitFor({ state: "hidden" });
   await page.locator(".widget-unavailable").waitFor();
+  assert.equal(suggestionRequests, 1, "Closed pages must stop scheduling suggestion requests");
+  await page.unroute(actionRoute);
   await http(admin, "POST", `/plugins/${plugin}/enable`);
   archiveDisabled = false;
   await page.reload();

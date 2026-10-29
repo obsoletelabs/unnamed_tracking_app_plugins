@@ -71,9 +71,7 @@
   "name": "Collector's Archive",
   "native_frontend": {
     "entry": "native/app.js",
-    "styles": [
-      "native/style.css"
-    ]
+    "styles": []
   },
   "permissions": [
     {

@@ -3,7 +3,7 @@ import { RouterLink, useRoute } from "../native/router";
 import { UiModal } from "@unnamed/plugin-ui";
 import { PageHeader } from "@unnamed/plugin-ui";
 import { AccountChip } from "@unnamed/plugin-ui";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { fetchGames, fetchGameAchievements } from "../services/games";
 import { listGameScreenshots } from "../services/media";
 import type { Game, Achievement } from "../types/game";
@@ -287,12 +287,15 @@ function proposalKey(p: BountyProposal): string {
   return `${p.type}:${p.game_id}:${p.title}`;
 }
 const suggestionAlternatives = ref<BountyProposal[]>([]);
-async function loadSuggestionAlternatives() {
+let suggestionsLive = true;
+let suggestionGeneration = 0;
+onBeforeUnmount(() => { suggestionsLive = false; suggestionGeneration++; });
+async function loadSuggestionAlternatives(generation: number) {
   const seen = new Set(
     randomProposal.value ? [proposalKey(randomProposal.value)] : [],
   );
   const results: BountyProposal[] = [];
-  for (let i = 0; i < 5 && results.length < 2; i++) {
+  for (let i = 0; i < 5 && results.length < 2 && suggestionsLive && generation === suggestionGeneration; i++) {
     const p = await fetchRandomBountyProposal();
     if (!p) break;
     const key = proposalKey(p);
@@ -301,19 +304,23 @@ async function loadSuggestionAlternatives() {
       results.push(p);
     }
   }
-  suggestionAlternatives.value = results;
+  if (suggestionsLive && generation === suggestionGeneration) suggestionAlternatives.value = results;
 }
 
 async function loadRandomProposal() {
+  const generation = ++suggestionGeneration;
   randomLoading.value = true;
+  suggestionAlternatives.value = [];
   try {
-    randomProposal.value = await fetchRandomBountyProposal();
+    const proposal = await fetchRandomBountyProposal();
+    if (!suggestionsLive || generation !== suggestionGeneration) return;
+    randomProposal.value = proposal;
+    if (proposal) await loadSuggestionAlternatives(generation);
   } catch {
-    randomProposal.value = null;
+    if (suggestionsLive && generation === suggestionGeneration) randomProposal.value = null;
   } finally {
-    randomLoading.value = false;
+    if (suggestionsLive && generation === suggestionGeneration) randomLoading.value = false;
   }
-  void loadSuggestionAlternatives();
 }
 
 async function acceptAlternative(proposal: BountyProposal) {

@@ -1,11 +1,35 @@
-import { defineComponent, h, provide, ref, onMounted, onBeforeUnmount } from "vue";
+import { defineAsyncComponent, defineComponent, h, provide, ref, onMounted, onBeforeUnmount } from "vue";
 import { configure as configureVue } from "@unnamed/plugin-vue";
 import { configure as configureUi } from "@unnamed/plugin-ui";
 import { configureHost, host, pluginRequest, type NativeHost } from "./native/host";
 
 const TABLES = ["sets", "bounties", "cards", "bounty_objectives", "bounty_evidence", "bounty_journal_entries", "bounty_point_transactions"];
-export async function activate(context: NativeHost & { registerComponent(id: string, component: unknown): void }) {
+export async function activate(context: NativeHost & {
+  registerComponent(id: string, component: unknown): void;
+  onCleanup?(callback: () => void): void;
+}) {
   configureVue(context); configureUi(context); configureHost(context);
+  let stylesheet: HTMLLinkElement | undefined;
+  let stylesReady: Promise<void> | undefined;
+  function ensureStyles(): Promise<void> {
+    if (stylesReady) return stylesReady;
+    stylesReady = new Promise<void>((resolve, reject) => {
+      const link = document.createElement("link");
+      stylesheet = link;
+      link.rel = "stylesheet";
+      link.href = new URL("./style.css", import.meta.url).href;
+      link.onload = () => resolve();
+      link.onerror = () => {
+        link.remove();
+        stylesheet = undefined;
+        stylesReady = undefined;
+        reject(new Error("Archive styles could not be loaded. Reopen this page to retry."));
+      };
+      document.head.appendChild(link);
+    });
+    return stylesReady;
+  }
+  context.onCleanup?.(() => stylesheet?.remove());
   context.host.registerSearchProvider?.(async query => {
     if (!(await host().runAction("migration-status")).imported) return [];
     const response = await pluginRequest("bounties");
@@ -15,7 +39,6 @@ export async function activate(context: NativeHost & { registerComponent(id: str
       .map((item: {id: string; title: string; status: string}) => ({ id: item.id, label: item.title,
         description: `Bounty · ${item.status}`, path: `/plugins/official.collectors-archive/bounties?record_id=${item.id}` }));
   });
-  // SFC helpers run during module initialization. Load them only after the
   context.host.registerNotificationProvider?.(async () => {
     if (!(await host().runAction("migration-status")).imported) return [];
     const response = await pluginRequest("bounties?status=active");
@@ -32,14 +55,19 @@ export async function activate(context: NativeHost & { registerComponent(id: str
     }
     return reminders;
   });
-  // public Vue/UI bindings have been configured by the active host.
-  const [CardCollection, CardDetail, SetList, SetDetail, Bounties, GoalsWidget] = await Promise.all([
-    import("./views/CardCollection.vue"), import("./views/CardDetail.vue"),
-    import("./views/SetList.vue"), import("./views/SetDetail.vue"), import("./views/Bounties.vue"),
-    import("./GoalsWidget.vue"),
-  ]).then(modules => modules.map(module => module.default));
-  const pages = { cards: CardCollection, "card-detail": CardDetail, sets: SetList, "set-detail": SetDetail, bounties: Bounties, goals: GoalsWidget, migration: null };
-  for (const [id, View] of Object.entries(pages)) {
+  // Keep global providers small. Compiled SFCs evaluate only after their page
+  // opens, with the public Vue/UI bindings already configured above.
+  const pages = {
+    cards: () => import("./views/CardCollection.vue"),
+    "card-detail": () => import("./views/CardDetail.vue"),
+    sets: () => import("./views/SetList.vue"),
+    "set-detail": () => import("./views/SetDetail.vue"),
+    bounties: () => import("./views/Bounties.vue"),
+    goals: () => import("./GoalsWidget.vue"),
+    migration: null,
+  };
+  for (const [id, loader] of Object.entries(pages)) {
+    const View = loader ? defineAsyncComponent(async () => (await loader()).default) : null;
     context.registerComponent(id, defineComponent({
       props: ["context", "host"],
       setup(props) {
@@ -48,7 +76,10 @@ export async function activate(context: NativeHost & { registerComponent(id: str
         let live = true;
         onBeforeUnmount(() => { live = false; });
         onMounted(async () => {
-          try { const result = await host().runAction("migration-status"); if (live) imported.value = Boolean(result.imported); }
+          try {
+            const [result] = await Promise.all([host().runAction("migration-status"), ensureStyles()]);
+            if (live) imported.value = Boolean(result.imported);
+          }
           catch (err) { if (live) error.value = err instanceof Error ? err.message : "Could not check your archive."; }
           finally { if (live) checking.value = false; }
         });
@@ -71,7 +102,9 @@ export async function activate(context: NativeHost & { registerComponent(id: str
           } catch (err) { if (live) error.value = err instanceof Error ? err.message : "Import interrupted. Retry safely; original records are retained."; }
           finally { if (live) pending.value = false; }
         }
-        return () => h("section", { class: "collector-archive" }, [
+        return () => checking.value
+          ? h("p", { class: "ui-state", role: "status" }, "Loading archive…")
+          : h("section", { class: "collector-archive" }, [
           id === "migration" ? h("h1", "Collector's Archive") : null,
           !imported.value || id === "migration" ? h("section", { class: "collector-import ui-panel" }, [
             h("h2", "Bring your existing archive with you"),

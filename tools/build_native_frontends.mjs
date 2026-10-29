@@ -1,5 +1,5 @@
 // Compile plugin-owned Vue SFCs independently, using the documented host runtime.
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
@@ -17,16 +17,20 @@ const modules = {
 const results = await build({
   absWorkingDir: root,
   entryPoints: [path.join(source, "ui/app.ts")], bundle: true, write: false,
+  splitting: true, outdir: path.join(source, "native"),
+  entryNames: "app", chunkNames: "chunks/[name]-[hash]",
   format: "esm", target: "es2022", minify: false, legalComments: "none",
   define: { "import.meta.env.VITE_USE_MOCK_DATA": "false" },
   plugins: [{ name: "public-native-vue", setup(builder) {
-    builder.onResolve({ filter: /^(vue|@unnamed\/plugin-(vue|ui))$/ }, args => ({ path: args.path === "vue" ? "@unnamed/plugin-vue" : args.path, namespace: "public-runtime" }));
+    builder.onResolve({ filter: /^(vue|@unnamed\/plugin-(vue|ui))$/ }, () => ({ path: "bindings", namespace: "public-runtime" }));
     builder.onLoad({ filter: /.*/, namespace: "public-runtime" }, args => {
-      const keys = modules[args.path], property = args.path.endsWith("-ui") ? "ui" : "vue";
-      return { contents: `export let ${keys.join(",")};\nexport function configure(context) { ({${keys.join(",")}} = context.${property}); }`, loader: "js" };
+      // Vue and host UI bindings share one small module across lazy pages.
+      // Keeping them together avoids an extra serial bootstrap asset request.
+      const vueKeys = modules["@unnamed/plugin-vue"], uiKeys = modules["@unnamed/plugin-ui"];
+      return { contents: `export let ${[...vueKeys, ...uiKeys].join(",")};\nexport function configure(context) { ({${vueKeys.join(",")}} = context.vue); ({${uiKeys.join(",")}} = context.ui); }`, loader: "js" };
     });
     builder.onLoad({ filter: /\.vue$/ }, async args => {
-      const code = await readFile(args.path, "utf8");
+      const code = (await readFile(args.path, "utf8")).replaceAll("\r\n", "\n");
       const { descriptor, errors } = parse(code, { filename: args.path });
       if (errors.length) throw errors[0];
       const scope = "data-v-" + createHash("sha256").update(path.relative(source, args.path).replaceAll("\\", "/")).digest("hex").slice(0, 8);
@@ -45,11 +49,29 @@ const results = await build({
 const css = "/* Generated from plugin-owned UI; rebuild with npm run build:native. */\n" +
   [...styles.entries()].sort(([a], [b]) => a.localeCompare(b, "en")).map(([, code]) => code).join("\n") +
   "\n.collector-import{padding:var(--ui-space-6);margin-bottom:var(--ui-space-6)}.collector-import p{margin:12px 0;color:var(--ui-dim)}.collector-error{color:var(--ui-error)}.collector-archive{min-width:0}.collector-archive .page{padding:0}\n";
-const outputs = { "native/app.js": results.outputFiles[0].text, "native/style.css": css };
+const outputs = Object.fromEntries(results.outputFiles.map(file =>
+  [path.relative(source, file.path).replaceAll("\\", "/"), file.text]));
+outputs["native/style.css"] = css;
+// Only this generated chunk directory belongs to the builder. Published .utp
+// histories are independent and remain immutable.
+const chunkDirectory = path.join(source, "native/chunks");
+for (const name of await readdir(chunkDirectory).catch(error => {
+  if (error.code === "ENOENT") return [];
+  throw error;
+})) {
+  const relative = "native/chunks/" + name;
+  if (!outputs[relative] && /^[A-Za-z0-9_-]+-[A-Z0-9]{8}\.js$/.test(name)) {
+    if (process.argv.includes("--check")) throw new Error(`${relative} is stale; run npm run build:native`);
+    await unlink(path.join(chunkDirectory, name));
+  }
+}
 for (const [name, content] of Object.entries(outputs)) {
   const filename = path.join(source, name);
   if (process.argv.includes("--check")) {
     if ((await readFile(filename, "utf8")).replaceAll("\r\n", "\n") !== content) throw new Error(`${name} is stale; run npm run build:native`);
-  } else await writeFile(filename, content);
+  } else {
+    await mkdir(path.dirname(filename), { recursive: true });
+    await writeFile(filename, content);
+  }
 }
 console.log("Collector's Archive native UI compiled against the public runtime");

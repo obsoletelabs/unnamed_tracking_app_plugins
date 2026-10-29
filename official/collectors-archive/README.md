@@ -61,3 +61,11 @@ deadline reminders and disable/re-enable cleanup. Accounts created by the check
 are removed afterwards. Never use personal session cookies or production data.
 Set `COLLECTOR_FRONTEND_ORIGIN` to the same backend origin to exercise a compiled
 production frontend through Nginx instead of the local static review proxy.
+
+The startup entry registers global search and reminders without loading the
+archive editor. Each contributed page loads its own compiled Vue chunk, and the
+shared stylesheet loads on the first mounted archive contribution. Rebuild with
+`npm run build:native`; generated chunks stay within this plugin's `native/` assets.
+Background bounty suggestions stop scheduling when their page closes and handle
+in-flight failures during disable. The public Plugin API v1.1.0 boundary and
+previous signed releases remain supported.
