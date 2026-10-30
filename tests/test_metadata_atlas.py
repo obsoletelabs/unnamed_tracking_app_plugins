@@ -1,4 +1,5 @@
 """Atlas provider: wire shape, URL handling and certainty rules, against a faked gateway."""
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -426,6 +427,27 @@ def _achievements(atlas):
     return atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
 
 
+def _delivered(atlas, cursor=None):
+    """Follow next_cursor like the host and merge pages by external_id (host PR 447 semantics).
+
+    Returns (merged items, page responses); a failing page is returned as-is."""
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2", "media_type": "game"}
+    merged, pages, seen = {}, [], set()
+    while True:
+        request = {"resource": "achievements", **({"cursor": cursor} if cursor else {})}
+        response = atlas.metadata({"request": request, "candidate": selected})
+        if "failure" in response:
+            return response
+        pages.append(response)
+        for item in response.get("metadata", {}).get("achievements", []):
+            merged[item["external_id"]] = item
+        cursor = response.get("next_cursor")
+        if cursor is None:
+            return list(merged.values()), pages
+        assert cursor not in seen
+        seen.add(cursor)
+
+
 def _achievement_calls(gateway):
     from urllib.parse import parse_qs, urlsplit
     return [parse_qs(urlsplit(call["url"]).query) for call in gateway.calls if "/achievements" in call["url"]]
@@ -435,22 +457,22 @@ def test_large_catalogues_are_read_in_pages_of_200_and_deduplicated(atlas, monke
     entries = [_entry(number) for number in range(450)]
     entries[210] = {**entries[10]}  # a boundary shift between pages repeats an id
     gateway = PagedAchievements(monkeypatch, entries)
-    items = _achievements(atlas)["metadata"]["achievements"]
+    items, pages = _delivered(atlas)
     assert [item["external_id"] for item in items] == [f"ach_{n}" for n in range(450) if n != 210]
-    assert _achievement_calls(gateway) == [
-        {"limit": ["200"], "offset": ["0"]}, {"limit": ["200"], "offset": ["200"]},
-        {"limit": ["200"], "offset": ["400"]}]
+    assert len(pages) == 3 and "next_cursor" not in pages[-1]
+    assert [call["offset"] for call in _achievement_calls(gateway)] == [["0"], ["200"], ["400"]]
+    assert {call["limit"][0] for call in _achievement_calls(gateway)} == {"200"}
 
 
 def test_a_server_without_paging_returns_everything_in_one_response(atlas, monkeypatch):
     gateway = PagedAchievements(monkeypatch, [_entry(number) for number in range(120)], paging=False)
-    items = _achievements(atlas)["metadata"]["achievements"]
-    assert len(items) == 120 and len(_achievement_calls(gateway)) == 1
+    items, pages = _delivered(atlas)
+    assert len(items) == 120 and len(pages) == 1 and len(_achievement_calls(gateway)) == 1
 
 
 def test_a_failing_later_page_is_an_error_not_a_truncated_catalogue(atlas, monkeypatch):
     PagedAchievements(monkeypatch, [_entry(number) for number in range(450)], fail_at=200)
-    assert _achievements(atlas) == {"failure": {"code": "unavailable"}}
+    assert _delivered(atlas) == {"failure": {"code": "unavailable"}}
 
 
 def test_a_cursor_that_does_not_advance_cannot_loop_and_the_forwarding_cap_holds(atlas, monkeypatch):
@@ -462,8 +484,40 @@ def test_a_cursor_that_does_not_advance_cannot_loop_and_the_forwarding_cap_holds
             return super().__call__(method, capability, payload)
 
     gateway = Stuck(monkeypatch, [])
-    assert len(_achievements(atlas)["metadata"]["achievements"]) == 1
-    assert len(_achievement_calls(gateway)) == 1
+    items, pages = _delivered(atlas)
+    assert len(items) == 1 and len(pages) == 1 and len(_achievement_calls(gateway)) == 1
     big = PagedAchievements(monkeypatch, [_entry(number) for number in range(2500)])
-    assert len(_achievements(atlas)["metadata"]["achievements"]) == 2000
+    items, pages = _delivered(atlas)
+    assert len(items) == 2000 and "next_cursor" not in pages[-1]
     assert len(_achievement_calls(big)) == 10
+
+
+def _realistic(number):
+    digest = lambda salt: hashlib.sha256(f"{salt}{number}".encode()).hexdigest()
+    return {"id": f"ach_{number:05d}_{digest('i')[:12]}", "name": f"Achievement number {number}: a typical title",
+            "description": "Complete the objective described here without being defeated. " * 3,
+            "hidden": number % 17 == 0, "global_percent": 12.345, "kind": "progression", "tier": "gold",
+            "points": 25, "icon_url": f"/api/v2/media/{digest('a')}", "locked_icon_url": f"/api/v2/media/{digest('b')}",
+            "external_ids": {"steam": f"ACH_SOMETHING_{number}", "retroachievements": str(number)}}
+
+
+@pytest.mark.parametrize("count", [450, 2000])
+def test_realistic_catalogues_stay_under_the_runtime_output_limit_and_arrive_exactly_once(atlas, monkeypatch, count):
+    PagedAchievements(monkeypatch, [_realistic(number) for number in range(count)])
+    items, pages = _delivered(atlas)
+    assert len(pages) > 1  # one response could never carry this many entries
+    for page in pages:
+        assert len(json.dumps(page).encode("utf-8")) <= 56 * 1024 < 64 * 1024
+    assert [item["external_id"] for item in items] == [_realistic(n)["id"] for n in range(count)]
+    delivered = [item["external_id"] for page in pages for item in page["metadata"]["achievements"]]
+    assert len(delivered) == len(set(delivered)) == count  # no repeat or gap across the pages
+    assert all("next_cursor" in page for page in pages[:-1]) and "next_cursor" not in pages[-1]
+
+
+def test_an_invalid_achievement_cursor_is_rejected_without_a_request(atlas, monkeypatch):
+    gateway = PagedAchievements(monkeypatch, [_entry(1)])
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2", "media_type": "game"}
+    for bad in ("-1", "abc", "1.5"):
+        response = atlas.metadata({"request": {"resource": "achievements", "cursor": bad}, "candidate": selected})
+        assert response == {"failure": {"code": "invalid_response"}}
+    assert _achievement_calls(gateway) == []
