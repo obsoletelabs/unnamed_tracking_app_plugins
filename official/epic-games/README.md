@@ -102,8 +102,10 @@ cannot adopt your Epic account or change your library.
 Games use namespace + catalogue identity within the connected account. Similar
 titles and another Epic account cannot adopt each other's games. Engine assets,
 private sandboxes, DLC and digital extras are skipped. Catalogue requests group
-up to 25 entries in one namespace; a missing catalogue response retains the batch
-for retry. A repeated/invalid cursor, invalid record, incomplete page or safety
+up to 25 entries in one namespace. An entry Epic omits (for example a delisted
+item) is skipped individually: it is counted in `skipped`/`catalogue_missing`, listed
+in `skipped_entries` (first 25 shown) and later games continue. Transport failures or
+an unreadable catalogue response still stop the step and retain the batch for retry. A repeated/invalid cursor, invalid record, incomplete page or safety
 limit stops inventory before availability changes.
 
 Successful imports respect the host's field locks, manual status, notes and
