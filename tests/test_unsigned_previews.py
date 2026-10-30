@@ -44,7 +44,9 @@ def test_workflows_parse_and_unsigned_previews_run_for_all_branch_pushes():
     # The shared gate (not per-job path checks) decides whether this commit's CI runs.
     assert preview["needs"] == "gate" and preview["if"] == "needs.gate.outputs.run == 'true'"
     assert checks["jobs"]["gate"].get("needs") is None
-    assert all(job.get("needs") == "gate" for name, job in checks["jobs"].items() if name != "gate")
+    # The aggregate `lifecycle` status is the one job that waits on the other lifecycle jobs.
+    assert all(job.get("needs") == "gate" for name, job in checks["jobs"].items()
+               if name not in ("gate", "lifecycle"))
     assert any(step.get("with", {}).get("name") == "unsigned-dist" for step in preview["steps"])
     publication = yaml.load((workflows / "publish.yml").read_text(), Loader=yaml.BaseLoader)
     # Publication only ever runs for main or a release, so other branches must not start it.

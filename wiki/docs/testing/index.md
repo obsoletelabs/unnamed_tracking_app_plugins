@@ -61,12 +61,19 @@ permission packages, retained rollback, configuration/storage preservation,
 reinstall, purge and uninstall. It does not substitute for authenticated host
 permission approval. Windows cannot run the real POSIX worker acceptance.
 
-The required `ci.yml` `lifecycle` job provisions PostgreSQL and runs the host's
+The required `ci.yml` `lifecycle` check aggregates four parallel jobs (`lifecycle-official`,
+`lifecycle-reference`, `lifecycle-jellyfin` and `lifecycle-pwa`), each of which runs only when
+`tools/ci_changes.py` selects its area and each of which provisions PostgreSQL. A
+`tools/check_<plugin>*` or `tools/capture_<plugin>*` script counts as a change to that plugin.
+`lifecycle-official` runs the host's
 `tools/check_plugin_repository_lifecycle.py` through the plugin repository's
 `tools/check_host_lifecycle.py --host-root .validation/host --plugins-root . --work-root <empty-dir> --browser` adapter.
 It builds the actual Plugin Manager frontend and verifies consent, effective
 grants, new-scope staging, release policy, rollback and failed worker restoration.
-Then it runs the additional reference lifecycle check. Use the host's
+`lifecycle-reference` runs the additional reference lifecycle check, `lifecycle-jellyfin` the strict
+independent Jellyfin preview and `lifecycle-pwa` the PWA signing and browser lifecycle. The aggregate
+status fails if a selected job fails or is skipped, and accepts a skip only for an area the change
+selection did not choose. Use the host's
 [validation instructions](https://github.com/obsoletelabs/unnamed_tracking_app_2/blob/main/wiki/docs/development/plugin-validation.md)
 for database, Linux, environment and frontend prerequisites. Never replace this
 with a pretend gateway or fake host to get a green lifecycle claim.
