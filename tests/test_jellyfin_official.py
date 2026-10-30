@@ -586,6 +586,109 @@ def test_stories_are_not_published_when_the_user_disabled_notifications(service)
     assert not background_calls(calls, "notifications.send")
 
 
+def _watch(service, **extra):
+    return service[0].watch_now(
+        {"_plugin_context": {"user_id": USER, "is_admin": False, "resource_id": WATCH_MEDIA}, **extra})
+
+
+WATCH_MEDIA = str(uuid4())
+
+
+def _seed_watch(service, available=True, user=USER):
+    plugin, _, _, server, account, *_ = service
+    plugin.store("watch/" + user + "/" + WATCH_MEDIA + "/" + account,
+                 {"external_id": film()["Id"], "library_id": LIBRARY, "available": available})
+    plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "movie"}))
+
+
+def _reads(service):
+    return sum(1 for m, c, _ in service[6] if m == "storage.get")
+
+
+def test_watch_lookup_is_cached_after_the_first_open(service):
+    plugin, *_ = service
+    _seed_watch(service)
+    first = _watch(service)
+    assert first["ok"] and "cached" not in first
+    before = _reads(service)
+    second = _watch(service)
+    assert second["ok"] and second["cached"] is True and second["url"] == first["url"]
+    assert _reads(service) - before == 1  # one cache read, no account or server lookups
+    assert [m for m, *_ in service[6][-1:]] == ["storage.get"]
+
+
+def test_cached_only_returns_immediately_on_a_miss_without_looking_up(service):
+    _seed_watch(service)
+    before = len(service[6])
+    pending = _watch(service, cached_only=True)
+    assert pending == {"ok": False, "pending": True, "message": "Looking up your Jellyfin libraries."}
+    assert [m for m, *_ in service[6][before:]] == ["storage.get"]
+    assert _watch(service)["ok"]
+    assert _watch(service, cached_only=True)["cached"] is True
+
+
+def test_entries_expire_and_negative_results_expire_sooner(service, monkeypatch):
+    plugin, *_ = service
+    _seed_watch(service, available=False)
+    clock = {"now": 1_000_000.0}
+    monkeypatch.setattr(plugin.time, "time", lambda: clock["now"])
+    assert _watch(service)["ok"] is False
+    assert _watch(service)["cached"] is True
+    clock["now"] += plugin.WATCH_MISS_TTL + 1
+    assert "cached" not in _watch(service)
+    _seed_watch(service)  # mapping becomes available; a hit would still be the stale miss
+    plugin.invalidate_watch_cache(USER)
+    assert _watch(service)["ok"]
+    clock["now"] += plugin.WATCH_MISS_TTL + 1
+    assert _watch(service)["cached"] is True  # positive results live for the longer TTL
+    clock["now"] += plugin.WATCH_CACHE_TTL
+    assert "cached" not in _watch(service)
+
+
+def test_failed_open_refresh_evicts_and_looks_up_again(service):
+    _seed_watch(service)
+    _watch(service)
+    before = _reads(service)
+    refreshed = _watch(service, refresh=True)
+    assert refreshed["ok"] and "cached" not in refreshed and _reads(service) - before > 1
+    assert _watch(service)["cached"] is True
+
+
+def test_configuration_changes_invalidate_the_cache(service):
+    plugin, _, _, server, account, *_ = service
+    _seed_watch(service)
+    ignoring = lambda: plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "ignore"}))
+    for change in (
+        lambda: plugin.save_account(context(account_id=account, background_sync=True)),
+        ignoring,
+        lambda: plugin.order_accounts(context(account_ids=[account])),
+    ):
+        plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "movie"}))
+        assert _watch(service)["ok"]
+        assert _watch(service)["cached"] is True
+        change()
+        result = _watch(service)
+        assert "cached" not in result
+        if change is ignoring:
+            assert result["ok"] is False  # an ignored library never serves a stale URL
+
+
+def test_cache_is_per_user_bounded_and_cleared_on_completed_sync_and_restart(service):
+    plugin, sync, _, _, account, storage, *_ = service
+    _seed_watch(service)
+    _watch(service)
+    assert "watchcache/" + USER in storage and "watchcache/" + OTHER not in storage
+    other = plugin.watch_now({"_plugin_context": {"user_id": OTHER, "is_admin": False, "resource_id": WATCH_MEDIA}})
+    assert other["ok"] is False and "cached" not in other  # nothing leaks across users
+    # The bound is enforced on write.
+    for _ in range(plugin.WATCH_CACHE_MAX + 20):
+        plugin.watch_now({"_plugin_context": {"user_id": USER, "is_admin": False, "resource_id": str(uuid4())}})
+    assert len(json.loads(storage["watchcache/" + USER])["entries"]) <= plugin.WATCH_CACHE_MAX
+    finish(service)
+    assert "watchcache/" + USER not in storage  # a completed sync may change mappings
+    _watch(service)
+    plugin.invalidate_watch_cache()
+    assert not [k for k in storage if k.startswith("watchcache/")]
 def _tick(service, *, expire_retry=True):
     plugin, sync, _, _, account, *_ = service
     status_key = "status/" + USER + "/" + account
@@ -641,3 +744,45 @@ def test_persistent_outage_is_not_treated_as_a_library_change(service):
     failure = finish(service)
     assert failure["error_code"] != "library_changed"
     assert "SECRET" not in failure["error"] and failure["retry_at"] > 0
+
+
+
+def test_sync_sends_the_watch_link_and_label_for_every_matched_item(service):
+    plugin, sync, _, server, account, _, _, imports, catalogue, *_ = service
+    catalogue[:] = [film(i) for i in range(3)]
+    plugin.save_server(context(admin=True, server_id=server, url="https://fixture.test/jellyfin/", name="Living Room"))
+    finish(service)
+    assert len(imports) >= 3
+    for payload in imports:
+        assert payload["source"] == "jellyfin" and payload["available"] is True
+        assert payload["watch_url"] == (
+            "https://fixture.test/jellyfin/web/index.html#!/details?id=" + payload["external_id"]
+        )
+        assert payload["watch_label"] == "Jellyfin · Living Room" and len(payload["watch_label"]) <= 80
+        assert TOKEN not in json.dumps(payload) and "@" not in payload["watch_url"].split("/")[2]
+
+
+def test_watch_label_is_bounded_and_defaults_when_the_server_is_unnamed(service):
+    fields = service[1].watch_fields
+    assert fields({"url": "https://jf.test/"}, "abc")["watch_label"] == "Jellyfin"
+    long = fields({"url": "https://jf.test"}, "a b")
+    assert long["watch_url"] == "https://jf.test/web/index.html#!/details?id=a%20b"
+    assert len(fields({"url": "https://jf.test", "name": "x" * 500}, "a")["watch_label"]) == 80
+
+
+def test_unavailable_items_keep_the_link_and_report_available_false(service):
+    plugin, sync, _, _, account, _, _, imports, catalogue, *_ = service
+    finish(service)
+    catalogue.pop(0)
+    finish(service)
+    finish(service)  # absent from two successful censuses
+    gone = [p for p in imports if p.get("available") is False]
+    assert gone and all(p["watch_url"].endswith(p["external_id"]) for p in gone)
+    assert any(p.get("availability_only") for p in gone)
+
+
+def test_watch_links_require_the_plugin_api_that_accepts_them():
+    manifest = json.loads((SOURCE / "manifest.json").read_text(encoding="utf-8"))
+    ui = json.loads((SOURCE / "ui.json").read_text(encoding="utf-8"))
+    # Hosts older than 1.1.18 reject media.sync watch_url/watch_label, so they must refuse this plugin.
+    assert manifest["api_contract_version"] == ui["api_contract_version"] == "1.1.18"

@@ -64,7 +64,7 @@ def test_signed_jellyfin_package_declares_the_story_capabilities_and_verifies(si
     entries = entries_of(package)
     manifest = json.loads(entries["manifest.json"])
     assert manifest["integrity"]["signature"].startswith("v2:")
-    assert manifest["api_contract_version"] == "1.1.17"
+    assert manifest["api_contract_version"] == "1.1.18"
     assert manifest["native_frontend"]["activation"] == "page"
     names = {item["name"] for item in manifest["capabilities"]}
     assert {"notification_sources.register", "notifications.canonical", "notifications.send"} <= names

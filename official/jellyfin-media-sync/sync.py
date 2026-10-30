@@ -13,7 +13,9 @@ from uuid import uuid4
 import attention
 from jellyfin import FIELDS, SyncError, api, integer, normalized, playback
 from sdk.plugin_protocol import request
-from plugin import account_token, delete, keys, load, server_by_id, server_secret, store
+from plugin import (
+    account_token, delete, invalidate_watch_cache, keys, load, server_by_id, server_secret, store,
+)
 
 PAGE_SIZE = 100
 
@@ -56,6 +58,18 @@ def episode_override_key(user: str, account: dict, external: str) -> str:
         + "episode-overrides/"
         + hashlib.sha256(external.encode()).hexdigest()
     )
+
+
+def watch_fields(server: dict, external_id: str) -> dict:
+    """Deep link and label the host renders as "Watch in <label>" from the stored source."""
+    name = str(server.get("name") or "").strip()
+    return {
+        # Neither credentials nor server filesystem paths belong in navigation URLs.
+        "watch_url": server["url"].rstrip("/")
+        + "/web/index.html#!/details?id="
+        + quote(external_id, safe=""),
+        "watch_label": ("Jellyfin · " + name if name else "Jellyfin")[:80],
+    }
 
 
 def host_sync(user: str, payload: dict) -> dict:
@@ -101,6 +115,7 @@ def apply_item(
         inventory_complete=complete,
         history=history or [],
         available=state.get("available", True),
+        **watch_fields(server, item["external_id"]),
     )
     if state.get("target_id"):
         payload["target_id"] = state["target_id"]
@@ -449,6 +464,7 @@ def _finalize(user: str, account: dict, server: dict, cursor: dict) -> None:
                     source_scope=server.get("remote_server_id", server["id"])
                     + ":"
                     + account["remote_user_id"],
+                    **watch_fields(server, state["item"]["external_id"]),
                 )
                 host_sync(user, payload)
                 store(
@@ -721,6 +737,7 @@ def run_account(user: str, account: dict) -> None:
         )
         if done:
             state["finished_at"] = now
+            invalidate_watch_cache(user)
             if state.get("notified_error"):
                 try:
                     attention.report_recovered(user, account, str(server.get("name", "")))
