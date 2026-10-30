@@ -779,3 +779,10 @@ def test_unavailable_items_keep_the_link_and_report_available_false(service):
     gone = [p for p in imports if p.get("available") is False]
     assert gone and all(p["watch_url"].endswith(p["external_id"]) for p in gone)
     assert any(p.get("availability_only") for p in gone)
+
+
+def test_watch_links_require_the_plugin_api_that_accepts_them():
+    manifest = json.loads((SOURCE / "manifest.json").read_text(encoding="utf-8"))
+    ui = json.loads((SOURCE / "ui.json").read_text(encoding="utf-8"))
+    # Hosts older than 1.1.18 reject media.sync watch_url/watch_label, so they must refuse this plugin.
+    assert manifest["api_contract_version"] == ui["api_contract_version"] == "1.1.18"
