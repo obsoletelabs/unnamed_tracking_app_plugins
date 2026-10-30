@@ -34,3 +34,11 @@ For an app and Atlas running in separate Docker containers, set **Atlas API URL*
 This local app test used Atlas 0.7.1 and a small blue icon fixture. The achievement definition, its icon, and separate Pin/Edit controls are visible together:
 
 ![Atlas achievement icon loaded in the tracking app](https://github.com/user-attachments/assets/3105f083-1949-4f8e-9eee-7f7958dd21ab)
+
+## Achievement catalogues
+
+Achievements are read in pages (`limit=200`, `offset`, following `next_offset`) so a large catalogue stays
+under the host gateway's response limit. Entries are de-duplicated by achievement `id`, at most 2000 are
+forwarded, and a failed later page is reported as a failure instead of a truncated list. An Atlas without
+paging ignores the parameters and returns everything in one response, which still works. Paging needs
+Atlas PR 95 (obsoletelabs/unnamed_tracking_metadata).
