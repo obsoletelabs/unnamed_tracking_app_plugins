@@ -129,11 +129,11 @@
   "manifest_version": 1,
   "name": "Extended Session Manager",
   "native_frontend": {
+    "activation": "page",
     "entry": "native/index.js",
     "styles": [
       "native/style.css"
-    ],
-    "activation": "page"
+    ]
   },
   "permissions": [
     {
@@ -230,5 +230,5 @@
     ],
     "settings": []
   },
-  "version": "2.11.0"
+  "version": "2.12.0"
 }

@@ -256,6 +256,260 @@
         "collections"
       ],
       "version": "0.1.0"
+    },
+    {
+      "automatic_update": false,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "aec23cceb8d7f69574eb97252a1052978ffc42e5",
+        "source_committed_at": "2026-10-30T08:34:51+08:00",
+        "source_digest": "78b4f12c8d0c780c5f29365cb992b10e2b79b2aa6c0cd3e32d97ff25ef8c4d59",
+        "source_path": "official/collectors-archive",
+        "version_bump": "patch"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "0c659d5a6e8300c0a5c2da9fc5e9f329461edc4273987a4290cb919adb6493b4"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.0",
+        "application_version_range": "^1.0.0",
+        "capabilities": [
+          {
+            "name": "games.read",
+            "version": 1
+          },
+          {
+            "name": "media.read",
+            "version": 1
+          },
+          {
+            "name": "library.legacy.read",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "frontend.native",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.main",
+            "version": 1
+          },
+          {
+            "name": "frontend.navigation.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.settings",
+            "version": 1
+          },
+          {
+            "name": "frontend.routes",
+            "version": 1
+          },
+          {
+            "name": "frontend.context.game",
+            "version": 1
+          },
+          {
+            "name": "frontend.home.widgets",
+            "version": 1
+          },
+          {
+            "name": "frontend.placement.sidebar",
+            "version": 1
+          },
+          {
+            "name": "frontend.placement.settings.account",
+            "version": 1
+          },
+          {
+            "name": "frontend.shortcuts",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Official Cards, Sets and Bounties, preserving personal archives, the full card designer, prestige challenges, objectives, evidence, journals and rewards.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "458e49f4548bc825ce0907daf39735d893e567cabc63c632d03181acb1c78f90",
+          "signature": "v2:Kb7TTHIwYYhMomR+SIhtXhL7KjXw5rSyzJrRSeejtthiNGWUAf8yfMf2ENMJECySQhIizmzKSlc7HU+UMQR/DQ=="
+        },
+        "manifest_version": 1,
+        "name": "Collector's Archive",
+        "native_frontend": {
+          "entry": "native/app.js",
+          "styles": []
+        },
+        "permissions": [
+          {
+            "capability": {
+              "name": "games.read",
+              "version": 1
+            },
+            "rationale": "Read your game metadata and achievement progress for cards, prestige and automatic goals."
+          },
+          {
+            "capability": {
+              "name": "media.read",
+              "version": 1
+            },
+            "rationale": "Read your owned game screenshots and clips when attaching bounty evidence."
+          },
+          {
+            "capability": {
+              "name": "library.legacy.read",
+              "version": 1
+            },
+            "rationale": "Import only your retained Cards, Sets and Bounties records from older host versions, without deleting the originals."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Keep each user's cards, sets, objectives, evidence, journal and reward history in this plugin's own storage."
+          },
+          {
+            "capability": {
+              "name": "frontend.native",
+              "version": 1
+            },
+            "rationale": "Render the complete card designer and bounty board using the shared native UI runtime."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.main",
+              "version": 1
+            },
+            "rationale": "Add Cards, Sets and Bounties to the main navigation."
+          },
+          {
+            "capability": {
+              "name": "frontend.navigation.settings",
+              "version": 1
+            },
+            "rationale": "Add the personal archive import and backup page to settings."
+          },
+          {
+            "capability": {
+              "name": "frontend.settings",
+              "version": 1
+            },
+            "rationale": "Offer archive import status and recovery guidance in Account settings."
+          },
+          {
+            "capability": {
+              "name": "frontend.routes",
+              "version": 1
+            },
+            "rationale": "Open the archive's own list and detail pages."
+          },
+          {
+            "capability": {
+              "name": "frontend.context.game",
+              "version": 1
+            },
+            "rationale": "Create a card from a completed game through the game action menu."
+          },
+          {
+            "capability": {
+              "name": "frontend.home.widgets",
+              "version": 1
+            },
+            "rationale": "Restore your personal goals widget, weekly completed goal count and reward points on Home."
+          },
+          {
+            "capability": {
+              "name": "frontend.placement.sidebar",
+              "version": 1
+            },
+            "rationale": "Place this extension beneath the existing library and media headings in the main sidebar. This grants placement throughout the sidebar, not access to library records."
+          },
+          {
+            "capability": {
+              "name": "frontend.placement.settings.account",
+              "version": 1
+            },
+            "rationale": "Place these settings beneath the built-in account headings. Approval covers this settings area and its folders, not other settings areas or backend actions."
+          },
+          {
+            "capability": {
+              "name": "frontend.shortcuts",
+              "version": 1
+            },
+            "rationale": "Offer editable shortcuts for Cards, Sets and Bounties only while this plugin is enabled."
+          }
+        ],
+        "plugin_id": "official.collectors-archive",
+        "sdk_version_range": "^1.1.0",
+        "storage": {
+          "quota_mb": 64
+        },
+        "ui": {
+          "actions": [
+            "api",
+            "games",
+            "game-media",
+            "migration-status",
+            "import-legacy",
+            "create-game-card",
+            "transport-write",
+            "transport-read",
+            "transport-drop"
+          ],
+          "menus": [],
+          "pages": [
+            "cards",
+            "card-detail",
+            "sets",
+            "set-detail",
+            "bounties",
+            "migration",
+            "goals"
+          ],
+          "settings": []
+        },
+        "version": "0.1.1"
+      },
+      "package": {
+        "filename": "official.collectors-archive-0.1.1.utp",
+        "format": "utp-v1",
+        "size_bytes": 77489
+      },
+      "package_sha256": "c827eaa99353cd5e2dee902cda992f4173d1417f004c0558676d1f78e486190a",
+      "plugin_id": "official.collectors-archive",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# Collector's Archive\n\nWith optional `frontend.shortcuts` access, Alt+E opens Cards, Alt+S opens Sets,\nand Alt+B opens Bounties. N opens the create control on those plugin pages.\nThese bindings appear in host help and personal shortcut settings only while\nthe plugin is enabled and authorized; users can disable or remap them. Existing\nbindings keep working if one of these keys conflicts.\n\nOfficial plugin for **Cards, Sets and Bounties**, moved together out of the host.\nIt preserves the complete card designer (front/back templates, symbols, uploaded\nart, rarity, set placement and print status), archive numbers, prestige challenges,\nset completion, automatic and custom goals, objectives, evidence, journal entries\nand reward history. Prestige requires verified 100% achievement completion and\ncreates one deterministic challenge for each card.\n\nInstall Collector's Archive from the official catalogue in the plugin manager and review its permissions. Open\n**Collector's Archive** under Account settings and import your legacy records\nbefore using the archive. Imports retain original identifiers and archive numbers;\nretrying never overwrites an imported or edited record. Each account imports its\nown records. The host retains the original tables, and importing does not modify\nor delete them. Keep a database backup until you've checked your archive.\n\nCards, Sets and Bounties appear directly under **Games** while the plugin is\nenabled, with no additional archive folder. The import entry appears directly in\n**Account** settings.\nCompleted-game context actions can create cards. On phones, use the hamburger to\nopen those entries. The existing native appearance tokens, modal controls and\nheadings work in Light, Dark, System, preset and custom palettes.\n\nThe plugin owns its state through `plugin.storage`; it does not import host\nmodules, declare database models or access the database directly. The public\n`library.legacy.read` grant permits the one-time, read-only legacy export.\n`games.read` supplies owned game and achievement data; `media.read` supplies\nowned evidence metadata. Withdrawing a required permission stops the contribution\nthrough the normal host lifecycle. Official publication uses the registered **Unnamed Tracking Official** publisher\nand signed `.utp` packages. Updates require manual review. Branch archives remain\nuntrusted previews and require explicit installation consent.\n\nAll authenticated actions require the host's private plugin gateway. If pages\nreport that it is not configured, check Plugin Manager's platform health and set\n`PLUGIN_GATEWAY_URL` on the app or runtime service. Reinstalling the plugin does\nnot repair shared deployment configuration.\n\nUse the plugin manager's storage backup/restore controls before updating or\nremoving the plugin. Disable retains its namespace. Uninstalling with data deletion\nremoves the plugin copy; the retained legacy server records remain available.\n\nRun `npm ci && npm run build:native` at the plugin repository root to compile the\nplugin-owned Vue components. The build uses the documented `context.vue` runtime\nand `context.ui` components; it bundles no host source or second Vue runtime.\nPython behavior tests and actual host/runtime/browser acceptance are maintained\nalongside the source. Published signed archives remain immutable.\n\nFor a disposable installed host, run\n`node tools/check_collectors_archive_ui.mjs <host-source> <output> <backend-url> <temporary-admin-cookies.json>`.\nThe check creates temporary ordinary users through the public API, imports all\nseven retained record groups, exercises native set/card creation, objectives,\nevidence, journals, reward idempotency and cross-user denial, and captures loaded\nphone/desktop Light/Dark pages. It also checks global search, Home goals,\ndeadline reminders and disable/re-enable cleanup. Accounts created by the check\nare removed afterwards. Never use personal session cookies or production data.\nSet `COLLECTOR_FRONTEND_ORIGIN` to the same backend origin to exercise a compiled\nproduction frontend through Nginx instead of the local static review proxy.\n\nThe startup entry registers global search and reminders without loading the\narchive editor. Each contributed page loads its own compiled Vue chunk, and the\nshared stylesheet loads on the first mounted archive contribution. Rebuild with\n`npm run build:native`; generated chunks stay within this plugin's `native/` assets.\nBackground bounty suggestions stop scheduling when their page closes and handle\nin-flight failures during disable. The public Plugin API v1.1.0 boundary and\nprevious signed releases remain supported.\n",
+      "release_notes": "Cards, Sets and Bounties now appear directly under Games, with a direct Account entry for legacy import. Preserves original IDs, archive numbers, customization, goals, evidence, journal and point history; server originals remain untouched. Requires the host's configured private plugin gateway for authenticated actions.",
+      "sha256": "458e49f4548bc825ce0907daf39735d893e567cabc63c632d03181acb1c78f90",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "458e49f4548bc825ce0907daf39735d893e567cabc63c632d03181acb1c78f90",
+        "signature": "v2:Kb7TTHIwYYhMomR+SIhtXhL7KjXw5rSyzJrRSeejtthiNGWUAf8yfMf2ENMJECySQhIizmzKSlc7HU+UMQR/DQ=="
+      },
+      "tags": [
+        "official",
+        "games",
+        "collections"
+      ],
+      "version": "0.1.1"
     }
   ],
   "version": 1

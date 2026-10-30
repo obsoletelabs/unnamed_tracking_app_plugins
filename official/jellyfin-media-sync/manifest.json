@@ -82,11 +82,11 @@
   "manifest_version": 1,
   "name": "Jellyfin Media Sync",
   "native_frontend": {
+    "activation": "page",
     "entry": "native/app.js",
     "styles": [
       "native/style.css"
-    ],
-    "activation": "page"
+    ]
   },
   "permissions": [
     {
@@ -242,5 +242,5 @@
     ],
     "settings": []
   },
-  "version": "0.10.0"
+  "version": "0.11.0"
 }

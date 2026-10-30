@@ -67,11 +67,11 @@
   "manifest_version": 1,
   "name": "Discord Bot Notifications",
   "native_frontend": {
+    "activation": "page",
     "entry": "native/app.js",
     "styles": [
       "native/style.css"
-    ],
-    "activation": "page"
+    ]
   },
   "permissions": [
     {
@@ -204,5 +204,5 @@
     ],
     "settings": []
   },
-  "version": "0.5.0"
+  "version": "0.5.1"
 }

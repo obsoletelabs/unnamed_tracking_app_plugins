@@ -52,11 +52,11 @@
   "manifest_version": 1,
   "name": "Game Night",
   "native_frontend": {
+    "activation": "page",
     "entry": "native/app.js",
     "styles": [
       "native/style.css"
-    ],
-    "activation": "page"
+    ]
   },
   "permissions": [
     {
@@ -131,5 +131,5 @@
     ],
     "settings": []
   },
-  "version": "0.3.0"
+  "version": "0.3.1"
 }
