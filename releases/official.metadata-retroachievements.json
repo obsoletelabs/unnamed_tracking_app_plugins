@@ -1749,6 +1749,165 @@
         "official"
       ],
       "version": "0.7.1"
+    },
+    {
+      "automatic_update": true,
+      "build": {
+        "builder": "tools/build_packages.py",
+        "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+        "legacy": false,
+        "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+        "source_committed_at": "2026-10-30T16:50:51+08:00",
+        "source_digest": "657b1c1d25b573a32c330b5a624efaddef7643f1e8d92c1743f5a34ad53d13ea",
+        "source_path": "official/metadata-retroachievements",
+        "version_bump": "minor"
+      },
+      "icon": {
+        "path": "icon.svg",
+        "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+      },
+      "lifecycle": "published",
+      "lifecycle_stages": [
+        "source",
+        "validated",
+        "built",
+        "catalogued",
+        "published",
+        "downloadable"
+      ],
+      "manifest": {
+        "api_contract_version": "1.1.1",
+        "application_version_range": ">=0.0.1",
+        "capabilities": [
+          {
+            "name": "metadata_providers.register",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.search",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.metadata",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.health",
+            "version": 1
+          },
+          {
+            "name": "network.outbound",
+            "version": 1
+          },
+          {
+            "name": "plugin.storage",
+            "version": 1
+          },
+          {
+            "name": "metadata_providers.configuration",
+            "version": 1
+          }
+        ],
+        "dependencies": [],
+        "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+        "entrypoint": "plugin:main",
+        "integrity": {
+          "key_id": "unnamed-tracking-official-2026-10-07-v2",
+          "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+          "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
+        },
+        "manifest_version": 1,
+        "name": "RetroAchievements Metadata Provider",
+        "permissions": [
+          {
+            "capability": {
+              "name": "metadata_providers.register",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.search",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.metadata",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.health",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "network.outbound",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "plugin.storage",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          },
+          {
+            "capability": {
+              "name": "metadata_providers.configuration",
+              "version": 1
+            },
+            "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+          }
+        ],
+        "plugin_id": "official.metadata-retroachievements",
+        "sdk_version_range": "^1.1.1",
+        "storage": {
+          "quota_mb": 1
+        },
+        "ui": {
+          "actions": [
+            "search",
+            "metadata",
+            "health"
+          ],
+          "menus": [],
+          "pages": [],
+          "settings": []
+        },
+        "version": "0.8.0"
+      },
+      "package": {
+        "filename": "official.metadata-retroachievements-0.8.0.utp",
+        "format": "utp-v1",
+        "size_bytes": 9762
+      },
+      "package_sha256": "e248ccfcf5de1e38d236b04d34f33d7e85dbfa4c936a478ef02fdafeafaadadd",
+      "plugin_id": "official.metadata-retroachievements",
+      "publisher": "Unnamed Tracking Official",
+      "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\n## Console coverage\n\nSearch walks one RetroAchievements game system per cursor page. `CONSOLE_NAMES` in\n`plugin.py` lists 80 systems (including Game Boy Advance, Dreamcast and PSP, which\nwere previously missing); the original eleven keep their order so saved cursors still\nresume. Events and hubs are excluded. A stale or out-of-range cursor ends the search\ninstead of wrapping, and results lacking a `ConsoleName` use the mapped system name.\nSystems RetroAchievements adds later need an entry in the table.\n",
+      "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+      "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+      "signing": {
+        "key_id": "unnamed-tracking-official-2026-10-07-v2",
+        "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+        "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
+      },
+      "tags": [
+        "metadata",
+        "retroachievements",
+        "official"
+      ],
+      "version": "0.8.0"
     }
   ],
   "version": 1
