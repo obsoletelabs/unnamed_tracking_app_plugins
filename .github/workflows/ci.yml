@@ -29,6 +29,11 @@ jobs:
     timeout-minutes: 5
     outputs:
       run: ${{ steps.decide.outputs.run }}
+      lifecycle: ${{ steps.changes.outputs.lifecycle }}
+      lifecycle_reference: ${{ steps.changes.outputs.lifecycle_reference }}
+      lifecycle_jellyfin: ${{ steps.changes.outputs.lifecycle_jellyfin }}
+      lifecycle_pwa: ${{ steps.changes.outputs.lifecycle_pwa }}
+      full_tests: ${{ steps.changes.outputs.full_tests }}
     steps:
       - id: decide
         env:
@@ -47,10 +52,29 @@ jobs:
           fi
           echo "run=$run" >> "$GITHUB_OUTPUT"
           echo "Run checks for this event: $run"
+      - uses: actions/checkout@v7
+        if: steps.decide.outputs.run == 'true'
+        with:
+          fetch-depth: 0
+      # main and tags, shared files (SDK, tools, workflows, dependencies) and an unknown change
+      # set select every area; otherwise only the areas the changed plugins need run.
+      - id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref_type == 'tag' && format('refs/tags/{0}', github.ref_name) || github.ref_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN: ${{ steps.decide.outputs.run }}
+        run: |
+          if [ "$RUN" = true ]; then
+            python3 tools/ci_changes.py
+          else
+            printf '%s\n' lifecycle=false lifecycle_reference=false lifecycle_jellyfin=false lifecycle_pwa=false full_tests=false >> "$GITHUB_OUTPUT"
+          fi
 
   lifecycle:
     needs: gate
-    if: needs.gate.outputs.run == 'true'
+    if: needs.gate.outputs.run == 'true' && needs.gate.outputs.lifecycle == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
@@ -179,6 +203,7 @@ jobs:
             --plugins-root . \
             --work-root "${{ runner.temp }}/plugin-acceptance" --browser
       - name: Exercise real reference packages through runtime transactions
+        if: needs.gate.outputs.lifecycle_reference == 'true'
         env:
           # Matches the existing process-mode acceptance above. The actual
           # supervisor still probes and reports isolation; nothing is mocked.
@@ -191,11 +216,13 @@ jobs:
           python .validation/host/tools/check_plugin_contract_upgrade.py --plugins-root . \
             --work-root "${{ runner.temp }}/contract-upgrade-acceptance"
       - name: Test independently installed official Jellyfin preview
+        if: needs.gate.outputs.lifecycle_jellyfin == 'true'
         run: |
           bash .validation/host/tools/run_strict_plugin_acceptance.sh \
             "$GITHUB_WORKSPACE/.validation/host" "$GITHUB_WORKSPACE" \
             "${{ runner.temp }}/jellyfin-official-acceptance"
       - name: Verify official PWA signing and real browser lifecycle
+        if: needs.gate.outputs.lifecycle_pwa == 'true'
         run: |
           python .validation/host/tools/check_pwa_lifecycle.py --plugins-root . \
             --work-root "${{ runner.temp }}/pwa-acceptance"
@@ -237,31 +264,49 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: python -m pip install --upgrade pip -r requirements-dev.txt
       - run: npm ci
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check:native
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check:activity
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/check_source_layout.py
       - name: Validate documentation and repository references
         run: python tools/check_docs.py
       - name: Build developer wiki with strict validation
         run: python -m mkdocs build --strict
       - run: node --test tests/session_manager_ui.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/frontend_appearance.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/shortcut_playground.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/jellyfin_official_ui.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/discord_activity_options.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --check official/extended-session-manager/frontend/app.js
+        if: needs.gate.outputs.full_tests == 'true'
       - run: pytest
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/build_packages.py
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/verify_packages.py dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/validate_packages.py dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Preserve published packages and release history
+        if: needs.gate.outputs.full_tests == 'true'
         env:
           BASELINE_REF: ${{ github.event.pull_request.base.sha || 'origin/main' }}
         run: python tools/distribution.py --baseline-ref "$BASELINE_REF"
       - run: python tools/distribution.py --root .validation --check-source --include-unreleased
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/verify_packages.py .validation/dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/validate_packages.py .validation/dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Select companion repository ref
+        if: needs.gate.outputs.full_tests == 'true'
         id: companion
         env:
           REQUESTED_REF: ""
@@ -307,12 +352,15 @@ jobs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
           echo "Testing companion repository ref: $ref"
       - uses: actions/checkout@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           repository: obsoletelabs/unnamed_tracking_app_2
           ref: ${{ steps.companion.outputs.ref }}
           path: .validation/host
       - run: python tools/check_host_contract.py --host-root .validation/host
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Select existing mobile PWA source ref
+        if: needs.gate.outputs.full_tests == 'true'
         id: mobile
         env:
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -328,13 +376,16 @@ jobs:
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           repository: obsoletelabs/unnamed-tracking-mobile-app
           ref: ${{ steps.mobile.outputs.ref }}
           path: .validation/mobile
       - name: Verify source provenance, version and reviewed host templates
+        if: needs.gate.outputs.full_tests == 'true'
         run: python tools/sync_pwa.py --mobile-root .validation/mobile --host-root .validation/host --check
       - name: Cache Playwright browser downloads
+        if: needs.gate.outputs.full_tests == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -342,9 +393,13 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium --only-shell
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm test
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Reject unexpected generated changes or untracked output
+        if: needs.gate.outputs.full_tests == 'true'
         run: |
           if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
             git status --short --untracked-files=all
@@ -352,6 +407,7 @@ jobs:
             exit 1
           fi
       - uses: actions/upload-artifact@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           name: validated-plugin-distribution
           path: |
