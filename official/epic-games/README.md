@@ -38,7 +38,9 @@ supplies them, the description, developer and publisher are imported too. Total
 playtime is imported when Epic's playtime service answers. Catalogue text is
 requested in US English. Artwork, release dates, genres/tags, achievements,
 prices, DLC/add-ons and install state are not imported. Use the host's metadata
-lookup for artwork and other metadata.
+lookup for artwork and other metadata. The import sends only the fields the host's `games.import`
+contract accepts (title, description, developer, publisher, provider ID, playtime, availability); a test
+pins this so a future field cannot be added without a host contract change.
 
 ## Connect and import
 

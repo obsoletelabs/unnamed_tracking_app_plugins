@@ -601,3 +601,38 @@ def test_progress_is_kept_when_a_later_batch_hits_a_transport_failure(service):
     service.failures.pop(path)
     final = finish(service)
     assert final["imported"] == 5 and final["catalogue_missing"] == 1
+
+
+# The host's games.import contract (ImportedGameInput) accepts only these fields and limits.
+IMPORT_FIELDS = {"external_id", "title", "description", "developer", "publisher", "tags",
+                 "provider_ids", "playtime_seconds", "available"}
+IMPORT_LIMITS = {"external_id": 256, "title": 500, "description": 20000, "developer": 200, "publisher": 200}
+
+
+def test_imported_items_use_only_fields_and_limits_the_host_import_contract_accepts(service):
+    metadata = {
+        "title": "T" * 900, "description": "D" * 30000, "developer": "V" * 400, "publisher": "P" * 400,
+        "keyImages": [{"type": "DieselGameBoxTall", "url": "https://cdn.example/box.jpg"}],
+        "releaseInfo": [{"appId": "game-app", "platform": ["Windows"]}], "creationDate": "2020-01-01T00:00:00Z",
+        "categories": [{"path": "games"}], "tags": [{"id": "1"}], "longDescription": "x" * 50,
+    }
+    item = service.epic.game_item({**row(), "apps": ["game-app"]}, metadata, {"game-app": 600})
+    assert set(item) <= IMPORT_FIELDS
+    assert {"description", "developer", "publisher", "playtime_seconds"} <= set(item)
+    for field, limit in IMPORT_LIMITS.items():
+        assert len(item[field]) <= limit
+    assert item["provider_ids"] == {"epic": item["external_id"]}
+    # Artwork, release dates and genres are not accepted by games.import, so none are sent.
+    assert not {"keyImages", "artwork", "poster_url", "release_date", "tags", "releaseInfo"} & set(item)
+
+
+def test_import_batches_stay_within_the_host_contract(service):
+    rows = [row(str(i), "one", str(i)) for i in range(60)]
+    service.pages[None] = {"records": rows, "responseMetadata": {"nextCursor": None}}
+    for entry in rows:
+        service.catalogue[(entry["namespace"], entry["catalogItemId"])] = {
+            "title": "Game " + entry["catalogItemId"], "categories": [{"path": "games"}], "developer": "Studio"}
+    connected(service)
+    finish(service)
+    assert service.imports and all(len(batch["items"]) <= 25 for batch in service.imports)
+    assert all(set(item) <= IMPORT_FIELDS for batch in service.imports for item in batch["items"])
