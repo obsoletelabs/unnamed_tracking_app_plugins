@@ -69,6 +69,7 @@ nav:
   - Security:
       - Default deny and risk: security/permissions.md
       - Signing and publisher identity: security/signing.md
+      - Exposed test signing key: security/exposed-test-key.md
       - Runtime boundary: security/runtime.md
   - Publishing:
       - Build and publish: publishing/packages.md
