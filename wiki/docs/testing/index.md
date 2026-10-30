@@ -61,7 +61,7 @@ permission packages, retained rollback, configuration/storage preservation,
 reinstall, purge and uninstall. It does not substitute for authenticated host
 permission approval. Windows cannot run the real POSIX worker acceptance.
 
-The required `host-integration.yml` job provisions PostgreSQL and runs the host's
+The required `ci.yml` `lifecycle` job provisions PostgreSQL and runs the host's
 `tools/check_plugin_repository_lifecycle.py` through the plugin repository's
 `tools/check_host_lifecycle.py --host-root .validation/host --plugins-root . --work-root <empty-dir> --browser` adapter.
 It builds the actual Plugin Manager frontend and verifies consent, effective
@@ -83,7 +83,7 @@ After #432 is merged:
 
 1. Check that main's production image build and its dependent published-image
    runtime smoke both pass, using the exact `sha-<commit>` image tag.
-2. Return `DEFAULT_HOST_REF` in `host-integration.yml` to `main`, update the
+2. Return `DEFAULT_HOST_REF` in `ci.yml` `lifecycle` to `main`, update the
    fallback expectation in `tests/test_host_integration_target.py`, and run its
    actual shell-selector scenarios.
 3. Run runtime integration on main after signed publication. The retained signed

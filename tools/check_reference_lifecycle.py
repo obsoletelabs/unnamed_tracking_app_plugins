@@ -48,7 +48,7 @@ def main() -> None:
     parser.add_argument("--temporary-root", type=Path)
     args = parser.parse_args()
     if os.name != "posix":
-        parser.error("real worker acceptance requires Linux; run the required host-integration CI job")
+        parser.error("real worker acceptance requires Linux; run the required lifecycle CI job")
     sys.path.insert(0, str(args.host_root.resolve() / "src/plugin-runtime"))
     sys.path.insert(0, str(args.host_root.resolve() / "src/backend"))
     from runtime import PluginRegistry, PluginSupervisor, RuntimePolicyError
