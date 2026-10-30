@@ -584,3 +584,60 @@ def test_stories_are_not_published_when_the_user_disabled_notifications(service)
     finish(service)
     assert not background_calls(calls, "notifications.publish")
     assert not background_calls(calls, "notifications.send")
+
+
+def _tick(service, *, expire_retry=True):
+    plugin, sync, _, _, account, *_ = service
+    status_key = "status/" + USER + "/" + account
+    state = plugin.load(status_key, {})
+    if expire_retry and state.get("phase") == "error":
+        plugin.store(status_key, {**state, "retry_at": 0})
+    sync.run_account(USER, plugin.account_by_id(USER, account))
+    return plugin.load(status_key, {})
+
+
+def _run_to_idle(service, maximum=60):
+    for _ in range(maximum):
+        state = _tick(service)
+        if state["phase"] == "idle" and state.get("finished_at"):
+            return state
+    pytest.fail("scan did not recover without a manual rescan")
+
+
+@pytest.mark.parametrize("final_size", [120, 190])
+def test_library_changing_between_pages_restarts_the_scan_without_manual_rescan(service, final_size):
+    plugin, sync, _, _, account, _, _, imports, catalogue, *_ = service
+    catalogue[:] = [film(i) for i in range(151)]
+    plugin.sync_now(context(account_id=account))
+    state = _tick(service, expire_retry=False)
+    assert state["phase"] == "syncing" and state["offset"] == 100
+    catalogue[:] = [film(i) for i in range(final_size)]  # removal or addition mid-scan
+    failure = _tick(service, expire_retry=False)
+    assert failure["phase"] == "error" and "changed during pagination" in failure["error"]
+    done = _run_to_idle(service)
+    assert done["processed"] == final_size
+    assert {item["external_id"] for item in imports} >= {film(i)["Id"] for i in range(final_size)}
+
+
+def test_pagination_gap_is_recovered_and_persistent_changes_stay_bounded(service):
+    plugin, sync, _, _, account, _, _, _, catalogue, *_ = service
+    catalogue[:] = [film(i) for i in range(151)]
+    plugin.sync_now(context(account_id=account))
+    _tick(service, expire_retry=False)
+    # Every later total differs from the one the cursor saw: the library keeps changing.
+    for size in range(150, 140, -1):
+        catalogue[:] = [film(i) for i in range(size)]
+        state = _tick(service)
+        assert state["phase"] in {"error", "syncing"}
+        if state["phase"] == "error":
+            assert state["error_code"] == "library_changed"
+            assert state["retry_at"] > 0 and state["scan_restarts"] >= 1
+    assert _run_to_idle(service)["phase"] == "idle"
+
+
+def test_persistent_outage_is_not_treated_as_a_library_change(service):
+    plugin, sync, _, _, account, _, _, _, catalogue, errors, *_ = service
+    errors["/Items"] = {"status": 503, "error": "SECRET"}
+    failure = finish(service)
+    assert failure["error_code"] != "library_changed"
+    assert "SECRET" not in failure["error"] and failure["retry_at"] > 0

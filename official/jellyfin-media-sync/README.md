@@ -82,3 +82,12 @@ when a contributed page is opened, rather than during unrelated library navigati
 Status polls read compact state every five seconds while syncing and every thirty
 seconds while idle. Hidden pages pause requests; full configuration reloads when
 review counts or completed syncs change, preserving unsaved preferences.
+
+## Library changes during a scan
+
+If items are added or removed while a scan is paginating, Jellyfin's total no
+longer matches the saved cursor. The plugin classifies this as `library_changed`,
+discards the stale cursor and restarts with a fresh generation on the next retry,
+so no manual Rescan is needed. Repeated restarts back off (30 s doubling to one
+hour) and are counted in `scan_restarts`, which resets after a completed scan.
+Server outages and authentication failures keep their own bounded retry policy.
