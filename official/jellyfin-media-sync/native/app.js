@@ -33,7 +33,18 @@ export function activate(context) {
         const configurationError = ref("");
         const message = ref("");
         const warnings = ref([]);
-        const pending = ref(null);
+        // Quick Connect: idle | waiting | authorized | expired | error
+        const quick = reactive({
+          phase: "idle",
+          pending_id: "",
+          code: "",
+          expires_at: 0,
+          message: "",
+          checking: false,
+          failures: 0,
+        });
+        const quickLife = lifetime();
+        let quickRun = 0;
         const serverForm = reactive({
           name: "",
           url: "",
@@ -65,6 +76,9 @@ export function activate(context) {
           const result = await run("get-config");
           if (!life.live) return;
           config.value = result;
+          const choices = (result.servers || []).filter((s) => s.enabled);
+          if (!choices.some((s) => s.id === loginForm.server_id))
+            loginForm.server_id = choices.length === 1 ? choices[0].id : "";
           for (const review of result.reviews || []) {
             const key = `${review.account_id}:${review.external_id}`;
             if (!episodeDrafts[key])
@@ -89,9 +103,6 @@ export function activate(context) {
               result.message ||
               (result.ok ? "Saved." : "Operation needs attention.");
             warnings.value = result.warnings || [];
-            if (result.pending_id) pending.value = result;
-            if (id === "quick-connect-finish" && result.ok)
-              pending.value = null;
             await refresh();
           } catch (error) {
             if (life.live)
@@ -107,6 +118,109 @@ export function activate(context) {
             }
           }
         }
+        const QUICK_FAILURES = 3;
+        const stopQuick = () => {
+          quickRun += 1;
+          clearTimeout(quickLife.timer);
+          quick.checking = false;
+        };
+        const scheduleQuick = (seconds) => {
+          clearTimeout(quickLife.timer);
+          quickLife.timer = setTimeout(
+            () => checkQuick(),
+            Math.max(0.5, seconds) * 1000,
+          );
+        };
+        const finishQuick = (phase, text) => {
+          stopQuick();
+          quick.phase = phase;
+          quick.message = text;
+        };
+        async function startQuick() {
+          stopQuick();
+          quick.phase = "idle";
+          quick.message = "";
+          busy.value = true;
+          try {
+            const result = await run("quick-connect-start", {
+              server_id: loginForm.server_id,
+              account_id: loginForm.account_id || undefined,
+            });
+            if (!quickLife.live) return;
+            if (!result.ok || !result.pending_id) {
+              message.value = result.message || "Quick Connect could not be started.";
+              return;
+            }
+            message.value = "";
+            Object.assign(quick, {
+              phase: "waiting",
+              pending_id: result.pending_id,
+              code: result.code,
+              expires_at: Date.now() + (result.expires_in || 300) * 1000,
+              message: "",
+              failures: 0,
+            });
+            scheduleQuick(result.poll_seconds || 2);
+          } catch (error) {
+            if (quickLife.live)
+              message.value = error?.message || "Quick Connect could not be started.";
+          } finally {
+            if (quickLife.live) busy.value = false;
+          }
+        }
+        // One check at a time: the timer re-arms only after the previous request settles,
+        // and "Check now" is ignored while a request is in flight.
+        async function checkQuick() {
+          if (!quickLife.live || quick.checking || !quick.pending_id) return;
+          if (quick.phase !== "waiting" && quick.phase !== "error") return;
+          if (Date.now() >= quick.expires_at)
+            return finishQuick("expired", "The code expired. Get a new code.");
+          const token = quickRun;
+          quick.checking = true;
+          quick.phase = "waiting";
+          let again = true;
+          try {
+            const result = await run("quick-connect-finish", {
+              pending_id: quick.pending_id,
+            });
+            if (!quickLife.live || token !== quickRun) return;
+            if (result.ok) {
+              again = false;
+              finishQuick("authorized", result.message || "Account connected.");
+              quick.pending_id = "";
+              message.value = "";
+              await refresh();
+            } else if (result.state === "expired") {
+              again = false;
+              finishQuick("expired", result.message || "The code expired.");
+            } else if (result.pending || result.state === "pending") {
+              quick.failures = 0;
+              if (result.expires_in !== undefined)
+                quick.expires_at = Date.now() + result.expires_in * 1000;
+            } else if (result.retryable && quick.failures + 1 < QUICK_FAILURES) {
+              quick.failures += 1;
+            } else {
+              again = false;
+              finishQuick("error", result.message || "Quick Connect failed.");
+            }
+          } catch (error) {
+            if (!quickLife.live || token !== quickRun) return;
+            if (quick.failures + 1 < QUICK_FAILURES) quick.failures += 1;
+            else {
+              again = false;
+              finishQuick("error", error?.message || "Quick Connect failed.");
+            }
+          } finally {
+            if (quickLife.live && token === quickRun) {
+              quick.checking = false;
+              if (again) scheduleQuick(2);
+            }
+          }
+        }
+        const cancelQuick = () => {
+          stopQuick();
+          Object.assign(quick, { phase: "idle", pending_id: "", code: "", message: "" });
+        };
         let lastReviewSignature = null;
         async function poll() {
           let interval = 30000;
@@ -364,6 +478,55 @@ export function activate(context) {
             { "data-testid": "jf-account" },
           );
         };
+        const quickButton = (label, onClick) =>
+          h("button", { type: "button", onClick }, label);
+        function quickPanel() {
+          if (quick.phase === "idle") return null;
+          const again = quickButton("Get a new code", () => startQuick());
+          const check = quickButton("Check now", () => checkQuick());
+          const cancel = quickButton("Cancel", cancelQuick);
+          const body =
+            quick.phase === "waiting"
+              ? [
+                  h("p", [
+                    "Approve code ",
+                    h("strong", { class: "jf-code" }, quick.code),
+                    " in Jellyfin (Settings, then Quick Connect, in a signed-in Jellyfin app or web client). It expires after five minutes.",
+                  ]),
+                  h(
+                    "p",
+                    quick.checking
+                      ? "Checking with Jellyfin…"
+                      : "Waiting for approval. This page checks automatically.",
+                  ),
+                  h("div", { class: "jf-actions" }, [check, cancel]),
+                ]
+              : quick.phase === "authorized"
+                ? [h("p", quick.message)]
+                : quick.phase === "expired"
+                  ? [
+                      h("p", quick.message),
+                      h("div", { class: "jf-actions" }, [again]),
+                    ]
+                  : [
+                      h("p", { class: "jf-error" }, quick.message),
+                      h("div", { class: "jf-actions" }, [
+                        Date.now() < quick.expires_at && quick.pending_id ? check : null,
+                        again,
+                      ]),
+                    ];
+          return h(
+            "div",
+            {
+              class: quick.phase === "authorized" ? "jf-status" : "jf-warning",
+              role: "status",
+              "aria-live": "polite",
+              "data-testid": "jf-quick-connect",
+              "data-state": quick.phase,
+            },
+            body,
+          );
+        }
         function userContents() {
           const selected = config.value.servers.find(
             (s) => s.id === loginForm.server_id,
@@ -388,10 +551,15 @@ export function activate(context) {
                     loginForm.password = "";
                     return values;
                   }),
-                  button("Quick Connect", "quick-connect-start", () => ({
-                    server_id: loginForm.server_id,
-                    account_id: loginForm.account_id || undefined,
-                  })),
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      disabled: busy.value,
+                      onClick: () => startQuick(),
+                    },
+                    "Quick Connect",
+                  ),
                   h(
                     "button",
                     {
@@ -405,17 +573,7 @@ export function activate(context) {
                     "New account",
                   ),
                 ]),
-                pending.value
-                  ? h("div", { class: "jf-warning" }, [
-                      h(
-                        "p",
-                        `Approve code ${pending.value.code} in Jellyfin within five minutes.`,
-                      ),
-                      button("Check approval", "quick-connect-finish", () => ({
-                        pending_id: pending.value.pending_id,
-                      })),
-                    ])
-                  : null,
+                quickPanel(),
                 selected?.approved_users?.length
                   ? h("div", [
                       select(

@@ -14,11 +14,13 @@ function all(tree) {
 }
 function fixture(admin = false, nativePassword = false) {
   const PasswordInput = { name: "PasswordInput" };
-  const components = {}, cleanup = [], unmount = [], calls = [], timers = new Map();
-  const original = [global.setTimeout, global.clearTimeout];
-  const delays = [];
-  global.setTimeout = (fn, delay) => { const id = timers.size + 1; timers.set(id, fn); delays.push(delay); return id; };
+  const components = {}, cleanup = [], unmount = [], calls = [], timers = new Map(), timerDelays = new Map();
+  const original = [global.setTimeout, global.clearTimeout, Date.now];
+  const delays = [], clock = { now: Date.now() };
+  let nextTimer = 0;
+  global.setTimeout = (fn, delay) => { const id = ++nextTimer; timers.set(id, fn); timerDelays.set(id, delay); delays.push(delay); return id; };
   global.clearTimeout = id => timers.delete(id);
+  Date.now = () => clock.now;
   const config = { is_admin: admin, host_user_id: "owned-user", review_total: 1,
     servers: [{ id: "server", name: "Fixture", enabled: true, libraries: [{ id: "library", name: "Films" }], users: [], mappings: { library: "movie" } }],
     accounts: [{ id: "account", server_id: "server", name: "Viewer", libraries: [], enabled: true, background_sync: false }],
@@ -29,9 +31,9 @@ function fixture(admin = false, nativePassword = false) {
   } };
   activate({ version: "0.0.2", ui: nativePassword ? { PasswordInput } : {}, vue: { h, ref: value => ({ value }), reactive: x => x, defineComponent: x => x, onBeforeUnmount: fn => unmount.push(fn) },
     registerComponent: (id, component) => { components[id] = component; }, onCleanup: fn => cleanup.push(fn) });
-  return { components, host, config, calls, timers, delays, unmount, PasswordInput, close() {
+  return { components, host, config, calls, timers, timerDelays, clock, delays, unmount, PasswordInput, close() {
     cleanup.forEach(fn => fn());
-    [global.setTimeout, global.clearTimeout] = original;
+    [global.setTimeout, global.clearTimeout, Date.now] = original;
   } };
 }
 
@@ -183,4 +185,196 @@ test("idle polls avoid full configuration reads and hidden pages pause requests"
     else global.document = originalDocument;
     f.close();
   }
+});
+
+
+const START = { ok: true, state: "pending", pending_id: "pending", code: "123456", expires_in: 300, poll_seconds: 2 };
+const WAITING = { ok: false, pending: true, state: "pending", expires_in: 250, message: "Waiting for approval in Jellyfin." };
+const APPROVED = { ok: true, state: "authorized", account_id: "account", message: "Account connected." };
+
+async function openQuickConnect(f, finish, start = START) {
+  const render = f.components.accounts.setup({ host: f.host }); await flush();
+  f.host.runAction = async (id, values = {}) => {
+    f.calls.push([id, values]);
+    if (id === "get-config") return f.config;
+    if (id === "status") return { accounts: {} };
+    if (id === "quick-connect-start") return start;
+    if (id === "quick-connect-finish") return finish(values);
+    return { ok: true };
+  };
+  const button = label => all(render()).find(x => x.tag === "button" && x.children === label);
+  await button("Quick Connect").props.onClick();
+  const panel = () => all(render()).find(x => x.props["data-testid"] === "jf-quick-connect");
+  // The quick timer is the only 2s one; the status poll uses 1s, 5s or 30s.
+  const timer = () => [...f.timers].find(([id]) => f.timerDelays.get(id) === 2000);
+  const finishes = () => f.calls.filter(([id]) => id === "quick-connect-finish");
+  const fire = async () => { const [id, fn] = timer(); f.timers.delete(id); await fn(); await flush(); };
+  return { render, button, panel, timer, finishes, fire, text: () => JSON.stringify(panel() || null) };
+}
+
+test("Quick Connect checks by itself and connects when Jellyfin reports the code approved", async () => {
+  const f = fixture();
+  try {
+    const answers = [WAITING, WAITING, APPROVED];
+    const q = await openQuickConnect(f, () => answers.shift());
+    assert.equal(q.panel().props["data-state"], "waiting");
+    assert(q.text().includes("123456") && q.text().includes("checks automatically"));
+    assert(q.timer(), "a check is scheduled without any button press");
+    assert.equal(q.finishes().length, 0);
+    await q.fire();
+    await q.fire();
+    assert.equal(q.finishes().length, 2);
+    assert.equal(q.panel().props["data-state"], "waiting");
+    const configReads = f.calls.filter(([id]) => id === "get-config").length;
+    await q.fire();
+    assert.equal(q.finishes().length, 3);
+    assert(q.finishes().every(([, values]) => values.pending_id === "pending" && Object.keys(values).length === 1));
+    assert.equal(q.panel().props["data-state"], "authorized");
+    assert(q.text().includes("Account connected."));
+    assert.equal(q.timer(), undefined, "polling stops on success");
+    assert.equal(f.calls.filter(([id]) => id === "get-config").length, configReads + 1, "accounts are reloaded");
+  } finally { f.close(); }
+});
+
+test("Quick Connect never overlaps checks and Check now is a manual fallback", async () => {
+  const f = fixture();
+  try {
+    let release;
+    const q = await openQuickConnect(f, () => new Promise(done => { release = done; }));
+    const [id, fn] = q.timer(); f.timers.delete(id);
+    const running = fn();
+    assert.equal(q.finishes().length, 1);
+    await q.button("Check now").props.onClick();
+    assert.equal(q.finishes().length, 1, "no second request while one is in flight");
+    assert.equal(q.timer(), undefined, "the next check is armed only after the reply");
+    release(WAITING); await running; await flush();
+    assert(q.timer());
+    // Check now does not wait for the timer.
+    const manual = q.button("Check now").props.onClick();
+    assert.equal(q.finishes().length, 2);
+    release(APPROVED); await manual; await flush();
+    assert.equal(q.panel().props["data-state"], "authorized");
+    assert.equal(q.timer(), undefined);
+  } finally { f.close(); }
+});
+
+test("Quick Connect stops when the code expires, by Jellyfin or by the clock", async () => {
+  const f = fixture();
+  try {
+    const q = await openQuickConnect(f, () => ({ ok: false, state: "expired", message: "Quick Connect expired. Start a new connection." }));
+    await q.fire();
+    assert.equal(q.panel().props["data-state"], "expired");
+    assert.equal(q.timer(), undefined);
+    assert(q.button("Get a new code"));
+    assert(!q.button("Check now"));
+  } finally { f.close(); }
+  const g = fixture();
+  try {
+    const q = await openQuickConnect(g, () => WAITING);
+    g.clock.now += 301 * 1000;
+    await q.fire();
+    assert.equal(q.finishes().length, 0, "an expired code is not sent to Jellyfin");
+    assert.equal(q.panel().props["data-state"], "expired");
+    assert.equal(q.timer(), undefined);
+  } finally { g.close(); }
+});
+
+test("Quick Connect retries brief failures, then reports the error and offers a way forward", async () => {
+  const f = fixture();
+  try {
+    const q = await openQuickConnect(f, () => ({ ok: false, state: "error", retryable: true, message: "Jellyfin is unavailable." }));
+    await q.fire(); await q.fire();
+    assert.equal(q.panel().props["data-state"], "waiting", "two blips are tolerated");
+    await q.fire();
+    assert.equal(q.finishes().length, 3);
+    assert.equal(q.panel().props["data-state"], "error");
+    assert(q.text().includes("Jellyfin is unavailable."));
+    assert.equal(q.timer(), undefined);
+    assert(q.button("Check now") && q.button("Get a new code"));
+    f.host.runAction = async (id, values = {}) => { f.calls.push([id, values]); return id === "get-config" ? f.config : APPROVED; };
+    await q.button("Check now").props.onClick();
+    assert.equal(q.panel().props["data-state"], "authorized");
+  } finally { f.close(); }
+  const g = fixture();
+  try {
+    const q = await openQuickConnect(g, () => { throw new Error("Plugin action failed (503): Runtime unavailable."); });
+    await q.fire(); await q.fire(); await q.fire();
+    assert.equal(q.panel().props["data-state"], "error");
+    assert(q.text().includes("Runtime unavailable."));
+  } finally { g.close(); }
+  const h2 = fixture();
+  try {
+    const q = await openQuickConnect(h2, () => ({ ok: false, state: "error", retryable: false, message: "The server changed." }));
+    await q.fire();
+    assert.equal(q.panel().props["data-state"], "error");
+    assert.equal(q.finishes().length, 1, "a permanent failure is not retried");
+  } finally { h2.close(); }
+});
+
+test("Quick Connect stops on unmount and ignores a reply that arrives afterwards", async () => {
+  const f = fixture();
+  try {
+    let release;
+    const q = await openQuickConnect(f, () => new Promise(done => { release = done; }));
+    const [id, fn] = q.timer(); f.timers.delete(id);
+    const running = fn();
+    f.unmount.forEach(stop => stop());
+    release(APPROVED); await running; await flush();
+    assert.equal(f.timers.size, 0);
+    assert.equal(f.calls.filter(([call]) => call === "get-config").length, 1, "no reload after unmount");
+  } finally { f.close(); }
+  const g = fixture();
+  try {
+    const q = await openQuickConnect(g, () => WAITING);
+    assert(q.timer());
+    g.unmount.forEach(stop => stop());
+    assert.equal(g.timers.size, 0);
+  } finally { g.close(); }
+});
+
+test("A new code supersedes the old one and Cancel stops checking", async () => {
+  const f = fixture();
+  try {
+    let release;
+    const q = await openQuickConnect(f, () => new Promise(done => { release = done; }));
+    const [id, fn] = q.timer(); f.timers.delete(id);
+    const stale = fn();
+    await q.button("Quick Connect").props.onClick();
+    release(APPROVED); await stale; await flush();
+    assert.equal(q.panel().props["data-state"], "waiting", "a stale reply cannot complete the new request");
+    await q.button("Cancel").props.onClick();
+    assert.equal(q.panel(), undefined);
+    assert.equal(q.timer(), undefined);
+  } finally { f.close(); }
+});
+
+test("A Quick Connect that cannot start and a refused password show the reason from Jellyfin", async () => {
+  const f = fixture();
+  try {
+    const q = await openQuickConnect(f, () => WAITING, { ok: false, state: "error", message: "Quick Connect is disabled on this Jellyfin server." });
+    assert.equal(q.panel(), undefined);
+    assert.equal(q.timer(), undefined);
+    assert(JSON.stringify(q.render()).includes("Quick Connect is disabled on this Jellyfin server."));
+    f.host.runAction = async id => id === "login"
+      ? { ok: false, state: "error", message: "Jellyfin rejected that username or password." }
+      : f.config;
+    await q.button("Sign in").props.onClick();
+    assert(JSON.stringify(q.render()).includes("Jellyfin rejected that username or password."));
+  } finally { f.close(); }
+});
+
+test("The only enabled server is selected so sign-in does not depend on a hidden choice", async () => {
+  const f = fixture();
+  try {
+    const render = f.components.accounts.setup({ host: f.host }); await flush();
+    all(render()).find(x => x.tag === "button" && x.children === "Sign in").props.onClick();
+    assert.equal(f.calls.find(x => x[0] === "login")[1].server_id, "server");
+  } finally { f.close(); }
+  const g = fixture();
+  try {
+    g.config.servers.push({ ...g.config.servers[0], id: "second", name: "Second" });
+    const render = g.components.accounts.setup({ host: g.host }); await flush();
+    all(render()).find(x => x.tag === "button" && x.children === "Sign in").props.onClick();
+    assert.equal(g.calls.find(x => x[0] === "login")[1].server_id, "", "two servers still require a choice");
+  } finally { g.close(); }
 });
