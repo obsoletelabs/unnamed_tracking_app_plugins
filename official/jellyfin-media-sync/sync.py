@@ -194,8 +194,8 @@ def page(
         or offset + len(rows) > total
     ):
         raise SyncError(
-            "The library changed during pagination. Resume with a rescan.",
-            code="remote_data",
+            "The library changed during pagination; the scan will restart.",
+            code="library_changed",
         )
     return rows, total
 
@@ -211,8 +211,8 @@ def _root_page(
     items = [normalized(row, server, server["mappings"][library]) for row in rows]
     if cursor.get("total") not in {None, total}:
         raise SyncError(
-            "The library changed during pagination. Resume with a rescan.",
-            code="remote_data",
+            "The library changed during pagination; the scan will restart.",
+            code="library_changed",
         )
     cursor["total"] = total
     for item in items:
@@ -265,8 +265,8 @@ def _episode_page(
     rows, total = page(server, token, account, library, "Episode", cursor["offset"])
     if cursor.get("total") not in {None, total}:
         raise SyncError(
-            "The library changed during pagination. Resume with a rescan.",
-            code="remote_data",
+            "The library changed during pagination; the scan will restart.",
+            code="library_changed",
         )
     cursor["total"] = total
     groups: dict[str, list] = {}
@@ -728,6 +728,7 @@ def run_account(user: str, account: dict) -> None:
                     # The earlier alert may be a plain message; there is no story to resolve.
                     pass
             state["notified_error"] = None
+            state["scan_restarts"] = 0
         store(status_key, state)
     except (ValueError, RuntimeError, OSError, TypeError, KeyError) as exc:
         failures = state.get("failures", 0) + 1
@@ -741,6 +742,14 @@ def run_account(user: str, account: dict) -> None:
             exc.retry_after if isinstance(exc, SyncError) else 0,
             min(3600, 15 * 2 ** min(failures, 7)) + random.randint(0, 15),
         )
+        if code == "library_changed":
+            # The saved offsets describe a library that no longer exists. Drop the
+            # cursor so the retry starts a fresh generation instead of failing the
+            # same total check until retries run out; repeated churn backs off.
+            delete(cursor_key)
+            restarts = state.get("scan_restarts", 0) + 1
+            state["scan_restarts"] = restarts
+            delay = max(delay, min(3600, 30 * 2 ** min(restarts, 7)))
         state.update(
             phase="error",
             error=safe,
