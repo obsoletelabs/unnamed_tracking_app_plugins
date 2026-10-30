@@ -55,7 +55,7 @@
       "public_key_file": "non-secret-testkey.public-key.b64",
       "public_key_b64": "1Ak72ekLhH26THBZzcjXWXAE0WbkDciFyf/SyQMfNaw=",
       "public_key_sha256": "2ebaa98408ef66adc15e5d7983900e50b6cdabc38ac076026ebaea05f2335860",
-      "status": "active",
+      "status": "retiring",
       "plugin_id_prefixes": [
         "example."
       ],
