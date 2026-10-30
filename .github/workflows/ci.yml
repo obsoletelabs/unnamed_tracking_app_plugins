@@ -1,47 +1,252 @@
 name: Plugin checks
+
+# One workflow runs every check. Each commit does the work once: on pull_request unless the
+# PR is a draft, on push only for main/tags or a branch with no open PR (the PR run covers
+# the rest). Jobs depend only on the gate, so they run in parallel; the longest are listed
+# first because the runner pool is shared and GitHub starts queued jobs roughly in order.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')) }}
 
 on:
   push:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
+    inputs:
+      host_ref:
+        description: "Host ref (defaults to a verified revision; matching branches take precedence)"
+        type: string
+        required: false
 
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
-  unsigned-dist:
+  gate:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+      lifecycle: ${{ steps.changes.outputs.lifecycle }}
+      lifecycle_reference: ${{ steps.changes.outputs.lifecycle_reference }}
+      lifecycle_jellyfin: ${{ steps.changes.outputs.lifecycle_jellyfin }}
+      lifecycle_pwa: ${{ steps.changes.outputs.lifecycle_pwa }}
+      full_tests: ${{ steps.changes.outputs.full_tests }}
+    steps:
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          BRANCH: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=true
+          if [ "$EVENT" = pull_request ]; then
+            [ "$DRAFT" = true ] && run=false
+          elif [ "$EVENT" = push ] && [ "$REF_TYPE" != tag ] && [ "$BRANCH" != main ]; then
+            open="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq length)"
+            [ "$open" != 0 ] && run=false
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "Run checks for this event: $run"
+      - uses: actions/checkout@v7
+        if: steps.decide.outputs.run == 'true'
+        with:
+          fetch-depth: 0
+      # main and tags, shared files (SDK, tools, workflows, dependencies) and an unknown change
+      # set select every area; otherwise only the areas the changed plugins need run.
+      - id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref_type == 'tag' && format('refs/tags/{0}', github.ref_name) || github.ref_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN: ${{ steps.decide.outputs.run }}
+        run: |
+          if [ "$RUN" = true ]; then
+            python3 tools/ci_changes.py
+          else
+            printf '%s\n' lifecycle=false lifecycle_reference=false lifecycle_jellyfin=false lifecycle_pwa=false full_tests=false >> "$GITHUB_OUTPUT"
+          fi
+
+  lifecycle:
+    needs: gate
+    if: needs.gate.outputs.run == 'true' && needs.gate.outputs.lifecycle == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: plugin_integration
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U test -d plugin_integration"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+    env:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: plugin_integration
+      SECRET_KEY: XJVqc8r7Uj801VzGUYhlQV8A2tZTBepjOYEiP2pTzFk=
+      PYTHONPATH: ${{ github.workspace }}/.validation/host/src/backend
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      - name: Select companion repository ref
+        id: companion
+        env:
+          REQUESTED_REF: ${{ inputs.host_ref }}
+          GITHUB_TOKEN: ${{ github.token }}
+          COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
+          # The fork's main includes the retained-legacy conformance fixes.
+          DEFAULT_HOST_REF: main
+        run: |
+          ref="$REQUESTED_REF"
+          if [ -z "$ref" ]; then
+            ref="${DEFAULT_HOST_REF:-main}"
+            # The v1.1 host is merged; use the verified conformance-tool revision.
+            # Explicit overrides remain supported; only open paired PRs shadow main.
+            candidate_branch="$COMPANION_BRANCH"
+            # These provider PRs depend on the generic notification-provider host API;
+            # its host companion uses a deliberately different branch name.
+            if [ "$COMPANION_BRANCH" = "feat/discord-bot-notifications" ] || [ "$COMPANION_BRANCH" = "fix/discord-webhook-diagnostics" ]; then
+              candidate_branch="feat/plugin-owned-notification-providers"
+            elif [ "$COMPANION_BRANCH" = "feat/plugin-destination-verification" ]; then
+              candidate_branch="feat/plugin-notification-verification"
+            elif [ "$COMPANION_BRANCH" = "feat/official-user-invites" ]; then
+              candidate_branch="feat/plugin-user-invites"
+            elif [ "$COMPANION_BRANCH" = "feat/official-password-reset" ]; then
+              candidate_branch="feat/plugin-password-reset"
+            elif [ "$COMPANION_BRANCH" = "fix/discord-destination-trust-labels" ]; then
+              candidate_branch="feat/plugin-destination-status"
+            elif [ "$COMPANION_BRANCH" = "fix/notification-provider-upgrades" ]; then
+              candidate_branch="fix/notification-mail-and-auth-controls"
+            elif [ "$COMPANION_BRANCH" = "feat/discord-social-activity" ]; then
+              candidate_branch="feat/plugin-discord-activity-host"
+            elif [ "$COMPANION_BRANCH" = "feat/atlas-plugin-multiplayer" ]; then
+              candidate_branch="feat/provider-multiplayer-fields"
+            fi
+            if [ "$candidate_branch" != main ] && git ls-remote --exit-code --heads https://github.com/obsoletelabs/unnamed_tracking_app_2.git "refs/heads/$candidate_branch" >/dev/null; then
+              encoded_branch="$(printf '%s' "$candidate_branch" | jq -sRr @uri)"
+              open_prs="$(curl -fsSL \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/obsoletelabs/unnamed_tracking_app_2/pulls?state=open&head=obsoletelabs%3A${encoded_branch}")"
+              if printf '%s' "$open_prs" | jq -e 'length > 0' >/dev/null; then
+                ref="$candidate_branch"
+              fi
+            fi
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Testing companion repository ref: $ref"
+      - uses: actions/checkout@v7
+        with:
+          repository: obsoletelabs/unnamed_tracking_app_2
+          ref: ${{ steps.companion.outputs.ref }}
+          path: .validation/host
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: '3.12'
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: .validation/host/src/backend/requirements.txt
       - uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version: '22'
           cache: npm
-          cache-dependency-path: package-lock.json
-      - run: python -m pip install -r requirements-dev.txt
-      - run: npm ci
-      - run: npm run check:native
-      - run: npm run check:activity
-      - run: python -m tools.build_unsigned_previews
-      - uses: actions/upload-artifact@v7
+          cache-dependency-path: |
+            package-lock.json
+            .validation/host/src/frontend/package-lock.json
+      - name: Install host and builder dependencies
+        run: |
+          python -m pip install -r .validation/host/src/backend/requirements.txt jsonschema
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap
+          # The disposable runner must permit namespaces for strict sandbox tests.
+          if [ -f /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          bwrap --unshare-all --ro-bind / / -- /bin/true
+          sudo mkdir -p /data
+          sudo chown "$(id -u):$(id -g)" /data
+      - name: Prepare disposable database
+        working-directory: .validation/host/src/backend
+        run: alembic upgrade head
+      - name: Build the actual Plugin Manager frontend
+        working-directory: .validation/host/src/frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@v4
         with:
-          name: unsigned-dist
-          path: unsigned-dist/
-          if-no-files-found: error
-      - name: Require preview builds to leave tracked source unchanged
-        run: git diff --exit-code
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - name: Install browser tooling
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium --only-shell
+      - name: Verify official distribution and real-worker lifecycle
+        env:
+          JELLYFIN_SCREENSHOT_DIR: ${{ runner.temp }}/plugin-acceptance/screenshots
+        run: |
+          python tools/check_host_lifecycle.py --host-root .validation/host \
+            --plugins-root . \
+            --work-root "${{ runner.temp }}/plugin-acceptance" --browser
+      - name: Exercise real reference packages through runtime transactions
+        if: needs.gate.outputs.lifecycle_reference == 'true'
+        env:
+          # Matches the existing process-mode acceptance above. The actual
+          # supervisor still probes and reports isolation; nothing is mocked.
+          NONBUBBLE_ENV: 'true'
+        run: python tools/check_reference_lifecycle.py --host-root .validation/host
+      - name: Verify actual legacy worker withdrawal and signed v1.1 upgrade
+        env:
+          NONBUBBLE_ENV: 'true'
+        run: |
+          python .validation/host/tools/check_plugin_contract_upgrade.py --plugins-root . \
+            --work-root "${{ runner.temp }}/contract-upgrade-acceptance"
+      - name: Test independently installed official Jellyfin preview
+        if: needs.gate.outputs.lifecycle_jellyfin == 'true'
+        run: |
+          bash .validation/host/tools/run_strict_plugin_acceptance.sh \
+            "$GITHUB_WORKSPACE/.validation/host" "$GITHUB_WORKSPACE" \
+            "${{ runner.temp }}/jellyfin-official-acceptance"
+      - name: Verify official PWA signing and real browser lifecycle
+        if: needs.gate.outputs.lifecycle_pwa == 'true'
+        run: |
+          python .validation/host/tools/check_pwa_lifecycle.py --plugins-root . \
+            --work-root "${{ runner.temp }}/pwa-acceptance"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: plugin-manager-integration-evidence
+          path: |
+            ${{ runner.temp }}/plugin-acceptance/*.log
+            ${{ runner.temp }}/plugin-acceptance/conformance.json
+            ${{ runner.temp }}/plugin-acceptance/**/*.png
+            ${{ runner.temp }}/plugin-acceptance/workflow-captures.json
+            ${{ runner.temp }}/jellyfin-official-acceptance/*.log
+            ${{ runner.temp }}/jellyfin-official-acceptance/conformance.json
+            ${{ runner.temp }}/jellyfin-official-acceptance/screenshots/*.png
+            ${{ runner.temp }}/pwa-acceptance/*.log
+            ${{ runner.temp }}/pwa-acceptance/*.png
+            ${{ runner.temp }}/pwa-acceptance/pwa-conformance.json
+            ${{ runner.temp }}/contract-upgrade-acceptance/conformance.json
+          if-no-files-found: warn
+
   test-and-build:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -59,31 +264,49 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: python -m pip install --upgrade pip -r requirements-dev.txt
       - run: npm ci
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check:native
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check:activity
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/check_source_layout.py
       - name: Validate documentation and repository references
         run: python tools/check_docs.py
       - name: Build developer wiki with strict validation
         run: python -m mkdocs build --strict
       - run: node --test tests/session_manager_ui.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/frontend_appearance.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/shortcut_playground.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/jellyfin_official_ui.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/discord_activity_options.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
       - run: node --check official/extended-session-manager/frontend/app.js
+        if: needs.gate.outputs.full_tests == 'true'
       - run: pytest
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/build_packages.py
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/verify_packages.py dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/validate_packages.py dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Preserve published packages and release history
+        if: needs.gate.outputs.full_tests == 'true'
         env:
           BASELINE_REF: ${{ github.event.pull_request.base.sha || 'origin/main' }}
         run: python tools/distribution.py --baseline-ref "$BASELINE_REF"
       - run: python tools/distribution.py --root .validation --check-source --include-unreleased
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/verify_packages.py .validation/dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - run: python tools/validate_packages.py .validation/dist/*.utp
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Select companion repository ref
+        if: needs.gate.outputs.full_tests == 'true'
         id: companion
         env:
           REQUESTED_REF: ""
@@ -129,12 +352,15 @@ jobs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
           echo "Testing companion repository ref: $ref"
       - uses: actions/checkout@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           repository: obsoletelabs/unnamed_tracking_app_2
           ref: ${{ steps.companion.outputs.ref }}
           path: .validation/host
       - run: python tools/check_host_contract.py --host-root .validation/host
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Select existing mobile PWA source ref
+        if: needs.gate.outputs.full_tests == 'true'
         id: mobile
         env:
           COMPANION_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -150,13 +376,16 @@ jobs:
           fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           repository: obsoletelabs/unnamed-tracking-mobile-app
           ref: ${{ steps.mobile.outputs.ref }}
           path: .validation/mobile
       - name: Verify source provenance, version and reviewed host templates
+        if: needs.gate.outputs.full_tests == 'true'
         run: python tools/sync_pwa.py --mobile-root .validation/mobile --host-root .validation/host --check
       - name: Cache Playwright browser downloads
+        if: needs.gate.outputs.full_tests == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -164,9 +393,13 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium --only-shell
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm run check
+        if: needs.gate.outputs.full_tests == 'true'
       - run: npm test
+        if: needs.gate.outputs.full_tests == 'true'
       - name: Reject unexpected generated changes or untracked output
+        if: needs.gate.outputs.full_tests == 'true'
         run: |
           if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
             git status --short --untracked-files=all
@@ -174,6 +407,7 @@ jobs:
             exit 1
           fi
       - uses: actions/upload-artifact@v7
+        if: needs.gate.outputs.full_tests == 'true'
         with:
           name: validated-plugin-distribution
           path: |
@@ -183,3 +417,34 @@ jobs:
             .validation/wiki/**
           include-hidden-files: true
           if-no-files-found: error
+
+  unsigned-dist:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: python -m pip install -r requirements-dev.txt
+      - run: npm ci
+      - run: npm run check:native
+      - run: npm run check:activity
+      - run: python -m tools.build_unsigned_previews
+      - uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-dist
+          path: unsigned-dist/
+          if-no-files-found: error
+      - name: Require preview builds to leave tracked source unchanged
+        run: git diff --exit-code

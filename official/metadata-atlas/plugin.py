@@ -250,21 +250,57 @@ def locate(values, selected):
         raise
 
 
+ACHIEVEMENT_PAGE_SIZE = 200
+ACHIEVEMENT_LIMIT = 2000
+
+
+def achievement_pages(values, game):
+    """Read the catalogue in bounded pages (Atlas API v2 limit/offset, next_offset).
+
+    A server without paging ignores the parameters and returns everything in one response with no
+    next_offset, which ends the loop after the first page. Entries are de-duplicated by achievement id
+    and a failed later page raises instead of returning a silently truncated catalogue."""
+    path = "/games/" + quote(game["id"], safe=":") + "/achievements"
+    entries, seen, offset = [], set(), 0
+    while True:
+        try:
+            data = call(values, path + "?" + urlencode({"limit": ACHIEVEMENT_PAGE_SIZE, "offset": offset}))
+        except ProviderFailure as exc:
+            if exc.status == 404 and offset == 0:
+                return None
+            raise
+        results = data.get("results", [])
+        if not isinstance(results, list):
+            raise ProviderFailure("invalid_response")
+        for entry in results:
+            if not isinstance(entry, dict):
+                continue
+            identity = entry.get("id")
+            if isinstance(identity, str):
+                if identity in seen:
+                    continue
+                seen.add(identity)
+            entries.append(entry)
+        following = data.get("next_offset")
+        if (isinstance(following, bool) or not isinstance(following, int) or following <= offset
+                or len(entries) >= ACHIEVEMENT_LIMIT):
+            # No further page, a cursor that does not advance, or the forwarding cap.
+            return entries
+        offset = following
+
+
 def achievement_catalogue(values, game):
     """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress.
 
     Icons are Atlas's own verified copies, offered through its public /media path like artwork, so the
     host downloads them itself under its public-network rules. Hidden entries arrive redacted from Atlas
     and are forwarded as they come, flagged hidden."""
-    try:
-        data = call(values, "/games/" + quote(game["id"], safe=":") + "/achievements")
-    except ProviderFailure as exc:
-        if exc.status == 404:
-            return {}
-        raise
+    entries = achievement_pages(values, game)
+    if entries is None:
+        return {}
     root = public_base_url()
     items, seen = [], set()
-    for entry in data.get("results", []):
+    for entry in entries:
         name = entry.get("name")
         identity = entry.get("id")
         if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
