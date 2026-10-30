@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import ipaddress
 import json
 import math
 import re
@@ -34,6 +35,18 @@ CODE_CANDIDATE = re.compile(r"(?<![0-9A-Fa-f])[0-9A-Fa-f]{32}(?![0-9A-Fa-f])")
 MAX_TOKEN_LENGTH = 8192
 MAX_REFRESH_INTERVAL = 86400
 NON_GAME = {"addons", "digitalextras", "plugins", "engines"}
+
+# Plugin API 1.1.19 `games.import` artwork fields, each with the Epic `keyImages` types that
+# fit it, best first. Types not listed (ratings badges, vault and carousel images) are never sent.
+ARTWORK_TYPES = {
+    "key_art_url": ("DieselGameBoxTall", "OfferImageTall", "DieselStoreFrontTall"),
+    "banner_url": ("DieselGameBox", "DieselStoreFrontWide", "OfferImageWide"),
+    "logo_url": ("DieselGameBoxLogo", "ProductLogo"),
+    "icon_url": ("Thumbnail",),
+}
+MAX_ARTWORK_URL = 2048
+# Names the host refuses as private even without an IP literal.
+PRIVATE_SUFFIXES = (".local", ".lan", ".internal", ".home", ".localdomain", ".intranet", ".corp")
 
 
 class EpicError(ValueError):
@@ -212,6 +225,66 @@ def catalog(session, namespace, ids):
     return {identity: data[identity] for identity in ids if isinstance(data.get(identity), dict)}
 
 
+def artwork_url(value):
+    """Return `value` if the host's `games.import` rules accept it, else None.
+
+    Mirrors the host: at most 2048 characters, http(s) on port 80 or 443, no credentials, fragment,
+    backslash or control characters, and a public host. Spaces are percent-encoded first, since
+    Epic occasionally leaves them in asset paths. An invalid address is dropped, never an error."""
+    if not isinstance(value, str):
+        return None
+    value = value.strip().replace(" ", "%20")
+    if not value or len(value) > MAX_ARTWORK_URL or "\\" in value:
+        return None
+    if any(ord(c) < 33 or ord(c) == 127 for c in value):
+        return None
+    try:
+        parts = urlsplit(value)
+        port = parts.port
+    except ValueError:
+        return None
+    host = (parts.hostname or "").rstrip(".").lower()
+    if parts.scheme not in {"http", "https"} or not host or parts.fragment or "#" in value:
+        return None
+    if parts.username is not None or parts.password is not None or "@" in parts.netloc:
+        return None
+    if port not in {None, 80, 443}:
+        return None
+    try:
+        address = ipaddress.ip_address(host.strip("[]"))
+    except ValueError:
+        if "." not in host or host.endswith(PRIVATE_SUFFIXES):
+            return None
+    else:
+        if not address.is_global:
+            return None
+    return value
+
+
+def artwork(metadata):
+    """Pick the best Epic image for each host artwork field; fields without one are omitted."""
+    images = metadata.get("keyImages")
+    if not isinstance(images, list):
+        return {}
+    chosen = {}
+    for field, types in ARTWORK_TYPES.items():
+        best = None
+        for image in images:
+            if not isinstance(image, dict) or image.get("type") not in types:
+                continue
+            url = artwork_url(image.get("url"))
+            if url is None:
+                continue
+            size = [v if type(v) is int and v > 0 else 0 for v in (image.get("width"), image.get("height"))]
+            # Earlier types win; within a type the larger picture and then https win.
+            rank = (-types.index(image["type"]), size[0] * size[1], url.startswith("https:"))
+            if best is None or rank > best[0]:
+                best = (rank, url)
+        if best:
+            chosen[field] = best[1]
+    return chosen
+
+
 def game_item(record, metadata, played):
     categories = metadata.get("categories") or []
     if not isinstance(categories, list) or any(not isinstance(c, dict) for c in categories):
@@ -230,6 +303,7 @@ def game_item(record, metadata, played):
         value = metadata.get(field)
         if isinstance(value, str) and value.strip():
             item[field] = value[:limit]
+    item.update(artwork(metadata))
     times = [played[app] for app in record["apps"] if app in played] if played is not None else []
     if times:
         item["playtime_seconds"] = max(times)

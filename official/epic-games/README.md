@@ -1,9 +1,9 @@
 # Epic Games Library
 
-Optional personal Epic game imports through **Plugin API 1.1.11**. Requires a host
-that implements `games.import`, connection sync actions and personal scheduled
-tasks. Older hosts reject this package during compatibility review;
-use an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.
+Optional personal Epic game imports through **Plugin API 1.1.19**. Requires a host
+that implements `games.import` with artwork addresses, connection sync actions and
+personal scheduled tasks. Older hosts reject this package during compatibility review;
+use an earlier Epic release on a host that predates 1.1.19. This plugin uses the existing SDK v1.1.1 wire helper.
 The host page/sign-in support is completed by
 [host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).
 
@@ -36,11 +36,37 @@ Each Epic game is imported with its title and its Epic identity (catalogue
 namespace and item ID, scoped to the connected account). When Epic's catalogue
 supplies them, the description, developer and publisher are imported too. Total
 playtime is imported when Epic's playtime service answers. Catalogue text is
-requested in US English. Artwork, release dates, genres/tags, achievements,
-prices, DLC/add-ons and install state are not imported. Use the host's metadata
-lookup for artwork and other metadata. The import sends only the fields the host's `games.import`
-contract accepts (title, description, developer, publisher, provider ID, playtime, availability); a test
-pins this so a future field cannot be added without a host contract change.
+requested in US English.
+
+Artwork is sent as addresses only; the host downloads, checks and resizes the
+pictures itself and fills only pictures the game does not already have, so an
+upload of yours or earlier artwork is never replaced. The plugin picks the best
+catalogue `keyImages` entry for each field (preferred type first, then the larger
+picture):
+
+| Host field | Epic image types, best first |
+| --- | --- |
+| `key_art_url` | `DieselGameBoxTall`, `OfferImageTall`, `DieselStoreFrontTall` |
+| `banner_url` | `DieselGameBox`, `DieselStoreFrontWide`, `OfferImageWide` |
+| `logo_url` | `DieselGameBoxLogo`, `ProductLogo` |
+| `icon_url` | `Thumbnail` |
+
+Each address is checked before it is sent, using the host's rules (at most 2048
+characters, `http`/`https` on port 80 or 443, no credentials, fragment or
+control characters, public host only). An address that fails is dropped and the
+game is still imported without that picture. If the host cannot download a
+picture it reports it and the import continues; the Epic page counts these as
+`artwork_failed` and the next sync offers the address again. Games that are
+unavailable never send artwork.
+
+Not imported: release dates (Epic's catalogue exposes only listing and record
+timestamps such as `creationDate`, which are not the game's release date, so
+sending them would overwrite correct dates), genres/tags, achievements, prices,
+DLC/add-ons, ratings badges and install state. Use the host's metadata lookup for
+those. The import sends only the fields the host's `games.import` contract
+accepts (Plugin API 1.1.19); a test pins this so a future field cannot be added
+without a host contract change. Checkpoints saved before artwork support still
+resume and import normally; artwork is added on the next sync.
 
 ## Connect and import
 
