@@ -13,7 +13,9 @@ from uuid import uuid4
 import attention
 from jellyfin import FIELDS, SyncError, api, integer, normalized, playback
 from sdk.plugin_protocol import request
-from plugin import account_token, delete, keys, load, server_by_id, server_secret, store
+from plugin import (
+    account_token, delete, invalidate_watch_cache, keys, load, server_by_id, server_secret, store,
+)
 
 PAGE_SIZE = 100
 
@@ -721,6 +723,7 @@ def run_account(user: str, account: dict) -> None:
         )
         if done:
             state["finished_at"] = now
+            invalidate_watch_cache(user)
             if state.get("notified_error"):
                 try:
                     attention.report_recovered(user, account, str(server.get("name", "")))

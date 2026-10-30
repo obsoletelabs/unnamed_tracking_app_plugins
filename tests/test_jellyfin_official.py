@@ -584,3 +584,108 @@ def test_stories_are_not_published_when_the_user_disabled_notifications(service)
     finish(service)
     assert not background_calls(calls, "notifications.publish")
     assert not background_calls(calls, "notifications.send")
+
+
+def _watch(service, **extra):
+    return service[0].watch_now(
+        {"_plugin_context": {"user_id": USER, "is_admin": False, "resource_id": WATCH_MEDIA}, **extra})
+
+
+WATCH_MEDIA = str(uuid4())
+
+
+def _seed_watch(service, available=True, user=USER):
+    plugin, _, _, server, account, *_ = service
+    plugin.store("watch/" + user + "/" + WATCH_MEDIA + "/" + account,
+                 {"external_id": film()["Id"], "library_id": LIBRARY, "available": available})
+    plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "movie"}))
+
+
+def _reads(service):
+    return sum(1 for m, c, _ in service[6] if m == "storage.get")
+
+
+def test_watch_lookup_is_cached_after_the_first_open(service):
+    plugin, *_ = service
+    _seed_watch(service)
+    first = _watch(service)
+    assert first["ok"] and "cached" not in first
+    before = _reads(service)
+    second = _watch(service)
+    assert second["ok"] and second["cached"] is True and second["url"] == first["url"]
+    assert _reads(service) - before == 1  # one cache read, no account or server lookups
+    assert [m for m, *_ in service[6][-1:]] == ["storage.get"]
+
+
+def test_cached_only_returns_immediately_on_a_miss_without_looking_up(service):
+    _seed_watch(service)
+    before = len(service[6])
+    pending = _watch(service, cached_only=True)
+    assert pending == {"ok": False, "pending": True, "message": "Looking up your Jellyfin libraries."}
+    assert [m for m, *_ in service[6][before:]] == ["storage.get"]
+    assert _watch(service)["ok"]
+    assert _watch(service, cached_only=True)["cached"] is True
+
+
+def test_entries_expire_and_negative_results_expire_sooner(service, monkeypatch):
+    plugin, *_ = service
+    _seed_watch(service, available=False)
+    clock = {"now": 1_000_000.0}
+    monkeypatch.setattr(plugin.time, "time", lambda: clock["now"])
+    assert _watch(service)["ok"] is False
+    assert _watch(service)["cached"] is True
+    clock["now"] += plugin.WATCH_MISS_TTL + 1
+    assert "cached" not in _watch(service)
+    _seed_watch(service)  # mapping becomes available; a hit would still be the stale miss
+    plugin.invalidate_watch_cache(USER)
+    assert _watch(service)["ok"]
+    clock["now"] += plugin.WATCH_MISS_TTL + 1
+    assert _watch(service)["cached"] is True  # positive results live for the longer TTL
+    clock["now"] += plugin.WATCH_CACHE_TTL
+    assert "cached" not in _watch(service)
+
+
+def test_failed_open_refresh_evicts_and_looks_up_again(service):
+    _seed_watch(service)
+    _watch(service)
+    before = _reads(service)
+    refreshed = _watch(service, refresh=True)
+    assert refreshed["ok"] and "cached" not in refreshed and _reads(service) - before > 1
+    assert _watch(service)["cached"] is True
+
+
+def test_configuration_changes_invalidate_the_cache(service):
+    plugin, _, _, server, account, *_ = service
+    _seed_watch(service)
+    ignoring = lambda: plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "ignore"}))
+    for change in (
+        lambda: plugin.save_account(context(account_id=account, background_sync=True)),
+        ignoring,
+        lambda: plugin.order_accounts(context(account_ids=[account])),
+    ):
+        plugin.save_mappings(context(admin=True, server_id=server, mappings={LIBRARY: "movie"}))
+        assert _watch(service)["ok"]
+        assert _watch(service)["cached"] is True
+        change()
+        result = _watch(service)
+        assert "cached" not in result
+        if change is ignoring:
+            assert result["ok"] is False  # an ignored library never serves a stale URL
+
+
+def test_cache_is_per_user_bounded_and_cleared_on_completed_sync_and_restart(service):
+    plugin, sync, _, _, account, storage, *_ = service
+    _seed_watch(service)
+    _watch(service)
+    assert "watchcache/" + USER in storage and "watchcache/" + OTHER not in storage
+    other = plugin.watch_now({"_plugin_context": {"user_id": OTHER, "is_admin": False, "resource_id": WATCH_MEDIA}})
+    assert other["ok"] is False and "cached" not in other  # nothing leaks across users
+    # The bound is enforced on write.
+    for _ in range(plugin.WATCH_CACHE_MAX + 20):
+        plugin.watch_now({"_plugin_context": {"user_id": USER, "is_admin": False, "resource_id": str(uuid4())}})
+    assert len(json.loads(storage["watchcache/" + USER])["entries"]) <= plugin.WATCH_CACHE_MAX
+    finish(service)
+    assert "watchcache/" + USER not in storage  # a completed sync may change mappings
+    _watch(service)
+    plugin.invalidate_watch_cache()
+    assert not [k for k in storage if k.startswith("watchcache/")]

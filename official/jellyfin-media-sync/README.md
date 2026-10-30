@@ -82,3 +82,15 @@ when a contributed page is opened, rather than during unrelated library navigati
 Status polls read compact state every five seconds while syncing and every thirty
 seconds while idle. Hidden pages pause requests; full configuration reloads when
 review counts or completed syncs change, preserving unsaved preferences.
+
+## Watch in Jellyfin lookup cache
+
+The Watch in Jellyfin action resolves its target from several plugin-storage reads
+(accounts, ordering, per-account item mapping, server). Results are cached per user in
+one `watchcache/<user>` record: at most 64 media items, 60 s for a found target and
+15 s for "not available". A hit costs one storage read. Writes to servers, accounts,
+profiles or credentials drop the affected cache (all users for server/credential
+changes); a completed sync drops that user's cache; plugin start clears every cache.
+Caches are never shared between users. `watch_now` accepts `cached_only` (instant
+`{"ok": false, "pending": true}` on a miss, nothing looked up) and `refresh` (evict and
+look up again, for example after a failed open).

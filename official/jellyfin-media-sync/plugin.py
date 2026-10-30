@@ -25,10 +25,38 @@ def load(key: str, default: Any = None) -> Any:
 
 def store(key: str, value: Any) -> None:
     request("storage.put", "plugin.storage", {"key": key, "value": json.dumps(value)})
+    _invalidate_for(key)
 
 
 def delete(key: str) -> None:
     request("storage.delete", "plugin.storage", {"key": key})
+    _invalidate_for(key)
+
+
+# Watch Now lookups are cached per user in one bounded storage record so a repeat open
+# costs one read. Servers, accounts, ordering and credentials feed the lookup, so any
+# write to them drops the affected cache; the TTL bounds staleness from item syncs.
+WATCH_CACHE_PREFIX = "watchcache/"
+WATCH_CACHE_TTL = 60
+WATCH_MISS_TTL = 15
+WATCH_CACHE_MAX = 64
+
+
+def invalidate_watch_cache(user: str | None = None) -> None:
+    """Drop one user's cached lookups, or every user's when the change is shared."""
+    if user is not None:
+        request("storage.delete", "plugin.storage", {"key": WATCH_CACHE_PREFIX + user})
+        return
+    for key in request("storage.keys", "plugin.storage", {"prefix": WATCH_CACHE_PREFIX}).get("keys", []):
+        request("storage.delete", "plugin.storage", {"key": key})
+
+
+def _invalidate_for(key: str) -> None:
+    kind, _, rest = key.partition("/")
+    if kind in {"servers", "secrets"}:
+        invalidate_watch_cache()
+    elif kind in {"accounts", "profiles"} and rest:
+        invalidate_watch_cache(rest.split("/", 1)[0])
 
 
 def keys(prefix: str) -> list[str]:
@@ -655,23 +683,60 @@ def resolve_review(values: dict) -> dict:
 
 
 def watch_now(values: dict) -> dict:
+    """Resolve the Watch in Jellyfin target, serving a short-lived per-user cache.
+
+    ``cached_only`` returns ``{"ok": False, "pending": True}`` on a miss without doing the
+    lookup, so the host can render at once and call again to fill the cache. ``refresh``
+    (for example after a failed open) evicts the entry and looks it up again.
+    """
     user = actor(values)
     context = values.get("_plugin_context", {})
     media_id = context.get("resource_id")
     if not media_id:
         raise SyncError("Open a synced media item to watch it in Jellyfin.")
+    media_id = str(UUID(str(media_id)))
+    cache_key = WATCH_CACHE_PREFIX + user
+    entries = load(cache_key, {}).get("entries")
+    entries = entries if isinstance(entries, dict) else {}
+    now = time.time()
+    refresh = values.get("refresh") is True or context.get("refresh") is True
+    hit = entries.get(media_id)
+    if (
+        not refresh
+        and isinstance(hit, dict)
+        and isinstance(hit.get("result"), dict)
+        and isinstance(hit.get("expires_at"), (int, float))
+        and now < hit["expires_at"]
+    ):
+        return {**hit["result"], "cached": True}
+    if values.get("cached_only") is True and not refresh:
+        return {"ok": False, "pending": True, "message": "Looking up your Jellyfin libraries."}
+    result = _watch_lookup(user, media_id)
+    ttl = WATCH_CACHE_TTL if result.get("ok") else WATCH_MISS_TTL
+    entries = {k: v for k, v in entries.items() if isinstance(v, dict) and v.get("expires_at", 0) > now}
+    entries[media_id] = {"result": result, "expires_at": now + ttl}
+    while len(entries) > WATCH_CACHE_MAX:
+        del entries[min(entries, key=lambda k: entries[k]["expires_at"])]
+    # Written directly: caching a lookup is not a configuration change.
+    request("storage.put", "plugin.storage", {"key": cache_key, "value": json.dumps({"entries": entries})})
+    return result
+
+
+def _watch_lookup(user: str, media_id: str) -> dict:
     # Only accounts and their servers are needed; the full settings payload
     # (secrets, reviews) would add storage reads for every account.
     servers: dict = {}
     for account in ordered_accounts(user):
+        mapped = load(
+            "watch/" + user + "/" + media_id + "/" + account["id"], {}
+        )
+        if not mapped.get("available"):
+            continue  # skip the server read for accounts that never synced this item
         if account["server_id"] not in servers:
             servers[account["server_id"]] = load(
                 "servers/" + identifier(account["server_id"]), {}
             ) or {}
         server = private = servers[account["server_id"]]
-        mapped = load(
-            "watch/" + user + "/" + str(UUID(media_id)) + "/" + account["id"], {}
-        )
         approved = (
             private.get("mappings", {}).get(mapped.get("library_id"), "ignore")
             != "ignore"
@@ -736,6 +801,8 @@ def worker_tick() -> int:
 
 def main() -> None:
     request("lifecycle.ready", "lifecycle.ready", {})
+    # Anything cached before this start may predate a disable or reconfiguration.
+    invalidate_watch_cache()
     while True:
         try:
             delay = worker_tick()
