@@ -46,9 +46,11 @@ try {
   const films = await (await context.request.get(`${base}/api/movie/list`)).json();
   const id = films.items.find(item => item.title === "Fixture film").id;
   await page.goto(`${base}/movies/${id}`);
-  const link = page.locator(".jf-official.jf-watch a");
+  // The host renders this button from the synced watch_url and watch_label.
+  const link = page.locator(".watch-links a.watch-main");
   await link.waitFor();
-  assert((await link.getAttribute("href")).includes("/second/web/index.html#!/details?id="));
+  assert((await link.getAttribute("href")).includes("/web/index.html#!/details?id="));
+  assert((await link.textContent()).includes("Watch in Jellyfin"));
   await page.getByRole("heading", { name: "Provider progress and viewing history" }).waitFor();
   await page.locator(".provider-panel details").first().locator("summary").click();
   assert(await page.locator(".provider-panel progress").count());

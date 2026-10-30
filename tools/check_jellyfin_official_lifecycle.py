@@ -453,21 +453,16 @@ def acceptance(args):
             action("order-accounts", {"account_ids": [second_account, account]})
             synchronize(second_account)
             assert len(client.get("/api/movie/list").json()["items"]) == 1
-            watch = request(
-                "POST",
-                f"/{PLUGIN}/actions/watch-now",
-                json={
-                    "values": {},
-                    "context": {
-                        "kind": "media",
-                        "resource_id": movie_id,
-                        "resource_type": "movie",
-                    },
-                },
-            )
-            assert "/second/web/" in watch["url"] and TOKEN not in watch["url"]
+            sources = client.get(
+                "/api/media/provider-state",
+                params={"media_type": "movie", "media_id": movie_id},
+            ).json()["sources"]
+            links = [item for item in sources if item.get("watch_url")]
+            assert any("/second/web/" in item["watch_url"] for item in links)
+            assert all(TOKEN not in item["watch_url"] for item in links)
+            assert all(str(item["watch_label"]).startswith("Jellyfin") for item in links)
             checkpoint(
-                "multiple servers/accounts, Quick Connect, cross-account merging and Watch Now priority"
+                "multiple servers/accounts, Quick Connect, cross-account merging and host-rendered Watch links"
             )
 
             def persisted():

@@ -83,11 +83,20 @@ Status polls read compact state every five seconds while syncing and every thirt
 seconds while idle. Hidden pages pause requests; full configuration reloads when
 review counts or completed syncs change, preserving unsaved preferences.
 
-## Library changes during a scan
+## Watch in Jellyfin
 
-If items are added or removed while a scan is paginating, Jellyfin's total no
-longer matches the saved cursor. The plugin classifies this as `library_changed`,
-discards the stale cursor and restarts with a fresh generation on the next retry,
-so no manual Rescan is needed. Repeated restarts back off (30 s doubling to one
-hour) and are counted in `scan_restarts`, which resets after a completed scan.
-Server outages and authentication failures keep their own bounded retry policy.
+Availability is decided at library sync. Every `media.sync` write for a matched item
+carries `watch_url` (the item's deep link in the configured server's web UI, without
+credentials) and `watch_label` (`Jellyfin · <server name>`, at most 80 characters)
+alongside `available`. The host stores them on the media's Jellyfin source link and
+renders the "Watch in <label>" button itself, so opening a media page performs no plugin
+lookup. An item that disappears from two successful scans is re-sent with
+`available: false` (and its link), and the host stops offering it. The plugin no longer
+contributes its own panel or media menu entry to media pages.
+
+The `watch-now` action remains as a fallback for items synced before this change. Its
+results are cached per user in one `watchcache/<user>` record (64 items, 60 s found /
+15 s not available). Writes to servers, accounts, profiles or credentials drop the
+affected cache, a completed sync drops that user's cache, and plugin start clears all
+caches. `cached_only` answers `{"ok": false, "pending": true}` on a miss without a
+lookup; `refresh` evicts and looks up again.
