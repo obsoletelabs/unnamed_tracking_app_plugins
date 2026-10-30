@@ -238,6 +238,7 @@ jobs:
             ${{ runner.temp }}/jellyfin-official-acceptance/*.log
             ${{ runner.temp }}/jellyfin-official-acceptance/conformance.json
             ${{ runner.temp }}/jellyfin-official-acceptance/screenshots/*.png
+            ${{ runner.temp }}/jellyfin-official-acceptance/screenshots/*.log
             ${{ runner.temp }}/pwa-acceptance/*.log
             ${{ runner.temp }}/pwa-acceptance/*.png
             ${{ runner.temp }}/pwa-acceptance/pwa-conformance.json
@@ -281,6 +282,8 @@ jobs:
       - run: node --test tests/shortcut_playground.test.mjs
         if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/jellyfin_official_ui.test.mjs
+        if: needs.gate.outputs.full_tests == 'true'
+      - run: node --test tests/browser_readiness.test.mjs
         if: needs.gate.outputs.full_tests == 'true'
       - run: node --test tests/discord_activity_options.test.mjs
         if: needs.gate.outputs.full_tests == 'true'

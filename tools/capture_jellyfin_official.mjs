@@ -2,8 +2,10 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
+import { createWriteStream } from "node:fs";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { gotoWhenReady, waitForServer } from "./browser_readiness.mjs";
 
 const hostRoot = process.env.JELLYFIN_HOST_ROOT;
 const work = process.env.INTEGRATION_WORK_ROOT;
@@ -12,14 +14,15 @@ const config = path.join(work, "official-vite.config.mjs");
 const port = Number(process.env.JELLYFIN_FRONTEND_PORT);
 await mkdir(output, { recursive: true });
 await writeFile(config, `import base from ${JSON.stringify(path.join(hostRoot, "src/frontend/vite.config.ts"))};\nexport default { ...base, root: ${JSON.stringify(path.join(hostRoot, "src/frontend"))}, server: { host: "127.0.0.1", port: ${port}, strictPort: true, proxy: { "/api": { target: ${JSON.stringify(process.env.PLUGIN_GATEWAY_URL)}, changeOrigin: true } } } };\n`);
-const frontend = spawn(process.execPath, [path.join(hostRoot, "src/frontend/node_modules/vite/bin/vite.js"), "--config", config], { cwd: path.join(hostRoot, "src/frontend"), stdio: "ignore" });
+const frontend = spawn(process.execPath, [path.join(hostRoot, "src/frontend/node_modules/vite/bin/vite.js"), "--config", config], { cwd: path.join(hostRoot, "src/frontend"), stdio: ["ignore", "pipe", "pipe"] });
+// Keep the dev server output with the evidence so a slow or failing page can be diagnosed.
+const serverLog = createWriteStream(path.join(output, "vite.log"));
+frontend.stdout.pipe(serverLog);
+frontend.stderr.pipe(serverLog);
 let browser;
 try {
   const base = `http://127.0.0.1:${port}`;
-  for (let i = 0; i < 100; i++) {
-    try { if ((await fetch(base)).ok) break; } catch { /* waiting for Vite */ }
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
+  await waitForServer(base);
   browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: "dark" });
   assert((await context.request.post(`${base}/api/auth/login`, { data: { username_or_email: process.env.PRIMARY_USER_USERNAME, password: process.env.PRIMARY_USER_PASSWORD } })).ok());
@@ -30,9 +33,20 @@ try {
     assert((await context.request.patch(`${base}/api/preferences`, { data: { ui_welcome_completed: true } })).ok());
   const page = await context.newPage();
   const errors = [];
+  const diagnostics = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.goto(`${base}/plugins/official.jellyfin-media-sync/accounts`);
-  await page.getByRole("heading", { name: "Your Jellyfin accounts", exact: true }).last().waitFor();
+  page.on("requestfailed", request => diagnostics.push(`request failed ${request.url()} ${request.failure()?.errorText}`));
+  page.on("response", response => { if (response.status() >= 400) diagnostics.push(`HTTP ${response.status()} ${response.url()}`); });
+  // Warm the cold Vite server (dependency optimisation, first compile) before asserting.
+  await page.goto(base, { waitUntil: "networkidle" }).catch(() => {});
+  try {
+    await gotoWhenReady(page, `${base}/plugins/official.jellyfin-media-sync/accounts`,
+      () => page.getByRole("heading", { name: "Your Jellyfin accounts", exact: true }).last());
+  } catch (error) {
+    await page.screenshot({ path: path.join(output, "jellyfin-official-accounts-failure.png"), fullPage: true }).catch(() => {});
+    console.error(["Accounts page did not render: " + page.url(), ...diagnostics, ...errors].join("\n"));
+    throw error;
+  }
   await page.getByTestId("jf-account").first().waitFor();
   assert.equal(await page.getByTestId("jf-admin").count(), 0);
   assert.equal(await page.getByLabel("Discovery API key", { exact: false }).count(), 0);
