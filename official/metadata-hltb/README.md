@@ -25,3 +25,14 @@ Fixtures cover token renewal bounds, partial/invalid figures, selected identity,
 ambiguity and the exported wire schema. A direct public token/search check on
 15 October 2026 returned five Portal results; this does not establish installed
 package success. Package/runtime integration validation is tracked in the PR.
+
+## Failure behaviour and session handling
+
+No cookie or homepage-visit step is needed: the current flow is the public
+`/api/search/site/init` token followed by `/api/search/site`, and the plugin
+neither sends nor stores cookies, so no host cookie/session capability is
+required. Failures are returned to the host, never swallowed: a retired or failing
+endpoint (404/410/5xx) is `unavailable`, an unusable init token or changed search
+schema is `invalid_response`, and `health` reports the same classification. Only a
+search 403 renews the token (once). Interactive requests never retry; background
+requests use the SDK's bounded retry budget. `tests/test_hltb.py` covers each case.
