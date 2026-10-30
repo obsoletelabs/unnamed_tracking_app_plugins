@@ -391,3 +391,79 @@ def test_games_without_achievements_return_nothing_rather_than_an_error(atlas, m
     Gateway(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME}})  # no achievements route: 404
     selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2"}
     assert atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected}) == {}
+
+
+def _entry(number):
+    return {"id": f"ach_{number}", "name": f"Achievement {number}", "hidden": False, "icon_url": None}
+
+
+class PagedAchievements(Gateway):
+    """Atlas achievements with limit/offset/next_offset (Atlas v2 paging, unpaged when asked not to)."""
+
+    def __init__(self, monkeypatch, entries, paging=True, fail_at=None):
+        super().__init__(monkeypatch, routes={"/games/" + GAME["id"]: {"status": 200, "data": GAME}})
+        self.entries, self.paging, self.fail_at = entries, paging, fail_at
+
+    def __call__(self, method, capability, payload=None):
+        if method == "network.request" and "/achievements" in payload["url"]:
+            from urllib.parse import parse_qs, urlsplit
+            self.calls.append(payload)
+            query = parse_qs(urlsplit(payload["url"]).query)
+            if not self.paging:  # a host/Atlas without paging ignores the parameters
+                return {"status": 200, "data": {"results": self.entries}}
+            limit, offset = int(query["limit"][0]), int(query["offset"][0])
+            if offset == self.fail_at:
+                return {"status": 503}
+            page = self.entries[offset:offset + limit]
+            end = offset + len(page)
+            return {"status": 200, "data": {"results": page, "total": len(self.entries),
+                                            "next_offset": end if end < len(self.entries) else None}}
+        return super().__call__(method, capability, payload)
+
+
+def _achievements(atlas):
+    selected = {"provider": atlas.PROVIDER_ID, "external_id": GAME["id"], "title": "Portal 2", "media_type": "game"}
+    return atlas.metadata({"request": {"resource": "achievements"}, "candidate": selected})
+
+
+def _achievement_calls(gateway):
+    from urllib.parse import parse_qs, urlsplit
+    return [parse_qs(urlsplit(call["url"]).query) for call in gateway.calls if "/achievements" in call["url"]]
+
+
+def test_large_catalogues_are_read_in_pages_of_200_and_deduplicated(atlas, monkeypatch):
+    entries = [_entry(number) for number in range(450)]
+    entries[210] = {**entries[10]}  # a boundary shift between pages repeats an id
+    gateway = PagedAchievements(monkeypatch, entries)
+    items = _achievements(atlas)["metadata"]["achievements"]
+    assert [item["external_id"] for item in items] == [f"ach_{n}" for n in range(450) if n != 210]
+    assert _achievement_calls(gateway) == [
+        {"limit": ["200"], "offset": ["0"]}, {"limit": ["200"], "offset": ["200"]},
+        {"limit": ["200"], "offset": ["400"]}]
+
+
+def test_a_server_without_paging_returns_everything_in_one_response(atlas, monkeypatch):
+    gateway = PagedAchievements(monkeypatch, [_entry(number) for number in range(120)], paging=False)
+    items = _achievements(atlas)["metadata"]["achievements"]
+    assert len(items) == 120 and len(_achievement_calls(gateway)) == 1
+
+
+def test_a_failing_later_page_is_an_error_not_a_truncated_catalogue(atlas, monkeypatch):
+    PagedAchievements(monkeypatch, [_entry(number) for number in range(450)], fail_at=200)
+    assert _achievements(atlas) == {"failure": {"code": "unavailable"}}
+
+
+def test_a_cursor_that_does_not_advance_cannot_loop_and_the_forwarding_cap_holds(atlas, monkeypatch):
+    class Stuck(PagedAchievements):
+        def __call__(self, method, capability, payload=None):
+            if method == "network.request" and "/achievements" in payload["url"]:
+                self.calls.append(payload)
+                return {"status": 200, "data": {"results": [_entry(len(self.calls))], "next_offset": 0}}
+            return super().__call__(method, capability, payload)
+
+    gateway = Stuck(monkeypatch, [])
+    assert len(_achievements(atlas)["metadata"]["achievements"]) == 1
+    assert len(_achievement_calls(gateway)) == 1
+    big = PagedAchievements(monkeypatch, [_entry(number) for number in range(2500)])
+    assert len(_achievements(atlas)["metadata"]["achievements"]) == 2000
+    assert len(_achievement_calls(big)) == 10
