@@ -22,6 +22,12 @@ can approve a specific remote identity for the shared discovery key. Users can n
 approved libraries, choose automatic sync and merging, opt into error notifications,
 and order accounts for Watch Now. All enabled accounts participate in sync.
 Removing a credential retains configuration, item mappings and checkpoints.
+Quick Connect shows a code to approve in Jellyfin and then completes by itself: the
+page checks every two seconds for as long as the code lives (five minutes), stops on
+success, expiry or an error, and keeps a "Check now" button as a fallback. Every
+connection signs in to Jellyfin under its own device id, so connecting or reconnecting
+one account never signs another one out (Jellyfin keeps a single token per user and
+device id). Sign-in problems are shown as messages on the page.
 Unnumbered episodes retain provider progress and enter review. Assign their real
 season/episode numbers or leave them unnumbered; the plugin never fabricates numbers
 or marks a partially numbered series complete. Missing runtimes remain unknown.

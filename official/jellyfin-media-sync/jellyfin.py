@@ -12,7 +12,14 @@ from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 from sdk.plugin_protocol import request
 
 SUPPORTED_TYPES = {"Movie", "Series", "Episode"}
-CLIENT = 'MediaBrowser Client="Unnamed Tracking", Device="Media Sync", DeviceId="utp-jellyfin", Version="0.0.1"'
+# Jellyfin keeps ONE access token per (user, DeviceId): signing in again with the same
+# DeviceId revokes the token an earlier sign-in received. Every connection therefore signs in
+# under its own DeviceId (see device_id), and only credentials issued before that change
+# keep sending the shared legacy value.
+LEGACY_DEVICE_ID = "utp-jellyfin"
+CLIENT_TEMPLATE = (
+    'MediaBrowser Client="Unnamed Tracking", Device="Media Sync", DeviceId="{}", Version="0.0.1"'
+)
 FIELDS = (
     "ProviderIds,Overview,Genres,Tags,Studios,People,ProductionLocations,MediaStreams"
 )
@@ -22,10 +29,20 @@ class SyncError(ValueError):
     """Public, sanitized failure classification used for bounded retries."""
 
     def __init__(
-        self, message: str, *, code: str = "configuration", retry_after: int = 0
+        self,
+        message: str,
+        *,
+        code: str = "configuration",
+        retry_after: int = 0,
+        status: int = 0,
     ):
         super().__init__(message)
-        self.code, self.retry_after = code, retry_after
+        self.code, self.retry_after, self.status = code, retry_after, status
+
+
+def device_id(identity: str) -> str:
+    """Stable, per-connection Jellyfin DeviceId so sign-ins never revoke one another."""
+    return LEGACY_DEVICE_ID + "-" + identity
 
 
 def server_url(value: Any) -> str:
@@ -62,8 +79,10 @@ def api(
     query: dict | None = None,
     method: str = "GET",
     body: dict | None = None,
+    device: str = LEGACY_DEVICE_ID,
 ) -> Any:
-    headers = {"Authorization": CLIENT + (f', Token="{token}"' if token else "")}
+    client = CLIENT_TEMPLATE.format(device)
+    headers = {"Authorization": client + (f', Token="{token}"' if token else "")}
     payload = {
         "url": server_url(server["url"]) + path,
         "headers": headers,
@@ -78,8 +97,12 @@ def api(
     if not 200 <= code < 300:
         if code in {401, 403}:
             raise SyncError(
-                "Jellyfin refused access. Replace the credential or check library access.",
+                "Jellyfin no longer accepts the saved credential. Reconnect the account "
+                "(or ask an administrator to replace the server key)."
+                if token and code == 401
+                else "Jellyfin refused access. Replace the credential or check library access.",
                 code="authentication",
+                status=code,
             )
         if result.get("code") == "certificate_untrusted":
             raise SyncError(
@@ -88,10 +111,12 @@ def api(
             )
         raise SyncError(
             "Jellyfin is unavailable. Your saved progress will resume.",
+            # 408 is a gateway or proxy giving up on a slow server, not a bad request.
             code="transient"
-            if code == 0 or code == 429 or code >= 500
+            if code in {0, 408, 429} or code >= 500
             else "configuration",
             retry_after=result.get("retry_after_seconds", 0),
+            status=code,
         )
     return result.get("data")
 

@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import time
 from typing import Any
 from uuid import UUID, uuid4
 
 from sdk.plugin_protocol import request
-from jellyfin import SyncError, api, server_url, token_value
+from jellyfin import LEGACY_DEVICE_ID, SyncError, api, device_id, server_url, token_value
 
 
 def load(key: str, default: Any = None) -> Any:
@@ -307,11 +308,65 @@ def authorize_identity(values: dict) -> dict:
     return {"ok": True, "message": "Identity approval updated."}
 
 
+QUICK_CONNECT_SECONDS = 300
+QUICK_CONNECT_POLL_SECONDS = 2
+QUICK_CONNECT_CLAIM_SECONDS = 30
+QUICK_CONNECT_PENDING_LIMIT = 10
+
+
+def guided(action):
+    """Report an expected failure as a result the page can show.
+
+    The host's action runner discards the text of an exception raised by a handler and shows
+    only "plugin action did not return a result"; a returned result keeps its message. Sign-in
+    problems (wrong password, locked account, Quick Connect disabled, server unreachable) are
+    expected, so these handlers return them instead of raising.
+    """
+
+    @functools.wraps(action)
+    def wrapper(values: dict) -> dict:
+        try:
+            return action(values)
+        except SyncError as exc:
+            return {
+                "ok": False,
+                "state": "error",
+                "code": exc.code,
+                "retryable": exc.code == "transient",
+                "message": str(exc),
+            }
+        except (RuntimeError, ValueError, OSError):
+            # Gateway denials and malformed replies can carry remote diagnostics.
+            return {
+                "ok": False,
+                "state": "error",
+                "code": "transient",
+                "retryable": True,
+                "message": "The host could not complete the Jellyfin request. Check the "
+                "server address and this plugin's network permission, then try again.",
+            }
+
+    return wrapper
+
+
+def _connection_identity(user: str, values: dict) -> str:
+    """Account being reconnected, or the identity a new account will have."""
+    if values.get("account_id"):
+        return account_by_id(user, values["account_id"])["id"]
+    return uuid4().hex
+
+
 def _link(
-    user: str, server: dict, values: dict, remote: dict, token: str | None
+    user: str,
+    server: dict,
+    values: dict,
+    remote: dict,
+    token: str | None,
+    identity: str | None = None,
+    device: str | None = None,
 ) -> dict:
     remote_id = identifier(remote.get("Id"))
-    identity = (
+    identity = identity or (
         identifier(values["account_id"]) if values.get("account_id") else uuid4().hex
     )
     old = account_by_id(user, identity) if values.get("account_id") else {}
@@ -319,7 +374,6 @@ def _link(
         raise SyncError(
             "This login belongs to another identity. Add a separate account."
         )
-    request("tasks.subscribe", "tasks.background", {})
     account = {
         "enabled": True,
         "background_sync": False,
@@ -335,14 +389,17 @@ def _link(
         "auth": "login" if token else "approved",
         "revision": old.get("revision", 0) + 1,
     }
+    # Save the credential before the optional host step: Jellyfin has already issued it
+    # (and spent a Quick Connect secret), so it must not be lost if the step fails.
     if token:
-        store(
-            "secrets/accounts/" + user + "/" + identity,
-            {"token": token_value(token), "url": server["url"]},
-        )
+        secret = {"token": token_value(token), "url": server["url"]}
+        if device:
+            secret["device_id"] = device
+        store("secrets/accounts/" + user + "/" + identity, secret)
     else:
         delete("secrets/accounts/" + user + "/" + identity)
     store("accounts/" + user + "/" + identity, account)
+    request("tasks.subscribe", "tasks.background", {})
     return {
         "ok": True,
         "account_id": identity,
@@ -350,6 +407,14 @@ def _link(
     }
 
 
+def _sign_in_rejected(exc: SyncError, message: str) -> SyncError:
+    """Jellyfin answers 401/403 for every refused sign-in; say what that means here."""
+    if exc.status in {401, 403}:
+        return SyncError(message, code="authentication", status=exc.status)
+    return exc
+
+
+@guided
 def login(values: dict) -> dict:
     user = actor(values)
     server = server_by_id(values.get("server_id"))
@@ -361,30 +426,71 @@ def login(values: dict) -> dict:
         or len(password) > 2048
     ):
         raise SyncError("Enter your Jellyfin username and password.")
-    auth = api(
-        server,
-        None,
-        "/Users/AuthenticateByName",
-        method="POST",
-        body={"Username": username, "Pw": password},
-    )
+    identity = _connection_identity(user, values)
+    device = device_id(identity)
+    try:
+        auth = api(
+            server,
+            None,
+            "/Users/AuthenticateByName",
+            method="POST",
+            body={"Username": username, "Pw": password},
+            device=device,
+        )
+    except SyncError as exc:
+        raise _sign_in_rejected(
+            exc,
+            "Jellyfin rejected that username or password. After several wrong attempts "
+            "Jellyfin can lock the user for a while; Quick Connect is not affected.",
+        ) from exc
     return _link(
-        user, server, values, auth.get("User", {}), token_value(auth.get("AccessToken"))
+        user,
+        server,
+        values,
+        auth.get("User", {}),
+        token_value(auth.get("AccessToken")),
+        identity,
+        device,
     )
 
 
+def _quick_connect_prune(user: str) -> None:
+    """Drop expired requests and keep the number of waiting ones bounded."""
+    now = time.time()
+    live = []
+    for key in keys("secrets/quick/" + user + "/"):
+        pending = load(key, {})
+        if pending.get("expires_at", 0) <= now:
+            delete(key)
+        else:
+            live.append((pending.get("expires_at", 0), key))
+    for _, key in sorted(live)[: max(0, len(live) - QUICK_CONNECT_PENDING_LIMIT + 1)]:
+        delete(key)
+
+
+@guided
 def quick_connect_start(values: dict) -> dict:
     user = actor(values)
     server = server_by_id(values.get("server_id"))
-    if api(server, None, "/QuickConnect/Enabled") is not True:
+    identity = _connection_identity(user, values)
+    device = device_id(identity)
+    if api(server, None, "/QuickConnect/Enabled", device=device) is not True:
         raise SyncError("Quick Connect is disabled on this Jellyfin server.")
-    state = api(server, None, "/QuickConnect/Initiate", method="POST")
+    try:
+        state = api(
+            server, None, "/QuickConnect/Initiate", method="POST", device=device
+        )
+    except SyncError as exc:
+        raise _sign_in_rejected(
+            exc, "Quick Connect is disabled on this Jellyfin server."
+        ) from exc
     secret = token_value(state.get("Secret"))
     code = state.get("Code")
     if not isinstance(code, str) or not code.isdecimal() or len(code) > 12:
         raise SyncError(
             "Jellyfin returned an invalid Quick Connect code.", code="remote_data"
         )
+    _quick_connect_prune(user)
     pending = uuid4().hex
     store(
         "secrets/quick/" + user + "/" + pending,
@@ -393,54 +499,105 @@ def quick_connect_start(values: dict) -> dict:
             "server_id": server["id"],
             "url": server["url"],
             "account_id": values.get("account_id"),
-            "expires_at": int(time.time()) + 300,
+            "identity": identity,
+            "device_id": device,
+            "expires_at": int(time.time()) + QUICK_CONNECT_SECONDS,
         },
     )
     return {
         "ok": True,
+        "state": "pending",
         "pending_id": pending,
         "code": code,
-        "expires_in": 300,
-        "message": "Approve this code in Jellyfin, then check approval.",
+        "expires_in": QUICK_CONNECT_SECONDS,
+        "poll_seconds": QUICK_CONNECT_POLL_SECONDS,
+        "message": "Approve this code in Jellyfin. This page completes the connection "
+        "as soon as Jellyfin reports it approved.",
     }
 
 
+def _quick_connect_over(state: str, message: str) -> dict:
+    return {"ok": False, "state": state, "message": message}
+
+
+@guided
 def quick_connect_finish(values: dict) -> dict:
+    """One poll: waiting, connected, or over (expired, used or unusable)."""
     user = actor(values)
     key = "secrets/quick/" + user + "/" + identifier(values.get("pending_id"))
     pending = load(key, {})
-    if not pending or pending.get("expires_at", 0) <= time.time():
+    now = time.time()
+    if not pending or pending.get("expires_at", 0) <= now:
         delete(key)
-        raise SyncError("Quick Connect expired. Start a new connection.")
+        return _quick_connect_over(
+            "expired", "Quick Connect expired. Start a new connection."
+        )
     server = server_by_id(pending["server_id"])
     if server["url"] != pending["url"]:
         delete(key)
-        raise SyncError("The server changed. Start a new Quick Connect request.")
-    state = api(
-        server, None, "/QuickConnect/Connect", query={"secret": pending["secret"]}
-    )
+        return _quick_connect_over(
+            "error", "The server changed. Start a new Quick Connect request."
+        )
+    # Requests created before per-connection device ids carry no device.
+    device = pending.get("device_id", LEGACY_DEVICE_ID)
+    waiting = {
+        "ok": False,
+        "pending": True,
+        "state": "pending",
+        "expires_in": max(0, int(pending["expires_at"] - now)),
+        "message": "Waiting for approval in Jellyfin.",
+    }
+    try:
+        state = api(
+            server,
+            None,
+            "/QuickConnect/Connect",
+            query={"secret": pending["secret"]},
+            device=device,
+        )
+    except SyncError as exc:
+        if exc.status in {401, 404}:
+            # Jellyfin forgets a secret once its five minutes pass.
+            delete(key)
+            return _quick_connect_over(
+                "expired", "Quick Connect expired. Start a new connection."
+            )
+        raise
     if state.get("Authenticated") is not True:
-        return {
-            "ok": False,
-            "pending": True,
-            "message": "Waiting for approval in Jellyfin.",
-        }
-    auth = api(
-        server,
-        None,
-        "/Users/AuthenticateWithQuickConnect",
-        method="POST",
-        body={"Secret": pending["secret"]},
-    )
+        return waiting
+    if pending.get("finishing_until", 0) > now:
+        # Another check is already exchanging this secret; let it finish.
+        return waiting
+    store(key, {**pending, "finishing_until": now + QUICK_CONNECT_CLAIM_SECONDS})
+    try:
+        auth = api(
+            server,
+            None,
+            "/Users/AuthenticateWithQuickConnect",
+            method="POST",
+            body={"Secret": pending["secret"]},
+            device=device,
+        )
+    except SyncError as exc:
+        if exc.status in {401, 404}:
+            delete(key)
+            return _quick_connect_over(
+                "expired", "Quick Connect expired. Start a new connection."
+            )
+        store(key, pending)
+        raise
+    # The secret is spent; whatever happens next, it must not be offered again.
+    delete(key)
     result = _link(
         user,
         server,
         pending,
         auth.get("User", {}),
         token_value(auth.get("AccessToken")),
+        pending.get("identity"),
+        device if "device_id" in pending else None,
     )
-    delete(key)
-    return result
+    return {**result, "state": "authorized"}
 
 
 def link_approved(values: dict) -> dict:

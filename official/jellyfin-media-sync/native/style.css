@@ -135,3 +135,7 @@
   --accent-bg: var(--ui-accent-soft);
   --accent-border: var(--ui-accent-line);
 }
+.jf-official .jf-code {
+  font-size: 1.25em;
+  letter-spacing: 0.15em;
+}
