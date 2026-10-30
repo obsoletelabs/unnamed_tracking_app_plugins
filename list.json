@@ -36246,11 +36246,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "74c4f4b7fb51cc43508a39fce84b6f4f34a49ae8",
-        "source_committed_at": "2026-10-18T03:28:04+01:00",
-        "source_digest": "89e63bcd7fa2906af664dbb05df78ee2084a50453a1c64ca9c4ac69329aa33f5",
+        "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+        "source_committed_at": "2026-10-30T16:50:51+08:00",
+        "source_digest": "4f2dd1da66746c385e08a63748daba426b76d19964e9396939c8f88cc0f62038",
         "source_path": "official/epic-games",
-        "version_bump": "minor"
+        "version_bump": "patch"
       },
       "capabilities": [
         {
@@ -36328,8 +36328,8 @@
         },
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "0e897a15a0b05df636368fe2294c0bbd5d60986b23a308f95b3bc3443497287a",
-          "signature": "v2:7WZJ7JevvWrWunmtgqB4hQLpyooyRgHf6Clu1LqE4cdgDTRK1U8L260A5e3HNA8Azhh+Thn9K0HIWniXnB7FDQ=="
+          "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
+          "signature": "v2:vSMS9Klnzv4jsD8oWv/zTr+TuiHvkDfR0htaTIC1UOZ6FodnF/FcQoSG8DSgE5tnu4EspNnahcNX+E2RqWwyDQ=="
         },
         "manifest_version": 1,
         "name": "Epic Games Library",
@@ -36403,15 +36403,15 @@
           ],
           "settings": []
         },
-        "version": "0.9.0"
+        "version": "0.9.1"
       },
       "name": "Epic Games Library",
       "package": {
-        "filename": "official.epic-games-0.9.0.utp",
+        "filename": "official.epic-games-0.9.1.utp",
         "format": "utp-v1",
-        "size_bytes": 24229
+        "size_bytes": 24570
       },
-      "package_sha256": "679a7c165e1fc4caccf41e423d2805ccab18fdf7c33e3aff7e7f5ef8587dc351",
+      "package_sha256": "cbe9d08dfdf8ede6e8a868af9c72f04f2ecf28cd5b17c82f444d07e28c35846d",
       "permissions": [
         {
           "capability": {
@@ -36451,7 +36451,7 @@
       ],
       "plugin_id": "official.epic-games",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.11**. Requires a host\nthat implements `games.import`, connection sync actions and personal scheduled\ntasks. Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Experimental service dependency\n\nEpic does not publish or support an API for third-party library imports, and\nthis plugin is not affiliated with or endorsed by Epic Games. It does not use\nEpic Online Services or Epic Account Services, and Unnamed Tracking App has no\nEpic-issued OAuth client. Instead, the plugin signs in the same way the Epic\nGames Launcher does: Epic's own sign-in page returns a one-time authorization\ncode for the launcher's public client, and the plugin exchanges that code for\nlauncher access/refresh tokens. It then reads the same unofficial account,\nlibrary, playtime and catalogue services the launcher uses.\n\nThose services are undocumented and Epic can change, rate-limit or withdraw them\nat any time. Treat the integration as experimental: an Epic-side change can stop\nsign-in, imports or playtime until a new plugin release adapts to it. Epic\nsupport cannot help with this plugin; report problems to this repository instead\n(see [Troubleshooting and support](#troubleshooting-and-support)).\n\nAn Epic service failure is not host data loss. Failed sign-ins, refreshes,\ninventory pages, playtime or catalogue lookups stop the current step and keep\nyour saved connection, checkpoint and library. The plugin never deletes games.\nDisconnecting removes only this plugin's saved tokens and checkpoint for your\naccount; imported games, notes, ratings, status and playtime stay in the host.\n\n## Imported fields\n\nEach Epic game is imported with its title and its Epic identity (catalogue\nnamespace and item ID, scoped to the connected account). When Epic's catalogue\nsupplies them, the description, developer and publisher are imported too. Total\nplaytime is imported when Epic's playtime service answers. Catalogue text is\nrequested in US English. Artwork, release dates, genres/tags, achievements,\nprices, DLC/add-ons and install state are not imported. Use the host's metadata\nlookup for artwork and other metadata.\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nThe popup uses the host's appearance and spacing, with an account summary and\nimport controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and opens it in a new tab,\nleaving this popup open; the sandboxed plugin does not open a popup itself.\nAfter signing in, Epic shows a page of text. Select all of it, copy it and paste\nit into the code field: pasting the whole page connects without another click.\nThe one-time authorization code, its JSON page, a single copied JSON line or the\nredirect URL are all accepted. Hosts that predate new-tab handling, or a browser\nthat blocks the tab, navigate the host tab instead; then use browser Back and\nreopen **Connections → Epic Games**. No popup permission is needed. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nIf Epic later rejects the saved sign-in (for example after a password change),\nthe popup shows the code field again. **Replace sign-in** does the same at any\ntime. The existing connection stays until Epic accepts the new code; an\naccepted replacement then starts a fresh import checkpoint, and games already\nimported stay in your library.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nThe popup follows Steam's host dialog sizing and shared appearance. Disconnected\naccounts show sign-in controls; import controls appear after connecting.\nOn Games, **Sync / import → Sync Epic Games** starts or resumes the same\nimport flow. The menu does not add a second connection page.\n\nFor automatic imports, open **Account → Background tasks → Epic Games autosync**.\nApprove the declared `tasks.background` access and enable your own schedule; it\nstarts off and normally runs daily. Intervals can range from 5 minutes to 1 week.\nEach run advances one bounded checkpoint; incomplete work requests the next step\nafter 60 seconds, even with the page closed. Completion restores your chosen interval.\nDisabling autosync stops queued steps. Manual and automatic imports share the same\nper-user lease, tokens, checkpoint and preservation rules; another user's schedule\ncannot adopt your Epic account or change your library.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace; a missing catalogue response retains the batch\nfor retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n\n## Troubleshooting and support\n\nMessages come from the plugin and never include token values. Most Epic-side\nfailures are recovered by waiting and choosing **Resume import**.\n\n| Message or symptom | What it means and what to do |\n| --- | --- |\n| \"Paste the 32-character authorization code, its JSON page or redirect URL.\" | The pasted text did not contain exactly one code. Choose **Sign in on Epic Games** (or **Copy sign-in link**) again and paste the whole page Epic shows. Each code works once. |\n| \"Epic rejected this sign-in. Sign in on Epic again and paste a fresh code.\" | Epic no longer accepts the saved sign-in (for example after a password change), or rejected the pasted code. Choose **Replace sign-in** and paste a fresh code. If this happens during autosync, the schedule turns itself off; re-enable it in **Account → Background tasks** after reconnecting. |\n| \"Epic returned a different account. Reconnect before importing.\" | A token refresh answered for another Epic account. Use **Replace sign-in** with the account you intend to import. As above, re-enable autosync afterwards if it turned off. |\n| \"Epic is busy. Wait a minute, then resume the import.\" | Epic rate-limited the request. Wait, then **Resume import**. Autosync retries on its own after at least five minutes. |\n| \"Epic could not be reached or refused the request. Your saved import is retained.\" | Epic's service was unavailable or answered with an error. Resume later; the checkpoint is kept. |\n| \"Epic returned an incomplete inventory…\", \"…invalid inventory paging information\", \"…repeated an inventory cursor\", \"…omitted catalogue entries\", \"…omitted a game title\" or \"…unreadable game categories\" | Epic's reply did not match what the plugin expects. Nothing is marked unavailable from a partial inventory. Resume later; if it persists across days it is probably an Epic-side change, so report it. |\n| \"Epic playtime was unavailable. Existing playtime was retained.\" | Games still import; known playtime is not lowered or cleared. A later import fills playtime when Epic answers again. |\n| \"Another Epic action is running. Wait briefly, then resume.\" | Two Epic actions for your account overlapped, for example a manual import and autosync. Wait about a minute and resume. |\n| \"Start a new import for this connected account.\" | The saved checkpoint belongs to an earlier connection. Choose **Start new inventory**. |\n| \"Epic's inventory exceeded the safety limit. Availability has not changed.\" | The library exceeded 10,000 entries or 200 inventory pages. Report it. |\n| \"The host denied or could not complete this action. Check plugin permissions, then retry.\" | A host-side refusal, not an Epic failure. In **Settings → Plugins**, check that the plugin is enabled and its permissions are approved. |\n| **Local conflicts** count increases | A game you deleted in the app, or one whose identity changed, is left alone instead of being recreated. |\n\nOnly a complete, valid inventory marks games that left your Epic library as\nunavailable. They are not deleted, and they become available again when a later\nimport lists them.\n\nReport persistent Epic sign-in or import failures as an\n[issue in this repository](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues),\nnot to Epic or the host application. Include the plugin version (shown in\n**Settings → Plugins**), the host release or image tag you deployed and the exact\nmessage. Never include the authorization code, the text of Epic's sign-in page,\nthe redirect URL, tokens or your Epic account ID. Installation, permission and Connections-page problems that\nare not specific to Epic belong to the host's plugin documentation.\n",
+      "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.11**. Requires a host\nthat implements `games.import`, connection sync actions and personal scheduled\ntasks. Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Experimental service dependency\n\nEpic does not publish or support an API for third-party library imports, and\nthis plugin is not affiliated with or endorsed by Epic Games. It does not use\nEpic Online Services or Epic Account Services, and Unnamed Tracking App has no\nEpic-issued OAuth client. Instead, the plugin signs in the same way the Epic\nGames Launcher does: Epic's own sign-in page returns a one-time authorization\ncode for the launcher's public client, and the plugin exchanges that code for\nlauncher access/refresh tokens. It then reads the same unofficial account,\nlibrary, playtime and catalogue services the launcher uses.\n\nThose services are undocumented and Epic can change, rate-limit or withdraw them\nat any time. Treat the integration as experimental: an Epic-side change can stop\nsign-in, imports or playtime until a new plugin release adapts to it. Epic\nsupport cannot help with this plugin; report problems to this repository instead\n(see [Troubleshooting and support](#troubleshooting-and-support)).\n\nAn Epic service failure is not host data loss. Failed sign-ins, refreshes,\ninventory pages, playtime or catalogue lookups stop the current step and keep\nyour saved connection, checkpoint and library. The plugin never deletes games.\nDisconnecting removes only this plugin's saved tokens and checkpoint for your\naccount; imported games, notes, ratings, status and playtime stay in the host.\n\n## Imported fields\n\nEach Epic game is imported with its title and its Epic identity (catalogue\nnamespace and item ID, scoped to the connected account). When Epic's catalogue\nsupplies them, the description, developer and publisher are imported too. Total\nplaytime is imported when Epic's playtime service answers. Catalogue text is\nrequested in US English. Artwork, release dates, genres/tags, achievements,\nprices, DLC/add-ons and install state are not imported. Use the host's metadata\nlookup for artwork and other metadata.\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nThe popup uses the host's appearance and spacing, with an account summary and\nimport controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and opens it in a new tab,\nleaving this popup open; the sandboxed plugin does not open a popup itself.\nAfter signing in, Epic shows a page of text. Select all of it, copy it and paste\nit into the code field: pasting the whole page connects without another click.\nThe one-time authorization code, its JSON page, a single copied JSON line or the\nredirect URL are all accepted. Hosts that predate new-tab handling, or a browser\nthat blocks the tab, navigate the host tab instead; then use browser Back and\nreopen **Connections → Epic Games**. No popup permission is needed. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nIf Epic later rejects the saved sign-in (for example after a password change),\nthe popup shows the code field again. **Replace sign-in** does the same at any\ntime. The existing connection stays until Epic accepts the new code; an\naccepted replacement then starts a fresh import checkpoint, and games already\nimported stay in your library.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nThe popup follows Steam's host dialog sizing and shared appearance. Disconnected\naccounts show sign-in controls; import controls appear after connecting.\nOn Games, **Sync / import → Sync Epic Games** starts or resumes the same\nimport flow. The menu does not add a second connection page.\n\nFor automatic imports, open **Account → Background tasks → Epic Games autosync**.\nApprove the declared `tasks.background` access and enable your own schedule; it\nstarts off and normally runs daily. Intervals can range from 5 minutes to 1 week.\nEach run advances one bounded checkpoint; incomplete work requests the next step\nafter 60 seconds, even with the page closed. Completion restores your chosen interval.\nDisabling autosync stops queued steps. Manual and automatic imports share the same\nper-user lease, tokens, checkpoint and preservation rules; another user's schedule\ncannot adopt your Epic account or change your library.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace. An entry Epic omits (for example a delisted\nitem) is skipped individually: it is counted in `skipped`/`catalogue_missing`, listed\nin `skipped_entries` (first 25 shown) and later games continue. Transport failures or\nan unreadable catalogue response still stop the step and retain the batch for retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n\n## Troubleshooting and support\n\nMessages come from the plugin and never include token values. Most Epic-side\nfailures are recovered by waiting and choosing **Resume import**.\n\n| Message or symptom | What it means and what to do |\n| --- | --- |\n| \"Paste the 32-character authorization code, its JSON page or redirect URL.\" | The pasted text did not contain exactly one code. Choose **Sign in on Epic Games** (or **Copy sign-in link**) again and paste the whole page Epic shows. Each code works once. |\n| \"Epic rejected this sign-in. Sign in on Epic again and paste a fresh code.\" | Epic no longer accepts the saved sign-in (for example after a password change), or rejected the pasted code. Choose **Replace sign-in** and paste a fresh code. If this happens during autosync, the schedule turns itself off; re-enable it in **Account → Background tasks** after reconnecting. |\n| \"Epic returned a different account. Reconnect before importing.\" | A token refresh answered for another Epic account. Use **Replace sign-in** with the account you intend to import. As above, re-enable autosync afterwards if it turned off. |\n| \"Epic is busy. Wait a minute, then resume the import.\" | Epic rate-limited the request. Wait, then **Resume import**. Autosync retries on its own after at least five minutes. |\n| \"Epic could not be reached or refused the request. Your saved import is retained.\" | Epic's service was unavailable or answered with an error. Resume later; the checkpoint is kept. |\n| \"Epic returned an incomplete inventory…\", \"…invalid inventory paging information\", \"…repeated an inventory cursor\", \"…omitted catalogue entries\", \"…omitted a game title\" or \"…unreadable game categories\" | Epic's reply did not match what the plugin expects. Nothing is marked unavailable from a partial inventory. Resume later; if it persists across days it is probably an Epic-side change, so report it. |\n| \"Epic playtime was unavailable. Existing playtime was retained.\" | Games still import; known playtime is not lowered or cleared. A later import fills playtime when Epic answers again. |\n| \"Another Epic action is running. Wait briefly, then resume.\" | Two Epic actions for your account overlapped, for example a manual import and autosync. Wait about a minute and resume. |\n| \"Start a new import for this connected account.\" | The saved checkpoint belongs to an earlier connection. Choose **Start new inventory**. |\n| \"Epic's inventory exceeded the safety limit. Availability has not changed.\" | The library exceeded 10,000 entries or 200 inventory pages. Report it. |\n| \"The host denied or could not complete this action. Check plugin permissions, then retry.\" | A host-side refusal, not an Epic failure. In **Settings → Plugins**, check that the plugin is enabled and its permissions are approved. |\n| **Local conflicts** count increases | A game you deleted in the app, or one whose identity changed, is left alone instead of being recreated. |\n\nOnly a complete, valid inventory marks games that left your Epic library as\nunavailable. They are not deleted, and they become available again when a later\nimport lists them.\n\nReport persistent Epic sign-in or import failures as an\n[issue in this repository](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues),\nnot to Epic or the host application. Include the plugin version (shown in\n**Settings → Plugins**), the host release or image tag you deployed and the exact\nmessage. Never include the authorization code, the text of Epic's sign-in page,\nthe redirect URL, tokens or your Epic account ID. Installation, permission and Connections-page problems that\nare not specific to Epic belong to the host's plugin documentation.\n",
       "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11.",
       "releases": [
         {
@@ -38902,14 +38902,175 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.9.0.utp",
           "version": "0.9.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+            "source_committed_at": "2026-10-30T16:50:51+08:00",
+            "source_digest": "4f2dd1da66746c385e08a63748daba426b76d19964e9396939c8f88cc0f62038",
+            "source_path": "official/epic-games",
+            "version_bump": "patch"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "e8ae273cee46093c738e16ceca8687ea120b1289dc64e502aa4f27f0342db2d7"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.11",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "games.write",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "frontend.connections",
+                "version": 1
+              },
+              {
+                "name": "tasks.background",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Connect a personal Epic account from Settings > Account > Connections and import its games with resumable inventory, catalogue and playtime steps.",
+            "entrypoint": "plugin:main",
+            "frontend": {
+              "entry": "frontend/index.html",
+              "inline_assets": true
+            },
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
+              "signature": "v2:vSMS9Klnzv4jsD8oWv/zTr+TuiHvkDfR0htaTIC1UOZ6FodnF/FcQoSG8DSgE5tnu4EspNnahcNX+E2RqWwyDQ=="
+            },
+            "manifest_version": 1,
+            "name": "Epic Games Library",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "games.write",
+                  "version": 1
+                },
+                "rationale": "Import games into the authenticated user's library and update provider metadata, playtime and availability while preserving personal state."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Exchange the user's Epic authorization code and contact Epic's account, library and catalogue services through the bounded host network gateway."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Keep each user's rotating Epic tokens private and save resumable inventory/import checkpoints inside this plugin's storage."
+              },
+              {
+                "capability": {
+                  "name": "frontend.connections",
+                  "version": 1
+                },
+                "rationale": "List Epic Games on the Connections page so you can connect, import and disconnect from a popup there."
+              },
+              {
+                "capability": {
+                  "name": "tasks.background",
+                  "version": 1
+                },
+                "rationale": "Run an explicitly enabled personal Epic autosync schedule using that account’s approved access and resumable import checkpoints."
+              }
+            ],
+            "plugin_id": "official.epic-games",
+            "scheduled_tasks": [
+              {
+                "action_id": "sync",
+                "default_interval_minutes": 1440,
+                "description": "Sync your connected Epic library and playtime. Imports resume safely between steps; personal notes, ratings and status are preserved.",
+                "id": "autosync",
+                "max_interval_minutes": 10080,
+                "min_interval_minutes": 5,
+                "name": "Epic Games autosync",
+                "scope": "user"
+              }
+            ],
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 16
+            },
+            "ui": {
+              "actions": [
+                "status",
+                "signin",
+                "connect",
+                "disconnect",
+                "start",
+                "step",
+                "sync"
+              ],
+              "menus": [],
+              "pages": [
+                "library"
+              ],
+              "settings": []
+            },
+            "version": "0.9.1"
+          },
+          "package": {
+            "filename": "official.epic-games-0.9.1.utp",
+            "format": "utp-v1",
+            "size_bytes": 24570
+          },
+          "package_sha256": "cbe9d08dfdf8ede6e8a868af9c72f04f2ecf28cd5b17c82f444d07e28c35846d",
+          "plugin_id": "official.epic-games",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Epic Games Library\n\nOptional personal Epic game imports through **Plugin API 1.1.11**. Requires a host\nthat implements `games.import`, connection sync actions and personal scheduled\ntasks. Older hosts reject this package during compatibility review;\nuse an earlier Epic release on a host that predates 1.1.11. This plugin uses the existing SDK v1.1.1 wire helper.\nThe host page/sign-in support is completed by\n[host PR40](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/40).\n\n## Experimental service dependency\n\nEpic does not publish or support an API for third-party library imports, and\nthis plugin is not affiliated with or endorsed by Epic Games. It does not use\nEpic Online Services or Epic Account Services, and Unnamed Tracking App has no\nEpic-issued OAuth client. Instead, the plugin signs in the same way the Epic\nGames Launcher does: Epic's own sign-in page returns a one-time authorization\ncode for the launcher's public client, and the plugin exchanges that code for\nlauncher access/refresh tokens. It then reads the same unofficial account,\nlibrary, playtime and catalogue services the launcher uses.\n\nThose services are undocumented and Epic can change, rate-limit or withdraw them\nat any time. Treat the integration as experimental: an Epic-side change can stop\nsign-in, imports or playtime until a new plugin release adapts to it. Epic\nsupport cannot help with this plugin; report problems to this repository instead\n(see [Troubleshooting and support](#troubleshooting-and-support)).\n\nAn Epic service failure is not host data loss. Failed sign-ins, refreshes,\ninventory pages, playtime or catalogue lookups stop the current step and keep\nyour saved connection, checkpoint and library. The plugin never deletes games.\nDisconnecting removes only this plugin's saved tokens and checkpoint for your\naccount; imported games, notes, ratings, status and playtime stay in the host.\n\n## Imported fields\n\nEach Epic game is imported with its title and its Epic identity (catalogue\nnamespace and item ID, scoped to the connected account). When Epic's catalogue\nsupplies them, the description, developer and publisher are imported too. Total\nplaytime is imported when Epic's playtime service answers. Catalogue text is\nrequested in US English. Artwork, release dates, genres/tags, achievements,\nprices, DLC/add-ons and install state are not imported. Use the host's metadata\nlookup for artwork and other metadata.\n\n## Connect and import\n\nInstall this plugin's `.utp` through Settings → Plugins, approve the declared\npermissions and enable it. Open Settings → Account → Connections, where **Epic Games**\nis listed with its connection status. Choose **Connect** (or **Manage** once\nconnected) to open the plugin page in a popup. The page is also reachable at its\nplugin route, but it no longer adds a sidebar entry.\nThe popup uses the host's appearance and spacing, with an account summary and\nimport controls. Expand **Use your regular browser**, then use **Copy sign-in link** to open Epic in your regular browser while leaving the\napp open. If clipboard access is unavailable, copy the selected link manually.\nAlternatively, use **Sign in on Epic Games**. The action is declared as external navigation, so\nthe host validates Epic's returned HTTPS destination and opens it in a new tab,\nleaving this popup open; the sandboxed plugin does not open a popup itself.\nAfter signing in, Epic shows a page of text. Select all of it, copy it and paste\nit into the code field: pasting the whole page connects without another click.\nThe one-time authorization code, its JSON page, a single copied JSON line or the\nredirect URL are all accepted. Hosts that predate new-tab handling, or a browser\nthat blocks the tab, navigate the host tab instead; then use browser Back and\nreopen **Connections → Epic Games**. No popup permission is needed. Your\npassword stays on Epic's site. The code is cleared immediately after submission\nand is never saved in settings.\n\nIf Epic later rejects the saved sign-in (for example after a password change),\nthe popup shows the code field again. **Replace sign-in** does the same at any\ntime. The existing connection stays until Epic accepts the new code; an\naccepted replacement then starts a fresh import checkpoint, and games already\nimported stay in your library.\n\nLauncher access/refresh tokens are validated independently from the 32-character\naccount ID and bounded to 8 KiB. Hosts must support authorization headers larger\nthan the original 2 KiB limit; older hosts need the companion token-header fix\nbefore an import can use these tokens. Failed replacement sign-ins retain an\nexisting connection and never show token values in errors.\n\nPositive, finite access-token lifetimes from Epic are accepted, including lifetimes\nlonger than one day. The plugin schedules refresh at the shorter of that lifetime\nand one day, so a longer provider lifetime does not delay local token rotation.\nMalformed expiry values retain an existing connection.\n\nChoose **Import games**. Inventory paging, playtime, catalogue lookup and host\nimports run as separate bounded steps. **Pause after this step**, closing the\npage or a failed request retains the checkpoint. **Resume import** continues it.\n**Start new inventory** deliberately replaces the current checkpoint. Disconnect\nremoves this user's saved tokens/checkpoint and keeps imported games.\n\nThe popup follows Steam's host dialog sizing and shared appearance. Disconnected\naccounts show sign-in controls; import controls appear after connecting.\nOn Games, **Sync / import → Sync Epic Games** starts or resumes the same\nimport flow. The menu does not add a second connection page.\n\nFor automatic imports, open **Account → Background tasks → Epic Games autosync**.\nApprove the declared `tasks.background` access and enable your own schedule; it\nstarts off and normally runs daily. Intervals can range from 5 minutes to 1 week.\nEach run advances one bounded checkpoint; incomplete work requests the next step\nafter 60 seconds, even with the page closed. Completion restores your chosen interval.\nDisabling autosync stops queued steps. Manual and automatic imports share the same\nper-user lease, tokens, checkpoint and preservation rules; another user's schedule\ncannot adopt your Epic account or change your library.\n\nGames use namespace + catalogue identity within the connected account. Similar\ntitles and another Epic account cannot adopt each other's games. Engine assets,\nprivate sandboxes, DLC and digital extras are skipped. Catalogue requests group\nup to 25 entries in one namespace. An entry Epic omits (for example a delisted\nitem) is skipped individually: it is counted in `skipped`/`catalogue_missing`, listed\nin `skipped_entries` (first 25 shown) and later games continue. Transport failures or\nan unreadable catalogue response still stop the step and retain the batch for retry. A repeated/invalid cursor, invalid record, incomplete page or safety\nlimit stops inventory before availability changes.\n\nSuccessful imports respect the host's field locks, manual status, notes and\nratings. Playtime only increases; absent/unavailable playtime leaves known values\nalone. When multiple launcher artifacts share a catalogue identity, the largest\nreported artifact total is used to avoid counting duplicate platform entries.\nOnly a complete valid inventory can mark previously imported games unavailable.\n\n## Troubleshooting and support\n\nMessages come from the plugin and never include token values. Most Epic-side\nfailures are recovered by waiting and choosing **Resume import**.\n\n| Message or symptom | What it means and what to do |\n| --- | --- |\n| \"Paste the 32-character authorization code, its JSON page or redirect URL.\" | The pasted text did not contain exactly one code. Choose **Sign in on Epic Games** (or **Copy sign-in link**) again and paste the whole page Epic shows. Each code works once. |\n| \"Epic rejected this sign-in. Sign in on Epic again and paste a fresh code.\" | Epic no longer accepts the saved sign-in (for example after a password change), or rejected the pasted code. Choose **Replace sign-in** and paste a fresh code. If this happens during autosync, the schedule turns itself off; re-enable it in **Account → Background tasks** after reconnecting. |\n| \"Epic returned a different account. Reconnect before importing.\" | A token refresh answered for another Epic account. Use **Replace sign-in** with the account you intend to import. As above, re-enable autosync afterwards if it turned off. |\n| \"Epic is busy. Wait a minute, then resume the import.\" | Epic rate-limited the request. Wait, then **Resume import**. Autosync retries on its own after at least five minutes. |\n| \"Epic could not be reached or refused the request. Your saved import is retained.\" | Epic's service was unavailable or answered with an error. Resume later; the checkpoint is kept. |\n| \"Epic returned an incomplete inventory…\", \"…invalid inventory paging information\", \"…repeated an inventory cursor\", \"…omitted catalogue entries\", \"…omitted a game title\" or \"…unreadable game categories\" | Epic's reply did not match what the plugin expects. Nothing is marked unavailable from a partial inventory. Resume later; if it persists across days it is probably an Epic-side change, so report it. |\n| \"Epic playtime was unavailable. Existing playtime was retained.\" | Games still import; known playtime is not lowered or cleared. A later import fills playtime when Epic answers again. |\n| \"Another Epic action is running. Wait briefly, then resume.\" | Two Epic actions for your account overlapped, for example a manual import and autosync. Wait about a minute and resume. |\n| \"Start a new import for this connected account.\" | The saved checkpoint belongs to an earlier connection. Choose **Start new inventory**. |\n| \"Epic's inventory exceeded the safety limit. Availability has not changed.\" | The library exceeded 10,000 entries or 200 inventory pages. Report it. |\n| \"The host denied or could not complete this action. Check plugin permissions, then retry.\" | A host-side refusal, not an Epic failure. In **Settings → Plugins**, check that the plugin is enabled and its permissions are approved. |\n| **Local conflicts** count increases | A game you deleted in the app, or one whose identity changed, is left alone instead of being recreated. |\n\nOnly a complete, valid inventory marks games that left your Epic library as\nunavailable. They are not deleted, and they become available again when a later\nimport lists them.\n\nReport persistent Epic sign-in or import failures as an\n[issue in this repository](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/issues),\nnot to Epic or the host application. Include the plugin version (shown in\n**Settings → Plugins**), the host release or image tag you deployed and the exact\nmessage. Never include the authorization code, the text of Epic's sign-in page,\nthe redirect URL, tokens or your Epic account ID. Installation, permission and Connections-page problems that\nare not specific to Epic belong to the host's plugin documentation.\n",
+          "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11.",
+          "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
+            "signature": "v2:vSMS9Klnzv4jsD8oWv/zTr+TuiHvkDfR0htaTIC1UOZ6FodnF/FcQoSG8DSgE5tnu4EspNnahcNX+E2RqWwyDQ=="
+          },
+          "tags": [
+            "games",
+            "epic",
+            "imports",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.9.1.utp",
+          "version": "0.9.1"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "0e897a15a0b05df636368fe2294c0bbd5d60986b23a308f95b3bc3443497287a",
+      "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "0e897a15a0b05df636368fe2294c0bbd5d60986b23a308f95b3bc3443497287a",
-        "signature": "v2:7WZJ7JevvWrWunmtgqB4hQLpyooyRgHf6Clu1LqE4cdgDTRK1U8L260A5e3HNA8Azhh+Thn9K0HIWniXnB7FDQ=="
+        "sha256": "67499264c040c887cbd176084f8b7d99759ea4b93b277cb3f4b00c848332b868",
+        "signature": "v2:vSMS9Klnzv4jsD8oWv/zTr+TuiHvkDfR0htaTIC1UOZ6FodnF/FcQoSG8DSgE5tnu4EspNnahcNX+E2RqWwyDQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -38922,8 +39083,8 @@
         "imports",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.9.0.utp",
-      "version": "0.9.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.epic-games-0.9.1.utp",
+      "version": "0.9.1"
     },
     {
       "application_version_range": "^1.0.0",
@@ -38932,11 +39093,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "aec23cceb8d7f69574eb97252a1052978ffc42e5",
-        "source_committed_at": "2026-10-30T08:34:51+08:00",
-        "source_digest": "4a24d78a546ead876ce7962b9d2bb725431334ed28a5993ec44a5208060656fd",
+        "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+        "source_committed_at": "2026-10-30T16:50:51+08:00",
+        "source_digest": "effeb205c8f5bc8f4b928871135febd33a21b513bffea20122b213ec4a33b5bd",
         "source_path": "official/jellyfin-media-sync",
-        "version_bump": "minor"
+        "version_bump": "patch"
       },
       "capabilities": [
         {
@@ -39106,8 +39267,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "65848276eb7282a4a39699a00d58f258c621873fd1bc6aea9c2aa840b4070a0f",
-          "signature": "v2:N1p+z62h4IMTNzSHbozH1SoXgbc4E/lVkX07o8DQ+xQmeKzJnTtq3CrEv9rbErYBlNpOBngBoUyT912cTV3EAA=="
+          "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
+          "signature": "v2:fihNegp0M9BxDxUrk5/zc4tC5M9UIO+g1NFHur6KKr/HYymU+2oTuXxfXa71W5DKczhZ5I9mQZpKpYTGt48qDw=="
         },
         "manifest_version": 1,
         "name": "Jellyfin Media Sync",
@@ -39272,15 +39433,15 @@
           ],
           "settings": []
         },
-        "version": "0.11.0"
+        "version": "0.11.1"
       },
       "name": "Jellyfin Media Sync",
       "package": {
-        "filename": "official.jellyfin-media-sync-0.11.0.utp",
+        "filename": "official.jellyfin-media-sync-0.11.1.utp",
         "format": "utp-v1",
-        "size_bytes": 46964
+        "size_bytes": 47358
       },
-      "package_sha256": "ba6d6bc53effd288f106e27909aae2bb894d33c1a9c4654172e47b4a9173fd2e",
+      "package_sha256": "8731a9f49f0c80d0aae129462ac3b4409102c292828685d3d50a0e599a02b4c8",
       "permissions": [
         {
           "capability": {
@@ -39404,7 +39565,7 @@
       ],
       "plugin_id": "official.jellyfin-media-sync",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n",
+      "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n\n## Library changes during a scan\n\nIf items are added or removed while a scan is paginating, Jellyfin's total no\nlonger matches the saved cursor. The plugin classifies this as `library_changed`,\ndiscards the stale cursor and restarts with a fresh generation on the next retry,\nso no manual Rescan is needed. Repeated restarts back off (30 s doubling to one\nhour) and are counted in `scan_restarts`, which resets after a completed scan.\nServer outages and authentication failures keep their own bounded retry policy.\n",
       "release_notes": "Official preview for Plugin API 1.1: server administration directly under Server management, personal connections in Account settings, and direct Media navigation. Native loading errors include host permission/runtime guidance and a retry control.",
       "releases": [
         {
@@ -43239,14 +43400,310 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.11.0.utp",
           "version": "0.11.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+            "source_committed_at": "2026-10-30T16:50:51+08:00",
+            "source_digest": "effeb205c8f5bc8f4b928871135febd33a21b513bffea20122b213ec4a33b5bd",
+            "source_path": "official/jellyfin-media-sync",
+            "version_bump": "patch"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "5de24c1b950d8e2610a6932a6fb57ad6308e7f95a4fadfabe43b08f4555adfbc"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.17",
+            "application_version_range": "^1.0.0",
+            "capabilities": [
+              {
+                "name": "media.write",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "tasks.background",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "frontend.native",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.main",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.routes",
+                "version": 1
+              },
+              {
+                "name": "frontend.page.extend",
+                "version": 1
+              },
+              {
+                "name": "frontend.context.media",
+                "version": 1
+              },
+              {
+                "name": "notifications.send",
+                "version": 1
+              },
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.canonical",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.sidebar",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.settings.admin",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.settings.account",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Official preview: multiple Jellyfin accounts, shared media matching, metadata, progress and reported viewing sessions. The separate example remains a demo.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
+              "signature": "v2:fihNegp0M9BxDxUrk5/zc4tC5M9UIO+g1NFHur6KKr/HYymU+2oTuXxfXa71W5DKczhZ5I9mQZpKpYTGt48qDw=="
+            },
+            "manifest_version": 1,
+            "name": "Jellyfin Media Sync",
+            "native_frontend": {
+              "activation": "page",
+              "entry": "native/app.js",
+              "styles": [
+                "native/style.css"
+              ]
+            },
+            "permissions": [
+              {
+                "capability": {
+                  "name": "media.write",
+                  "version": 1
+                },
+                "rationale": "Upsert Movies, TV and Anime with stable provider identity and conflict-checked completion."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Secure installation credential, approved user links, media mappings and bounded synchronization checkpoints."
+              },
+              {
+                "capability": {
+                  "name": "tasks.background",
+                  "version": 1
+                },
+                "rationale": "Synchronize each explicitly subscribed user through live user-scoped media grants."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Contact only the configured Jellyfin server after a live grant check; redirects are refused."
+              },
+              {
+                "capability": {
+                  "name": "frontend.native",
+                  "version": 1
+                },
+                "rationale": "Render native Vue configuration, write-only credential entry and progress using the host SDK."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.main",
+                  "version": 1
+                },
+                "rationale": "Add Jellyfin Sync to the sidebar."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.settings",
+                  "version": 1
+                },
+                "rationale": "Link to the native Jellyfin Settings contribution."
+              },
+              {
+                "capability": {
+                  "name": "frontend.settings",
+                  "version": 1
+                },
+                "rationale": "Provide native configuration and status within Settings."
+              },
+              {
+                "capability": {
+                  "name": "frontend.routes",
+                  "version": 1
+                },
+                "rationale": "Expose the plugin-owned Jellyfin sync route."
+              },
+              {
+                "capability": {
+                  "name": "frontend.page.extend",
+                  "version": 1
+                },
+                "rationale": "Contribute a plugin-owned Watch Now panel to media detail pages."
+              },
+              {
+                "capability": {
+                  "name": "frontend.context.media",
+                  "version": 1
+                },
+                "rationale": "Resolve Watch Now for the authenticated media-page context."
+              },
+              {
+                "capability": {
+                  "name": "notifications.send",
+                  "version": 1
+                },
+                "rationale": "Optional fallback: notify the subscribing user about sync errors with a plain message when the story contract is unavailable; denied grants do not stop sync."
+              },
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Declare this plugin's own sync-attention notification type; the core validates and namespaces it."
+              },
+              {
+                "capability": {
+                  "name": "notifications.canonical",
+                  "version": 1
+                },
+                "rationale": "Publish one evolving sync-attention story per Jellyfin account for the subscribing user; the core owns routing, privacy and history. Denied grants do not stop sync."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.sidebar",
+                  "version": 1
+                },
+                "rationale": "Place this extension beneath the existing library and media headings in the main sidebar. This grants placement throughout the sidebar, not access to library records."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.settings.admin",
+                  "version": 1
+                },
+                "rationale": "Place server configuration directly beneath the built-in administration headings. Approval covers this settings area, not other settings areas or backend actions."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.settings.account",
+                  "version": 1
+                },
+                "rationale": "Place personal Jellyfin connections beneath Account settings. This grants placement throughout the account settings area, not access to other users' accounts or server administration."
+              }
+            ],
+            "plugin_id": "official.jellyfin-media-sync",
+            "sdk_version_range": "^1.1.17",
+            "storage": {
+              "quota_mb": 128
+            },
+            "ui": {
+              "actions": [
+                "save-server",
+                "clear-server-credential",
+                "test-connection",
+                "save-mappings",
+                "authorize-identity",
+                "get-config",
+                "login",
+                "quick-connect-start",
+                "quick-connect-finish",
+                "link-approved",
+                "save-account",
+                "clear-account-credential",
+                "order-accounts",
+                "sync-now",
+                "status",
+                "watch-now",
+                "resolve-review"
+              ],
+              "menus": [],
+              "pages": [
+                "accounts",
+                "admin",
+                "watch"
+              ],
+              "settings": []
+            },
+            "version": "0.11.1"
+          },
+          "package": {
+            "filename": "official.jellyfin-media-sync-0.11.1.utp",
+            "format": "utp-v1",
+            "size_bytes": 47358
+          },
+          "package_sha256": "8731a9f49f0c80d0aae129462ac3b4409102c292828685d3d50a0e599a02b4c8",
+          "plugin_id": "official.jellyfin-media-sync",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n\n## Library changes during a scan\n\nIf items are added or removed while a scan is paginating, Jellyfin's total no\nlonger matches the saved cursor. The plugin classifies this as `library_changed`,\ndiscards the stale cursor and restarts with a fresh generation on the next retry,\nso no manual Rescan is needed. Repeated restarts back off (30 s doubling to one\nhour) and are counted in `scan_restarts`, which resets after a completed scan.\nServer outages and authentication failures keep their own bounded retry policy.\n",
+          "release_notes": "Official preview for Plugin API 1.1: server administration directly under Server management, personal connections in Account settings, and direct Media navigation. Native loading errors include host permission/runtime guidance and a retry control.",
+          "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
+            "signature": "v2:fihNegp0M9BxDxUrk5/zc4tC5M9UIO+g1NFHur6KKr/HYymU+2oTuXxfXa71W5DKczhZ5I9mQZpKpYTGt48qDw=="
+          },
+          "tags": [
+            "official",
+            "preview",
+            "media",
+            "integration"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.11.1.utp",
+          "version": "0.11.1"
         }
       ],
       "sdk_version_range": "^1.1.17",
-      "sha256": "65848276eb7282a4a39699a00d58f258c621873fd1bc6aea9c2aa840b4070a0f",
+      "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "65848276eb7282a4a39699a00d58f258c621873fd1bc6aea9c2aa840b4070a0f",
-        "signature": "v2:N1p+z62h4IMTNzSHbozH1SoXgbc4E/lVkX07o8DQ+xQmeKzJnTtq3CrEv9rbErYBlNpOBngBoUyT912cTV3EAA=="
+        "sha256": "60a2e7cfe17149720f2ea20c3367e2863dfdc6ddcf54a6e052ad1a4f5dcdb063",
+        "signature": "v2:fihNegp0M9BxDxUrk5/zc4tC5M9UIO+g1NFHur6KKr/HYymU+2oTuXxfXa71W5DKczhZ5I9mQZpKpYTGt48qDw=="
       },
       "source": {
         "lifecycle": "source",
@@ -43259,8 +43716,8 @@
         "media",
         "integration"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.11.0.utp",
-      "version": "0.11.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.11.1.utp",
+      "version": "0.11.1"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -48387,11 +48844,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "031eb2ef246929d8658acaf7b29f9d3805d1fb42",
-        "source_committed_at": "2026-10-17T09:21:35+08:00",
-        "source_digest": "3f4690c4022deaa9af6d9e7d1ac6aad691d9a4a3b2b6304c0e2ce9c3d58809b1",
+        "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+        "source_committed_at": "2026-10-30T16:50:51+08:00",
+        "source_digest": "cc8990cc3bed47c58c22d1754ec713839f0962d59e60e7b1b2ba56e7d74039a5",
         "source_path": "official/metadata-hltb",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -48465,8 +48922,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
-          "signature": "v2:E1ysvQTdlIjmbZZyqhRXV89J3yk2+9xxTjV0JZG2aCTR1cxfstUFZAShLMKKFD65hQCsUgoCzS094xgR/kFKAg=="
+          "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
+          "signature": "v2:PPRj8AkcwZTxEDugz2BFI2Ys+HgAhVh7jRrBAQK+Utt9bDubi15vainhSSlxwdYQPMMovE9LvgipxQlV2KEhDQ=="
         },
         "manifest_version": 1,
         "name": "HowLongToBeat Metadata Provider",
@@ -48521,15 +48978,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.7.1"
+        "version": "0.8.0"
       },
       "name": "HowLongToBeat Metadata Provider",
       "package": {
-        "filename": "official.metadata-hltb-0.7.1.utp",
+        "filename": "official.metadata-hltb-0.8.0.utp",
         "format": "utp-v1",
-        "size_bytes": 9605
+        "size_bytes": 9918
       },
-      "package_sha256": "390b06ecbae9b2ad4bb088098b607fcf753047106e6be48af21153140e3cd0ae",
+      "package_sha256": "c929e899523c0af4f1d493b34478d7eb9f0e8cc2ad23d2507e7a79f532fadfc8",
       "permissions": [
         {
           "capability": {
@@ -48569,7 +49026,7 @@
       ],
       "plugin_id": "official.metadata-hltb",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n",
+      "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n\n## Failure behaviour and session handling\n\nNo cookie or homepage-visit step is needed: the current flow is the public\n`/api/search/site/init` token followed by `/api/search/site`, and the plugin\nneither sends nor stores cookies, so no host cookie/session capability is\nrequired. Failures are returned to the host, never swallowed: a retired or failing\nendpoint (404/410/5xx) is `unavailable`, an unusable init token or changed search\nschema is `invalid_response`, and `health` reports the same classification. Only a\nsearch 403 renews the token (once). Interactive requests never retry; background\nrequests use the SDK's bounded retry budget. `tests/test_hltb.py` covers each case.\n",
       "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
       "releases": [
         {
@@ -50078,14 +50535,151 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.7.1.utp",
           "version": "0.7.1"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+            "source_committed_at": "2026-10-30T16:50:51+08:00",
+            "source_digest": "cc8990cc3bed47c58c22d1754ec713839f0962d59e60e7b1b2ba56e7d74039a5",
+            "source_path": "official/metadata-hltb",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.13",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
+              "signature": "v2:PPRj8AkcwZTxEDugz2BFI2Ys+HgAhVh7jRrBAQK+Utt9bDubi15vainhSSlxwdYQPMMovE9LvgipxQlV2KEhDQ=="
+            },
+            "manifest_version": 1,
+            "name": "HowLongToBeat Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-hltb",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.8.0"
+          },
+          "package": {
+            "filename": "official.metadata-hltb-0.8.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 9918
+          },
+          "package_sha256": "c929e899523c0af4f1d493b34478d7eb9f0e8cc2ad23d2507e7a79f532fadfc8",
+          "plugin_id": "official.metadata-hltb",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# HowLongToBeat Metadata Provider\n\nThe updated source requires public Plugin API **1.1.13** and the host completion-estimates\nupdate in [host PR #136](https://github.com/obsoletelabs/unnamed_tracking_app_2/pull/136).\nIt uses no account or API key. Install the corresponding published `.utp` through\nPlugin Manager and grant its declared metadata, network and storage permissions.\n\nThe provider initializes a short-lived public search token, then searches the\nsite's current endpoint with browser headers. A search 403 renews the token and\nretries once; a second rejection stops. Tokens are not persisted or logged. The\nSDK returns 403 directly to the provider instead of multiplying that renewal with\ngeneric background retries. Other failures retain bounded SDK pacing/retry policy.\n\nMetadata returns whichever of Main story, Main + extras, Completionist and All\nplay styles are available, normalized to one-decimal hours. Missing or invalid\nfigures are omitted, including when Main story is absent. Existing HLTB identity\nwins; without one, only a unique exact normalized title is accepted. Community\nestimates never write personal playtime. The host applies manual field protection,\naccount/provider choices and per-category native IGDB fallback independently.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\nRun `python -m pytest tests/test_hltb.py tests/test_metadata_providers.py -q`.\nFixtures cover token renewal bounds, partial/invalid figures, selected identity,\nambiguity and the exported wire schema. A direct public token/search check on\n15 October 2026 returned five Portal results; this does not establish installed\npackage success. Package/runtime integration validation is tracked in the PR.\n\n## Failure behaviour and session handling\n\nNo cookie or homepage-visit step is needed: the current flow is the public\n`/api/search/site/init` token followed by `/api/search/site`, and the plugin\nneither sends nor stores cookies, so no host cookie/session capability is\nrequired. Failures are returned to the host, never swallowed: a retired or failing\nendpoint (404/410/5xx) is `unavailable`, an unusable init token or changed search\nschema is `invalid_response`, and `health` reports the same classification. Only a\nsearch 403 renews the token (once). Interactive requests never retry; background\nrequests use the SDK's bounded retry budget. `tests/test_hltb.py` covers each case.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
+            "signature": "v2:PPRj8AkcwZTxEDugz2BFI2Ys+HgAhVh7jRrBAQK+Utt9bDubi15vainhSSlxwdYQPMMovE9LvgipxQlV2KEhDQ=="
+          },
+          "tags": [
+            "metadata",
+            "hltb",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.8.0.utp",
+          "version": "0.8.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
+      "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "407b37416e6e2d1868d3362ac658e1155121ac264dbeaab9211218b932c73b4a",
-        "signature": "v2:E1ysvQTdlIjmbZZyqhRXV89J3yk2+9xxTjV0JZG2aCTR1cxfstUFZAShLMKKFD65hQCsUgoCzS094xgR/kFKAg=="
+        "sha256": "183bd52a8c673a9ee9817f3cf2f1cedfea2510f8388e3cadc0581e6be41dcb37",
+        "signature": "v2:PPRj8AkcwZTxEDugz2BFI2Ys+HgAhVh7jRrBAQK+Utt9bDubi15vainhSSlxwdYQPMMovE9LvgipxQlV2KEhDQ=="
       },
       "source": {
         "lifecycle": "source",
@@ -50097,8 +50691,8 @@
         "hltb",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.7.1.utp",
-      "version": "0.7.1"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-hltb-0.8.0.utp",
+      "version": "0.8.0"
     },
     {
       "application_version_range": ">=0.0.1",
@@ -54167,11 +54761,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "031eb2ef246929d8658acaf7b29f9d3805d1fb42",
-        "source_committed_at": "2026-10-17T09:21:35+08:00",
-        "source_digest": "e512362331d088138d971deb7de1eb25bc8bfa128b65f1997b263dd0acf019ab",
+        "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+        "source_committed_at": "2026-10-30T16:50:51+08:00",
+        "source_digest": "657b1c1d25b573a32c330b5a624efaddef7643f1e8d92c1743f5a34ad53d13ea",
         "source_path": "official/metadata-retroachievements",
-        "version_bump": "patch"
+        "version_bump": "minor"
       },
       "capabilities": [
         {
@@ -54261,8 +54855,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "db08beac50a78ecf7ebcb1c79fa2a2b531a7ca3139c40d874b1ecbd6e746da51",
-          "signature": "v2:xG05j2yXgcv+6hkfoSn2IaleZwXeXldxWSwxnaLgr9wIj29mpThj/BG6LtAK4t8/Ipf0u+se43v3JiWgfBZdCw=="
+          "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+          "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
         },
         "manifest_version": 1,
         "name": "RetroAchievements Metadata Provider",
@@ -54332,15 +54926,15 @@
           "pages": [],
           "settings": []
         },
-        "version": "0.7.1"
+        "version": "0.8.0"
       },
       "name": "RetroAchievements Metadata Provider",
       "package": {
-        "filename": "official.metadata-retroachievements-0.7.1.utp",
+        "filename": "official.metadata-retroachievements-0.8.0.utp",
         "format": "utp-v1",
-        "size_bytes": 8556
+        "size_bytes": 9762
       },
-      "package_sha256": "e676ebdac0e2229c873e396cbdef3a50b82a406f11d619347a91ecee2ef3139a",
+      "package_sha256": "e248ccfcf5de1e38d236b04d34f33d7e85dbfa4c936a478ef02fdafeafaadadd",
       "permissions": [
         {
           "capability": {
@@ -54394,7 +54988,7 @@
       ],
       "plugin_id": "official.metadata-retroachievements",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n",
+      "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\n## Console coverage\n\nSearch walks one RetroAchievements game system per cursor page. `CONSOLE_NAMES` in\n`plugin.py` lists 80 systems (including Game Boy Advance, Dreamcast and PSP, which\nwere previously missing); the original eleven keep their order so saved cursors still\nresume. Events and hubs are excluded. A stale or out-of-range cursor ends the search\ninstead of wrapping, and results lacking a `ConsoleName` use the mapped system name.\nSystems RetroAchievements adds later need an entry in the table.\n",
       "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
       "releases": [
         {
@@ -56156,14 +56750,174 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.7.1.utp",
           "version": "0.7.1"
+        },
+        {
+          "automatic_update": true,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "84660e34909a9d92fecedec35a3d73d1ce684098",
+            "source_committed_at": "2026-10-30T16:50:51+08:00",
+            "source_digest": "657b1c1d25b573a32c330b5a624efaddef7643f1e8d92c1743f5a34ad53d13ea",
+            "source_path": "official/metadata-retroachievements",
+            "version_bump": "minor"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "c555650ba0ffb34d908b7f307695262c192848e794628d4943150b4f72e39a34"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.1",
+            "application_version_range": ">=0.0.1",
+            "capabilities": [
+              {
+                "name": "metadata_providers.register",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.search",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.metadata",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.health",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "metadata_providers.configuration",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Separate provider capabilities for progressive metadata and selected media enrichment.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+              "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
+            },
+            "manifest_version": 1,
+            "name": "RetroAchievements Metadata Provider",
+            "permissions": [
+              {
+                "capability": {
+                  "name": "metadata_providers.register",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.search",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.metadata",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.health",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              },
+              {
+                "capability": {
+                  "name": "metadata_providers.configuration",
+                  "version": 1
+                },
+                "rationale": "Provide declared metadata operations with bounded API requests and plugin-owned configuration or pacing."
+              }
+            ],
+            "plugin_id": "official.metadata-retroachievements",
+            "sdk_version_range": "^1.1.1",
+            "storage": {
+              "quota_mb": 1
+            },
+            "ui": {
+              "actions": [
+                "search",
+                "metadata",
+                "health"
+              ],
+              "menus": [],
+              "pages": [],
+              "settings": []
+            },
+            "version": "0.8.0"
+          },
+          "package": {
+            "filename": "official.metadata-retroachievements-0.8.0.utp",
+            "format": "utp-v1",
+            "size_bytes": 9762
+          },
+          "package_sha256": "e248ccfcf5de1e38d236b04d34f33d7e85dbfa4c936a478ef02fdafeafaadadd",
+          "plugin_id": "official.metadata-retroachievements",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# RetroAchievements Metadata Provider\n\nUses public Plugin API v1.1.1. Install its .utp through Plugin Manager and grant the declared permissions. Configure credentials in the host-rendered provider settings, selecting the plugin-declared system or personal scope. Secrets are write-only and encrypted by the host.\n\nSearch returns lightweight identities. Metadata is requested separately for the current top three. Interactive operations are bounded without retries; background operations may pace and retry within their separate budget. Missing credentials, invalid credentials, rate limits and outages return typed failures.\n\nBuild development packages with `python tools/build_packages.py`. Unsigned previews require explicit installation consent; the existing release workflow produces signed publication packages.\n\n## Console coverage\n\nSearch walks one RetroAchievements game system per cursor page. `CONSOLE_NAMES` in\n`plugin.py` lists 80 systems (including Game Boy Advance, Dreamcast and PSP, which\nwere previously missing); the original eleven keep their order so saved cursors still\nresume. Events and hubs are excluded. A stale or out-of-range cursor ends the search\ninstead of wrapping, and results lacking a `ConsoleName` use the mapped system name.\nSystems RetroAchievements adds later need an entry in the table.\n",
+          "release_notes": "Initial additive Plugin API v1.1.1 provider capabilities.",
+          "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+            "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
+          },
+          "tags": [
+            "metadata",
+            "retroachievements",
+            "official"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.8.0.utp",
+          "version": "0.8.0"
         }
       ],
       "sdk_version_range": "^1.1.1",
-      "sha256": "db08beac50a78ecf7ebcb1c79fa2a2b531a7ca3139c40d874b1ecbd6e746da51",
+      "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "db08beac50a78ecf7ebcb1c79fa2a2b531a7ca3139c40d874b1ecbd6e746da51",
-        "signature": "v2:xG05j2yXgcv+6hkfoSn2IaleZwXeXldxWSwxnaLgr9wIj29mpThj/BG6LtAK4t8/Ipf0u+se43v3JiWgfBZdCw=="
+        "sha256": "11c5bd8f8a97e3f7209f67ef916179dac7db34575337e2c4561770da4acde429",
+        "signature": "v2:OzWsjFE3DrJfl32y22XslVMYSGUQxmNgma/SgoYXAiXPS/C5vRAUIuRA+duw8mSaw1fVZKDU6woLhdhkJTwBAA=="
       },
       "source": {
         "lifecycle": "source",
@@ -56175,8 +56929,8 @@
         "retroachievements",
         "official"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.7.1.utp",
-      "version": "0.7.1"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.metadata-retroachievements-0.8.0.utp",
+      "version": "0.8.0"
     },
     {
       "application_version_range": ">=0.0.1",
