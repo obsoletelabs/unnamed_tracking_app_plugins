@@ -39415,11 +39415,11 @@
         "builder": "tools/build_packages.py",
         "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
         "legacy": false,
-        "source_commit": "017dd3f89c67346d0695392141f6ca412fcf35af",
-        "source_committed_at": "2026-10-30T19:19:13+08:00",
-        "source_digest": "de0b3cf06bfde4280dbcc7ea442a66ef07a89b28fd5a828275a3e4b1712dc4a5",
+        "source_commit": "8c2b8780b4a663ff8bd88e9946ea2086ad187508",
+        "source_committed_at": "2026-10-30T21:38:16+08:00",
+        "source_digest": "8eef803949f49b6128a8ee04ee9d56a2bc4f109e5023394af3fcd377c8a6226d",
         "source_path": "official/jellyfin-media-sync",
-        "version_bump": "minor"
+        "version_bump": "patch"
       },
       "capabilities": [
         {
@@ -39573,8 +39573,8 @@
         "entrypoint": "plugin:main",
         "integrity": {
           "key_id": "unnamed-tracking-official-2026-10-07-v2",
-          "sha256": "62140f3133d43d1d21448da63db27c3f4a629814af58d36bd41a240625c34ab0",
-          "signature": "v2:ND35SziIXkNYk2pXg1RaqEpkAs3Hvn5r0wkS2gLuB6QsCES5AeTwZW3VpY5pyEP7xIV+zykmYtD9o9NUmKqbDQ=="
+          "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
+          "signature": "v2:3JjGx2yUdMaIMltY8RYHz0eS9+vA7Otn2NfcsKRzJ9yXn6WiEYGxIinyI8OYhn3QzDoiqFF6mjXoP3IMzhgvCw=="
         },
         "manifest_version": 1,
         "name": "Jellyfin Media Sync",
@@ -39725,15 +39725,15 @@
           ],
           "settings": []
         },
-        "version": "0.12.0"
+        "version": "0.12.1"
       },
       "name": "Jellyfin Media Sync",
       "package": {
-        "filename": "official.jellyfin-media-sync-0.12.0.utp",
+        "filename": "official.jellyfin-media-sync-0.12.1.utp",
         "format": "utp-v1",
-        "size_bytes": 48709
+        "size_bytes": 52189
       },
-      "package_sha256": "f657d55ca6056a81a57acf1f3852063c422e0de2cc2f2901e8ef3548bc4bc815",
+      "package_sha256": "caf3e47e893dbd808218b7136af7c291a78fd8f1e1c49213bde4febbdfa9ecb3",
       "permissions": [
         {
           "capability": {
@@ -39843,7 +39843,7 @@
       ],
       "plugin_id": "official.jellyfin-media-sync",
       "publisher": "Unnamed Tracking Official",
-      "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n\n## Watch in Jellyfin\n\nAvailability is decided at library sync. Every `media.sync` write for a matched item\ncarries `watch_url` (the item's deep link in the configured server's web UI, without\ncredentials) and `watch_label` (`Jellyfin · <server name>`, at most 80 characters)\nalongside `available`. The host stores them on the media's Jellyfin source link and\nrenders the \"Watch in <label>\" button itself, so opening a media page performs no plugin\nlookup. An item that disappears from two successful scans is re-sent with\n`available: false` (and its link), and the host stops offering it. The plugin no longer\ncontributes its own panel or media menu entry to media pages.\n\nThe `watch-now` action remains as a fallback for items synced before this change. Its\nresults are cached per user in one `watchcache/<user>` record (64 items, 60 s found /\n15 s not available). Writes to servers, accounts, profiles or credentials drop the\naffected cache, a completed sync drops that user's cache, and plugin start clears all\ncaches. `cached_only` answers `{\"ok\": false, \"pending\": true}` on a miss without a\nlookup; `refresh` evicts and looks up again.\n",
+      "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nQuick Connect shows a code to approve in Jellyfin and then completes by itself: the\npage checks every two seconds for as long as the code lives (five minutes), stops on\nsuccess, expiry or an error, and keeps a \"Check now\" button as a fallback. Every\nconnection signs in to Jellyfin under its own device id, so connecting or reconnecting\none account never signs another one out (Jellyfin keeps a single token per user and\ndevice id). Sign-in problems are shown as messages on the page.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n\n## Watch in Jellyfin\n\nAvailability is decided at library sync. Every `media.sync` write for a matched item\ncarries `watch_url` (the item's deep link in the configured server's web UI, without\ncredentials) and `watch_label` (`Jellyfin · <server name>`, at most 80 characters)\nalongside `available`. The host stores them on the media's Jellyfin source link and\nrenders the \"Watch in <label>\" button itself, so opening a media page performs no plugin\nlookup. An item that disappears from two successful scans is re-sent with\n`available: false` (and its link), and the host stops offering it. The plugin no longer\ncontributes its own panel or media menu entry to media pages.\n\nThe `watch-now` action remains as a fallback for items synced before this change. Its\nresults are cached per user in one `watchcache/<user>` record (64 items, 60 s found /\n15 s not available). Writes to servers, accounts, profiles or credentials drop the\naffected cache, a completed sync drops that user's cache, and plugin start clears all\ncaches. `cached_only` answers `{\"ok\": false, \"pending\": true}` on a miss without a\nlookup; `refresh` evicts and looks up again.\n",
       "release_notes": "Official preview for Plugin API 1.1: server administration directly under Server management, personal connections in Account settings, and direct Media navigation. Native loading errors include host permission/runtime guidance and a retry control.",
       "releases": [
         {
@@ -44248,14 +44248,288 @@
           ],
           "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.12.0.utp",
           "version": "0.12.0"
+        },
+        {
+          "automatic_update": false,
+          "build": {
+            "builder": "tools/build_packages.py",
+            "contract_revision": "c50e6d0cc08e4649371def34bbef80f5e226e324",
+            "legacy": false,
+            "source_commit": "8c2b8780b4a663ff8bd88e9946ea2086ad187508",
+            "source_committed_at": "2026-10-30T21:38:16+08:00",
+            "source_digest": "8eef803949f49b6128a8ee04ee9d56a2bc4f109e5023394af3fcd377c8a6226d",
+            "source_path": "official/jellyfin-media-sync",
+            "version_bump": "patch"
+          },
+          "icon": {
+            "path": "icon.svg",
+            "sha256": "5de24c1b950d8e2610a6932a6fb57ad6308e7f95a4fadfabe43b08f4555adfbc"
+          },
+          "lifecycle": "published",
+          "lifecycle_stages": [
+            "source",
+            "validated",
+            "built",
+            "catalogued",
+            "published",
+            "downloadable"
+          ],
+          "manifest": {
+            "api_contract_version": "1.1.18",
+            "application_version_range": "^1.0.0",
+            "capabilities": [
+              {
+                "name": "media.write",
+                "version": 1
+              },
+              {
+                "name": "plugin.storage",
+                "version": 1
+              },
+              {
+                "name": "tasks.background",
+                "version": 1
+              },
+              {
+                "name": "network.outbound",
+                "version": 1
+              },
+              {
+                "name": "frontend.native",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.main",
+                "version": 1
+              },
+              {
+                "name": "frontend.navigation.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.settings",
+                "version": 1
+              },
+              {
+                "name": "frontend.routes",
+                "version": 1
+              },
+              {
+                "name": "notifications.send",
+                "version": 1
+              },
+              {
+                "name": "notification_sources.register",
+                "version": 1
+              },
+              {
+                "name": "notifications.canonical",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.sidebar",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.settings.admin",
+                "version": 1
+              },
+              {
+                "name": "frontend.placement.settings.account",
+                "version": 1
+              }
+            ],
+            "dependencies": [],
+            "description": "Official preview: multiple Jellyfin accounts, shared media matching, metadata, progress and reported viewing sessions. The separate example remains a demo.",
+            "entrypoint": "plugin:main",
+            "integrity": {
+              "key_id": "unnamed-tracking-official-2026-10-07-v2",
+              "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
+              "signature": "v2:3JjGx2yUdMaIMltY8RYHz0eS9+vA7Otn2NfcsKRzJ9yXn6WiEYGxIinyI8OYhn3QzDoiqFF6mjXoP3IMzhgvCw=="
+            },
+            "manifest_version": 1,
+            "name": "Jellyfin Media Sync",
+            "native_frontend": {
+              "activation": "page",
+              "entry": "native/app.js",
+              "styles": [
+                "native/style.css"
+              ]
+            },
+            "permissions": [
+              {
+                "capability": {
+                  "name": "media.write",
+                  "version": 1
+                },
+                "rationale": "Upsert Movies, TV and Anime with stable provider identity and conflict-checked completion."
+              },
+              {
+                "capability": {
+                  "name": "plugin.storage",
+                  "version": 1
+                },
+                "rationale": "Secure installation credential, approved user links, media mappings and bounded synchronization checkpoints."
+              },
+              {
+                "capability": {
+                  "name": "tasks.background",
+                  "version": 1
+                },
+                "rationale": "Synchronize each explicitly subscribed user through live user-scoped media grants."
+              },
+              {
+                "capability": {
+                  "name": "network.outbound",
+                  "version": 1
+                },
+                "rationale": "Contact only the configured Jellyfin server after a live grant check; redirects are refused."
+              },
+              {
+                "capability": {
+                  "name": "frontend.native",
+                  "version": 1
+                },
+                "rationale": "Render native Vue configuration, write-only credential entry and progress using the host SDK."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.main",
+                  "version": 1
+                },
+                "rationale": "Add Jellyfin Sync to the sidebar."
+              },
+              {
+                "capability": {
+                  "name": "frontend.navigation.settings",
+                  "version": 1
+                },
+                "rationale": "Link to the native Jellyfin Settings contribution."
+              },
+              {
+                "capability": {
+                  "name": "frontend.settings",
+                  "version": 1
+                },
+                "rationale": "Provide native configuration and status within Settings."
+              },
+              {
+                "capability": {
+                  "name": "frontend.routes",
+                  "version": 1
+                },
+                "rationale": "Expose the plugin-owned Jellyfin sync route."
+              },
+              {
+                "capability": {
+                  "name": "notifications.send",
+                  "version": 1
+                },
+                "rationale": "Optional fallback: notify the subscribing user about sync errors with a plain message when the story contract is unavailable; denied grants do not stop sync."
+              },
+              {
+                "capability": {
+                  "name": "notification_sources.register",
+                  "version": 1
+                },
+                "rationale": "Declare this plugin's own sync-attention notification type; the core validates and namespaces it."
+              },
+              {
+                "capability": {
+                  "name": "notifications.canonical",
+                  "version": 1
+                },
+                "rationale": "Publish one evolving sync-attention story per Jellyfin account for the subscribing user; the core owns routing, privacy and history. Denied grants do not stop sync."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.sidebar",
+                  "version": 1
+                },
+                "rationale": "Place this extension beneath the existing library and media headings in the main sidebar. This grants placement throughout the sidebar, not access to library records."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.settings.admin",
+                  "version": 1
+                },
+                "rationale": "Place server configuration directly beneath the built-in administration headings. Approval covers this settings area, not other settings areas or backend actions."
+              },
+              {
+                "capability": {
+                  "name": "frontend.placement.settings.account",
+                  "version": 1
+                },
+                "rationale": "Place personal Jellyfin connections beneath Account settings. This grants placement throughout the account settings area, not access to other users' accounts or server administration."
+              }
+            ],
+            "plugin_id": "official.jellyfin-media-sync",
+            "sdk_version_range": "^1.1.17",
+            "storage": {
+              "quota_mb": 128
+            },
+            "ui": {
+              "actions": [
+                "save-server",
+                "clear-server-credential",
+                "test-connection",
+                "save-mappings",
+                "authorize-identity",
+                "get-config",
+                "login",
+                "quick-connect-start",
+                "quick-connect-finish",
+                "link-approved",
+                "save-account",
+                "clear-account-credential",
+                "order-accounts",
+                "sync-now",
+                "status",
+                "watch-now",
+                "resolve-review"
+              ],
+              "menus": [],
+              "pages": [
+                "accounts",
+                "admin",
+                "watch"
+              ],
+              "settings": []
+            },
+            "version": "0.12.1"
+          },
+          "package": {
+            "filename": "official.jellyfin-media-sync-0.12.1.utp",
+            "format": "utp-v1",
+            "size_bytes": 52189
+          },
+          "package_sha256": "caf3e47e893dbd808218b7136af7c291a78fd8f1e1c49213bde4febbdfa9ecb3",
+          "plugin_id": "official.jellyfin-media-sync",
+          "publisher": "Unnamed Tracking Official",
+          "readme": "# Jellyfin Media Sync â€” official preview\n\nThis official preview is under test, with automatic package updates disabled.\nThe independently installable `official.jellyfin-media-sync` package is\nseparate from `example.jellyfin-media-sync`, which remains a demonstration.\nThere is no automatic conversion of the demo's private storage or permission grants.\n\nAn administrator adds servers and discovery keys on **Jellyfin servers** directly\nunder **Administration → Server management** in Settings, tests them, and approves\nlibraries. Personal connections live at **Account → Your Jellyfin accounts** and\nthe direct **Media → Jellyfin** sidebar entry. These placements require separate\nconsent for the administration and account settings areas. Loading and failed\nconfiguration requests show a retry control and the host's access/runtime details;\nadministrator denial is shown only after a successful role check.\nMusic, books, Live TV and collections\nare excluded. Explicit film/TV/anime mappings win over automatic anime tag/genre\ndetection. Anime films become a one-episode anime entry; season zero is supported.\n\nOn **Jellyfin**, each user connects multiple accounts using a password or Quick\nConnect. A password is used once, never persisted. Alternatively, the administrator\ncan approve a specific remote identity for the shared discovery key. Users can narrow\napproved libraries, choose automatic sync and merging, opt into error notifications,\nand order accounts for Watch Now. All enabled accounts participate in sync.\nRemoving a credential retains configuration, item mappings and checkpoints.\nQuick Connect shows a code to approve in Jellyfin and then completes by itself: the\npage checks every two seconds for as long as the code lives (five minutes), stops on\nsuccess, expiry or an error, and keeps a \"Check now\" button as a fallback. Every\nconnection signs in to Jellyfin under its own device id, so connecting or reconnecting\none account never signs another one out (Jellyfin keeps a single token per user and\ndevice id). Sign-in problems are shown as messages on the page.\nUnnumbered episodes retain provider progress and enter review. Assign their real\nseason/episode numbers or leave them unnumbered; the plugin never fabricates numbers\nor marks a partially numbered series complete. Missing runtimes remain unknown.\n\nSync imports all supported items, including unwatched titles, watched episodes,\nposition ticks, percentage, play counts and last-played timestamps. Provider IDs\nand unique exact title/year matches merge into the user's existing media records.\nAmbiguous matches and local watch-state changes enter a review queue. Notes,\nratings and manually locked metadata survive enrichment. Personal ratings are\nimported only where absent. Jellyfin supplies descriptions, credits, genres,\nstudios, countries, languages, tags, dates, codec details, provider identities and\ntoken-free artwork URLs. Year-only dates retain their precision in provider metadata.\nAuthenticated-only artwork may not display; tokens are never added to image URLs.\n\nOptional **Playback Reporting** imports real individual viewing sessions through\nthat Jellyfin plugin's read-only user/day API. It requires an installed, active\nPlayback Reporting plugin and an elevated discovery credential. Choose a bounded\ninitial lookback (default 30 days, up to 3650). Without it, ordinary Jellyfin cannot\nreconstruct earlier sessions from its aggregate counters; the plugin reports this\nlimitation and never invents past plays or timestamps. No new Jellyfin-side plugin\nis required. Sync never changes Jellyfin watched state, ratings, files or media.\n\nOne supervised worker processes bounded pages and saves accepted checkpoints.\nHost downtime, permission denial and restarts preserve progress. Backoff is bounded\nand configurable; authentication/configuration failures wait for correction.\nThe next automatic run replaces the previous retry schedule, with no overlapping\nper-account jobs. Disabling automatic sync stops future schedules; an active run\nfinishes. Full rescan starts a fresh census. Two successful censuses must miss an\nitem before its Watch Now link becomes unavailable; personal media is retained.\n\nHTTP and untrusted certificates produce connection-test warnings. HTTPS always\nuses host CA trust; there is no certificate-verification bypass. Base URLs may\ninclude a reverse-proxy path; redirects are refused. Secrets stay in private\n`plugin.storage` broker namespaces and are never returned by configuration/status\nactions. This storage is access-controlled by the runtime, not an encrypted vault;\nprotect runtime backups accordingly. The plugin has no host database, filesystem,\nenvironment or secret access. Native UI keeps the existing privileged permission\nand requires normal user grants. Optional notification denial does not stop sync. With the opt-in, each account has one\nnotification story (Plugin API 1.1.14): a sync problem opens it, a different problem revises it and a\nsuccessful sync resolves it, with a link to the accounts page; hosts or grants without story support\nreceive the earlier single message.\n\nTarget: the current `plugin-manager` public API and Jellyfin 12.1.0. Manifest ranges\nremain `^1.0.0`; compatibility detection is intentionally deferred. Provider-neutral\nmedia enrichment and bounded JSON POST are host API additions, available equally\nto all plugins. No plugin-specific host hook or trust bypass is used.\n\nBuild a validated preview with `python tools/build_packages.py`. Packages and\ncatalogue previews land under `.validation/`; published historical packages remain\nimmutable. The 0.0.1 preview is published through the reviewed official signing\nidentity; automatic updates remain disabled during validation. Unsigned local packages must\nuse the host's normal untrusted-package approval flow. Test signing keys are for\ndisposable integration tests only and never confer production trust.\n\n\nRequires Plugin API v1.1.17 for declared page activation. The native bundle loads\nwhen a contributed page is opened, rather than during unrelated library navigation.\nStatus polls read compact state every five seconds while syncing and every thirty\nseconds while idle. Hidden pages pause requests; full configuration reloads when\nreview counts or completed syncs change, preserving unsaved preferences.\n\n## Watch in Jellyfin\n\nAvailability is decided at library sync. Every `media.sync` write for a matched item\ncarries `watch_url` (the item's deep link in the configured server's web UI, without\ncredentials) and `watch_label` (`Jellyfin · <server name>`, at most 80 characters)\nalongside `available`. The host stores them on the media's Jellyfin source link and\nrenders the \"Watch in <label>\" button itself, so opening a media page performs no plugin\nlookup. An item that disappears from two successful scans is re-sent with\n`available: false` (and its link), and the host stops offering it. The plugin no longer\ncontributes its own panel or media menu entry to media pages.\n\nThe `watch-now` action remains as a fallback for items synced before this change. Its\nresults are cached per user in one `watchcache/<user>` record (64 items, 60 s found /\n15 s not available). Writes to servers, accounts, profiles or credentials drop the\naffected cache, a completed sync drops that user's cache, and plugin start clears all\ncaches. `cached_only` answers `{\"ok\": false, \"pending\": true}` on a miss without a\nlookup; `refresh` evicts and looks up again.\n",
+          "release_notes": "Official preview for Plugin API 1.1: server administration directly under Server management, personal connections in Account settings, and direct Media navigation. Native loading errors include host permission/runtime guidance and a retry control.",
+          "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
+          "signing": {
+            "key_id": "unnamed-tracking-official-2026-10-07-v2",
+            "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
+            "signature": "v2:3JjGx2yUdMaIMltY8RYHz0eS9+vA7Otn2NfcsKRzJ9yXn6WiEYGxIinyI8OYhn3QzDoiqFF6mjXoP3IMzhgvCw=="
+          },
+          "tags": [
+            "official",
+            "preview",
+            "media",
+            "integration"
+          ],
+          "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.12.1.utp",
+          "version": "0.12.1"
         }
       ],
       "sdk_version_range": "^1.1.17",
-      "sha256": "62140f3133d43d1d21448da63db27c3f4a629814af58d36bd41a240625c34ab0",
+      "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
       "signing": {
         "key_id": "unnamed-tracking-official-2026-10-07-v2",
-        "sha256": "62140f3133d43d1d21448da63db27c3f4a629814af58d36bd41a240625c34ab0",
-        "signature": "v2:ND35SziIXkNYk2pXg1RaqEpkAs3Hvn5r0wkS2gLuB6QsCES5AeTwZW3VpY5pyEP7xIV+zykmYtD9o9NUmKqbDQ=="
+        "sha256": "7ef50a7c5574f7c68ba7d256f95496337bf1507d7c517a7fea5631c0b99449b0",
+        "signature": "v2:3JjGx2yUdMaIMltY8RYHz0eS9+vA7Otn2NfcsKRzJ9yXn6WiEYGxIinyI8OYhn3QzDoiqFF6mjXoP3IMzhgvCw=="
       },
       "source": {
         "lifecycle": "source",
@@ -44268,8 +44542,8 @@
         "media",
         "integration"
       ],
-      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.12.0.utp",
-      "version": "0.12.0"
+      "url": "https://raw.githubusercontent.com/obsoletelabs/unnamed_tracking_app_plugins/main/dist/official.jellyfin-media-sync-0.12.1.utp",
+      "version": "0.12.1"
     },
     {
       "application_version_range": ">=0.0.1",
