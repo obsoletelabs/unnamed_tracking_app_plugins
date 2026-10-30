@@ -9,6 +9,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 VERIFIED_RUNTIME_REF = "main"
+LIFECYCLE_SETUP = ROOT / ".github/actions/lifecycle-setup/action.yml"
+LIFECYCLE_JOBS = ("lifecycle-official", "lifecycle-reference", "lifecycle-jellyfin", "lifecycle-pwa")
 
 
 @pytest.mark.parametrize(
@@ -36,12 +38,13 @@ def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, j
     """Explicit refs and open paired branches precede each workflow's verified fallback."""
     requested, branch, remote_branch, open_pr, expected = scenario
     workflow = yaml.safe_load((ROOT / ".github/workflows" / workflow_name).read_text())
-    checkout = next(step for step in workflow["jobs"][job]["steps"]
-                    if step.get("with", {}).get("path") == ".validation/host")
+    steps = workflow["jobs"][job]["steps"]
+    if job == "lifecycle":
+        # The parallel lifecycle jobs share one setup action that owns the host selection.
+        steps = yaml.safe_load(LIFECYCLE_SETUP.read_text())["runs"]["steps"]
+    checkout = next(step for step in steps if step.get("with", {}).get("path") == ".validation/host")
     assert checkout["with"]["repository"] == "obsoletelabs/unnamed_tracking_app_2"
-    step = next(
-        step for step in workflow["jobs"][job]["steps"] if step.get("id") == "companion"
-    )
+    step = next(step for step in steps if step.get("id") == "companion")
     assert "https://github.com/obsoletelabs/unnamed_tracking_app_2.git" in step["run"]
     if job == "lifecycle":
         assert step["env"]["DEFAULT_HOST_REF"] == VERIFIED_RUNTIME_REF
@@ -76,3 +79,15 @@ def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, j
         check=True,
     )
     assert output.read_text().strip() == "ref=" + expected, result.stdout
+
+
+def test_every_lifecycle_job_shares_the_setup_and_feeds_the_aggregate_status():
+    """The old required `lifecycle` check remains one status that waits for every area."""
+    jobs = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())["jobs"]
+    for name in LIFECYCLE_JOBS:
+        uses = [step.get("uses") for step in jobs[name]["steps"]]
+        assert "./.github/actions/lifecycle-setup" in uses, name
+        assert jobs[name]["needs"] == "gate"
+    aggregate = jobs["lifecycle"]
+    assert aggregate["if"] == "always()"
+    assert set(aggregate["needs"]) == {"gate", *LIFECYCLE_JOBS}

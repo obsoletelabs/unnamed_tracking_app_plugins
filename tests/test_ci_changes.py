@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "tools"))
 
-from ci_changes import classify, everything
+from ci_changes import classify, everything, tool_plugins
 
 
 def test_unknown_change_sets_select_everything():
@@ -18,7 +18,8 @@ def test_unknown_change_sets_select_everything():
 @pytest.mark.parametrize("path", [
     "sdk/plugin_protocol.py", "tools/build_packages.py", "publishers/registry.json",
     ".github/workflows/ci.yml", "requirements-dev.txt", "package.json", "catalogue.json",
-    "tools/ci_changes.py",
+    "tools/ci_changes.py", "tools/check_host_lifecycle.py", "tools/check_metadata_live.py",
+    "tools/capture_sessions.mjs", "tools/schemas/manifest.schema.json",
 ])
 def test_shared_files_select_everything(path):
     selection = classify([path])
@@ -39,6 +40,31 @@ def test_a_single_plugin_selects_only_its_acceptance_steps():
     other = classify(["official/epic-games/epic.py"])
     assert other["lifecycle"] and not (
         other["lifecycle_jellyfin"] or other["lifecycle_pwa"] or other["lifecycle_reference"])
+
+
+@pytest.mark.parametrize("path, owners", [
+    ("tools/check_collectors_archive_ui.mjs", ["official/collectors-archive"]),
+    ("tools/capture_collectors_archive.mjs", ["official/collectors-archive"]),
+    ("tools/check_epic_host.py", ["official/epic-games"]),
+    ("tools/check_jellyfin_official_lifecycle.py", ["official/jellyfin-media-sync"]),
+    ("tools/capture_jellyfin_official.mjs", ["official/jellyfin-media-sync"]),
+])
+def test_plugin_scoped_tools_select_only_their_plugin(path, owners):
+    selection = classify([path])
+    assert selection["plugins"] == owners
+    assert selection["lifecycle"] and selection["full_tests"]
+    assert selection["lifecycle_jellyfin"] == (owners == ["official/jellyfin-media-sync"])
+    assert not selection["lifecycle_pwa"] and not selection["lifecycle_reference"]
+
+
+def test_tool_ownership_needs_one_plugin_and_a_check_or_capture_name():
+    available = ["official/metadata-hltb", "official/metadata-tmdb", "official/pwa",
+                 "examples/ui-api"]
+    assert tool_plugins("check_metadata_live.py", available) == set()  # shared by several
+    assert tool_plugins("check_pwa_lifecycle.py", available) == {"official/pwa"}
+    assert tool_plugins("check_ui_api_cases.py", available) == {"examples/ui-api"}
+    assert tool_plugins("build_pwa.py", available) == set()  # not a check/capture script
+    assert tool_plugins("check_unknown.py", available) == set()
 
 
 def test_documentation_only_changes_skip_plugin_lifecycle_and_package_work():

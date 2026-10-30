@@ -3,14 +3,46 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
+from pathlib import Path
 
 PLUGIN_ROOTS = ("examples", "official", "plugins")
 DOC_ROOTS = ("wiki", "docs")
 ZERO_SHA = "0" * 40
 JELLYFIN = "official/jellyfin-media-sync"
 PWA = "official/pwa"
+REPOSITORY = Path(__file__).resolve().parents[1]
+TOOL_NAME = re.compile(r"^(?:check|capture)_(?P<rest>.+?)\.[^.]+$")
+
+
+def tool_plugins(name: str, available: list[str] | None = None) -> set[str]:
+    """Plugins a ``tools/check_<plugin>*`` or ``tools/capture_<plugin>*`` script belongs to.
+
+    A script belongs to a plugin when its name continues the plugin directory name
+    (``check_collectors_archive_ui`` -> ``collectors-archive``) or, failing that, when its
+    first word identifies exactly one plugin (``check_epic_host`` -> ``epic-games``,
+    ``check_jellyfin_official_lifecycle`` -> the official Jellyfin plugin). Anything else,
+    including a word shared by several plugins (``check_metadata_live``), stays shared.
+    """
+    match = TOOL_NAME.match(name)
+    if not match:
+        return set()
+    rest = match["rest"]
+    if available is None:
+        available = [f"{root}/{child.name}" for root in PLUGIN_ROOTS
+                     if (REPOSITORY / root).is_dir()
+                     for child in sorted((REPOSITORY / root).iterdir()) if child.is_dir()]
+    slugs = {path: path.split("/")[1].replace("-", "_") for path in available}
+    exact = {path for path, slug in slugs.items() if rest == slug or rest.startswith(slug + "_")}
+    if exact:
+        return exact
+    first = rest.split("_")[0]
+    related = {path for path, slug in slugs.items() if slug.split("_")[0] == first}
+    if "official" in rest.split("_"):
+        related = {path for path in related if path.startswith("official/")}
+    return related if len({slugs[path] for path in related}) == 1 else set()
 
 
 def classify(files: list[str] | None) -> dict[str, object]:
@@ -18,7 +50,9 @@ def classify(files: list[str] | None) -> dict[str, object]:
 
     ``None`` means the change set is unknown. Paths outside plugin sources, documentation
     and tests (SDK, tools, publishers, workflows, dependency files, ...) are shared and
-    select everything; documentation-only diffs skip plugin lifecycle and package work.
+    select everything, except per-plugin ``tools/check_<plugin>*`` and
+    ``tools/capture_<plugin>*`` scripts, which count as changes to that plugin.
+    Documentation-only diffs skip plugin lifecycle and package work.
     """
     if files is None:
         return everything()
@@ -33,6 +67,8 @@ def classify(files: list[str] | None) -> dict[str, object]:
             plugins.add("/".join(parts[:2]))
         elif parts[0] in DOC_ROOTS or (len(parts) == 1 and path.endswith(".md")):
             continue
+        elif parts[0] == "tools" and len(parts) == 2 and (owners := tool_plugins(parts[1])):
+            plugins.update(owners)
         elif parts[0] == "tests":
             tests = True
         else:
