@@ -1,8 +1,8 @@
 # Epic Games Library
 
 The official `official.epic-games` plugin keeps Epic connection and import behavior
-outside the core app. It requires the host's additive **Plugin API 1.1.11**
-connection sync and personal schedule contracts. Its sandboxed page offers personal sign-in, imports,
+outside the core app. It requires the host's additive **Plugin API 1.1.19**
+(`games.import` artwork addresses on top of the 1.1.11 connection sync and personal schedule contracts). Its sandboxed page offers personal sign-in, imports,
 pause/resume and disconnect through declared actions.
 
 ## Experimental service dependency
@@ -21,8 +21,9 @@ An Epic service failure is not host data loss. A failed sign-in, refresh or
 provider request keeps the saved connection, checkpoint and library; the plugin
 never deletes games, and disconnecting keeps imported games. Imports carry the
 title, Epic identity, and (when Epic supplies them) description, developer,
-publisher and total playtime. Artwork, release dates, genres/tags and
-achievements are not imported.
+publisher, total playtime and, for games that lack those pictures, the addresses of
+Epic's key art, banner, logo and icon (the host downloads them). Release dates,
+genres/tags and achievements are not imported.
 
 The plugin README is the maintained reference for
 [imported fields](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/blob/main/official/epic-games/README.md#imported-fields)

@@ -1,4 +1,4 @@
-"""Personal Epic library imports and autosync through Plugin API 1.1.11."""
+"""Personal Epic library imports and autosync through Plugin API 1.1.19."""
 
 from __future__ import annotations
 
@@ -115,6 +115,7 @@ def public_status(user):
         "conflicts": state.get("conflicts", 0),
         "skipped": state.get("skipped", 0),
         "catalogue_missing": state.get("catalogue_missing", 0),
+        "artwork_failed": state.get("artwork_failed", 0),
         "skipped_entries": state.get("skipped_entries", [])[:25],
         "warning": state.get("warning"),
         "updated_at": state.get("updated_at"),
@@ -254,6 +255,9 @@ def import_step(user, state):
                     "title": item["title"],
                 }
                 state["imported"] += 1
+                if game.get("artwork_failed"):
+                    # The host keeps the game; the next sync offers the pictures again.
+                    state["artwork_failed"] = state.get("artwork_failed", 0) + 1
         store(known_key, known)
     batch_ids = set(state["batch_ids"])
     state["pending"] = [i for i in state["pending"] if i not in batch_ids]

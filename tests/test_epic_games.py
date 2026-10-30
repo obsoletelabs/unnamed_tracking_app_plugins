@@ -174,7 +174,7 @@ def test_sandbox_assets_are_inlined_and_scripts_follow_the_form():
 def test_epic_is_a_connection_not_a_sidebar_page():
     manifest = json.loads((SOURCE / "manifest.json").read_text())
     document = json.loads((SOURCE / "ui.json").read_text())
-    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.11"
+    assert manifest["api_contract_version"] == document["api_contract_version"] == "1.1.19"
     capabilities = {item["name"] for item in manifest["capabilities"]}
     assert "frontend.connections" in capabilities
     assert "frontend.navigation.main" not in capabilities
@@ -605,7 +605,8 @@ def test_progress_is_kept_when_a_later_batch_hits_a_transport_failure(service):
 
 # The host's games.import contract (ImportedGameInput) accepts only these fields and limits.
 IMPORT_FIELDS = {"external_id", "title", "description", "developer", "publisher", "tags",
-                 "provider_ids", "playtime_seconds", "available"}
+                 "provider_ids", "playtime_seconds", "available", "release_date", "key_art_url",
+                 "banner_url", "logo_url", "icon_url"}
 IMPORT_LIMITS = {"external_id": 256, "title": 500, "description": 20000, "developer": 200, "publisher": 200}
 
 
@@ -622,7 +623,9 @@ def test_imported_items_use_only_fields_and_limits_the_host_import_contract_acce
     for field, limit in IMPORT_LIMITS.items():
         assert len(item[field]) <= limit
     assert item["provider_ids"] == {"epic": item["external_id"]}
-    # Artwork, release dates and genres are not accepted by games.import, so none are sent.
+    # Raw catalogue structures, genres and release dates are never forwarded. The release date is
+    # deliberately omitted because Epic's catalogue only carries listing timestamps.
+    assert item["key_art_url"] == "https://cdn.example/box.jpg"
     assert not {"keyImages", "artwork", "poster_url", "release_date", "tags", "releaseInfo"} & set(item)
 
 
@@ -636,3 +639,142 @@ def test_import_batches_stay_within_the_host_contract(service):
     finish(service)
     assert service.imports and all(len(batch["items"]) <= 25 for batch in service.imports)
     assert all(set(item) <= IMPORT_FIELDS for batch in service.imports for item in batch["items"])
+
+
+def image(kind, url, width=0, height=0):
+    return {"type": kind, "url": url, "width": width, "height": height}
+
+
+def with_images(service, images):
+    metadata = {"title": "Pictured", "categories": [{"path": "games"}], "keyImages": images}
+    return service.epic.game_item({**row(), "apps": ["game-app"]}, metadata, {})
+
+
+def urls(item):
+    return {k: v for k, v in item.items() if k.endswith("_url")}
+
+
+def test_best_epic_images_fill_each_host_artwork_field(service):
+    item = with_images(service, [
+        image("OfferImageTall", "https://cdn.example/offer-tall.jpg", 100, 200),
+        image("DieselGameBoxTall", "https://cdn.example/tall-small.jpg", 300, 400),
+        image("DieselGameBoxTall", "https://cdn.example/tall-large.jpg", 1200, 1600),
+        image("DieselGameBox", "https://cdn.example/wide.jpg", 2560, 1440),
+        image("DieselGameBoxLogo", "https://cdn.example/logo.png", 800, 400),
+        image("Thumbnail", "https://cdn.example/thumb.jpg", 256, 256),
+        image("IARC", "https://cdn.example/rating.png", 64, 64),
+    ])
+    assert urls(item) == {
+        "key_art_url": "https://cdn.example/tall-large.jpg",
+        "banner_url": "https://cdn.example/wide.jpg",
+        "logo_url": "https://cdn.example/logo.png",
+        "icon_url": "https://cdn.example/thumb.jpg",
+    }
+
+
+def test_fallback_types_are_used_only_when_the_preferred_type_is_absent(service):
+    item = with_images(service, [
+        image("OfferImageTall", "https://cdn.example/offer-tall.jpg"),
+        image("DieselStoreFrontWide", "https://cdn.example/front.jpg"),
+        image("ProductLogo", "https://cdn.example/product-logo.png"),
+    ])
+    assert urls(item) == {
+        "key_art_url": "https://cdn.example/offer-tall.jpg",
+        "banner_url": "https://cdn.example/front.jpg",
+        "logo_url": "https://cdn.example/product-logo.png",
+    }
+
+
+@pytest.mark.parametrize("url", [
+    None, 5, "", "   ", "ftp://cdn.example/a.png", "javascript:alert(1)", "//cdn.example/a.png",
+    "https://user:pass@cdn.example/a.png", "https://user@cdn.example/a.png",
+    "https://cdn.example/a.png#frag", "https://cdn.example:8443/a.png", "https://cdn.example:bad/a.png",
+    "https://localhost/a.png", "https://nas.lan/a.png", "https://printer.local/a.png",
+    "https://intranet/a.png", "https://127.0.0.1/a.png", "https://10.0.0.5/a.png",
+    "https://192.168.1.2/a.png", "https://169.254.169.254/a.png", "https://[::1]/a.png",
+    "https://cdn.example/a\b.png", "https://cdn.example/a\tb.png", "https://cdn.example/" + "a" * 2048,
+])
+def test_invalid_artwork_urls_are_dropped_not_fatal(service, url):
+    item = with_images(service, [
+        image("DieselGameBoxTall", url), image("DieselGameBox", "https://cdn.example/ok.jpg")])
+    assert item["title"] == "Pictured"
+    assert urls(item) == {"banner_url": "https://cdn.example/ok.jpg"}
+
+
+def test_valid_public_urls_are_kept_and_spaces_are_encoded(service):
+    for url, expected in (
+        ("http://cdn.example:80/a.png", "http://cdn.example:80/a.png"),
+        ("https://cdn1.epicgames.com/offer/x/Box Art.jpg?h=1&w=2",
+         "https://cdn1.epicgames.com/offer/x/Box%20Art.jpg?h=1&w=2"),
+        ("https://93.184.216.34/a.png", "https://93.184.216.34/a.png"),
+    ):
+        assert service.epic.artwork_url(url) == expected
+
+
+@pytest.mark.parametrize("bad", [None, "x", {"a": 1}, [None, "x", {"type": "DieselGameBox"},
+                                                        {"type": ["x"], "url": "https://a.b/c"}]])
+def test_malformed_key_images_never_fail_the_item(service, bad):
+    item = with_images(service, bad)
+    assert item["title"] == "Pictured" and not urls(item)
+
+
+def test_artwork_survives_checkpoint_restart_and_host_replay(service, monkeypatch):
+    service.catalogue[("store", "item")] = {
+        "title": "Pictured", "categories": [{"path": "games"}],
+        "keyImages": [image("DieselGameBoxTall", "https://cdn.example/tall.jpg", 10, 20),
+                      image("DieselGameBox", "https://cdn.example/bad.jpg#x")],
+    }
+    connected(service)
+    key = "sync/users/" + USER
+    while json.loads(service.storage[key])["phase"] != "import":
+        service.plugin.step(context())
+    batch = json.loads(service.storage[key])["batch"]
+    assert urls(batch[0]) == {"key_art_url": "https://cdn.example/tall.jpg"}
+
+    real_store = service.plugin.store
+
+    def failing_store(name, value):
+        if name == key:
+            raise OSError("checkpoint write failed after the host import")
+        real_store(name, value)
+
+    monkeypatch.setattr(service.plugin, "store", failing_store)
+    with pytest.raises(OSError):
+        service.plugin.step(context())
+    monkeypatch.setattr(service.plugin, "store", real_store)
+    assert json.loads(service.storage[key])["phase"] == "import"
+    final = finish(service)
+    assert final["imported"] == 1
+    assert len(service.imports) == 2 and service.imports[0] == service.imports[1]
+    assert urls(service.imports[1]["items"][0]) == {"key_art_url": "https://cdn.example/tall.jpg"}
+
+
+def test_a_checkpoint_saved_before_artwork_existed_still_imports(service):
+    connected(service)
+    key = "sync/users/" + USER
+    while json.loads(service.storage[key])["phase"] != "import":
+        service.plugin.step(context())
+    state = json.loads(service.storage[key])
+    for field in ("key_art_url", "banner_url", "logo_url", "icon_url"):
+        state["batch"][0].pop(field, None)
+    state.pop("artwork_failed", None)
+    service.storage[key] = json.dumps(state)
+    assert finish(service)["imported"] == 1
+
+
+def test_host_reported_artwork_failures_are_counted_without_failing_the_import(service, monkeypatch):
+    service.catalogue[("store", "item")]["keyImages"] = [
+        image("DieselGameBoxTall", "https://cdn.example/t.jpg")]
+    connected(service)
+    original = service.plugin.request
+
+    def reporting(method, capability, payload):
+        result = original(method, capability, payload)
+        if method == "games.import":
+            for game in result["games"]:
+                game["artwork_failed"] = ["key_art"]
+        return result
+
+    monkeypatch.setattr(service.plugin, "request", reporting)
+    final = finish(service)
+    assert final["imported"] == 1 and final["artwork_failed"] == 1 and final["conflicts"] == 0
