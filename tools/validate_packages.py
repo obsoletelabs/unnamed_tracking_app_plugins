@@ -132,6 +132,11 @@ def validate_package(path: Path, *, full: bool = False) -> None:
         if not isinstance(native, dict) or ("frontend.native", 1) not in capabilities:
             raise ValueError(f"{path.name}: native frontend requires frontend.native")
         entry = native.get("entry")
+        activation = native.get("activation", "startup")
+        if activation not in {"startup", "page"}:
+            raise ValueError(f"{path.name}: invalid native frontend activation")
+        if activation == "page" and tuple(map(int, manifest.get("api_contract_version", "1.0.0").split("."))) < (1, 1, 17):
+            raise ValueError(f"{path.name}: page activation requires Plugin API v1.1.17")
         styles = native.get("styles", [])
         if not isinstance(entry, str) or not isinstance(styles, list):
             raise ValueError(f"{path.name}: invalid native frontend declaration")

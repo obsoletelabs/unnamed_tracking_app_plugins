@@ -127,3 +127,7 @@ identifies the tested archive and records the actual loaded native UI.
 ![Native admin component with fixture data](../../wiki/docs/assets/screenshots/session-manager-admin.png)
 
 Screenshot uses the actual native module with disposable fixture data in a local Vue harness, not a deployed authenticated host.
+
+
+Requires Plugin API v1.1.17 for declared page activation. The native bundle loads
+when a contributed page is opened, rather than during unrelated library navigation.

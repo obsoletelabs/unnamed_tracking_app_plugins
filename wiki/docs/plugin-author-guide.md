@@ -522,3 +522,14 @@ plugins use these locations and separate saving settings from enabling/disabling
 Invitation registration also supports escaped plain-text email presentation and an
 optional recipient name on issuance. SMTP sender addresses and acceptance links
 remain host owned; wording-only edits preserve outstanding links.
+
+
+### Page activation (Plugin API v1.1.17)
+
+For bundles that only register components for declared contributions, set
+`native_frontend.activation` to `page` and declare `api_contract_version: "1.1.17"`
+in both the manifest and UI document. The host imports that bundle when a
+contribution mounts. Omitted activation retains `startup`, which is required for
+bundles registering global search, notification providers or startup hooks.
+Concurrent contribution mounts share one activation. Existing grant and package
+validation requirements apply to both modes.

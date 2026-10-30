@@ -365,4 +365,6 @@ def test_packages_bundle_exactly_the_helpers_they_import(current_packages, plugi
         assert {"payload/sdk/discord_embeds.py", "payload/sdk/notification_stories.py"} <= names
         assert archive.read("payload/sdk/discord_embeds.py") == (ROOT / "sdk/discord_embeds.py").read_bytes()
         manifest = json.loads(archive.read("manifest.json"))
-    assert manifest["api_contract_version"] == "1.1.14" and manifest["sdk_version_range"] == "^1.1.14"
+    contract = "1.1.17" if plugin_id == "official.discord-bot-notifications" else "1.1.14"
+    assert manifest["api_contract_version"] == contract
+    assert manifest["sdk_version_range"] == "^" + contract

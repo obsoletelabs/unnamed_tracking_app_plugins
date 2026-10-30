@@ -184,3 +184,9 @@ deterministic; mentions never notify; only http(s) links survive.
   minimal path. The legacy grouped `.dm` provider is unchanged.
 
 Release order: host (Plugin API 1.1.14) first, then this package.
+
+
+Requires Plugin API v1.1.17 for declared page activation. The native bundle loads
+when a contributed page is opened, rather than during unrelated library navigation.
+Settings initially read saved configuration. Use **Refresh** to fetch live Discord
+identity and health; unchecked remote health is shown explicitly.

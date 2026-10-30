@@ -98,20 +98,39 @@ export function activate(context) {
               message.value =
                 error?.message || "Operation failed. Check credentials, server access and plugin permissions in runtime diagnostics.";
           } finally {
-            if (life.live) busy.value = false;
+            if (life.live) {
+              busy.value = false;
+              if (!admin) {
+                clearTimeout(life.timer);
+                life.timer = setTimeout(poll, 1000);
+              }
+            }
           }
         }
+        let lastReviewSignature = null;
         async function poll() {
+          let interval = 30000;
           try {
+            if (!life.live) return;
+            if ((typeof document !== "undefined" && document.hidden) || busy.value) return;
             const result = await run("status");
-            if (life.live) statuses.value = result.accounts || {};
-            await refresh(true);
+            if (!life.live) return;
+            statuses.value = result.accounts || {};
+            const entries = Object.entries(statuses.value).sort(([a], [b]) => a.localeCompare(b));
+            if (entries.some(([, state]) => state.phase === "syncing")) interval = 5000;
+            const signature = JSON.stringify(entries.map(([id, state]) => [id, state.reviews || 0, state.finished_at || 0]));
+            const reviews = entries.reduce((total, [, state]) => total + (state.reviews || 0), 0);
+            if ((lastReviewSignature !== null && lastReviewSignature !== signature) ||
+                reviews !== (config.value.review_total ?? config.value.reviews?.length ?? 0))
+              await refresh(true);
+            lastReviewSignature = signature;
           } catch (error) {
             if (life.live)
               message.value =
                 error?.message || "Sync status is unavailable. Check plugin permissions.";
+          } finally {
+            if (life.live) life.timer = setTimeout(poll, interval);
           }
-          if (life.live) life.timer = setTimeout(poll, 5000);
         }
         async function loadConfiguration() {
           loading.value = true;
