@@ -114,6 +114,8 @@ def public_status(user):
         "imported": state.get("imported", 0),
         "conflicts": state.get("conflicts", 0),
         "skipped": state.get("skipped", 0),
+        "catalogue_missing": state.get("catalogue_missing", 0),
+        "skipped_entries": state.get("skipped_entries", [])[:25],
         "warning": state.get("warning"),
         "updated_at": state.get("updated_at"),
     }
@@ -195,6 +197,9 @@ def inventory_step(state, session):
         state["phase"] = "playtime"
 
 
+MAX_SKIPPED_ENTRIES = 100
+
+
 def catalogue_step(state, session):
     pending = state["pending"]
     if not pending:
@@ -205,12 +210,19 @@ def catalogue_step(state, session):
     metadata = epic.catalog(
         session, first["namespace"], [state["records"][i]["catalogItemId"] for i in identities]
     )
-    items = [
-        epic.game_item(
-            state["records"][i], metadata[state["records"][i]["catalogItemId"]], state["playtime"]
-        )
-        for i in identities
-    ]
+    items = []
+    for identity in identities:
+        record = state["records"][identity]
+        entry = metadata.get(record["catalogItemId"])
+        if entry is None:
+            # One omitted or delisted entry must not hold back its batch or later games.
+            skipped = state.setdefault("skipped_entries", [])
+            if len(skipped) < MAX_SKIPPED_ENTRIES:
+                skipped.append(identity)
+            state["catalogue_missing"] = state.get("catalogue_missing", 0) + 1
+            items.append(None)
+        else:
+            items.append(epic.game_item(record, entry, state["playtime"]))
     state.update(batch=[i for i in items if i is not None], batch_ids=identities, phase="import")
     state["skipped"] += sum(i is None for i in items)
 

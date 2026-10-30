@@ -417,9 +417,11 @@ def test_catalogue_failure_preserves_batch_and_optional_playtime_is_not_zero(ser
     service.failures["/library/api/public/playtime/account/" + ACCOUNT + "/all"] = {"status": 503}
     service.plugin.step(context())
     service.plugin.step(context())
-    service.catalogue.clear()
-    assert "catalogue" in service.plugin.step(context())["error"]
+    path = "/catalog/api/shared/namespace/store/bulk/items"
+    service.failures[path] = {"status": 503}
+    assert "retained" in service.plugin.step(context())["error"]
     assert service.imports == [] and service.plugin.status(context())["phase"] == "catalogue"
+    service.failures.pop(path)
     service.catalogue[("store", "item")] = {"title": "Recovered game"}
     result = finish(service)
     assert result["warning"] and "playtime_seconds" not in service.imports[0]["items"][0]
@@ -550,3 +552,52 @@ def test_support_docs_name_the_unofficial_dependency_without_launcher_credential
     assert len(quoted) >= 8
     for message in quoted:
         assert message in source, message
+
+
+def test_missing_catalogue_entries_are_skipped_and_do_not_block_later_games(service):
+    rows = [row(str(i), "one", str(i)) for i in range(30)] + [row("late", "two", "late-app")]
+    service.pages[None] = {"records": rows, "responseMetadata": {"nextCursor": None}}
+    for item in rows:
+        service.catalogue[(item["namespace"], item["catalogItemId"])] = {
+            "title": "Game " + item["catalogItemId"], "categories": [{"path": "games"}]}
+    for delisted in ("3", "26"):  # one in each 25-item batch
+        service.catalogue.pop(("one", delisted))
+    connected(service)
+    result = finish(service)
+    assert result["catalogue_missing"] == 2 and result["skipped"] == 2
+    assert set(result["skipped_entries"]) == {"one:3", "one:26"}
+    imported = {item["external_id"] for batch in service.imports for item in batch["items"]}
+    assert "two:late" in imported and "one:3" not in imported and len(imported) == 29
+    assert result["imported"] == 29
+
+
+def test_all_entries_missing_from_a_batch_still_lets_the_import_complete(service):
+    connected(service)
+    service.catalogue.clear()
+    result = finish(service)
+    assert result["catalogue_missing"] == 1 and result["imported"] == 0
+    assert service.imports == []
+
+
+def test_progress_is_kept_when_a_later_batch_hits_a_transport_failure(service):
+    rows = [row(str(i), "one", str(i)) for i in range(5)] + [row("x", "two", "x-app")]
+    service.pages[None] = {"records": rows, "responseMetadata": {"nextCursor": None}}
+    for item in rows:
+        service.catalogue[(item["namespace"], item["catalogItemId"])] = {
+            "title": "Game " + item["catalogItemId"], "categories": [{"path": "games"}]}
+    service.catalogue.pop(("one", "2"))
+    connected(service)
+    path = "/catalog/api/shared/namespace/two/bulk/items"
+    service.failures[path] = {"status": 503}
+    for _ in range(100):
+        result = service.plugin.step(context())
+        if result.get("ok") is False:
+            break
+    else:
+        raise AssertionError("transport failure was hidden")
+    assert "retained" in result["error"]
+    state = service.storage["sync/users/" + USER]
+    assert json.loads(state)["imported"] == 4  # the first namespace's games survived
+    service.failures.pop(path)
+    final = finish(service)
+    assert final["imported"] == 5 and final["catalogue_missing"] == 1

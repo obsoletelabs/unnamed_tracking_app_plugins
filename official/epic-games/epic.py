@@ -206,11 +206,10 @@ def catalog(session, namespace, ids):
         CATALOG_URL.format(namespace=quote(namespace, safe="")) + "?" + query,
         token=session["access_token"],
     )
-    if not isinstance(data, dict) or any(
-        not isinstance(data.get(identity), dict) for identity in ids
-    ):
-        raise EpicError("Epic omitted catalogue entries. Resume to retry this batch.")
-    return data
+    if not isinstance(data, dict):
+        raise EpicError("Epic returned an unreadable catalogue response. Resume to retry this batch.")
+    # Delisted or withdrawn items are simply absent; the caller records and skips them.
+    return {identity: data[identity] for identity in ids if isinstance(data.get(identity), dict)}
 
 
 def game_item(record, metadata, played):
