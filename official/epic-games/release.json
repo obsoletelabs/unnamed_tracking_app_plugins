@@ -9,5 +9,5 @@
   ],
   "icon": "icon.svg",
   "automatic_update": false,
-  "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Requires Plugin API 1.1.11."
+  "release_notes": "Steam-style host connection dialog with shared appearance, focused sign-in controls and compact imports. Adds Games menu sync and an opt-in personal Epic autosync schedule with bounded checkpoint continuation. Existing token handling, pause/resume, conflict protections and disconnect confirmation are preserved. Imports now also send Epic's key art, banner, logo and icon addresses for games that lack those pictures. Requires Plugin API 1.1.19."
 }

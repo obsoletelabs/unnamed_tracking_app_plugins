@@ -148,7 +148,7 @@ def main():
                 break
             time.sleep(0.1)
         assert (
-            installed["api_contract_version"] == "1.1.11"
+            installed["api_contract_version"] == "1.1.19"
             and installed["status"] == "running"
         )
         assert installed["digest"] == preview["digest"], (

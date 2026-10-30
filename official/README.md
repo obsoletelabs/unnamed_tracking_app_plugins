@@ -1,7 +1,7 @@
 # Official plugins
 
 [Epic Games Library](epic-games/README.md) connects a personal Epic
-account and imports games/playtime through Plugin API 1.1.11. It relies on Epic's
+account and imports games, playtime and artwork addresses through Plugin API 1.1.19. It relies on Epic's
 unofficial launcher services, so it is experimental; see its
 [service dependency and support notes](epic-games/README.md#experimental-service-dependency).
 It preserves manual library state and resumes bounded inventory/catalogue/import
