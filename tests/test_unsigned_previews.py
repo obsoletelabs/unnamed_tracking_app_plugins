@@ -41,10 +41,15 @@ def test_workflows_parse_and_unsigned_previews_run_for_all_branch_pushes():
     assert "push" in checks["on"] and checks["on"]["push"] in ("", {})
     assert "pull_request" in checks["on"]
     preview = checks["jobs"]["unsigned-dist"]
-    assert "if" not in preview
+    # The shared gate (not per-job path checks) decides whether this commit's CI runs.
+    assert preview["needs"] == "gate" and preview["if"] == "needs.gate.outputs.run == 'true'"
+    assert checks["jobs"]["gate"].get("needs") is None
+    assert all(job.get("needs") == "gate" for name, job in checks["jobs"].items() if name != "gate")
     assert any(step.get("with", {}).get("name") == "unsigned-dist" for step in preview["steps"])
     publication = yaml.load((workflows / "publish.yml").read_text(), Loader=yaml.BaseLoader)
-    assert publication["on"]["push"]["branches"] == ["**"]
+    # Publication only ever runs for main or a release, so other branches must not start it.
+    assert publication["on"]["push"]["branches"] == ["main"]
+    assert "if" in publication["jobs"]["packages"]
 
 
 def test_bot_release_matches_registered_official_publisher_and_retains_manual_updates():

@@ -38,8 +38,8 @@ permission approval are separate. Unsigned preview packages remain untrusted.
 Full API/native frontend authority needs particular review; request narrow scopes.
 
 To test a branch or pull request, open its [Plugin checks workflow run](https://github.com/obsoletelabs/unnamed_tracking_app_plugins/actions/workflows/ci.yml)
-and download **unsigned-dist**. This job runs on every branch push and PR,
-independently of the full test job. Extract the artifact and upload the chosen
+and download **unsigned-dist**. This job runs for every non-draft PR and for pushes to branches without an open PR
+(a branch with a PR is covered once by the PR run), independently of the full test job. Extract the artifact and upload the chosen
 `.utp` through the install screen. Review permissions and explicitly consent to
 the unsigned preview. No build tools or signing key are needed on your machine.
 The artifact includes source commits and package digests; it never updates

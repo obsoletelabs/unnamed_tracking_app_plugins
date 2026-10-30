@@ -30,7 +30,7 @@ VERIFIED_RUNTIME_REF = "main"
 )
 @pytest.mark.parametrize(
     "workflow_name,job",
-    [("host-integration.yml", "lifecycle"), ("ci.yml", "test-and-build")],
+    [("ci.yml", "lifecycle"), ("ci.yml", "test-and-build")],
 )
 def test_workflow_selects_owned_host_target(tmp_path, scenario, workflow_name, job):
     """Explicit refs and open paired branches precede each workflow's verified fallback."""
