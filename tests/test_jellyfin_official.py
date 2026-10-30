@@ -744,3 +744,38 @@ def test_persistent_outage_is_not_treated_as_a_library_change(service):
     failure = finish(service)
     assert failure["error_code"] != "library_changed"
     assert "SECRET" not in failure["error"] and failure["retry_at"] > 0
+
+
+
+def test_sync_sends_the_watch_link_and_label_for_every_matched_item(service):
+    plugin, sync, _, server, account, _, _, imports, catalogue, *_ = service
+    catalogue[:] = [film(i) for i in range(3)]
+    plugin.save_server(context(admin=True, server_id=server, url="https://fixture.test/jellyfin/", name="Living Room"))
+    finish(service)
+    assert len(imports) >= 3
+    for payload in imports:
+        assert payload["source"] == "jellyfin" and payload["available"] is True
+        assert payload["watch_url"] == (
+            "https://fixture.test/jellyfin/web/index.html#!/details?id=" + payload["external_id"]
+        )
+        assert payload["watch_label"] == "Jellyfin · Living Room" and len(payload["watch_label"]) <= 80
+        assert TOKEN not in json.dumps(payload) and "@" not in payload["watch_url"].split("/")[2]
+
+
+def test_watch_label_is_bounded_and_defaults_when_the_server_is_unnamed(service):
+    fields = service[1].watch_fields
+    assert fields({"url": "https://jf.test/"}, "abc")["watch_label"] == "Jellyfin"
+    long = fields({"url": "https://jf.test"}, "a b")
+    assert long["watch_url"] == "https://jf.test/web/index.html#!/details?id=a%20b"
+    assert len(fields({"url": "https://jf.test", "name": "x" * 500}, "a")["watch_label"]) == 80
+
+
+def test_unavailable_items_keep_the_link_and_report_available_false(service):
+    plugin, sync, _, _, account, _, _, imports, catalogue, *_ = service
+    finish(service)
+    catalogue.pop(0)
+    finish(service)
+    finish(service)  # absent from two successful censuses
+    gone = [p for p in imports if p.get("available") is False]
+    assert gone and all(p["watch_url"].endswith(p["external_id"]) for p in gone)
+    assert any(p.get("availability_only") for p in gone)

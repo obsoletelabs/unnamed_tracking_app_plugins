@@ -60,6 +60,18 @@ def episode_override_key(user: str, account: dict, external: str) -> str:
     )
 
 
+def watch_fields(server: dict, external_id: str) -> dict:
+    """Deep link and label the host renders as "Watch in <label>" from the stored source."""
+    name = str(server.get("name") or "").strip()
+    return {
+        # Neither credentials nor server filesystem paths belong in navigation URLs.
+        "watch_url": server["url"].rstrip("/")
+        + "/web/index.html#!/details?id="
+        + quote(external_id, safe=""),
+        "watch_label": ("Jellyfin · " + name if name else "Jellyfin")[:80],
+    }
+
+
 def host_sync(user: str, payload: dict) -> dict:
     return request(
         "tasks.request",
@@ -103,6 +115,7 @@ def apply_item(
         inventory_complete=complete,
         history=history or [],
         available=state.get("available", True),
+        **watch_fields(server, item["external_id"]),
     )
     if state.get("target_id"):
         payload["target_id"] = state["target_id"]
@@ -451,6 +464,7 @@ def _finalize(user: str, account: dict, server: dict, cursor: dict) -> None:
                     source_scope=server.get("remote_server_id", server["id"])
                     + ":"
                     + account["remote_user_id"],
+                    **watch_fields(server, state["item"]["external_id"]),
                 )
                 host_sync(user, payload)
                 store(

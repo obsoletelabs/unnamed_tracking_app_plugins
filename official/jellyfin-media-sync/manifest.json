@@ -39,14 +39,6 @@
       "version": 1
     },
     {
-      "name": "frontend.page.extend",
-      "version": 1
-    },
-    {
-      "name": "frontend.context.media",
-      "version": 1
-    },
-    {
       "name": "notifications.send",
       "version": 1
     },
@@ -151,20 +143,6 @@
         "version": 1
       },
       "rationale": "Expose the plugin-owned Jellyfin sync route."
-    },
-    {
-      "capability": {
-        "name": "frontend.page.extend",
-        "version": 1
-      },
-      "rationale": "Contribute a plugin-owned Watch Now panel to media detail pages."
-    },
-    {
-      "capability": {
-        "name": "frontend.context.media",
-        "version": 1
-      },
-      "rationale": "Resolve Watch Now for the authenticated media-page context."
     },
     {
       "capability": {
