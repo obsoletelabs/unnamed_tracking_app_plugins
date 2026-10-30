@@ -122,3 +122,75 @@ def test_actual_package_uses_its_bundled_sdk_and_only_the_public_gateway(tmp_pat
         "time_to_beat_completionist_hours": 2.0, "time_to_beat_all_hours": 1.7,
         "provider_ids": {"hltb": "723"},
     }
+
+
+def interactive(**candidate):
+    return {"request": {"policy": "interactive"}, "candidate": {"title": "Portal", **candidate}}
+
+
+def _scripted(monkeypatch, responder):
+    calls = []
+
+    def request(method, capability, payload):
+        if method == "storage.get":
+            return {"value": None}
+        if method == "storage.compare_and_swap":
+            return {"swapped": True}
+        calls.append(payload)
+        return responder(payload)
+
+    monkeypatch.setattr(sdk, "request", request)
+    return calls
+
+
+@pytest.mark.parametrize("status", [404, 410, 500])
+def test_retired_or_failing_endpoints_surface_a_visible_failure_without_looping(monkeypatch, status):
+    calls = _scripted(monkeypatch, lambda payload: {"status": status, "data": None})
+    module = plugin("hltb", monkeypatch)
+    assert module.metadata(interactive()) == {"failure": {"code": "unavailable"}}
+    assert module.health({"request": {"policy": "interactive"}}) == {"failure": {"code": "unavailable"}}
+    # Interactive requests make a single token request and never reach the search.
+    assert [call["url"].split("?")[0] for call in calls] == [
+        "https://howlongtobeat.com/api/search/site/init"] * 2
+
+
+def test_search_endpoint_removal_after_a_valid_token_is_reported_not_hidden(monkeypatch):
+    def respond(payload):
+        if "/site/init?" in payload["url"]:
+            return {"status": 200, "data": {"token": "token"}}
+        return {"status": 404, "data": None}
+
+    calls = _scripted(monkeypatch, respond)
+    assert plugin("hltb", monkeypatch).metadata(interactive()) == {"failure": {"code": "unavailable"}}
+    assert len(calls) == 2  # interactive: no SDK retries; only 403 renews the token; 404 is final
+
+
+@pytest.mark.parametrize("init", [None, {}, {"token": ""}, {"token": 5}, {"token": "x\r\nInjected: 1"}, {"token": "a" * 3000}])
+def test_unusable_initialization_tokens_are_invalid_responses(monkeypatch, init):
+    calls = _scripted(monkeypatch, lambda payload: {"status": 200, "data": init})
+    assert plugin("hltb", monkeypatch).metadata(interactive()) == {"failure": {"code": "invalid_response"}}
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("data", [None, [], {"data": "nope"}, {"other": []}])
+def test_changed_search_schema_is_an_invalid_response(monkeypatch, data):
+    def respond(payload):
+        if "/site/init?" in payload["url"]:
+            return {"status": 200, "data": {"token": "token"}}
+        return {"status": 200, "data": data}
+
+    _scripted(monkeypatch, respond)
+    assert plugin("hltb", monkeypatch).metadata(interactive()) == {"failure": {"code": "invalid_response"}}
+
+
+def test_health_reports_healthy_and_requests_no_cookie_or_session_state(gateway, monkeypatch):
+    module = plugin("hltb", monkeypatch)
+    assert module.health({"request": {"policy": "interactive"}}) == {"health": "healthy"}
+    for call in gateway.calls:
+        assert not {name.lower() for name in call["headers"]} & {"cookie", "set-cookie"}
+        assert "cookies" not in call
+
+
+def test_punctuation_only_titles_do_not_touch_the_network(gateway, monkeypatch):
+    assert plugin("hltb", monkeypatch).metadata(values(title="!!! ???")) == {}
+    assert gateway.calls == []
