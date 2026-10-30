@@ -37,8 +37,15 @@ This local app test used Atlas 0.7.1 and a small blue icon fixture. The achievem
 
 ## Achievement catalogues
 
-Achievements are read in pages (`limit=200`, `offset`, following `next_offset`) so a large catalogue stays
-under the host gateway's response limit. Entries are de-duplicated by achievement `id`, at most 2000 are
-forwarded, and a failed later page is reported as a failure instead of a truncated list. An Atlas without
-paging ignores the parameters and returns everything in one response, which still works. Paging needs
-Atlas PR 95 (obsoletelabs/unnamed_tracking_metadata).
+Achievements are read from Atlas in pages (`limit=200`, `offset`, following `next_offset`) and handed to the
+host the same way: one Atlas page per response, trimmed to 56 KiB (measured as `json.dumps` of the whole
+result) so it stays under the plugin runtime's 64 KiB action output limit. A response that does not fit
+returns `next_cursor`, the next unsent Atlas offset, and the host asks again until there is none. Typical
+entries are 500 to 800 bytes, so about 70 to 110 fit per response: a 450-entry game takes 5 to 7 responses
+and a 2000-entry game about 20 to 30.
+
+The host merges the pages by `external_id` (host PR 447), so an entry repeated across a boundary arrives
+once. At most 2000 entries are forwarded, and a failed later page is reported as a failure instead of a
+truncated list. An Atlas without paging ignores the parameters and returns everything in one response,
+which is still split under the byte budget. Atlas paging needs Atlas PR 95
+(obsoletelabs/unnamed_tracking_metadata); without host PR 447 a later page replaces an earlier one.

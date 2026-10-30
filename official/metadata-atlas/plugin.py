@@ -1,5 +1,6 @@
 """Atlas metadata provider: merged, cross-provider media records from a self-hosted Atlas node."""
 
+import json
 import re
 import time
 from urllib.parse import quote, urlencode, urlsplit
@@ -252,26 +253,42 @@ def locate(values, selected):
 
 ACHIEVEMENT_PAGE_SIZE = 200
 ACHIEVEMENT_LIMIT = 2000
+# Below the runtime's 64 KiB action output limit, measured as json.dumps of the whole result.
+ACHIEVEMENT_PAGE_BYTES = 56 * 1024
+
+
+def achievement_page(values, game, offset):
+    """One Atlas page (API v2 limit/offset) as ``(results, next_offset)``.
+
+    ``None`` when the game has no achievement catalogue (404 on the first page). A failed later page
+    raises, so a catalogue is never silently truncated."""
+    path = "/games/" + quote(game["id"], safe=":") + "/achievements"
+    try:
+        data = call(values, path + "?" + urlencode({"limit": ACHIEVEMENT_PAGE_SIZE, "offset": offset}))
+    except ProviderFailure as exc:
+        if exc.status == 404 and offset == 0:
+            return None
+        raise
+    results = data.get("results", [])
+    if not isinstance(results, list):
+        raise ProviderFailure("invalid_response")
+    following = data.get("next_offset")
+    if isinstance(following, bool) or not isinstance(following, int) or following <= offset:
+        following = None
+    return results, following
 
 
 def achievement_pages(values, game):
-    """Read the catalogue in bounded pages (Atlas API v2 limit/offset, next_offset).
+    """Read the whole catalogue in bounded pages.
 
     A server without paging ignores the parameters and returns everything in one response with no
-    next_offset, which ends the loop after the first page. Entries are de-duplicated by achievement id
-    and a failed later page raises instead of returning a silently truncated catalogue."""
-    path = "/games/" + quote(game["id"], safe=":") + "/achievements"
+    next_offset, which ends the loop after the first page. Entries are de-duplicated by achievement id."""
     entries, seen, offset = [], set(), 0
     while True:
-        try:
-            data = call(values, path + "?" + urlencode({"limit": ACHIEVEMENT_PAGE_SIZE, "offset": offset}))
-        except ProviderFailure as exc:
-            if exc.status == 404 and offset == 0:
-                return None
-            raise
-        results = data.get("results", [])
-        if not isinstance(results, list):
-            raise ProviderFailure("invalid_response")
+        page = achievement_page(values, game, offset)
+        if page is None:
+            return None
+        results, following = page
         for entry in results:
             if not isinstance(entry, dict):
                 continue
@@ -281,57 +298,87 @@ def achievement_pages(values, game):
                     continue
                 seen.add(identity)
             entries.append(entry)
-        following = data.get("next_offset")
-        if (isinstance(following, bool) or not isinstance(following, int) or following <= offset
-                or len(entries) >= ACHIEVEMENT_LIMIT):
-            # No further page, a cursor that does not advance, or the forwarding cap.
+        if following is None or len(entries) >= ACHIEVEMENT_LIMIT:
             return entries
         offset = following
 
 
-def achievement_catalogue(values, game):
+def achievement_item(entry, root):
+    """The host's definition for one Atlas achievement, or None when it cannot be forwarded."""
+    name = entry.get("name")
+    identity = entry.get("id")
+    if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
+        return None
+    if not isinstance(identity, str) or not 0 < len(identity) <= 200:
+        return None
+    item = {"name": name.strip(), "external_id": identity, "hidden": entry.get("hidden") is True}
+    if isinstance(entry.get("description"), str) and entry["description"].strip():
+        item["description"] = entry["description"].strip()[:2000]
+    percent = entry.get("global_percent")
+    if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
+        item["global_percent"] = float(percent)
+    for source, target in (("icon_url", "icon_url"), ("locked_icon_url", "locked_icon_url")):
+        digest = (entry.get(source) or "").rsplit("/", 1)[-1] if isinstance(entry.get(source), str) else ""
+        if re.fullmatch(r"[0-9a-f]{64}", digest):
+            item[target] = f"{root}/media/{digest}"
+    if entry.get("kind") in ("progression", "missable", "win_condition"):
+        item["kind"] = entry["kind"]
+    if entry.get("tier") in ("bronze", "silver", "gold"):
+        item["tier"] = entry["tier"]
+    points = entry.get("points")
+    if isinstance(points, int) and not isinstance(points, bool) and 0 <= points <= 100_000:
+        item["points"] = points
+    ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
+    source_ids = {k: v for k, v in ids.items() if isinstance(k, str) and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", k)
+                  and isinstance(v, str) and 0 < len(v) <= 512}
+    if source_ids:
+        item["source_ids"] = dict(list(source_ids.items())[:8])
+    return item
+
+
+def achievement_catalogue(values, game, cursor=0):
     """Atlas's achievement definitions (names, descriptions, rarity); never anyone's progress.
 
     Icons are Atlas's own verified copies, offered through its public /media path like artwork, so the
     host downloads them itself under its public-network rules. Hidden entries arrive redacted from Atlas
-    and are forwarded as they come, flagged hidden."""
-    entries = achievement_pages(values, game)
-    if entries is None:
+    and are forwarded as they come, flagged hidden.
+
+    One Atlas page per host page, under ACHIEVEMENT_PAGE_BYTES, so the runtime's 64 KiB action output
+    limit is never reached. ``next_cursor`` is the next unsent Atlas offset; the host merges pages by
+    external_id. Entries repeated across pages are de-duplicated by the host merge."""
+    if cursor >= ACHIEVEMENT_LIMIT:
+        return {"metadata": {"achievements": []}}
+    page = achievement_page(values, game, cursor)
+    if page is None:
         return {}
+    results, following = page
     root = public_base_url()
-    items, seen = [], set()
-    for entry in entries:
-        name = entry.get("name")
-        identity = entry.get("id")
-        if not isinstance(name, str) or not 0 < len(name.strip()) <= 200:
-            continue
-        if not isinstance(identity, str) or not 0 < len(identity) <= 200 or identity in seen:
-            continue
-        seen.add(identity)
-        item = {"name": name.strip(), "external_id": identity, "hidden": entry.get("hidden") is True}
-        if isinstance(entry.get("description"), str) and entry["description"].strip():
-            item["description"] = entry["description"].strip()[:2000]
-        percent = entry.get("global_percent")
-        if isinstance(percent, (int, float)) and not isinstance(percent, bool) and 0 <= percent <= 100:
-            item["global_percent"] = float(percent)
-        for source, target in (("icon_url", "icon_url"), ("locked_icon_url", "locked_icon_url")):
-            digest = (entry.get(source) or "").rsplit("/", 1)[-1] if isinstance(entry.get(source), str) else ""
-            if re.fullmatch(r"[0-9a-f]{64}", digest):
-                item[target] = f"{root}/media/{digest}"
-        if entry.get("kind") in ("progression", "missable", "win_condition"):
-            item["kind"] = entry["kind"]
-        if entry.get("tier") in ("bronze", "silver", "gold"):
-            item["tier"] = entry["tier"]
-        points = entry.get("points")
-        if isinstance(points, int) and not isinstance(points, bool) and 0 <= points <= 100_000:
-            item["points"] = points
-        ids = entry.get("external_ids") if isinstance(entry.get("external_ids"), dict) else {}
-        source_ids = {k: v for k, v in ids.items() if isinstance(k, str) and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,127}", k)
-                      and isinstance(v, str) and 0 < len(v) <= 512}
-        if source_ids:
-            item["source_ids"] = dict(list(source_ids.items())[:8])
-        items.append(item)
-    return {"achievements": items[:2000]} if items else {}
+    items, seen, consumed = [], set(), 0
+    size = len(json.dumps({"metadata": {"achievements": []}, "next_cursor": str(ACHIEVEMENT_LIMIT)}))
+    for entry in results:
+        item = achievement_item(entry, root) if isinstance(entry, dict) else None
+        if item is not None and item["external_id"] not in seen:
+            cost = len(json.dumps(item)) + 2
+            if items and size + cost > ACHIEVEMENT_PAGE_BYTES:
+                break
+            seen.add(item["external_id"])
+            items.append(item)
+            size += cost
+        consumed += 1
+    resume = cursor + consumed if consumed < len(results) else following
+    response = {"metadata": {"achievements": items}}
+    if resume is not None and resume < ACHIEVEMENT_LIMIT:
+        response["next_cursor"] = str(resume)
+    return response if items or "next_cursor" in response else {}
+
+
+def achievement_cursor(request):
+    cursor = request.get("cursor")
+    if cursor in (None, ""):
+        return 0
+    if not isinstance(cursor, str) or not cursor.isdigit():
+        raise ProviderFailure("invalid_response")
+    return int(cursor)
 
 
 @operation
@@ -346,8 +393,7 @@ def metadata(values):
     if values["request"].get("resource") == "achievements":
         if media_type != "game":
             return {}
-        found = achievement_catalogue(values, record)
-        return {"metadata": found} if found else {}
+        return achievement_catalogue(values, record, achievement_cursor(values["request"]))
     result = patch(record)
     identity = record.get("id")
     if isinstance(identity, str) and ATLAS_ID.fullmatch(identity):
